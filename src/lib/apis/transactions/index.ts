@@ -1,0 +1,104 @@
+import {
+  PaymentChannel,
+  PaymentMethod,
+  TransactionPhase,
+  TransactionStatus,
+  TransactionType,
+} from "@/lib/types/transaction";
+
+export const getTransactionByIdApi = async ({
+  transactionId,
+  accessToken,
+}: {
+  transactionId: string;
+  accessToken: string;
+}) => {
+  const url = `${
+    process.env.NEXT_PUBLIC_BACKEND_URL
+  }/transactions/${encodeURIComponent(transactionId)}`;
+
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+};
+
+export const getTransactionByMerchantOrderIdApi = async ({
+  merchantId,
+  merchantOrderId,
+  accessToken,
+}: {
+  merchantId: string;
+  merchantOrderId: string;
+  accessToken: string;
+}) => {
+  const urlSearchParams = new URLSearchParams();
+  urlSearchParams.append("merchantId", merchantId);
+  urlSearchParams.append("merchantOrderId", merchantOrderId);
+
+  const url = `${
+    process.env.NEXT_PUBLIC_BACKEND_URL
+  }/transactions/merchantOrderId?${urlSearchParams.toString()}`;
+
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+};
+
+export interface GetTransactionsApiQuery {
+  type?: TransactionType;
+  merchantId?: string;
+  paymentMethod?: PaymentMethod;
+  paymentChannel?: PaymentChannel;
+  status?: TransactionStatus;
+  phase?: TransactionPhase;
+  revenueDistributed?: boolean;
+}
+
+export const getTransactionsApi = async ({
+  query,
+  cursor,
+  limit = 30,
+  accessToken,
+}: {
+  query: GetTransactionsApiQuery;
+  cursor?: string;
+  limit?: number;
+  accessToken: string;
+}) => {
+  const urlSearchParams = new URLSearchParams();
+  if (query.type) urlSearchParams.append("type", query.type);
+  if (query.paymentMethod)
+    urlSearchParams.append("paymentMethod", query.paymentMethod);
+  if (query.paymentChannel)
+    urlSearchParams.append("paymentChannel", query.paymentChannel);
+  if (query.merchantId) urlSearchParams.append("merchantId", query.merchantId);
+  if (query.status) urlSearchParams.append("status", query.status);
+  if (query.phase) urlSearchParams.append("phase", query.phase);
+  if (query.revenueDistributed)
+    urlSearchParams.append(
+      "revenueDistributed",
+      query.revenueDistributed.toString()
+    );
+  if (cursor) urlSearchParams.append("cursor", cursor);
+  if (limit) urlSearchParams.append("limit", limit.toString());
+
+  const url = `${
+    process.env.NEXT_PUBLIC_BACKEND_URL
+  }/transactions?${urlSearchParams.toString()}`;
+
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+};
