@@ -1,5 +1,6 @@
 import "@/styles/globals.css";
 
+import { Analytics } from "@vercel/analytics/next";
 import type { AppProps } from "next/app";
 import ApplicationLayout from "@/modules/common/layout/ApplicationLayout";
 import { SWRConfig } from "swr";
@@ -24,6 +25,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <Component {...pageProps} />
           <Toaster />
         </SWRConfig>
+        <Analytics />
       </>
     );
   }
@@ -36,6 +38,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <Toaster />
         </ApplicationLayout>
       </SWRConfig>
+      <Analytics />
     </>
   );
 }
