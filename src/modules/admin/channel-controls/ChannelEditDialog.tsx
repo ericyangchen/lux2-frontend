@@ -1,6 +1,7 @@
 import {
   ChannelSettings,
   createOrganizationTransactionFeeConfigsWithSamePaymentMethod,
+  updateOrganizationTransactionFeeConfigsWithSamePaymentMethod,
 } from "@/lib/apis/organizations/transaction-fee-config";
 import {
   Dialog,
@@ -32,22 +33,28 @@ import { Button } from "@/components/shadcn/ui/button";
 import Decimal from "decimal.js";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
+import { Switch } from "@/components/shadcn/ui/switch";
+import { TransactionFeeConfig } from "@/lib/types/transaction-fee-config";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { getApplicationCookies } from "@/lib/cookie";
 import { useOrganizationTransactionFeeConfigs } from "@/lib/hooks/swr/transaction-fee-config";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
-export function OrganizationPaymentMethodAddDialog({
+export function ChannelEditDialog({
   isOpen,
   closeDialog,
   type,
   organizationId,
+  paymentMethod,
+  transactionFeeConfigs,
 }: {
   isOpen: boolean;
   closeDialog: () => void;
   type?: TransactionType;
   organizationId: string;
+  paymentMethod?: PaymentMethod;
+  transactionFeeConfigs: TransactionFeeConfig[];
 }) {
   const { toast } = useToast();
 
@@ -56,14 +63,26 @@ export function OrganizationPaymentMethodAddDialog({
     type,
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
-  const [percentageFee, setPercentageFee] = useState<string>("");
-  const [fixedFee, setFixedFee] = useState<string>("0");
-  const [channelSettings, setChannelSettings] = useState<ChannelSettings[]>([]);
+  const [percentageFee, setPercentageFee] = useState<string>(
+    transactionFeeConfigs[0]?.percentageFee
+  );
+  const [fixedFee, setFixedFee] = useState<string>(
+    transactionFeeConfigs[0]?.fixedFee
+  );
+  const [channelSettings, setChannelSettings] = useState<ChannelSettings[]>(
+    transactionFeeConfigs.map((config) => ({
+      paymentChannel: config.paymentChannel,
+      minAmount: config.minAmount,
+      maxAmount: config.maxAmount,
+      settlementInterval: config.settlementInterval,
+      enabled: config.enabled,
+    }))
+  );
   const [isLoading, setIsLoading] = useState(false);
 
-  const [percentageFeeInPercentage, setPercentageFeeInPercentage] =
-    useState("");
+  const [percentageFeeInPercentage, setPercentageFeeInPercentage] = useState(
+    (parseFloat(transactionFeeConfigs[0]?.percentageFee) * 100).toString()
+  );
 
   const disableButton =
     !paymentMethod ||
@@ -126,35 +145,33 @@ export function OrganizationPaymentMethodAddDialog({
 
   const handleCloseDialog = () => {
     closeDialog();
-    setPaymentMethod(undefined);
     setPercentageFee("");
     setPercentageFeeInPercentage("");
     setFixedFee("0");
     setChannelSettings([]);
   };
 
-  const handleAddPaymentMethod = async () => {
+  const handleEditPaymentMethod = async () => {
     const { accessToken } = getApplicationCookies();
+
     if (!type || disableButton || !accessToken) return;
 
     const formattedChannelSettings = channelSettings.map((channelSetting) => {
       const settlementInterval = channelSetting.settlementInterval;
-
       return {
         ...channelSetting,
-        ...(settlementInterval && {
-          settlementInterval:
-            parseInt(settlementInterval) > 1
-              ? `${settlementInterval} days`
-              : `${settlementInterval} day`,
-        }),
+        settlementInterval: settlementInterval
+          ? parseInt(settlementInterval) > 1
+            ? `${parseInt(settlementInterval)} days`
+            : `${parseInt(settlementInterval)} day`
+          : `0 day`,
       };
     });
 
     try {
       setIsLoading(true);
       const response =
-        await createOrganizationTransactionFeeConfigsWithSamePaymentMethod({
+        await updateOrganizationTransactionFeeConfigsWithSamePaymentMethod({
           organizationId,
           type,
           paymentMethod,
@@ -163,11 +180,13 @@ export function OrganizationPaymentMethodAddDialog({
           channelSettings: formattedChannelSettings,
           accessToken,
         });
+
       const data = await response.json();
+
       if (response.ok) {
         handleCloseDialog();
         toast({
-          title: `${TransactionTypeDisplayNames[type]}通道新增成功`,
+          title: `${TransactionTypeDisplayNames[type]}通道更新成功`,
           variant: "success",
         });
         mutate();
@@ -177,13 +196,13 @@ export function OrganizationPaymentMethodAddDialog({
     } catch (error) {
       if (error instanceof ApplicationError) {
         toast({
-          title: `${error.statusCode} - ${TransactionTypeDisplayNames[type]}通道新增失敗`,
+          title: `${error.statusCode} - ${TransactionTypeDisplayNames[type]}通道更新失敗`,
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: `${TransactionTypeDisplayNames[type]}通道新增失敗`,
+          title: `${TransactionTypeDisplayNames[type]}通道更新失敗`,
           description: "Unknown error",
           variant: "destructive",
         });
@@ -198,20 +217,15 @@ export function OrganizationPaymentMethodAddDialog({
       <DialogContent className="max-w-[600px]">
         <DialogHeader>
           <DialogTitle>
-            新增{type && TransactionTypeDisplayNames[type]}通道
+            編輯{type && TransactionTypeDisplayNames[type]}通道
           </DialogTitle>
-          <DialogDescription>新增一個通道</DialogDescription>
+          <DialogDescription>編輯一個通道</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-4">
           <div className="flex items-center gap-4">
             <Label className="whitespace-nowrap w-[70px]">通道</Label>
             <div className="w-fit min-w-[150px]">
-              <Select
-                defaultValue={paymentMethod}
-                onValueChange={(value) =>
-                  setPaymentMethod(value as PaymentMethod)
-                }
-              >
+              <Select defaultValue={paymentMethod} disabled>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -279,6 +293,9 @@ export function OrganizationPaymentMethodAddDialog({
                     </th>
                     <th className="px-3 py-2 text-center text-sm font-semibold text-gray-900">
                       結算天數
+                    </th>
+                    <th className="px-3 py-2 text-center text-sm font-semibold text-gray-900">
+                      開關
                     </th>
                     <th className="px-3 py-2 text-center text-sm font-semibold text-gray-900">
                       操作
@@ -376,7 +393,9 @@ export function OrganizationPaymentMethodAddDialog({
                       </td>
                       <td className="px-1 py-2 flex items-center gap-1">
                         <Input
-                          value={channelSetting?.settlementInterval}
+                          value={
+                            channelSetting?.settlementInterval?.split(" ")[0]
+                          }
                           className="max-w-[100px]"
                           type="number"
                           onChange={(e) => {
@@ -395,6 +414,23 @@ export function OrganizationPaymentMethodAddDialog({
                           }}
                         />
                         <span>天</span>
+                      </td>
+                      <td className="px-1 py-2 text-center">
+                        <Switch
+                          checked={channelSetting?.enabled}
+                          onCheckedChange={(value) => {
+                            setChannelSettings((prev) =>
+                              prev.map((channel, index) =>
+                                index === idx
+                                  ? {
+                                      ...channel,
+                                      enabled: value,
+                                    }
+                                  : channel
+                              )
+                            );
+                          }}
+                        />
                       </td>
                       <td className="px-1 py-2 text-center">
                         <Button
@@ -423,7 +459,7 @@ export function OrganizationPaymentMethodAddDialog({
                         paymentChannel: remainingChannel[0],
                         minAmount: undefined,
                         maxAmount: undefined,
-                        enabled: true,
+                        enabled: false,
                       },
                     ]);
                   }}
@@ -435,8 +471,8 @@ export function OrganizationPaymentMethodAddDialog({
           )}
         </div>
         <DialogFooter>
-          <Button onClick={handleAddPaymentMethod} disabled={disableButton}>
-            {isLoading ? "新增中..." : "新增"}
+          <Button onClick={handleEditPaymentMethod} disabled={disableButton}>
+            {isLoading ? "更新中..." : "更新"}
           </Button>
         </DialogFooter>
       </DialogContent>

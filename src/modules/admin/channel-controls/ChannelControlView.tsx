@@ -10,7 +10,7 @@ enum Tab {
 }
 
 const tabDisplayNames = {
-  [Tab.ChannelList]: "渠道列表",
+  [Tab.ChannelList]: "總代理",
   [Tab.BatchModification]: "批量修改",
 };
 

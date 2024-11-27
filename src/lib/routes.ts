@@ -5,6 +5,8 @@ import {
   DocumentChartBarIcon,
   HandRaisedIcon,
   HomeIcon,
+  InboxIcon,
+  InboxStackIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 
@@ -35,7 +37,7 @@ export const merchantNavigation = [
 
 export const adminNavigation = [
   {
-    name: "主頁",
+    name: "系統主頁",
     href: "/admin/dashboard",
     icon: HomeIcon,
   },
@@ -44,20 +46,20 @@ export const adminNavigation = [
     href: "/admin/organizations",
     icon: BuildingOffice2Icon,
   },
+  // {
+  //   name: "渠道管理",
+  //   href: "/admin/channel-controls",
+  //   icon: CurrencyDollarIcon,
+  // },
   {
     name: "訂單查詢",
     href: "/admin/transactions",
-    icon: CreditCardIcon,
+    icon: InboxIcon,
   },
   {
     name: "手動作業",
     href: "/admin/manual-actions",
     icon: HandRaisedIcon,
-  },
-  {
-    name: "渠道管理",
-    href: "/admin/channel-controls",
-    icon: CurrencyDollarIcon,
   },
   // {
   //   name: "歷史紀錄",

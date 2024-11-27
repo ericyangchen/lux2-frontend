@@ -30,6 +30,7 @@ import {
 
 import { ApplicationError } from "@/lib/types/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
+import Decimal from "decimal.js";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { Switch } from "@/components/shadcn/ui/switch";
@@ -135,7 +136,8 @@ export function OrganizationPaymentMethodEditDialog({
     const parsedValue = parseFloat(value);
 
     if (!isNaN(parsedValue) && parsedValue.toString() === value) {
-      setPercentageFee((parsedValue / 100).toString());
+      const percentageValue = new Decimal(parsedValue);
+      setPercentageFee(percentageValue.dividedBy(100).toString());
     } else {
       setPercentageFee("");
     }

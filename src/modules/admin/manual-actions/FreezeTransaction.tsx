@@ -31,11 +31,14 @@ import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { Textarea } from "@/components/shadcn/ui/textarea";
+import { TransactionMetadata } from "@/lib/types/transaction-metadata";
+import { classNames } from "@/lib/utils";
 import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/timezone";
 import { copyToClipboard } from "@/lib/copyToClipboard";
 import { createManualTransactionApi } from "@/lib/apis/manual-transactions";
 import { getApplicationCookies } from "@/lib/cookie";
 import { getTransactionByIdApi } from "@/lib/apis/transactions";
+import { getTransactionMetadataByIdApi } from "@/lib/apis/transaction-metadata";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
@@ -51,6 +54,8 @@ export function FreezeTransaction() {
   const [isLoading, setIsLoading] = useState(false);
 
   const [transaction, setTransaction] = useState<Transaction>();
+  const [transactionMetadata, setTransactionMetadata] =
+    useState<TransactionMetadata>();
 
   const handleSearch = async (isLoadMore: boolean = false) => {
     const { accessToken, organizationId } = getApplicationCookies();
@@ -72,6 +77,22 @@ export function FreezeTransaction() {
 
       if (response.ok) {
         setTransaction(data?.transaction);
+
+        const transactionId = data?.transaction?.id;
+
+        // get transaction metadata
+        if (transactionId) {
+          const metadataResponse = await getTransactionMetadataByIdApi({
+            transactionId,
+            accessToken,
+          });
+
+          const metadataData = await metadataResponse.json();
+
+          if (metadataData.ok) {
+            setTransactionMetadata(metadataData?.transactionMetadata);
+          }
+        }
       } else {
         throw new ApplicationError(data);
       }
@@ -275,19 +296,6 @@ export function FreezeTransaction() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-4 w-full lg:w-fit min-h-6 px-4">
-                <Label className="whitespace-nowrap min-w-[100px] mt-[5px]">
-                  交易資訊:
-                </Label>
-                <div className="font-mono">
-                  {transaction.paymentData && (
-                    <pre className="text-xs bg-gray-100 rounded-md whitespace-pre-wrap p-4 overflow-auto">
-                      {JSON.stringify(transaction.paymentData, null, 2)}
-                    </pre>
-                  )}
-                </div>
-              </div>
-
               <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 px-4">
                 <Label className="whitespace-nowrap min-w-[100px]">
                   通知 URL:
@@ -321,7 +329,9 @@ export function FreezeTransaction() {
                   結算天數:
                 </Label>
                 <div className="font-mono">
-                  {transaction.settlementInterval}
+                  {transaction.settlementInterval
+                    ? transaction.settlementInterval
+                    : "無"}
                 </div>
               </div>
 
@@ -344,18 +354,18 @@ export function FreezeTransaction() {
               </div>
 
               <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 px-4">
-                <Label className="whitespace-nowrap min-w-[100px]">金額:</Label>
-                <div className="font-mono">
-                  {formatNumberWithoutMinFraction(transaction.amount)}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 px-4">
                 <Label className="whitespace-nowrap min-w-[100px]">
                   總手續費:
                 </Label>
                 <div className="font-mono">
                   {formatNumberWithoutMinFraction(transaction.totalFee)}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 px-4">
+                <Label className="whitespace-nowrap min-w-[100px]">金額:</Label>
+                <div className="font-mono">
+                  {formatNumberWithoutMinFraction(transaction.amount)}
                 </div>
               </div>
 
@@ -370,16 +380,23 @@ export function FreezeTransaction() {
 
               <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 px-4">
                 <Label className="whitespace-nowrap min-w-[100px]">
-                  分潤狀態:
+                  詳細狀態:
                 </Label>
-                <div className="font-mono">
-                  {transaction.revenueDistributed ? "已分潤" : "未分潤"}
-                </div>
+                <div className="font-mono">{transaction.detailedStatus}</div>
               </div>
 
               <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 px-4">
                 <Label className="whitespace-nowrap min-w-[100px]">狀態:</Label>
-                <div className="font-mono">{`${transaction.status} (${
+                <div
+                  className={classNames(
+                    transaction.status === TransactionStatus.SUCCESS
+                      ? "text-green-600"
+                      : transaction.status === TransactionStatus.FAILED
+                      ? "text-red-600"
+                      : "",
+                    "font-mono"
+                  )}
+                >{`${transaction.status} (${
                   TransactionStatusDisplayNames[transaction.status]
                 })`}</div>
               </div>
@@ -387,13 +404,6 @@ export function FreezeTransaction() {
               <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 px-4">
                 <Label className="whitespace-nowrap min-w-[100px]">訊息:</Label>
                 <div className="font-mono">{transaction.message}</div>
-              </div>
-
-              <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 px-4">
-                <Label className="whitespace-nowrap min-w-[100px]">
-                  交易進行階段:
-                </Label>
-                <div className="font-mono">{transaction.phase}</div>
               </div>
 
               <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 px-4">
@@ -418,19 +428,6 @@ export function FreezeTransaction() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-4 w-full lg:w-fit min-h-6 px-4">
-                <Label className="whitespace-nowrap min-w-[100px] mt-[5px]">
-                  上游回覆:
-                </Label>
-                <div className="font-mono">
-                  {transaction.upstreamResponse && (
-                    <pre className="text-xs bg-gray-100 rounded-md whitespace-pre-wrap p-4 overflow-auto">
-                      {JSON.stringify(transaction.upstreamResponse, null, 2)}
-                    </pre>
-                  )}
-                </div>
-              </div>
-
               <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 px-4">
                 <Label className="whitespace-nowrap min-w-[100px]">
                   上游回覆時間:
@@ -439,6 +436,53 @@ export function FreezeTransaction() {
                   {convertDatabaseTimeToReadablePhilippinesTime(
                     transaction.upstreamNotifiedAt
                   )}
+                </div>
+              </div>
+
+              {transactionMetadata && (
+                <>
+                  <div className="flex items-start gap-4 w-full lg:w-fit min-h-6 px-4">
+                    <Label className="whitespace-nowrap min-w-[100px] mt-[5px]">
+                      上游 API 回覆:
+                    </Label>
+                    <div className="font-mono">
+                      {transactionMetadata?.upstreamReceiveResponse && (
+                        <pre className="text-xs bg-gray-100 rounded-md whitespace-pre-wrap p-4 overflow-auto">
+                          {JSON.stringify(
+                            transactionMetadata.upstreamReceiveResponse,
+                            null,
+                            2
+                          )}
+                        </pre>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4 w-full lg:w-fit min-h-6 px-4">
+                    <Label className="whitespace-nowrap min-w-[100px] mt-[5px]">
+                      上游 Notify 回覆:
+                    </Label>
+                    <div className="font-mono">
+                      {transactionMetadata?.upstreamNotifyResponse && (
+                        <pre className="text-xs bg-gray-100 rounded-md whitespace-pre-wrap p-4 overflow-auto">
+                          {JSON.stringify(
+                            transactionMetadata.upstreamNotifyResponse,
+                            null,
+                            2
+                          )}
+                        </pre>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 px-4">
+                <Label className="whitespace-nowrap min-w-[100px]">
+                  分潤狀態:
+                </Label>
+                <div className="font-mono">
+                  {transaction.revenueDistributed ? "已分潤" : "未分潤"}
                 </div>
               </div>
             </div>

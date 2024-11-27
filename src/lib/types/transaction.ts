@@ -4,9 +4,8 @@ export interface Transaction {
   merchantId: string;
   merchantOrderId: string;
   paymentMethod: PaymentMethod;
-  paymentData: any;
-  notifyUrl: string;
   amount: string;
+  notifyUrl?: string;
   paymentChannel: PaymentChannel;
   percentageFee: string;
   fixedFee: string;
@@ -16,14 +15,49 @@ export interface Transaction {
   revenueDistributionInfo: any;
   revenueDistributed: boolean;
   operatorInfo: OperatorInfo;
-  phase: TransactionPhase;
-  upstreamResponse?: any;
   upstreamNotifiedAt?: string;
+  detailedStatus: TransactionDetailedStatus;
   status: TransactionStatus;
   message?: string;
   createdAt: string;
   updatedAt: string;
   deletedAt?: string;
+  // nullable params
+  bankName?: string;
+  bankBranch?: string;
+  bankAccountName?: string;
+  senderName?: string;
+  receiverName?: string;
+}
+
+export interface CreateDepositTransactionRequestBody {
+  merchantId: string;
+  merchantOrderId: string;
+  paymentMethod: PaymentMethod;
+  amount: string;
+  notifyUrl?: string;
+  sign?: string;
+  note?: string;
+
+  /**
+   * nullable params
+   */
+  bankName?: string;
+  senderName?: string;
+}
+export interface CreateDepositTransactionResponseBody {
+  id: string;
+  merchantId: string;
+  merchantOrderId: string;
+  paymentMethod: string;
+  amount: string;
+  totalFee: string;
+  balanceChanged: string;
+  status: string;
+  message?: string | undefined;
+  createdAt: string;
+  /** transformed from TransactionMetadata */
+  paymentUrl?: string | undefined;
 }
 
 export interface OperatorInfo {
@@ -38,19 +72,11 @@ export enum TransactionType {
 }
 
 export enum PaymentMethod {
-  GCASH = "GCASH",
-  MAYA = "MAYA",
-  USDT = "USDT",
+  THAILAND_SCAN_CODE = "THAILAND_SCAN_CODE",
 }
 
 export enum PaymentChannel {
-  // GCASH
-  CLICK_PAY = "CLICK_PAY",
-  WG_PAY = "WG_PAY",
-  JS_PAY = "JS_PAY",
-  DC_PAY = "DC_PAY",
-  // MAYA
-  // USDT
+  JD_THAILAND_SCAN_CODE = "JD_THAILAND_SCAN_CODE",
 }
 
 export enum TransactionStatus {
@@ -60,25 +86,25 @@ export enum TransactionStatus {
   FAILED = "FAILED",
 }
 
-export enum TransactionPhase {
-  /**
-   * deposit: should start with DEPOSIT
-   */
-  DEPOSIT_RECEIVED = "DEPOSIT_RECEIVED",
-  DEPOSIT_SENT_TO_UPSTREAM = "DEPOSIT_SENT_TO_UPSTREAM",
-  DEPOSIT_UPSTREAM_PROCESSING = "DEPOSIT_UPSTREAM_PROCESSING", // for longer processing
-  DEPOSIT_COMPLETED = "DEPOSIT_COMPLETED",
-  DEPOSIT_FAILED = "DEPOSIT_FAILED",
+export enum TransactionDetailedStatus {
+  UNKNOWN = "UNKNOWN", // status: NOT_STARTED
 
-  /**
-   * withdrawal: should start with WITHDRAWAL
-   */
-  WITHDRAWAL_RECEIVED = "WITHDRAWAL_RECEIVED",
-  WITHDRAWAL_SENT_TO_UPSTREAM = "WITHDRAWAL_SENT_TO_UPSTREAM",
-  WITHDRAWAL_UPSTREAM_PROCESSING = "WITHDRAWAL_UPSTREAM_PROCESSING", // for longer processing
-  WITHDRAWAL_COMPLETED = "WITHDRAWAL_COMPLETED",
-  WITHDRAWAL_REQUIRE_ACTION = "WITHDRAWAL_REQUIRE_ACTION",
-  WITHDRAWAL_FAILED = "WITHDRAWAL_FAILED",
+  DEPOSIT_CREATED = "DEPOSIT_CREATED", // status: PENDING
+  DEPOSIT_UPSTREAM_CREATED = "DEPOSIT_UPSTREAM_CREATED", // status: PENDING
+  DEPOSIT_UPSTREAM_REQUEST_ERROR = "DEPOSIT_UPSTREAM_REQUEST_ERROR", // status: FAILED
+  DEPOSIT_UPSTREAM_CREATION_ERROR = "DEPOSIT_UPSTREAM_CREATION_ERROR", // status: FAILED
+  DEPOSIT_UPSTREAM_NOTIFY_PROCESSING = "DEPOSIT_UPSTREAM_NOTIFY_PROCESSING", // status: PENDING
+  DEPOSIT_UPSTREAM_NOTIFY_COMPLETED = "DEPOSIT_UPSTREAM_NOTIFY_COMPLETED", // status: SUCCESS
+  DEPOSIT_UPSTREAM_NOTIFY_COMPLETED_AMOUNT_MISMATCH = "DEPOSIT_UPSTREAM_NOTIFY_COMPLETED_AMOUNT_MISMATCH", // status: FAILED
+  DEPOSIT_UPSTREAM_NOTIFY_ERROR = "DEPOSIT_UPSTREAM_NOTIFY_ERROR", // status: FAILED
+
+  WITHDRAWAL_CREATED = "WITHDRAWAL_CREATED", // status: PENDING
+  WITHDRAWAL_UPSTREAM_CREATED = "WITHDRAWAL_UPSTREAM_CREATED", // status: PENDING
+  WITHDRAWAL_UPSTREAM_REQUEST_ERROR = "WITHDRAWAL_UPSTREAM_REQUEST_ERROR", // status: FAILED
+  WITHDRAWAL_UPSTREAM_CREATION_ERROR = "WITHDRAWAL_UPSTREAM_CREATION_ERROR", // status: FAILED
+  WITHDRAWAL_UPSTREAM_NOTIFY_PROCESSING = "WITHDRAWAL_UPSTREAM_NOTIFY_PROCESSING", // status: PENDING
+  WITHDRAWAL_UPSTREAM_NOTIFY_COMPLETED = "WITHDRAWAL_UPSTREAM_NOTIFY_COMPLETED", // status: SUCCESS
+  WITHDRAWAL_UPSTREAM_NOTIFY_ERROR = "WITHDRAWAL_UPSTREAM_NOTIFY_ERROR", // status: FAILED
 }
 
 export enum OperatorType {
@@ -95,29 +121,14 @@ export const TransactionTypeDisplayNames = {
 };
 
 export const PaymentChannelCategories = {
-  [PaymentMethod.GCASH]: [
-    PaymentChannel.CLICK_PAY,
-    PaymentChannel.WG_PAY,
-    PaymentChannel.JS_PAY,
-    PaymentChannel.DC_PAY,
-  ],
-  [PaymentMethod.MAYA]: [],
-  [PaymentMethod.USDT]: [],
+  [PaymentMethod.THAILAND_SCAN_CODE]: [PaymentChannel.JD_THAILAND_SCAN_CODE],
 };
 
 export const PaymentMethodDisplayNames = {
-  [PaymentMethod.GCASH]: "GCash",
-  [PaymentMethod.MAYA]: "Maya",
-  [PaymentMethod.USDT]: "USDT",
+  [PaymentMethod.THAILAND_SCAN_CODE]: "泰國掃碼",
 };
 export const PaymentChannelDisplayNames = {
-  // GCASH
-  [PaymentChannel.CLICK_PAY]: "Click Pay",
-  [PaymentChannel.WG_PAY]: "WG Pay",
-  [PaymentChannel.JS_PAY]: "JS Pay",
-  [PaymentChannel.DC_PAY]: "DC Pay",
-  // MAYA
-  // USDT
+  [PaymentChannel.JD_THAILAND_SCAN_CODE]: "JD 泰國掃碼",
 };
 
 export const TransactionStatusDisplayNames = {

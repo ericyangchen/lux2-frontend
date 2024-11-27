@@ -17,7 +17,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
-import { OrganizationSearchBar } from "./OrganizationSearchBar";
+import { OrganizationSearchBar } from "../common/OrganizationSearchBar";
 import { Revenue } from "@/lib/types/revenue";
 import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/timezone";
 import { copyToClipboard } from "@/lib/copyToClipboard";

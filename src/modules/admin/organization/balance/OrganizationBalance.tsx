@@ -36,10 +36,14 @@ export default function OrganizationBalance({
 }) {
   const { balances } = useBalances({ organizationId });
 
-  const totalBalance = balances?.reduce(
-    (acc, balance) => Calculator.plus(acc, balance.balance),
-    "0"
-  );
+  const totalBalance = balances?.reduce((acc, balance) => {
+    const totalBalance = Calculator.plus(
+      balance.availableAmount,
+      balance.depositUnsettledAmount
+    );
+
+    return Calculator.plus(acc, totalBalance);
+  }, "0");
   const totalAvailableAmount = balances?.reduce(
     (acc, balance) => Calculator.plus(acc, balance.availableAmount),
     "0"
@@ -48,8 +52,8 @@ export default function OrganizationBalance({
     (acc, balance) => Calculator.plus(acc, balance.depositUnsettledAmount),
     "0"
   );
-  const totalFrozenBalance = balances?.reduce(
-    (acc, balance) => Calculator.plus(acc, balance.frozenBalance),
+  const totalFrozenAmount = balances?.reduce(
+    (acc, balance) => Calculator.plus(acc, balance.frozenAmount),
     "0"
   );
 
@@ -70,12 +74,12 @@ export default function OrganizationBalance({
         />
         <Stat
           name={"凍結額度"}
-          value={totalFrozenBalance}
+          value={totalFrozenAmount}
           textClassNames={"text-rose-600 font-mono"}
         />
       </dl>
 
-      <OrganizationBalanceTable balances={balances} />
+      {/* <OrganizationBalanceTable balances={balances} /> */}
     </div>
   );
 }

@@ -38,32 +38,30 @@ import { useOrganizationTransactionFeeConfigs } from "@/lib/hooks/swr/transactio
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
-export function OrganizationPaymentMethodAddDialog({
+export function ChannelAddDialog({
   isOpen,
   closeDialog,
-  type,
-  organizationId,
 }: {
   isOpen: boolean;
   closeDialog: () => void;
-  type?: TransactionType;
-  organizationId: string;
 }) {
   const { toast } = useToast();
 
-  const { mutate } = useOrganizationTransactionFeeConfigs({
-    organizationId,
-    type,
-  });
+  const { organizationId } = getApplicationCookies();
 
+  const [type, setType] = useState();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
   const [percentageFee, setPercentageFee] = useState<string>("");
   const [fixedFee, setFixedFee] = useState<string>("0");
   const [channelSettings, setChannelSettings] = useState<ChannelSettings[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-
   const [percentageFeeInPercentage, setPercentageFeeInPercentage] =
     useState("");
+
+  const { mutate } = useOrganizationTransactionFeeConfigs({
+    organizationId,
+    type,
+  });
 
   const disableButton =
     !paymentMethod ||
@@ -135,7 +133,7 @@ export function OrganizationPaymentMethodAddDialog({
 
   const handleAddPaymentMethod = async () => {
     const { accessToken } = getApplicationCookies();
-    if (!type || disableButton || !accessToken) return;
+    if (!type || disableButton || !accessToken || !organizationId) return;
 
     const formattedChannelSettings = channelSettings.map((channelSetting) => {
       const settlementInterval = channelSetting.settlementInterval;
