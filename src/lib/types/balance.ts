@@ -1,13 +1,13 @@
+import { PaymentMethod } from "./transaction";
+
 export interface Balance {
   id: string;
   organizationId: string;
-  paymentMethod: string;
-  balance: string;
+  paymentMethod: PaymentMethod;
   availableAmount: string;
   depositUnsettledAmount: string;
   withdrawalPendingAmount: string;
-  frozenBalance: string;
-  action: string;
+  frozenAmount: string;
   createdAt: string;
   updatedAt?: string;
   deletedAt?: string;

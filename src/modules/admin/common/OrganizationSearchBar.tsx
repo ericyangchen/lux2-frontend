@@ -7,22 +7,10 @@ import {
   ComboboxOptions,
 } from "@headlessui/react";
 
-import { Organization } from "@/lib/types/organization";
+import { flattenOrganizations } from "./flattenOrganizations";
 import { getApplicationCookies } from "@/lib/cookie";
 import { useOrganizationWithChildren } from "@/lib/hooks/swr/organization";
 import { useState } from "react";
-
-function flattenOrganizations(org: Organization): Organization[] {
-  let flatList = [{ ...org }]; // Add the current organization to the list
-
-  if (org?.children) {
-    org.children.forEach((child) => {
-      flatList = flatList.concat(flattenOrganizations(child)); // Recursively flatten and concatenate child organizations
-    });
-  }
-
-  return flatList;
-}
 
 export function OrganizationSearchBar({
   selectedOrganizationId,

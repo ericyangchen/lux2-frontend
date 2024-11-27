@@ -1,4 +1,5 @@
 import { Balance } from "@/lib/types/balance";
+import { Calculator } from "@/lib/calculator";
 import { formatNumber } from "@/lib/number";
 
 export default function OrganizationBalanceTable({
@@ -54,7 +55,12 @@ export default function OrganizationBalanceTable({
                         {balance.paymentMethod}
                       </td>
                       <td className="font-mono whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
-                        {formatNumber(balance.balance)}
+                        {formatNumber(
+                          Calculator.plus(
+                            balance.availableAmount,
+                            balance.depositUnsettledAmount
+                          )
+                        )}
                       </td>
                       <td className="font-mono whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {formatNumber(balance.availableAmount)}
@@ -63,7 +69,7 @@ export default function OrganizationBalanceTable({
                         {formatNumber(balance.depositUnsettledAmount)}
                       </td>
                       <td className="font-mono whitespace-nowrap px-3 py-4 text-sm text-rose-600 pr-4 sm:pr-6">
-                        {formatNumber(balance.frozenBalance)}
+                        {formatNumber(balance.frozenAmount)}
                       </td>
                     </tr>
                   ))

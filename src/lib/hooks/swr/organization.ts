@@ -45,9 +45,7 @@ export const useOrganizationWithChildren = ({
   const shouldFetch = accessToken && organizationId;
 
   const { data, error, isLoading, mutate } = useSWR(
-    shouldFetch
-      ? { key: "organizationWithChildren", organizationId, accessToken }
-      : null,
+    shouldFetch ? { key: "organizations", organizationId, accessToken } : null,
     fetchOrganizationWithChildren,
     { refreshInterval: USE_ORGANIZATION_WITH_CHILDREN_REFRESH_INTERVAL }
   );
@@ -94,7 +92,7 @@ export const useOrganizationInfo = ({
 
   const { data, error, isLoading, mutate } = useSWR(
     shouldFetch
-      ? { key: "organizationInfo", organizationId, accessToken }
+      ? { key: "organization-info", organizationId, accessToken }
       : null,
     fetchOrganizationInfo,
     {

@@ -1,27 +1,27 @@
 import { useCallback, useEffect, useState } from "react";
 
+import CreateApiDepositTransaction from "./CreateApiDepositTransaction";
 import { FreezeTransaction } from "./FreezeTransaction";
 import ManualDeposit from "./ManualDeposit";
 import ManualWithdrawal from "./ManualWithdrawal";
-import { TroubleApiTransaction } from "./TroubleApiTransaction";
 import { UnfreezeTransaction } from "./UnfreezeTransaction";
 import { classNames } from "@/lib/utils";
 import { useRouter } from "next/router";
 
 enum Tab {
-  TroubleApiTransaction = "TroubleApiTransaction",
   ManualDeposit = "ManualDeposit",
   ManualWithdrawal = "ManualWithdrawal",
   FreezeTransaction = "FreezeTransaction",
   UnfreezeTransaction = "UnfreezeTransaction",
+  CreateApiDepositTransaction = "CreateApiDepositTransaction",
 }
 
 const tabDisplayNames = {
-  [Tab.TroubleApiTransaction]: "問題自動訂單",
   [Tab.ManualDeposit]: "手動充值",
   [Tab.ManualWithdrawal]: "手動提款",
   [Tab.FreezeTransaction]: "凍結款項",
   [Tab.UnfreezeTransaction]: "解凍款項",
+  [Tab.CreateApiDepositTransaction]: "建立代收訂單",
 };
 
 export function ManualActionView() {
@@ -29,7 +29,7 @@ export function ManualActionView() {
   const { query } = router;
 
   const [selectedTab, setSelectedTab] = useState<string>(
-    (query.tab as Tab) || Tab.TroubleApiTransaction
+    (query.tab as Tab) || Tab.ManualDeposit
   );
 
   const handleSelectTab = useCallback(
@@ -97,11 +97,13 @@ export function ManualActionView() {
         </div>
       </div>
 
-      {selectedTab === Tab.TroubleApiTransaction && <TroubleApiTransaction />}
       {selectedTab === Tab.ManualDeposit && <ManualDeposit />}
       {selectedTab === Tab.ManualWithdrawal && <ManualWithdrawal />}
       {selectedTab === Tab.FreezeTransaction && <FreezeTransaction />}
       {selectedTab === Tab.UnfreezeTransaction && <UnfreezeTransaction />}
+      {selectedTab === Tab.CreateApiDepositTransaction && (
+        <CreateApiDepositTransaction />
+      )}
     </div>
   );
 }

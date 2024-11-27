@@ -28,7 +28,7 @@ import { ApplicationError } from "@/lib/types/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
-import { OrganizationSearchBar } from "../transactions/OrganizationSearchBar";
+import { OrganizationSearchBar } from "../common/OrganizationSearchBar";
 import { Textarea } from "@/components/shadcn/ui/textarea";
 import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/timezone";
 import { copyToClipboard } from "@/lib/copyToClipboard";
@@ -133,7 +133,9 @@ export default function ManualDeposit() {
         <div className="flex flex-col gap-4 p-4">
           {/* manualTransactionType */}
           <div className="flex items-center gap-4 w-full lg:w-fit">
-            <Label className="whitespace-nowrap min-w-[70px]">類別</Label>
+            <Label className="whitespace-nowrap min-w-[70px]">
+              類別<span className="text-red-500">*</span>
+            </Label>
             <Select
               defaultValue={manualTransactionType}
               value={manualTransactionType}
@@ -169,7 +171,9 @@ export default function ManualDeposit() {
 
           {/* organizationId */}
           <div className="flex items-center gap-4 w-full lg:w-fit">
-            <Label className="whitespace-nowrap min-w-[70px]">單位 ID</Label>
+            <Label className="whitespace-nowrap min-w-[70px]">
+              單位 ID<span className="text-red-500">*</span>
+            </Label>
             <OrganizationSearchBar
               selectedOrganizationId={organizationId}
               setSelectedOrganizationId={setOrganizationId}
@@ -178,7 +182,9 @@ export default function ManualDeposit() {
 
           {/* paymentMethod */}
           <div className="flex items-center gap-4">
-            <Label className="whitespace-nowrap w-[70px]">通道</Label>
+            <Label className="whitespace-nowrap w-[70px]">
+              通道<span className="text-red-500">*</span>
+            </Label>
             <div className="w-fit min-w-[150px]">
               <Select
                 defaultValue={paymentMethod}
@@ -207,7 +213,9 @@ export default function ManualDeposit() {
 
           {/* amount */}
           <div className="flex items-center gap-4 w-full lg:w-fit">
-            <Label className="whitespace-nowrap min-w-[70px]">充值金額</Label>
+            <Label className="whitespace-nowrap min-w-[70px]">
+              充值金額<span className="text-red-500">*</span>
+            </Label>
             <Input
               className="w-[150px]"
               value={amount}

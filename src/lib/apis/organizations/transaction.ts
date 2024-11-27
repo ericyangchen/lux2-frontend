@@ -1,7 +1,7 @@
 import {
   PaymentChannel,
   PaymentMethod,
-  TransactionPhase,
+  TransactionDetailedStatus,
   TransactionStatus,
   TransactionType,
 } from "@/lib/types/transaction";
@@ -59,7 +59,7 @@ export interface GetOrganizationTransactionsApiQuery {
   paymentMethod?: PaymentMethod;
   paymentChannel?: PaymentChannel;
   status?: TransactionStatus;
-  phase?: TransactionPhase;
+  detailedStatus?: TransactionDetailedStatus;
   revenueDistributed?: boolean;
 }
 
@@ -83,7 +83,8 @@ export const getOrganizationTransactionsApi = async ({
   if (query.paymentChannel)
     urlSearchParams.append("paymentChannel", query.paymentChannel);
   if (query.status) urlSearchParams.append("status", query.status);
-  if (query.phase) urlSearchParams.append("phase", query.phase);
+  if (query.detailedStatus)
+    urlSearchParams.append("detailedStatus", query.detailedStatus);
   if (query.revenueDistributed)
     urlSearchParams.append(
       "revenueDistributed",

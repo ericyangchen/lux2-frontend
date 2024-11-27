@@ -1,7 +1,8 @@
 import {
+  CreateDepositTransactionRequestBody,
   PaymentChannel,
   PaymentMethod,
-  TransactionPhase,
+  TransactionDetailedStatus,
   TransactionStatus,
   TransactionType,
 } from "@/lib/types/transaction";
@@ -58,7 +59,7 @@ export interface GetTransactionsApiQuery {
   paymentMethod?: PaymentMethod;
   paymentChannel?: PaymentChannel;
   status?: TransactionStatus;
-  phase?: TransactionPhase;
+  detailedStatus?: TransactionDetailedStatus;
   revenueDistributed?: boolean;
 }
 
@@ -81,7 +82,8 @@ export const getTransactionsApi = async ({
     urlSearchParams.append("paymentChannel", query.paymentChannel);
   if (query.merchantId) urlSearchParams.append("merchantId", query.merchantId);
   if (query.status) urlSearchParams.append("status", query.status);
-  if (query.phase) urlSearchParams.append("phase", query.phase);
+  if (query.detailedStatus)
+    urlSearchParams.append("detailedStatus", query.detailedStatus);
   if (query.revenueDistributed)
     urlSearchParams.append(
       "revenueDistributed",
@@ -102,3 +104,23 @@ export const getTransactionsApi = async ({
     },
   });
 };
+
+export const generalAgentCreateApiDepositTransaction = async ({
+  body,
+  accessToken,
+}: {
+  body: CreateDepositTransactionRequestBody;
+  accessToken: string;
+}) => {
+  const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/transactions/deposit`;
+
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(body),
+  });
+};
+  
