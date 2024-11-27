@@ -107,9 +107,9 @@ export default function LoginPage() {
       // store unauthorized IP
       if (
         errorData.statusCode === 401 &&
-        errorData.message.startsWith("登入 IP 未授權")
+        errorData.message.startsWith("Unauthorized Login IP")
       ) {
-        const ip = errorData.message.split("登入 IP 未授權:")[1].trim();
+        const ip = errorData.message.split("Unauthorized Login IP:")[1].trim();
         setUnauthorizedIp(ip);
       }
 
@@ -132,6 +132,7 @@ export default function LoginPage() {
         <Card className="mx-auto w-[400px] max-w-md rounded-none md:rounded-lg">
           <CardHeader>
             <CardTitle className="text-2xl flex justify-center gap-2 items-center">
+              <span>Login to</span>
               <div className="px-2 py-1 bg-black text-white rounded-lg">
                 {companyName}
               </div>
