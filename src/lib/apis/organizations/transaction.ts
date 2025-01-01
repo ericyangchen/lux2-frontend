@@ -61,6 +61,8 @@ export interface GetOrganizationTransactionsApiQuery {
   status?: TransactionStatus;
   detailedStatus?: TransactionDetailedStatus;
   revenueDistributed?: boolean;
+  createdAtStart?: string;
+  createdAtEnd?: string;
 }
 
 export const getOrganizationTransactionsApi = async ({
@@ -90,6 +92,10 @@ export const getOrganizationTransactionsApi = async ({
       "revenueDistributed",
       query.revenueDistributed.toString()
     );
+  if (query.createdAtStart)
+    urlSearchParams.append("createdAtStart", query.createdAtStart);
+  if (query.createdAtEnd)
+    urlSearchParams.append("createdAtEnd", query.createdAtEnd);
   if (cursor) urlSearchParams.append("cursor", cursor);
   if (limit) urlSearchParams.append("limit", limit.toString());
 
@@ -98,6 +104,28 @@ export const getOrganizationTransactionsApi = async ({
   }/organizations/${encodeURIComponent(
     organizationId
   )}/transactions?${urlSearchParams.toString()}`;
+
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+};
+
+export const getDailyTransactionCountByOrganizationIdApi = async ({
+  organizationId,
+  accessToken,
+}: {
+  organizationId: string;
+  accessToken: string;
+}) => {
+  const url = `${
+    process.env.NEXT_PUBLIC_BACKEND_URL
+  }/organizations/${encodeURIComponent(
+    organizationId
+  )}/transactions/daily-count`;
 
   return fetch(url, {
     method: "GET",

@@ -2,6 +2,8 @@ import { Dialog, DialogContent } from "@/components/shadcn/ui/dialog";
 import {
   PaymentChannelDisplayNames,
   PaymentMethodDisplayNames,
+  TransactionDetailedStatusDisplayNames,
+  TransactionDetailedStatusRequireProcessing,
   TransactionStatus,
   TransactionStatusDisplayNames,
   TransactionTypeDisplayNames,
@@ -256,7 +258,23 @@ export function ApiTransactionInfoDialog({
               <Label className="whitespace-nowrap min-w-[100px] font-normal">
                 詳細狀態:
               </Label>
-              <div className="font-mono">{transaction.detailedStatus}</div>
+              <div className="font-mono">
+                <span
+                  className={classNames(
+                    TransactionDetailedStatusRequireProcessing.includes(
+                      transaction.detailedStatus
+                    )
+                      ? "text-orange-500"
+                      : ""
+                  )}
+                >
+                  {
+                    TransactionDetailedStatusDisplayNames[
+                      transaction.detailedStatus
+                    ]
+                  }
+                </span>
+              </div>
             </div>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
               <Label className="whitespace-nowrap min-w-[100px] font-normal">
@@ -298,6 +316,40 @@ export function ApiTransactionInfoDialog({
               <div className="font-mono">
                 {convertDatabaseTimeToReadablePhilippinesTime(
                   transaction.updatedAt
+                )}
+              </div>
+            </div>
+
+            {/* 備註 */}
+            <Label className="whitespace-nowrap font-bold text-md mt-8">
+              備註
+            </Label>
+            <div className="flex flex-col items-start gap-2 w-full min-h-6">
+              <Input
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                disabled={!isEditingNote}
+              />
+              <div>
+                {isEditingNote ? (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleAbortEditTransactionNote}
+                      className="bg-red-500 hover:bg-red-600"
+                    >
+                      放棄編輯
+                    </Button>
+                    <Button
+                      onClick={handleEditTransactionNote}
+                      className="bg-blue-500 hover:bg-blue-600"
+                    >
+                      儲存編輯
+                    </Button>
+                  </div>
+                ) : (
+                  <Button onClick={() => setIsEditingNote(true)}>
+                    編輯備注
+                  </Button>
                 )}
               </div>
             </div>
@@ -374,40 +426,6 @@ export function ApiTransactionInfoDialog({
                       2
                     )}
                   </pre>
-                )}
-              </div>
-            </div>
-
-            {/* 備註 */}
-            <Label className="whitespace-nowrap font-bold text-md mt-8">
-              備註
-            </Label>
-            <div className="flex flex-col items-start gap-2 w-full min-h-6">
-              <Input
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                disabled={!isEditingNote}
-              />
-              <div>
-                {isEditingNote ? (
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handleAbortEditTransactionNote}
-                      className="bg-red-500 hover:bg-red-600"
-                    >
-                      放棄編輯
-                    </Button>
-                    <Button
-                      onClick={handleEditTransactionNote}
-                      className="bg-blue-500 hover:bg-blue-600"
-                    >
-                      儲存編輯
-                    </Button>
-                  </div>
-                ) : (
-                  <Button onClick={() => setIsEditingNote(true)}>
-                    編輯備注
-                  </Button>
                 )}
               </div>
             </div>

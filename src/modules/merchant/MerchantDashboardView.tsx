@@ -2,9 +2,13 @@ import { formatNumber, formatNumberInInteger } from "@/lib/number";
 
 import { Calculator } from "@/lib/calculator";
 import { Label } from "@/components/shadcn/ui/label";
+import MerchantPaymentMethodInfo from "./MerchantPaymentMethodInfo";
+import OrganizationBalanceTable from "../admin/organization/balance/OrganizationBalanceTable";
+import OrganizationPaymentMethodTable from "../admin/organization/paymentMethod/OrganizationPaymentMethodTable";
 import { classNames } from "@/lib/utils";
-import { useSystemBalance } from "@/lib/hooks/swr/balance";
-import { useSystemDailyTransactionCount } from "@/lib/hooks/swr/transaction";
+import { getApplicationCookies } from "@/lib/cookie";
+import { useBalances } from "@/lib/hooks/swr/balance";
+import { useDailyTransactionCountByOrganizationId } from "@/lib/hooks/swr/transaction";
 
 const Stat = ({
   name,
@@ -30,44 +34,61 @@ const Stat = ({
   );
 };
 
-export default function DashboardView() {
-  const { systemBalance } = useSystemBalance();
+export default function MerchantDashboardView() {
+  const { organizationId } = getApplicationCookies();
 
-  const totalBalance = systemBalance
-    ? Calculator.plus(
-        systemBalance.totalAvailableAmount,
-        systemBalance.totalDepositUnsettledAmount
-      )
-    : "0";
+  const { balances } = useBalances({ organizationId });
 
-  const { systemDailyTransactionCount } = useSystemDailyTransactionCount();
+  const totalBalance = balances?.reduce((acc, balance) => {
+    const totalBalance = Calculator.plus(
+      balance.availableAmount,
+      balance.depositUnsettledAmount
+    );
+
+    return Calculator.plus(acc, totalBalance);
+  }, "0");
+  const totalAvailableAmount = balances?.reduce(
+    (acc, balance) => Calculator.plus(acc, balance.availableAmount),
+    "0"
+  );
+  const totalDepositUnsettledAmount = balances?.reduce(
+    (acc, balance) => Calculator.plus(acc, balance.depositUnsettledAmount),
+    "0"
+  );
+  const totalFrozenAmount = balances?.reduce(
+    (acc, balance) => Calculator.plus(acc, balance.frozenAmount),
+    "0"
+  );
+
+  const { dailyTransactionCountByOrganizationId } =
+    useDailyTransactionCountByOrganizationId({ organizationId });
 
   return (
-    <div className="p-4 border rounded-md flex flex-col gap-4">
-      <div>
-        <Label className="text-xl font-bold">系統總餘額</Label>
+    <div className="p-4 border rounded-md">
+      <div className="py-8">
+        <Label className="text-xl font-bold">餘額</Label>
         <dl className="flex flex-wrap">
           <Stat name={"餘額"} value={totalBalance} textClassNames="font-mono" />
           <Stat
             name={"可用餘額"}
-            value={systemBalance?.totalAvailableAmount}
+            value={totalAvailableAmount}
             textClassNames="font-mono"
           />
           <Stat
             name={"未結算額度"}
-            value={systemBalance?.totalDepositUnsettledAmount}
+            value={totalDepositUnsettledAmount}
             textClassNames="font-mono"
           />
           <Stat
             name={"凍結額度"}
-            value={systemBalance?.totalFrozenAmount}
+            value={totalFrozenAmount}
             textClassNames={"text-rose-600 font-mono"}
           />
         </dl>
       </div>
 
-      <div>
-        <Label className="text-xl font-bold">系統總訂單數</Label>
+      <div className="py-8">
+        <Label className="text-xl font-bold">訂單數</Label>
 
         <dl className="flex flex-wrap">
           <div className="flex flex-wrap items-baseline justify-between p-4">
@@ -80,7 +101,7 @@ export default function DashboardView() {
               }
             >
               {formatNumberInInteger(
-                systemDailyTransactionCount?.dailyTotal || "0"
+                dailyTransactionCountByOrganizationId?.dailyTotal || "0"
               )}
             </dd>
           </div>
@@ -95,11 +116,13 @@ export default function DashboardView() {
               }
             >
               {formatNumberInInteger(
-                systemDailyTransactionCount?.dailyDepositSuccessTotal || "0"
+                dailyTransactionCountByOrganizationId?.dailyDepositSuccessTotal ||
+                  "0"
               )}{" "}
               /{" "}
               {formatNumberInInteger(
-                systemDailyTransactionCount?.dailyDepositFailedTotal || "0"
+                dailyTransactionCountByOrganizationId?.dailyDepositFailedTotal ||
+                  "0"
               )}
             </dd>
           </div>
@@ -114,15 +137,22 @@ export default function DashboardView() {
               }
             >
               {formatNumberInInteger(
-                systemDailyTransactionCount?.dailyWithdrawalSuccessTotal || "0"
+                dailyTransactionCountByOrganizationId?.dailyWithdrawalSuccessTotal ||
+                  "0"
               )}{" "}
               /{" "}
               {formatNumberInInteger(
-                systemDailyTransactionCount?.dailyWithdrawalFailedTotal || "0"
+                dailyTransactionCountByOrganizationId?.dailyWithdrawalFailedTotal ||
+                  "0"
               )}
             </dd>
           </div>
         </dl>
+      </div>
+
+      <div className="py-8">
+        <Label className="text-xl font-bold">通道</Label>
+        <MerchantPaymentMethodInfo organizationId={organizationId} />
       </div>
     </div>
   );

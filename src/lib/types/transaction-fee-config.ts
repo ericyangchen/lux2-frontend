@@ -16,3 +16,12 @@ export interface TransactionFeeConfig {
   updatedAt?: string;
   deletedAt?: string;
 }
+
+export interface PaymentMethodInfo {
+  type: string;
+  paymentMethod: string;
+  percentageFee: string;
+  fixedFee: string;
+  totalMinAmount?: string | undefined;
+  totalMaxAmount?: string | undefined;
+}

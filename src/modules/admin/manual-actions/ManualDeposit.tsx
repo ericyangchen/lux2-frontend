@@ -81,7 +81,7 @@ export default function ManualDeposit() {
         accessToken,
       });
       const data = await response.json();
-      console.log(data);
+
       if (response.ok) {
         toast({
           title: `手動充值訂單 新增成功`,

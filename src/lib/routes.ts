@@ -1,12 +1,10 @@
 import {
   BuildingOffice2Icon,
-  CreditCardIcon,
-  CurrencyDollarIcon,
-  DocumentChartBarIcon,
+  ChartBarSquareIcon,
+  DocumentDuplicateIcon,
+  DocumentMagnifyingGlassIcon,
   HandRaisedIcon,
   HomeIcon,
-  InboxIcon,
-  InboxStackIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 
@@ -26,7 +24,7 @@ export const merchantNavigation = [
   {
     name: "訂單查詢",
     href: "/merchant/transactions",
-    icon: CreditCardIcon,
+    icon: DocumentMagnifyingGlassIcon,
   },
   // {
   //   name: "歷史紀錄",
@@ -54,17 +52,22 @@ export const adminNavigation = [
   {
     name: "訂單查詢",
     href: "/admin/transactions",
-    icon: InboxIcon,
+    icon: DocumentMagnifyingGlassIcon,
   },
   {
     name: "手動作業",
     href: "/admin/manual-actions",
     icon: HandRaisedIcon,
   },
+  {
+    name: "批量操作",
+    href: "/admin/batch-processing",
+    icon: DocumentDuplicateIcon,
+  },
   // {
-  //   name: "歷史紀錄",
+  //   name: "報表",
   //   href: "/admin/history",
-  //   icon: DocumentChartBarIcon,
+  //   icon: ChartBarSquareIcon,
   // },
 ];
 

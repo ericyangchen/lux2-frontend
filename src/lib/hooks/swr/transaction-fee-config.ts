@@ -1,7 +1,14 @@
+import {
+  PaymentMethodInfo,
+  TransactionFeeConfig,
+} from "@/lib/types/transaction-fee-config";
+import {
+  getOrganizationTransactionFeeConfigsApi,
+  getPaymentMethodInfoByOrganizationIdApi,
+} from "@/lib/apis/organizations/transaction-fee-config";
+
 import { ApplicationError } from "@/lib/types/applicationError";
-import { TransactionFeeConfig } from "@/lib/types/transaction-fee-config";
 import { getApplicationCookies } from "@/lib/cookie";
-import { getOrganizationTransactionFeeConfigsApi } from "@/lib/apis/organizations/transaction-fee-config";
 import useSWR from "swr";
 
 const fetchOrganizationTransactionFeeConfigs = async ({
@@ -62,6 +69,57 @@ export const useOrganizationTransactionFeeConfigs = ({
   return {
     transactionFeeConfigs:
       (data?.transactionFeeConfigs as TransactionFeeConfig[]) || [],
+    isLoading: isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
+const fetchPaymentMethodInfoByOrganizationIdApi = async ({
+  organizationId,
+  accessToken,
+}: {
+  organizationId: string;
+  accessToken: string;
+}) => {
+  const response = await getPaymentMethodInfoByOrganizationIdApi({
+    organizationId,
+    accessToken,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+
+    const error = new ApplicationError(errorData);
+
+    throw error;
+  }
+
+  return response.json();
+};
+
+export const useOrganizationPaymentMethodInfo = ({
+  organizationId,
+}: {
+  organizationId?: string;
+}) => {
+  const { accessToken } = getApplicationCookies();
+
+  const shouldFetch = accessToken && organizationId;
+
+  const { data, error, isLoading, mutate } = useSWR(
+    shouldFetch
+      ? {
+          key: "payment-method-infos",
+          organizationId,
+          accessToken,
+        }
+      : null,
+    fetchPaymentMethodInfoByOrganizationIdApi
+  );
+
+  return {
+    paymentMethodInfos: data?.paymentMethodInfos as PaymentMethodInfo[],
     isLoading: isLoading,
     isError: error,
     mutate,

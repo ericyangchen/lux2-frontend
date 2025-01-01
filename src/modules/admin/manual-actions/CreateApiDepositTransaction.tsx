@@ -28,11 +28,12 @@ import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { OrganizationSearchBar } from "../common/OrganizationSearchBar";
+import { OrganizationType } from "@/lib/types/organization";
 import { Textarea } from "@/components/shadcn/ui/textarea";
 import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/timezone";
 import { copyToClipboard } from "@/lib/copyToClipboard";
 import { formatNumberWithoutMinFraction } from "@/lib/number";
-import { generalAgentCreateApiDepositTransaction } from "@/lib/apis/transactions";
+import { generalAgentCreateApiDepositTransactionApi } from "@/lib/apis/transactions";
 import { getApplicationCookies } from "@/lib/cookie";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -91,12 +92,12 @@ export default function CreateApiDepositTransaction() {
 
     try {
       setIsLoading(true);
-      const response = await generalAgentCreateApiDepositTransaction({
+      const response = await generalAgentCreateApiDepositTransactionApi({
         body: body as CreateDepositTransactionRequestBody,
         accessToken,
       });
       const data = await response.json();
-      console.log(data);
+
       if (response.ok) {
         toast({
           title: `建立代收訂單 成功`,
@@ -133,13 +134,7 @@ export default function CreateApiDepositTransaction() {
     setCreatedApiDepositTransaction(undefined);
   };
 
-  const disableButton =
-    !body.merchantId ||
-    !body.merchantOrderId ||
-    !body.paymentMethod ||
-    !body.amount;
-
-  console.log(body);
+  const disableButton = !body.merchantId || !body.paymentMethod || !body.amount;
 
   return (
     <>
@@ -177,18 +172,18 @@ export default function CreateApiDepositTransaction() {
             <OrganizationSearchBar
               selectedOrganizationId={body?.merchantId}
               setSelectedOrganizationId={setMerchantId}
+              organizationType={OrganizationType.MERCHANT}
             />
           </div>
 
           {/* merchantOrderId */}
           <div className="flex items-center gap-4 w-full lg:w-fit">
-            <Label className="whitespace-nowrap min-w-[90px]">
-              商戶訂單號<span className="text-red-500">*</span>
-            </Label>
+            <Label className="whitespace-nowrap min-w-[90px]">商戶訂單號</Label>
             <Input
               className="w-[350px]"
               value={body?.merchantOrderId}
               onChange={(e) => setMerchantOrderId(e.target.value)}
+              placeholder="預設為系統自動訂單號"
             />
           </div>
 

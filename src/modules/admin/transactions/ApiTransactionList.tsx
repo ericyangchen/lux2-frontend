@@ -1,3 +1,4 @@
+import { Organization, OrganizationType } from "@/lib/types/organization";
 import {
   PaymentChannel,
   PaymentChannelCategories,
@@ -6,6 +7,8 @@ import {
   PaymentMethodDisplayNames,
   Transaction,
   TransactionDetailedStatus,
+  TransactionDetailedStatusDisplayNames,
+  TransactionDetailedStatusRequireProcessing,
   TransactionStatus,
   TransactionStatusDisplayNames,
   TransactionType,
@@ -20,8 +23,12 @@ import {
   SelectValue,
 } from "@/components/shadcn/ui/select";
 import {
+  convertDatabaseTimeToReadablePhilippinesTime,
+  convertToEndOfDay,
+  convertToStartOfDay,
+} from "@/lib/timezone";
+import {
   getTransactionByIdApi,
-  getTransactionByMerchantOrderIdApi,
   getTransactionsApi,
 } from "@/lib/apis/transactions";
 import { useEffect, useState } from "react";
@@ -29,14 +36,13 @@ import { useEffect, useState } from "react";
 import { ApiTransactionInfoDialog } from "../common/ApiTransactionInfoDialog";
 import { ApplicationError } from "@/lib/types/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
+import { DatePicker } from "@/components/DatePicker";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
-import { Organization } from "@/lib/types/organization";
 import { OrganizationSearchBar } from "../common/OrganizationSearchBar";
 import { classNames } from "@/lib/utils";
-import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/timezone";
 import { copyToClipboard } from "@/lib/copyToClipboard";
 import { flattenOrganizations } from "../common/flattenOrganizations";
 import { formatNumberWithoutMinFraction } from "@/lib/number";
@@ -47,7 +53,6 @@ import { useToast } from "@/components/shadcn/ui/use-toast";
 
 const QueryTypes = {
   SEARCH_BY_TRANSACTION_ID: "searchByTransactionId",
-  SEARCH_BY_MERCHANT_ORDER_ID: "searchByMerchantOrderId",
   SEARCH_BY_MULTIPLE_CONDITIONS: "searchByMultipleConditions",
 };
 
@@ -70,11 +75,7 @@ export function ApiTransactionList() {
     (router.query.transactionId as string) || ""
   );
 
-  // 2. search by merchantId & merchantOrderId
-  const [merchantId, setMerchantId] = useState<string>("");
-  const [merchantOrderId, setMerchantOrderId] = useState<string>("");
-
-  // 3. search by multiple conditions
+  // 2. search by multiple conditions
   const [transactionType, setTransactionType] = useState<
     TransactionType | "all"
   >("all");
@@ -84,14 +85,16 @@ export function ApiTransactionList() {
   const [paymentChannel, setPaymentChannel] = useState<PaymentChannel | "all">(
     "all"
   );
-  const [multipleConditionMerchantId, setMultipleConditionMerchantId] =
-    useState<string>();
+  const [merchantId, setMerchantId] = useState<string>();
+  const [merchantOrderId, setMerchantOrderId] = useState<string>("");
   const [transactionStatus, setTransactionStatus] = useState<
     TransactionStatus | "all"
   >("all");
   const [transactionDetailedStatus, setTransactionDetailedStatus] = useState<
     TransactionDetailedStatus | "all"
   >("all");
+  const [startDate, setStartDate] = useState<Date>();
+  const [endDate, setEndDate] = useState<Date>();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -121,7 +124,6 @@ export function ApiTransactionList() {
     }
 
     const searchById = !!transactionId;
-    const searchByMerchantOrderId = !!merchantId && !!merchantOrderId;
 
     try {
       // 1. search by transactionId
@@ -138,23 +140,8 @@ export function ApiTransactionList() {
         } else {
           throw new ApplicationError(data);
         }
-      } else if (searchByMerchantOrderId) {
-        // 2. search by merchantId & merchantOrderId
-        const response = await getTransactionByMerchantOrderIdApi({
-          merchantId,
-          merchantOrderId,
-          accessToken,
-        });
-        const data = await response.json();
-
-        if (response.ok) {
-          setTransactions([data?.transaction]);
-          setCurrentQueryType(QueryTypes.SEARCH_BY_MERCHANT_ORDER_ID);
-        } else {
-          throw new ApplicationError(data);
-        }
       } else {
-        // 3. search by multiple conditions
+        // 2. search by multiple conditions
         const transactionTypeQuery =
           transactionType && transactionType !== "all"
             ? transactionType
@@ -173,14 +160,21 @@ export function ApiTransactionList() {
           transactionDetailedStatus && transactionDetailedStatus !== "all"
             ? transactionDetailedStatus
             : undefined;
+        const startDateQuery = startDate
+          ? convertToStartOfDay(startDate)
+          : undefined;
+        const endDateQuery = endDate ? convertToEndOfDay(endDate) : undefined;
 
         const query = {
           type: transactionTypeQuery,
-          merchantId: multipleConditionMerchantId,
+          merchantId,
+          merchantOrderId,
           paymentMethod: paymentMethodQuery,
           paymentChannel: paymentChannelQuery,
           status: transactionStatusQuery,
           detailedStatus: transactionDetailedStatusQuery,
+          createdAtStart: startDateQuery,
+          createdAtEnd: endDateQuery,
         };
 
         const cursor = isLoadMore && !!nextCursor ? nextCursor : undefined;
@@ -229,22 +223,20 @@ export function ApiTransactionList() {
   const clearSearchByTransactionId = () => {
     setTransactionId("");
   };
-  const clearSearchByMerchantOrderId = () => {
-    setMerchantId("");
-    setMerchantOrderId("");
-  };
   const clearSearchByMultipleConditions = () => {
     setTransactionType("all");
     setPaymentMethod("all");
     setPaymentChannel("all");
-    setMultipleConditionMerchantId("");
+    setMerchantId("");
+    setMerchantOrderId("");
     setTransactionStatus("all");
     setTransactionDetailedStatus("all");
+    setStartDate(undefined);
+    setEndDate(undefined);
   };
 
   const handleClearAll = () => {
     clearSearchByTransactionId();
-    clearSearchByMerchantOrderId();
     clearSearchByMultipleConditions();
     setTransactions(undefined);
     setCurrentQueryType(undefined);
@@ -254,14 +246,9 @@ export function ApiTransactionList() {
     if (!currentQueryType) return;
 
     if (currentQueryType === QueryTypes.SEARCH_BY_TRANSACTION_ID) {
-      clearSearchByMerchantOrderId();
-      clearSearchByMultipleConditions();
-    } else if (currentQueryType === QueryTypes.SEARCH_BY_MERCHANT_ORDER_ID) {
-      clearSearchByTransactionId();
       clearSearchByMultipleConditions();
     } else {
       clearSearchByTransactionId();
-      clearSearchByMerchantOrderId();
     }
   }, [currentQueryType]);
 
@@ -270,7 +257,7 @@ export function ApiTransactionList() {
 
   return (
     <div
-      className="sm:p-4 sm:border rounded-md w-full lg:h-[calc(100vh-152px)] lg:overflow-y-scroll"
+      className="sm:p-4 sm:border rounded-md w-full lg:h-[calc(100vh-152px)] h-[calc(100vh-56px)] overflow-y-scroll"
       id="scrollableDiv"
     >
       {/* search bar */}
@@ -291,37 +278,6 @@ export function ApiTransactionList() {
               value={transactionId}
               onChange={(e) => setTransactionId(e.target.value)}
             />
-          </div>
-        </div>
-
-        {/* search by: merchantId & merchantOrderId */}
-        <div className="py-4 flex flex-col gap-4">
-          <Label className="whitespace-nowrap font-bold text-md">
-            單筆查詢: 商戶訂單號
-          </Label>
-          <div className="flex flex-wrap gap-4 px-4">
-            {/* merchantId */}
-            <div className="flex items-center gap-4 w-full lg:w-fit">
-              <Label className="whitespace-nowrap">
-                單位 ID<span className="text-red-500">*</span>
-              </Label>
-              <OrganizationSearchBar
-                selectedOrganizationId={merchantId}
-                setSelectedOrganizationId={setMerchantId}
-              />
-            </div>
-            {/* merchantOrderId */}
-            <div className="flex items-center gap-4 w-full lg:w-fit">
-              <Label className="whitespace-nowrap">
-                商戶訂單號<span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="merchantOrderId"
-                className="sm:min-w-[300px] font-mono"
-                value={merchantOrderId}
-                onChange={(e) => setMerchantOrderId(e.target.value)}
-              />
-            </div>
           </div>
         </div>
 
@@ -419,12 +375,23 @@ export function ApiTransactionList() {
                 </Select>
               </div>
             </div>
-            {/* multipleConditionMerchantId */}
+            {/* merchantId */}
             <div className="flex items-center gap-4 w-full lg:w-fit">
               <Label className="whitespace-nowrap">單位 ID</Label>
               <OrganizationSearchBar
-                selectedOrganizationId={multipleConditionMerchantId}
-                setSelectedOrganizationId={setMultipleConditionMerchantId}
+                selectedOrganizationId={merchantId}
+                setSelectedOrganizationId={setMerchantId}
+                organizationType={OrganizationType.MERCHANT}
+              />
+            </div>
+            {/* merchantOrderId */}
+            <div className="flex items-center gap-4 w-full lg:w-fit">
+              <Label className="whitespace-nowrap">商戶訂單號</Label>
+              <Input
+                id="merchantOrderId"
+                className="sm:min-w-[300px] font-mono"
+                value={merchantOrderId}
+                onChange={(e) => setMerchantOrderId(e.target.value)}
               />
             </div>
             {/* status */}
@@ -479,7 +446,21 @@ export function ApiTransactionList() {
                             key={detailedStatus}
                             value={detailedStatus}
                           >
-                            {detailedStatus}
+                            <span
+                              className={classNames(
+                                TransactionDetailedStatusRequireProcessing.includes(
+                                  detailedStatus
+                                )
+                                  ? "text-orange-500"
+                                  : ""
+                              )}
+                            >
+                              {
+                                TransactionDetailedStatusDisplayNames[
+                                  detailedStatus
+                                ]
+                              }
+                            </span>
                           </SelectItem>
                         )
                       )}
@@ -487,6 +468,24 @@ export function ApiTransactionList() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            {/* startDate */}
+            <div className="flex items-center gap-4 w-full lg:w-fit">
+              <Label className="whitespace-nowrap">起始日期</Label>
+              <DatePicker
+                date={startDate}
+                setDate={setStartDate}
+                placeholder="yyyy/mm/dd"
+              />
+            </div>
+            {/* endDate */}
+            <div className="flex items-center gap-4 w-full lg:w-fit">
+              <Label className="whitespace-nowrap">結束日期</Label>
+              <DatePicker
+                date={endDate}
+                setDate={setEndDate}
+                placeholder="yyyy/mm/dd"
+              />
             </div>
           </div>
         </div>
@@ -514,6 +513,7 @@ export function ApiTransactionList() {
           <InfiniteScroll
             dataLength={transactions?.length || 0}
             next={() => {
+              console.log("loading more");
               if (nextCursor) handleSearch(true);
             }}
             hasMore={!!nextCursor}
@@ -535,8 +535,6 @@ export function ApiTransactionList() {
               <Label className="whitespace-nowrap font-bold text-md">
                 {currentQueryType === QueryTypes.SEARCH_BY_TRANSACTION_ID
                   ? "單筆查詢結果: 系統自動訂單號"
-                  : currentQueryType === QueryTypes.SEARCH_BY_MERCHANT_ORDER_ID
-                  ? "單筆查詢結果: 商戶訂單號"
                   : "多筆查詢結果"}
               </Label>
             </div>
@@ -657,8 +655,21 @@ export function ApiTransactionList() {
                       >
                         {TransactionStatusDisplayNames[transaction.status]}
                       </td>
-                      <td className="px-1 py-2 text-center">
-                        {transaction.detailedStatus}
+                      <td
+                        className={classNames(
+                          TransactionDetailedStatusRequireProcessing.includes(
+                            transaction.detailedStatus
+                          )
+                            ? "text-orange-500"
+                            : "",
+                          "px-1 py-2 text-center"
+                        )}
+                      >
+                        {
+                          TransactionDetailedStatusDisplayNames[
+                            transaction.detailedStatus
+                          ]
+                        }
                       </td>
                       <td className="px-1 py-2 text-center">
                         {convertDatabaseTimeToReadablePhilippinesTime(

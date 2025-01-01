@@ -12,3 +12,10 @@ export interface Balance {
   updatedAt?: string;
   deletedAt?: string;
 }
+
+export interface SystemBalance {
+  totalAvailableAmount: string;
+  totalDepositUnsettledAmount: string;
+  totalWithdrawalPendingAmount: string;
+  totalFrozenAmount: string;
+}

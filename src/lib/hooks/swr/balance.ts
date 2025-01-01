@@ -1,8 +1,13 @@
+import { Balance, SystemBalance } from "@/lib/types/balance";
+import {
+  USD_SYSTEM_BALANCE_REFRESH_INTERVAL,
+  USE_BALANCES_REFRESH_INTERVAL,
+} from "./constants";
+
 import { ApplicationError } from "@/lib/types/applicationError";
-import { Balance } from "@/lib/types/balance";
-import { USE_BALANCES_REFRESH_INTERVAL } from "./constants";
 import { getApplicationCookies } from "@/lib/cookie";
 import { getOrganizationBalancesApi } from "@/lib/apis/organizations/balance";
+import { getSystemBalanceApi } from "@/lib/apis/balances/getSystemBalance";
 import useSWR from "swr";
 
 const fetchBalancesByOrganizationId = async ({
@@ -28,7 +33,11 @@ const fetchBalancesByOrganizationId = async ({
   return response.json();
 };
 
-export const useBalances = ({ organizationId }: { organizationId: string }) => {
+export const useBalances = ({
+  organizationId,
+}: {
+  organizationId?: string;
+}) => {
   const { accessToken } = getApplicationCookies();
 
   const shouldFetch = accessToken && organizationId;
@@ -41,6 +50,42 @@ export const useBalances = ({ organizationId }: { organizationId: string }) => {
 
   return {
     balances: (data?.balances as Balance[]) || [],
+    isLoading: isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
+const fetchSystemBalance = async ({ accessToken }: { accessToken: string }) => {
+  const response = await getSystemBalanceApi({
+    accessToken,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+
+    const error = new ApplicationError(errorData);
+
+    throw error;
+  }
+
+  return response.json();
+};
+
+// GENERAL_AGENT
+export const useSystemBalance = () => {
+  const { accessToken } = getApplicationCookies();
+
+  const shouldFetch = accessToken;
+
+  const { data, error, isLoading, mutate } = useSWR(
+    shouldFetch ? { key: "systemBalance", accessToken } : null,
+    fetchSystemBalance,
+    { refreshInterval: USD_SYSTEM_BALANCE_REFRESH_INTERVAL }
+  );
+
+  return {
+    systemBalance: data as SystemBalance,
     isLoading: isLoading,
     isError: error,
     mutate,

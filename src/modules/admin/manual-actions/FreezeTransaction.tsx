@@ -16,6 +16,7 @@ import {
   PaymentChannelDisplayNames,
   PaymentMethodDisplayNames,
   Transaction,
+  TransactionDetailedStatusDisplayNames,
   TransactionStatus,
   TransactionStatusDisplayNames,
   TransactionType,
@@ -382,7 +383,13 @@ export function FreezeTransaction() {
                 <Label className="whitespace-nowrap min-w-[100px]">
                   詳細狀態:
                 </Label>
-                <div className="font-mono">{transaction.detailedStatus}</div>
+                <div className="font-mono">
+                  {
+                    TransactionDetailedStatusDisplayNames[
+                      transaction.detailedStatus
+                    ]
+                  }
+                </div>
               </div>
 
               <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 px-4">
