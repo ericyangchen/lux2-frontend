@@ -108,3 +108,15 @@ export const getOrganizationBaseUrl = (organizationType: OrganizationType) => {
     return;
   }
 };
+
+export const getOrganizationPrefixUrl = (
+  organizationType: OrganizationType
+) => {
+  if (organizationType === OrganizationType.GENERAL_AGENT) {
+    return "/admin";
+  } else if (organizationType === OrganizationType.MERCHANT) {
+    return "/merchant";
+  } else {
+    return;
+  }
+};

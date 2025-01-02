@@ -9,6 +9,7 @@ import {
 
 import { ApplicationError } from "@/lib/types/applicationError";
 import { Organization } from "@/lib/types/organization";
+import { checkOrganizationTotpEnabledApi } from "@/lib/apis/organizations/totp";
 import { getApplicationCookies } from "@/lib/cookie";
 import useSWR from "swr";
 
@@ -102,6 +103,53 @@ export const useOrganizationInfo = ({
 
   return {
     organization: data?.organization as Organization,
+    isLoading: isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
+const fetchCheckOrganizationTotpEnabled = async ({
+  organizationId,
+  accessToken,
+}: {
+  organizationId: string;
+  accessToken: string;
+}) => {
+  const response = await checkOrganizationTotpEnabledApi({
+    organizationId,
+    accessToken,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+
+    const error = new ApplicationError(errorData);
+
+    throw error;
+  }
+
+  return response.json();
+};
+
+export const useCheckOrganizationTotpEnabled = ({
+  organizationId,
+}: {
+  organizationId?: string;
+}) => {
+  const { accessToken } = getApplicationCookies();
+
+  const shouldFetch = accessToken && organizationId;
+
+  const { data, error, isLoading, mutate } = useSWR(
+    shouldFetch
+      ? { key: "organization-totp-enabled", organizationId, accessToken }
+      : null,
+    fetchCheckOrganizationTotpEnabled
+  );
+
+  return {
+    totpEnabled: data?.enabled as boolean,
     isLoading: isLoading,
     isError: error,
     mutate,
