@@ -67,7 +67,7 @@ export default function LoginPage() {
       const payload = {
         email,
         password,
-        twoFactorCode,
+        totpCode: twoFactorCode,
       };
       const response = await loginApi(payload);
 
