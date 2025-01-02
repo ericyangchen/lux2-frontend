@@ -141,7 +141,7 @@ export default function LoginPage() {
           <CardContent>
             <div className="grid gap-4">
               <div className="grid gap-2">
-                <Label>Email</Label>
+                <Label>帳號</Label>
                 <Input
                   id="email"
                   type="email"
@@ -151,7 +151,7 @@ export default function LoginPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Password</Label>
+                <Label>密碼</Label>
                 <Input
                   id="password"
                   type="password"
@@ -161,7 +161,7 @@ export default function LoginPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>2FA Code</Label>
+                <Label>驗證碼</Label>
                 <Input
                   id="twoFactorCode"
                   type="text"
@@ -177,7 +177,7 @@ export default function LoginPage() {
                 onClick={handleLogin}
                 disabled={loading}
               >
-                Login
+                登入
               </Button>
               <div hidden={!unauthorizedIp}>
                 <Label className="font-bold text-red-500">登入 IP 未授權</Label>
