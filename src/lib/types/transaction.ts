@@ -82,6 +82,7 @@ export enum PaymentChannel {
 export enum TransactionStatus {
   NOT_STARTED = "NOT_STARTED",
   PENDING = "PENDING",
+  REQUIRE_ACTION = "REQUIRE_ACTION",
   SUCCESS = "SUCCESS",
   FAILED = "FAILED",
 }
@@ -196,6 +197,7 @@ export const PaymentChannelDisplayNames = {
 export const TransactionStatusDisplayNames = {
   [TransactionStatus.NOT_STARTED]: "未開始",
   [TransactionStatus.PENDING]: "處理中",
+  [TransactionStatus.REQUIRE_ACTION]: "需人工處理",
   [TransactionStatus.SUCCESS]: "成功",
   [TransactionStatus.FAILED]: "失敗",
 };
