@@ -80,7 +80,7 @@ export function BatchProcessingView() {
   // 2. search by multiple conditions
   const [transactionType, setTransactionType] = useState<
     TransactionType | "all"
-  >("all");
+  >(TransactionType.WITHDRAWAL);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "all">(
     "all"
   );
@@ -94,7 +94,7 @@ export function BatchProcessingView() {
   >(TransactionStatus.PENDING);
   const [transactionDetailedStatus, setTransactionDetailedStatus] = useState<
     TransactionDetailedStatus | "all"
-  >("all");
+  >(TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_INSUFFICIENT_BALANCE);
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
 
@@ -227,13 +227,15 @@ export function BatchProcessingView() {
   };
 
   const clearSearchByMultipleConditions = () => {
-    setTransactionType("all");
+    setTransactionType(TransactionType.WITHDRAWAL);
     setPaymentMethod("all");
     setPaymentChannel("all");
     setMerchantId("");
     setMerchantOrderId("");
     setTransactionStatus(TransactionStatus.PENDING);
-    setTransactionDetailedStatus("all");
+    setTransactionDetailedStatus(
+      TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_INSUFFICIENT_BALANCE
+    );
     setStartDate(undefined);
     setEndDate(undefined);
   };
