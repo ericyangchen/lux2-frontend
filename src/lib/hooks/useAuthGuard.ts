@@ -37,34 +37,37 @@ export const useAuthGuard = () => {
 
     // redirect to login if no access
     if (!hasAccess && !isLoginRoute) {
+      console.log("!hasAccess && !isLoginRoute");
       clearAndRedirectToLogin(router);
       return;
     }
 
     // loading organization
     if (isLoading) {
-      return;
-    }
-
-    // cannot get organization
-    if (!organizationBaseUrl || !organizationPrefixUrl) {
-      clearAndRedirectToLogin(router);
+      console.log("isLoading");
       return;
     }
 
     // handle login route
     if (isLoginRoute) {
       if (organizationBaseUrl) {
+        console.log("isLoginRoute, organizationBaseUrl");
         router.push(organizationBaseUrl);
-      } else {
-        clearAndRedirectToLogin(router);
       }
 
       return;
     }
 
+    // cannot get organization
+    if (!organizationBaseUrl || !organizationPrefixUrl) {
+      console.log("!organizationBaseUrl || !organizationPrefixUrl");
+      clearAndRedirectToLogin(router);
+      return;
+    }
+
     // handle organization route prefix
     if (!router.pathname.startsWith(organizationPrefixUrl)) {
+      console.log("!router.pathname.startsWith(organizationPrefixUrl)");
       router.push(organizationBaseUrl);
 
       return;
