@@ -112,3 +112,23 @@ export const updateOrganizationTransactionFeeConfigsWithSamePaymentMethod =
       }),
     });
   };
+
+export const getPaymentMethodInfoByOrganizationIdApi = async ({
+  organizationId,
+  accessToken,
+}: {
+  organizationId: string;
+  accessToken: string;
+}) => {
+  const url = `${backendUrl}/organizations/${encodeURIComponent(
+    organizationId
+  )}/transaction-fee-configs/payment-method-infos`;
+
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+};

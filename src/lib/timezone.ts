@@ -46,3 +46,21 @@ export const convertDatabaseTimeToReadablePhilippinesTime = (
 
   return moment.tz(date, PHILIPPINES_TIMEZONE).format("YYYY/MM/DD HH:mm:ss");
 };
+
+export const convertToStartOfDay = (time?: Date): string => {
+  if (!time) return "";
+
+  return moment
+    .tz(time, PHILIPPINES_TIMEZONE)
+    .startOf("day")
+    .format("YYYY-MM-DD HH:mm:ss.SSSZ");
+};
+
+export const convertToEndOfDay = (time?: Date): string => {
+  if (!time) return "";
+
+  return moment
+    .tz(time, PHILIPPINES_TIMEZONE)
+    .endOf("day")
+    .format("YYYY-MM-DD HH:mm:ss.SSSZ");
+};

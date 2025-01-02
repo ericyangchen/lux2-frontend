@@ -23,7 +23,7 @@ const Stat = ({
           "w-full flex-none text-xl font-medium leading-10 tracking-tight text-gray-900"
         )}
       >
-        &#8369; {formatNumber(value)}
+        &#3647; {formatNumber(value)}
       </dd>
     </div>
   );
@@ -68,7 +68,7 @@ export default function OrganizationBalance({
           textClassNames="font-mono"
         />
         <Stat
-          name={"未結算餘額"}
+          name={"未結算額度"}
           value={totalDepositUnsettledAmount}
           textClassNames="font-mono"
         />
@@ -79,7 +79,7 @@ export default function OrganizationBalance({
         />
       </dl>
 
-      {/* <OrganizationBalanceTable balances={balances} /> */}
+      <OrganizationBalanceTable balances={balances} />
     </div>
   );
 }

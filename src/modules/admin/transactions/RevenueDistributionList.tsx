@@ -130,7 +130,7 @@ export function RevenueDistributionList() {
 
   return (
     <div
-      className="sm:p-4 sm:border rounded-md w-full lg:h-[calc(100vh-152px)] lg:overflow-y-scroll"
+      className="sm:p-4 sm:border rounded-md w-full lg:h-[calc(100vh-152px)] h-[calc(100vh-56px)] overflow-y-scroll"
       id="scrollableDiv"
     >
       {/* search bar */}

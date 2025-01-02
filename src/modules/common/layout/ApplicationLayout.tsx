@@ -1,4 +1,5 @@
 import {
+  ArrowLeftStartOnRectangleIcon,
   Bars3Icon,
   EnvelopeIcon,
   IdentificationIcon,
@@ -16,6 +17,7 @@ import {
   developerNavigation,
   merchantNavigation,
 } from "@/lib/routes";
+import { clearApplicationCookies, getApplicationCookies } from "@/lib/cookie";
 
 import { Badge } from "@/components/shadcn/ui/badge";
 import Head from "next/head";
@@ -24,9 +26,9 @@ import { OrganizationType } from "@/lib/types/organization";
 import { classNames } from "@/lib/utils";
 import { companyName } from "@/lib/constants";
 import { copyToClipboard } from "@/lib/copyToClipboard";
-import { getApplicationCookies } from "@/lib/cookie";
 import { useNavigation } from "@/lib/hooks/useNavigation";
 import { useOrganizationInfo } from "@/lib/hooks/swr/organization";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 import { useUser } from "@/lib/hooks/swr/user";
@@ -83,6 +85,13 @@ export default function ApplicationLayout({
   const isDeveloper = false;
 
   const { user } = useUser();
+
+  const router = useRouter();
+
+  const handleLogout = () => {
+    clearApplicationCookies();
+    router.push("/login");
+  };
 
   return (
     <>
@@ -206,7 +215,17 @@ export default function ApplicationLayout({
             </nav>
           </div>
 
-          <div className="flex flex-col gap-1 overflow-y-auto border-r border-gray-200 bg-white px-4 py-4">
+          <div className="flex flex-col gap-4 overflow-y-auto border-r border-gray-200 bg-white px-4 py-4">
+            <div
+              className="text-gray-700 hover:bg-gray-100 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full cursor-pointer border"
+              onClick={handleLogout}
+            >
+              <ArrowLeftStartOnRectangleIcon
+                aria-hidden="true"
+                className={"text-gray-400 h-6 w-6 shrink-0"}
+              />
+              登出
+            </div>
             <UserInfo user={user} />
           </div>
         </div>
@@ -368,7 +387,17 @@ export default function ApplicationLayout({
                   </ul>
                 </nav>
 
-                <div className="flex flex-col gap-1 overflow-y-auto bg-white py-4">
+                <div className="flex flex-col gap-4 overflow-y-auto bg-white py-4">
+                  <div
+                    className="text-gray-700 hover:bg-gray-100 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full cursor-pointer border"
+                    onClick={handleLogout}
+                  >
+                    <ArrowLeftStartOnRectangleIcon
+                      aria-hidden="true"
+                      className={"text-gray-400 h-6 w-6 shrink-0"}
+                    />
+                    登出
+                  </div>
                   <UserInfo user={user} />
                 </div>
               </div>

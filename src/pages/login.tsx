@@ -180,9 +180,7 @@ export default function LoginPage() {
                 Login
               </Button>
               <div hidden={!unauthorizedIp}>
-                <Label className="font-bold text-red-500">
-                  Unauthorized IP
-                </Label>
+                <Label className="font-bold text-red-500">登入 IP 未授權</Label>
                 <CopyText text={unauthorizedIp} />
               </div>
             </div>

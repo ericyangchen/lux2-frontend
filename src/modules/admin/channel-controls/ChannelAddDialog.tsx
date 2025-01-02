@@ -33,6 +33,7 @@ import Decimal from "decimal.js";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { convertStringNumberToPercentageNumber } from "@/lib/number";
 import { getApplicationCookies } from "@/lib/cookie";
 import { useOrganizationTransactionFeeConfigs } from "@/lib/hooks/swr/transaction-fee-config";
 import { useState } from "react";
@@ -100,7 +101,9 @@ export function ChannelAddDialog({
 
     // Also update the percentage input accordingly
     if (!isNaN(parseFloat(value))) {
-      setPercentageFeeInPercentage((parseFloat(value) * 100).toString());
+      setPercentageFeeInPercentage(
+        convertStringNumberToPercentageNumber(value).toString()
+      );
     } else {
       setPercentageFeeInPercentage("");
     }

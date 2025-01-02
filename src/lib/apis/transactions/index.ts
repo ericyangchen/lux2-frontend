@@ -56,11 +56,14 @@ export const getTransactionByMerchantOrderIdApi = async ({
 export interface GetTransactionsApiQuery {
   type?: TransactionType;
   merchantId?: string;
+  merchantOrderId?: string;
   paymentMethod?: PaymentMethod;
   paymentChannel?: PaymentChannel;
   status?: TransactionStatus;
   detailedStatus?: TransactionDetailedStatus;
   revenueDistributed?: boolean;
+  createdAtStart?: string;
+  createdAtEnd?: string;
 }
 
 export const getTransactionsApi = async ({
@@ -81,6 +84,8 @@ export const getTransactionsApi = async ({
   if (query.paymentChannel)
     urlSearchParams.append("paymentChannel", query.paymentChannel);
   if (query.merchantId) urlSearchParams.append("merchantId", query.merchantId);
+  if (query.merchantOrderId)
+    urlSearchParams.append("merchantOrderId", query.merchantOrderId);
   if (query.status) urlSearchParams.append("status", query.status);
   if (query.detailedStatus)
     urlSearchParams.append("detailedStatus", query.detailedStatus);
@@ -89,6 +94,10 @@ export const getTransactionsApi = async ({
       "revenueDistributed",
       query.revenueDistributed.toString()
     );
+  if (query.createdAtStart)
+    urlSearchParams.append("createdAtStart", query.createdAtStart);
+  if (query.createdAtEnd)
+    urlSearchParams.append("createdAtEnd", query.createdAtEnd);
   if (cursor) urlSearchParams.append("cursor", cursor);
   if (limit) urlSearchParams.append("limit", limit.toString());
 
@@ -105,7 +114,7 @@ export const getTransactionsApi = async ({
   });
 };
 
-export const generalAgentCreateApiDepositTransaction = async ({
+export const generalAgentCreateApiDepositTransactionApi = async ({
   body,
   accessToken,
 }: {
@@ -123,4 +132,43 @@ export const generalAgentCreateApiDepositTransaction = async ({
     body: JSON.stringify(body),
   });
 };
-  
+
+export interface ResendWithdrawalTransactionsRequestBody {
+  transactionIds: string[];
+}
+
+export const resendWithdrawalTransactionsApi = async ({
+  body,
+  accessToken,
+}: {
+  body: ResendWithdrawalTransactionsRequestBody;
+  accessToken: string;
+}) => {
+  const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/transactions/withdrawal-resend`;
+
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(body),
+  });
+};
+
+// GENERAL_AGENT
+export const getSystemDailyTransactionCountApi = async ({
+  accessToken,
+}: {
+  accessToken: string;
+}) => {
+  const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/transactions/system/daily-count`;
+
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+};

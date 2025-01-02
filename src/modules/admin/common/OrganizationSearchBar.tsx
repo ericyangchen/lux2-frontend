@@ -7,6 +7,7 @@ import {
   ComboboxOptions,
 } from "@headlessui/react";
 
+import { OrganizationType } from "@/lib/types/organization";
 import { flattenOrganizations } from "./flattenOrganizations";
 import { getApplicationCookies } from "@/lib/cookie";
 import { useOrganizationWithChildren } from "@/lib/hooks/swr/organization";
@@ -15,14 +16,20 @@ import { useState } from "react";
 export function OrganizationSearchBar({
   selectedOrganizationId,
   setSelectedOrganizationId,
+  organizationType,
 }: {
   selectedOrganizationId?: string;
   setSelectedOrganizationId: (id: string) => void;
+  organizationType?: OrganizationType;
 }) {
   const { organization } = useOrganizationWithChildren({
     organizationId: getApplicationCookies().organizationId,
   });
-  const organizations = flattenOrganizations(organization);
+  const organizations = organizationType
+    ? flattenOrganizations(organization).filter(
+        (org) => org.type === organizationType
+      )
+    : flattenOrganizations(organization);
 
   const [query, setQuery] = useState("");
   const [isComposing, setIsComposing] = useState(false);

@@ -36,6 +36,7 @@ import { Label } from "@/components/shadcn/ui/label";
 import { Switch } from "@/components/shadcn/ui/switch";
 import { TransactionFeeConfig } from "@/lib/types/transaction-fee-config";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { convertStringNumberToPercentageNumber } from "@/lib/number";
 import { getApplicationCookies } from "@/lib/cookie";
 import { useOrganizationTransactionFeeConfigs } from "@/lib/hooks/swr/transaction-fee-config";
 import { useState } from "react";
@@ -81,7 +82,9 @@ export function ChannelEditDialog({
   const [isLoading, setIsLoading] = useState(false);
 
   const [percentageFeeInPercentage, setPercentageFeeInPercentage] = useState(
-    (parseFloat(transactionFeeConfigs[0]?.percentageFee) * 100).toString()
+    convertStringNumberToPercentageNumber(
+      transactionFeeConfigs[0]?.percentageFee
+    ).toString()
   );
 
   const disableButton =
@@ -121,7 +124,9 @@ export function ChannelEditDialog({
 
     // Also update the percentage input accordingly
     if (!isNaN(parseFloat(value))) {
-      setPercentageFeeInPercentage((parseFloat(value) * 100).toString());
+      setPercentageFeeInPercentage(
+        convertStringNumberToPercentageNumber(value).toString()
+      );
     } else {
       setPercentageFeeInPercentage("");
     }

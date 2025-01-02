@@ -1,5 +1,6 @@
 import { Balance } from "@/lib/types/balance";
 import { Calculator } from "@/lib/calculator";
+import { PaymentMethodDisplayNames } from "@/lib/types/transaction";
 import { formatNumber } from "@/lib/number";
 
 export default function OrganizationBalanceTable({
@@ -37,7 +38,7 @@ export default function OrganizationBalanceTable({
                     scope="col"
                     className="px-3 py-3.5 text-sm font-semibold text-gray-900"
                   >
-                    未結算餘額
+                    未結算額度
                   </th>
                   <th
                     scope="col"
@@ -52,7 +53,7 @@ export default function OrganizationBalanceTable({
                   balances.map((balance) => (
                     <tr key={balance.id}>
                       <td className="text-left whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900 pl-4 sm:pl-6">
-                        {balance.paymentMethod}
+                        {PaymentMethodDisplayNames[balance.paymentMethod]}
                       </td>
                       <td className="font-mono whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
                         {formatNumber(
