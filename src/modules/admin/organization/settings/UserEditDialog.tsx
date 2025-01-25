@@ -64,7 +64,7 @@ export function UserEditDialog({
         userId: user.id,
         name,
         email,
-        password,
+        password: password || undefined,
         role,
         accessToken,
       });
