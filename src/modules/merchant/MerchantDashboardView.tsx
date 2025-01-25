@@ -6,6 +6,7 @@ import MerchantPaymentMethodInfo from "./MerchantPaymentMethodInfo";
 import OrganizationBalanceTable from "../admin/organization/balance/OrganizationBalanceTable";
 import OrganizationPaymentMethodTable from "../admin/organization/paymentMethod/OrganizationPaymentMethodTable";
 import { classNames } from "@/lib/utils";
+import { currencySymbol } from "@/lib/constants";
 import { getApplicationCookies } from "@/lib/cookie";
 import { useBalances } from "@/lib/hooks/swr/balance";
 import { useDailyTransactionCountByOrganizationId } from "@/lib/hooks/swr/transaction";
@@ -28,7 +29,7 @@ const Stat = ({
           "w-full flex-none text-xl font-medium leading-10 tracking-tight text-gray-900"
         )}
       >
-        &#3647; {formatNumber(value)}
+        {currencySymbol} {formatNumber(value)}
       </dd>
     </div>
   );

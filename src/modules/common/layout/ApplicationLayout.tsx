@@ -107,7 +107,7 @@ export default function ApplicationLayout({
         <div className="h-full hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
           <div className="flex grow flex-col gap-y-2 overflow-y-auto border-r border-gray-200 bg-white px-6">
             <div className="flex h-14 shrink-0 items-center justify-center">
-              <div className="px-4 py-1 bg-purple-900 text-white rounded-lg">
+              <div className="px-4 py-1 bg-blue-900 text-white rounded-lg">
                 <span className="font-bold text-xl">{companyName}</span>
               </div>
             </div>
@@ -125,7 +125,7 @@ export default function ApplicationLayout({
                           href={item.href}
                           className={classNames(
                             currentNavigation?.href === item.href
-                              ? "bg-gray-100 text-purple-800"
+                              ? "bg-gray-100 text-blue-800"
                               : "text-gray-700 hover:bg-gray-100",
                             "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full"
                           )}
@@ -134,7 +134,7 @@ export default function ApplicationLayout({
                             aria-hidden="true"
                             className={classNames(
                               currentNavigation?.href === item.href
-                                ? "text-purple-800"
+                                ? "text-blue-800"
                                 : "text-gray-400",
                               "h-6 w-6 shrink-0"
                             )}
@@ -158,7 +158,7 @@ export default function ApplicationLayout({
                           href={item.href}
                           className={classNames(
                             currentNavigation?.href === item.href
-                              ? "bg-gray-100 text-purple-800"
+                              ? "bg-gray-100 text-blue-800"
                               : "text-gray-700 hover:bg-gray-100",
                             "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full"
                           )}
@@ -167,7 +167,7 @@ export default function ApplicationLayout({
                             aria-hidden="true"
                             className={classNames(
                               currentNavigation?.href === item.href
-                                ? "text-purple-800"
+                                ? "text-blue-800"
                                 : "text-gray-400",
                               "h-6 w-6 shrink-0"
                             )}
@@ -191,7 +191,7 @@ export default function ApplicationLayout({
                           href={item.href}
                           className={classNames(
                             currentNavigation?.href === item.href
-                              ? "bg-gray-100 text-purple-800"
+                              ? "bg-gray-100 text-blue-800"
                               : "text-gray-700 hover:bg-gray-100",
                             "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full"
                           )}
@@ -200,7 +200,7 @@ export default function ApplicationLayout({
                             aria-hidden="true"
                             className={classNames(
                               currentNavigation?.href === item.href
-                                ? "text-purple-8000"
+                                ? "text-blue-8000"
                                 : "text-gray-400",
                               "h-6 w-6 shrink-0"
                             )}
@@ -264,7 +264,7 @@ export default function ApplicationLayout({
 
               <div className="flex grow flex-col gap-y-2 overflow-y-auto bg-white px-6 pb-2">
                 <div className="flex h-14 shrink-0 items-center justify-center">
-                  <div className="px-4 py-1 bg-purple-900 text-white rounded-lg">
+                  <div className="px-4 py-1 bg-blue-900 text-white rounded-lg">
                     <span className="font-bold text-xl">{companyName}</span>
                   </div>
                 </div>
@@ -283,7 +283,7 @@ export default function ApplicationLayout({
                                 href={item.href}
                                 className={classNames(
                                   currentNavigation?.href === item.href
-                                    ? "bg-gray-100 text-purple-800"
+                                    ? "bg-gray-100 text-blue-800"
                                     : "text-gray-700 hover:bg-gray-100",
                                   "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full"
                                 )}
@@ -296,7 +296,7 @@ export default function ApplicationLayout({
                                   aria-hidden="true"
                                   className={classNames(
                                     currentNavigation?.href === item.href
-                                      ? "text-purple-800"
+                                      ? "text-blue-800"
                                       : "text-gray-400",
                                     "h-6 w-6 shrink-0"
                                   )}
@@ -322,7 +322,7 @@ export default function ApplicationLayout({
                                 href={item.href}
                                 className={classNames(
                                   currentNavigation?.href === item.href
-                                    ? "bg-gray-100 text-purple-800"
+                                    ? "bg-gray-100 text-blue-800"
                                     : "text-gray-700 hover:bg-gray-100",
                                   "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full"
                                 )}
@@ -334,7 +334,7 @@ export default function ApplicationLayout({
                                   aria-hidden="true"
                                   className={classNames(
                                     currentNavigation?.href === item.href
-                                      ? "text-purple-800"
+                                      ? "text-blue-800"
                                       : "text-gray-400",
                                     "h-6 w-6 shrink-0"
                                   )}
@@ -360,7 +360,7 @@ export default function ApplicationLayout({
                                 href={item.href}
                                 className={classNames(
                                   currentNavigation?.href === item.href
-                                    ? "bg-gray-100 text-purple-800"
+                                    ? "bg-gray-100 text-blue-800"
                                     : "text-gray-700 hover:bg-gray-100",
                                   "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full"
                                 )}
@@ -372,7 +372,7 @@ export default function ApplicationLayout({
                                   aria-hidden="true"
                                   className={classNames(
                                     currentNavigation?.href === item.href
-                                      ? "text-purple-800"
+                                      ? "text-blue-800"
                                       : "text-gray-400",
                                     "h-6 w-6 shrink-0"
                                   )}

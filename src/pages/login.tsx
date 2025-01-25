@@ -132,8 +132,7 @@ export default function LoginPage() {
         <Card className="mx-auto w-[400px] max-w-md rounded-none md:rounded-lg">
           <CardHeader>
             <CardTitle className="text-2xl flex justify-center gap-2 items-center">
-              <span>Login to</span>
-              <div className="px-2 py-1 bg-black text-white rounded-lg">
+              <div className="px-2 py-1 bg-blue-900 text-white rounded-lg">
                 {companyName}
               </div>
             </CardTitle>

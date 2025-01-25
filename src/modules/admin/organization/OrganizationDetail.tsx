@@ -2,6 +2,7 @@ import OrganizationBalance from "./balance/OrganizationBalance";
 import OrganizationInfo from "./info/OrganizationInfo";
 import OrganizationPaymentMethodSetting from "./paymentMethod/OrganizationPaymentMethodSetting";
 import { OrganizationSettings } from "./settings/OrganizationSettings";
+import { OrganizationType } from "@/lib/types/organization";
 import { useOrganizationInfo } from "@/lib/hooks/swr/organization";
 
 export function OrganizationDetail({
@@ -24,7 +25,9 @@ export function OrganizationDetail({
       <OrganizationInfo organizationId={organizationId} />
       <OrganizationBalance organizationId={organizationId} />
       <OrganizationPaymentMethodSetting organizationId={organizationId} />
-      <OrganizationSettings organizationId={organizationId} />
+      {organization.type !== OrganizationType.AGENT && (
+        <OrganizationSettings organizationId={organizationId} />
+      )}
     </div>
   );
 }
