@@ -21,7 +21,7 @@ const tabDisplayNames = {
   [Tab.ManualWithdrawal]: "手動提款",
   [Tab.FreezeTransaction]: "凍結款項",
   [Tab.UnfreezeTransaction]: "解凍款項",
-  [Tab.CreateApiDepositTransaction]: "建立代收訂單",
+  [Tab.CreateApiDepositTransaction]: "提交代收訂單",
 };
 
 export function ManualActionView() {

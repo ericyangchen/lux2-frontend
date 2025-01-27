@@ -1,15 +1,15 @@
 import { Dialog, DialogContent } from "@/components/shadcn/ui/dialog";
 import {
-  ResendWithdrawalTransactionsRequestBody,
-  resendWithdrawalTransactionsApi,
+  HandleStuckTransactionsRequestBody,
+  handleStuckTransactionsApi,
 } from "@/lib/apis/transactions";
+import { PaymentChannel, Transaction } from "@/lib/types/transaction";
 import { useMemo, useState } from "react";
 
 import { ApplicationError } from "@/lib/types/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
-import { Transaction } from "@/lib/types/transaction";
 import { getApplicationCookies } from "@/lib/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
@@ -52,7 +52,7 @@ export function BatchModifyTransactionsDialog({
   const [isLoading, setIsLoading] = useState(false);
 
   // paymentChannel
-  const [paymentChannel, setPaymentChannel] = useState("");
+  const [paymentChannel, setPaymentChannel] = useState<PaymentChannel>();
   const canBatchUpdatePaymentChannel = useMemo(
     () =>
       checkIfAllTransactionsHaveSamePaymentChannel(
@@ -75,10 +75,11 @@ export function BatchModifyTransactionsDialog({
     try {
       setIsLoading(true);
 
-      const response = await resendWithdrawalTransactionsApi({
+      const response = await handleStuckTransactionsApi({
         body: {
-          transactionIds: selectedTransactionIds,
-        } as ResendWithdrawalTransactionsRequestBody,
+          ids: selectedTransactionIds,
+          newPaymentChannel: paymentChannel,
+        } as HandleStuckTransactionsRequestBody,
         accessToken,
       });
       const data = await response.json();

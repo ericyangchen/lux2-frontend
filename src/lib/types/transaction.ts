@@ -24,7 +24,6 @@ export interface Transaction {
   deletedAt?: string;
   // nullable params
   bankName?: string;
-  bankBranch?: string;
   bankAccountName?: string;
   senderName?: string;
   receiverName?: string;
@@ -72,19 +71,23 @@ export enum TransactionType {
 }
 
 export enum PaymentMethod {
-  THAILAND_SCAN_CODE = "THAILAND_SCAN_CODE",
+  NATIVE_GCASH = "NATIVE_GCASH",
+  QRPH = "QRPH",
 }
 
 export enum PaymentChannel {
-  JD_THAILAND_SCAN_CODE = "JD_THAILAND_SCAN_CODE",
+  // NATIVE_GCASH
+  NATIVE_GCASH_MIKE = "NATIVE_GCASH_MIKE",
+  // QRPH
+  QRPH_MIKE = "QRPH_MIKE",
 }
 
 export enum TransactionStatus {
   NOT_STARTED = "NOT_STARTED",
   PENDING = "PENDING",
-  REQUIRE_ACTION = "REQUIRE_ACTION",
   SUCCESS = "SUCCESS",
   FAILED = "FAILED",
+  FAILED_REFUNDED = "FAILED_REFUNDED", // for withdrawal refunds
 }
 
 export enum TransactionDetailedStatus {
@@ -94,29 +97,25 @@ export enum TransactionDetailedStatus {
   // DEPOSIT status: PENDING
   DEPOSIT_CREATED = "DEPOSIT_CREATED",
   DEPOSIT_UPSTREAM_CREATED = "DEPOSIT_UPSTREAM_CREATED",
-  DEPOSIT_UPSTREAM_NOTIFY_PROCESSING = "DEPOSIT_UPSTREAM_NOTIFY_PROCESSING",
-  // DEPOSIT status: PENDING, need processing
-  DEPOSIT_UPSTREAM_NOTIFY_COMPLETED_AMOUNT_MISMATCH = "DEPOSIT_UPSTREAM_NOTIFY_COMPLETED_AMOUNT_MISMATCH",
   // DEPOSIT status: SUCCESS
   DEPOSIT_UPSTREAM_NOTIFY_SUCCESS = "DEPOSIT_UPSTREAM_NOTIFY_SUCCESS",
   // DEPOSIT status: FAILED
   DEPOSIT_UPSTREAM_REQUEST_ERROR = "DEPOSIT_UPSTREAM_REQUEST_ERROR",
   DEPOSIT_UPSTREAM_CREATION_ERROR = "DEPOSIT_UPSTREAM_CREATION_ERROR",
-  DEPOSIT_UPSTREAM_NOTIFY_FAILED = "DEPOSIT_UPSTREAM_NOTIFY_FAILED",
 
   // WITHDRAWAL status: PENDING
   WITHDRAWAL_CREATED = "WITHDRAWAL_CREATED",
-  WITHDRAWAL_UPSTREAM_CREATED = "WITHDRAWAL_UPSTREAM_CREATED",
-  WITHDRAWAL_UPSTREAM_NOTIFY_PROCESSING = "WITHDRAWAL_UPSTREAM_NOTIFY_PROCESSING",
+  WITHDRAWAL_UPSTREAM_PROCESSING = "WITHDRAWAL_UPSTREAM_PROCESSING",
   // WITHDRAWAL status: PENDING, need processing
-  WITHDRAWAL_UPSTREAM_INSUFFICIENT_BALANCE = "WITHDRAWAL_UPSTREAM_INSUFFICIENT_BALANCE",
+  WITHDRAWAL_UPSTREAM_INSUFFICIENT_BALANCE_ERROR = "WITHDRAWAL_UPSTREAM_INSUFFICIENT_BALANCE_ERROR",
   WITHDRAWAL_UPSTREAM_REQUEST_ERROR = "WITHDRAWAL_UPSTREAM_REQUEST_ERROR",
-  WITHDRAWAL_UPSTREAM_CREATION_ERROR = "WITHDRAWAL_UPSTREAM_CREATION_ERROR",
   WITHDRAWAL_UPSTREAM_NOTIFY_ERROR = "WITHDRAWAL_UPSTREAM_NOTIFY_ERROR",
   // WITHDRAWAL status: SUCCESS
   WITHDRAWAL_UPSTREAM_NOTIFY_SUCCESS = "WITHDRAWAL_UPSTREAM_NOTIFY_SUCCESS",
 
   // WITHDRAWAL status: FAILED
+  WITHDRAWAL_UPSTREAM_CREATION_ERROR = "WITHDRAWAL_UPSTREAM_CREATION_ERROR",
+  WITHDRAWAL_UPSTREAM_FAILED_REFUNDED = "WITHDRAWAL_UPSTREAM_FAILED_REFUNDED",
 }
 
 export const TransactionDetailedStatusDisplayNames = {
@@ -124,49 +123,45 @@ export const TransactionDetailedStatusDisplayNames = {
   [TransactionDetailedStatus.UNKNOWN]: "未知",
 
   // DEPOSIT status: PENDING
-  [TransactionDetailedStatus.DEPOSIT_CREATED]: "代收創建成功",
-  [TransactionDetailedStatus.DEPOSIT_UPSTREAM_CREATED]: "上游代收創建成功",
-  [TransactionDetailedStatus.DEPOSIT_UPSTREAM_NOTIFY_PROCESSING]:
-    "上游代收通知處理中",
-  // DEPOSIT status: PENDING, need processing
-  [TransactionDetailedStatus.DEPOSIT_UPSTREAM_NOTIFY_COMPLETED_AMOUNT_MISMATCH]:
-    "上游代收金額不符",
+  [TransactionDetailedStatus.DEPOSIT_CREATED]: "代收-創建成功",
+  [TransactionDetailedStatus.DEPOSIT_UPSTREAM_CREATED]: "代收-上游創建成功",
+
   // DEPOSIT status: SUCCESS
-  [TransactionDetailedStatus.DEPOSIT_UPSTREAM_NOTIFY_SUCCESS]: "上游代收成功",
+  [TransactionDetailedStatus.DEPOSIT_UPSTREAM_NOTIFY_SUCCESS]:
+    "代收-上游通知成功",
+
   // DEPOSIT status: FAILED
   [TransactionDetailedStatus.DEPOSIT_UPSTREAM_REQUEST_ERROR]:
-    "上游代收請求錯誤",
+    "代收-上游請求錯誤",
   [TransactionDetailedStatus.DEPOSIT_UPSTREAM_CREATION_ERROR]:
-    "上游代收創建失敗",
-  [TransactionDetailedStatus.DEPOSIT_UPSTREAM_NOTIFY_FAILED]: "上游代收失敗",
+    "代收-上游創建失敗",
 
   // WITHDRAWAL status: PENDING
-  [TransactionDetailedStatus.WITHDRAWAL_CREATED]: "代付創建成功",
-  [TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_CREATED]: "上游代付創建成功",
-  [TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_NOTIFY_PROCESSING]:
-    "上游代付通知處理中",
+  [TransactionDetailedStatus.WITHDRAWAL_CREATED]: "代付-創建成功",
+  [TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_PROCESSING]: "代付-上游處理中",
+
   // WITHDRAWAL status: PENDING, need processing
-  [TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_INSUFFICIENT_BALANCE]:
-    "上游代付餘額不足",
+  [TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_INSUFFICIENT_BALANCE_ERROR]:
+    "代付-上游餘額不足",
   [TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_REQUEST_ERROR]:
-    "上游代付請求錯誤",
-  [TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_CREATION_ERROR]:
-    "上游代付創建失敗",
-  [TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_NOTIFY_ERROR]: "上游代付失敗",
+    "代付-上游請求錯誤",
+  [TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_NOTIFY_ERROR]:
+    "代付-上游通知失敗",
+
   // WITHDRAWAL status: SUCCESS
   [TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_NOTIFY_SUCCESS]:
-    "上游代付成功",
+    "代付-上游通知成功",
 
   // WITHDRAWAL status: FAILED
+  [TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_CREATION_ERROR]:
+    "代付-上游創建失敗",
+  [TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_FAILED_REFUNDED]:
+    "代付-上游通知沖回",
 };
 export const TransactionDetailedStatusRequireProcessing = [
-  // DEPOSIT status: PENDING, need processing
-  TransactionDetailedStatus.DEPOSIT_UPSTREAM_NOTIFY_COMPLETED_AMOUNT_MISMATCH,
-
   // WITHDRAWAL status: PENDING, need processing
-  TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_INSUFFICIENT_BALANCE,
+  TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_INSUFFICIENT_BALANCE_ERROR,
   TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_REQUEST_ERROR,
-  TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_CREATION_ERROR,
   TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_NOTIFY_ERROR,
 ];
 
@@ -184,22 +179,25 @@ export const TransactionTypeDisplayNames = {
 };
 
 export const PaymentChannelCategories = {
-  [PaymentMethod.THAILAND_SCAN_CODE]: [PaymentChannel.JD_THAILAND_SCAN_CODE],
+  [PaymentMethod.NATIVE_GCASH]: [PaymentChannel.NATIVE_GCASH_MIKE],
+  [PaymentMethod.QRPH]: [PaymentChannel.QRPH_MIKE],
 };
 
 export const PaymentMethodDisplayNames = {
-  [PaymentMethod.THAILAND_SCAN_CODE]: "泰國掃碼",
+  [PaymentMethod.NATIVE_GCASH]: "Gcash直連",
+  [PaymentMethod.QRPH]: "QRPH",
 };
 export const PaymentChannelDisplayNames = {
-  [PaymentChannel.JD_THAILAND_SCAN_CODE]: "JD泰國掃碼",
+  [PaymentChannel.NATIVE_GCASH_MIKE]: "Gcash直連-Mike",
+  [PaymentChannel.QRPH_MIKE]: "QRPH-Mike",
 };
 
 export const TransactionStatusDisplayNames = {
   [TransactionStatus.NOT_STARTED]: "未開始",
   [TransactionStatus.PENDING]: "處理中",
-  [TransactionStatus.REQUIRE_ACTION]: "需人工處理",
   [TransactionStatus.SUCCESS]: "成功",
   [TransactionStatus.FAILED]: "失敗",
+  [TransactionStatus.FAILED_REFUNDED]: "失敗(沖回)",
 };
 
 export interface SystemDailyTransactionCount {
@@ -208,6 +206,7 @@ export interface SystemDailyTransactionCount {
   dailyDepositFailedTotal: string;
   dailyWithdrawalSuccessTotal: string;
   dailyWithdrawalFailedTotal: string;
+  dailyWithdrawalFailedRefundedTotal: string;
 }
 
 export interface DailyTransactionCountByOrganizationId {
@@ -216,4 +215,5 @@ export interface DailyTransactionCountByOrganizationId {
   dailyDepositFailedTotal: string;
   dailyWithdrawalSuccessTotal: string;
   dailyWithdrawalFailedTotal: string;
+  dailyWithdrawalFailedRefundedTotal: string;
 }

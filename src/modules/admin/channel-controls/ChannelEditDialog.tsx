@@ -251,13 +251,13 @@ export function ChannelEditDialog({
           <div className="flex items-center gap-4">
             <Label className="whitespace-nowrap w-[70px]">手續費率</Label>
             <div className="flex items-center gap-2 w-fit">
-              <Input
+              {/* <Input
                 id="percentageFee"
                 className="max-w-[100px]"
                 value={percentageFee}
                 onChange={handleDecimalChange}
               />
-              <div>=</div>
+              <div>=</div> */}
               <Input
                 id="percentageFeeInPercentage"
                 className="max-w-[80px]"

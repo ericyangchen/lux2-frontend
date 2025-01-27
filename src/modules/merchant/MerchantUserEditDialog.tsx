@@ -26,7 +26,7 @@ import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 import { useUsersByOrganizationId } from "@/lib/hooks/swr/user";
 
-export function UserEditDialog({
+export function MerchantUserEditDialog({
   isOpen,
   closeDialog,
   user,

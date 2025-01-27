@@ -28,8 +28,8 @@ import {
   convertToStartOfDay,
 } from "@/lib/timezone";
 import {
+  getStuckTransactionsApi,
   getTransactionByIdApi,
-  getTransactionsApi,
 } from "@/lib/apis/transactions";
 import { useEffect, useState } from "react";
 
@@ -37,7 +37,6 @@ import { ApiTransactionInfoDialog } from "../common/ApiTransactionInfoDialog";
 import { ApplicationError } from "@/lib/types/applicationError";
 import { BatchModifyTransactionsDialog } from "./BatchModifyTransactionsDialog";
 import { Button } from "@/components/shadcn/ui/button";
-import { Calendar } from "@/components/shadcn/ui/calendar";
 import { DatePicker } from "@/components/DatePicker";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
@@ -54,7 +53,6 @@ import { useRouter } from "next/router";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
 const QueryTypes = {
-  SEARCH_BY_TRANSACTION_ID: "searchByTransactionId",
   SEARCH_BY_MULTIPLE_CONDITIONS: "searchByMultipleConditions",
 };
 
@@ -72,11 +70,6 @@ export function BatchProcessingView() {
   });
   const organizations = flattenOrganizations(organization);
 
-  // 1. search by transactionId
-  const [transactionId, setTransactionId] = useState<string>(
-    (router.query.transactionId as string) || ""
-  );
-
   // 2. search by multiple conditions
   const [transactionType, setTransactionType] = useState<
     TransactionType | "all"
@@ -89,12 +82,9 @@ export function BatchProcessingView() {
   );
   const [merchantId, setMerchantId] = useState<string>();
   const [merchantOrderId, setMerchantOrderId] = useState<string>("");
-  const [transactionStatus, setTransactionStatus] = useState<
-    TransactionStatus | "all"
-  >(TransactionStatus.PENDING);
   const [transactionDetailedStatus, setTransactionDetailedStatus] = useState<
     TransactionDetailedStatus | "all"
-  >(TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_INSUFFICIENT_BALANCE);
+  >(TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_INSUFFICIENT_BALANCE_ERROR);
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
 
@@ -125,81 +115,56 @@ export function BatchProcessingView() {
       setLoadingMore(true);
     }
 
-    const searchById = !!transactionId;
-
     try {
-      // 1. search by transactionId
-      if (searchById) {
-        const response = await getTransactionByIdApi({
-          transactionId,
-          accessToken,
-        });
-        const data = await response.json();
-
-        if (response.ok) {
-          setTransactions([data?.transaction]);
-          setCurrentQueryType(QueryTypes.SEARCH_BY_TRANSACTION_ID);
-        } else {
-          throw new ApplicationError(data);
-        }
-      } else {
-        // 3. search by multiple conditions
-        const transactionTypeQuery =
-          transactionType && transactionType !== "all"
-            ? transactionType
-            : undefined;
-        const paymentMethodQuery =
-          paymentMethod && paymentMethod !== "all" ? paymentMethod : undefined;
-        const paymentChannelQuery =
-          paymentChannel && paymentChannel !== "all"
-            ? paymentChannel
-            : undefined;
-        const transactionStatusQuery =
-          transactionStatus && transactionStatus !== "all"
-            ? transactionStatus
-            : undefined;
-        const transactionDetailedStatusQuery =
-          transactionDetailedStatus && transactionDetailedStatus !== "all"
-            ? transactionDetailedStatus
-            : undefined;
-        const startDateQuery = startDate
-          ? convertToStartOfDay(startDate)
+      // 3. search by multiple conditions
+      const transactionTypeQuery =
+        transactionType && transactionType !== "all"
+          ? transactionType
           : undefined;
-        const endDateQuery = endDate ? convertToEndOfDay(endDate) : undefined;
+      const paymentMethodQuery =
+        paymentMethod && paymentMethod !== "all" ? paymentMethod : undefined;
+      const paymentChannelQuery =
+        paymentChannel && paymentChannel !== "all" ? paymentChannel : undefined;
+      const transactionDetailedStatusQuery =
+        transactionDetailedStatus && transactionDetailedStatus !== "all"
+          ? transactionDetailedStatus
+          : undefined;
+      const startDateQuery = startDate
+        ? convertToStartOfDay(startDate)
+        : undefined;
+      const endDateQuery = endDate ? convertToEndOfDay(endDate) : undefined;
 
-        const query = {
-          type: transactionTypeQuery,
-          merchantId,
-          merchantOrderId,
-          paymentMethod: paymentMethodQuery,
-          paymentChannel: paymentChannelQuery,
-          status: transactionStatusQuery,
-          detailedStatus: transactionDetailedStatusQuery,
-          createdAtStart: startDateQuery,
-          createdAtEnd: endDateQuery,
-        };
+      const query = {
+        type: transactionTypeQuery,
+        merchantId,
+        merchantOrderId,
+        paymentMethod: paymentMethodQuery,
+        paymentChannel: paymentChannelQuery,
+        detailedStatus: transactionDetailedStatusQuery,
+        createdAtStart: startDateQuery,
+        createdAtEnd: endDateQuery,
+      };
 
-        const cursor = isLoadMore && !!nextCursor ? nextCursor : undefined;
+      const cursor = isLoadMore && !!nextCursor ? nextCursor : undefined;
 
-        const response = await getTransactionsApi({
-          query,
-          cursor,
-          accessToken,
-        });
-        const data = await response.json();
+      const response = await getStuckTransactionsApi({
+        query,
+        cursor,
+        accessToken,
+      });
+      const data = await response.json();
 
-        if (response.ok) {
-          setTransactions((prev) =>
-            isLoadMore
-              ? [...(prev || []), ...(data?.transactions || [])]
-              : data?.transactions
-          );
-          setNextCursor(data?.nextCursor);
+      if (response.ok) {
+        setTransactions((prev) =>
+          isLoadMore
+            ? [...(prev || []), ...(data?.transactions || [])]
+            : data?.transactions
+        );
+        setNextCursor(data?.nextCursor);
 
-          setCurrentQueryType(QueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS);
-        } else {
-          throw new ApplicationError(data);
-        }
+        setCurrentQueryType(QueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS);
+      } else {
+        throw new ApplicationError(data);
       }
     } catch (error) {
       if (error instanceof ApplicationError) {
@@ -222,26 +187,20 @@ export function BatchProcessingView() {
     setLoadingMore(false);
   };
 
-  const clearSearchByTransactionId = () => {
-    setTransactionId("");
-  };
-
   const clearSearchByMultipleConditions = () => {
     setTransactionType(TransactionType.WITHDRAWAL);
     setPaymentMethod("all");
     setPaymentChannel("all");
     setMerchantId("");
     setMerchantOrderId("");
-    setTransactionStatus(TransactionStatus.PENDING);
     setTransactionDetailedStatus(
-      TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_INSUFFICIENT_BALANCE
+      TransactionDetailedStatus.WITHDRAWAL_UPSTREAM_INSUFFICIENT_BALANCE_ERROR
     );
     setStartDate(undefined);
     setEndDate(undefined);
   };
 
   const handleClearAll = () => {
-    clearSearchByTransactionId();
     clearSearchByMultipleConditions();
     setTransactions(undefined);
     setCurrentQueryType(undefined);
@@ -251,10 +210,7 @@ export function BatchProcessingView() {
   useEffect(() => {
     if (!currentQueryType) return;
 
-    if (currentQueryType === QueryTypes.SEARCH_BY_TRANSACTION_ID) {
-      clearSearchByMultipleConditions();
-    } else {
-      clearSearchByTransactionId();
+    if (currentQueryType === QueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS) {
     }
   }, [currentQueryType]);
 
@@ -304,25 +260,6 @@ export function BatchProcessingView() {
     >
       {/* search bar */}
       <div className="flex flex-col divide-y pb-8">
-        {/* search by transactionId */}
-        <div className="pb-4 flex flex-col gap-4">
-          <Label className="whitespace-nowrap font-bold text-md">
-            單筆查詢: 系統自動訂單號
-          </Label>
-          {/* transactionId */}
-          <div className="flex items-center gap-4 w-full lg:w-fit px-4">
-            <Label className="whitespace-nowrap">
-              系統自動訂單號(TX)<span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="transactionId"
-              className="w-full sm:min-w-[220px] font-mono"
-              value={transactionId}
-              onChange={(e) => setTransactionId(e.target.value)}
-            />
-          </div>
-        </div>
-
         {/* search by multiple conditions */}
         <div className="pt-4 flex flex-col gap-4">
           <Label className="whitespace-nowrap font-bold text-md">
@@ -436,33 +373,6 @@ export function BatchProcessingView() {
                 onChange={(e) => setMerchantOrderId(e.target.value)}
               />
             </div>
-            {/* status */}
-            <div className="flex items-center gap-4">
-              <Label className="whitespace-nowrap">狀態</Label>
-              <div className="w-fit min-w-[150px]">
-                <Select
-                  defaultValue={transactionStatus}
-                  value={transactionStatus}
-                  onValueChange={(value) => {
-                    setTransactionStatus(value as TransactionStatus);
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value={"all"} className="h-8"></SelectItem>
-                      {Object.values(TransactionStatus).map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {TransactionStatusDisplayNames[status]}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
             {/* detailedStatus */}
             <div className="flex items-center gap-4">
               <Label className="whitespace-nowrap">詳細狀態</Label>
@@ -574,9 +484,9 @@ export function BatchProcessingView() {
           >
             <div className="pb-2 flex items-center justify-between">
               <Label className="whitespace-nowrap font-bold text-md">
-                {currentQueryType === QueryTypes.SEARCH_BY_TRANSACTION_ID
-                  ? "單筆查詢結果: 系統自動訂單號"
-                  : "多筆查詢結果"}
+                {currentQueryType === QueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS
+                  ? "多筆查詢結果"
+                  : ""}
               </Label>
 
               <div>

@@ -133,18 +133,72 @@ export const generalAgentCreateApiDepositTransactionApi = async ({
   });
 };
 
-export interface ResendWithdrawalTransactionsRequestBody {
-  transactionIds: string[];
+export interface GetStuckTransactionsApiQuery {
+  type?: TransactionType;
+  merchantId?: string;
+  merchantOrderId?: string;
+  paymentMethod?: PaymentMethod;
+  paymentChannel?: PaymentChannel;
+  detailedStatus?: TransactionDetailedStatus;
+  createdAtStart?: string;
+  createdAtEnd?: string;
 }
 
-export const resendWithdrawalTransactionsApi = async ({
+export const getStuckTransactionsApi = async ({
+  query,
+  cursor,
+  limit = 30,
+  accessToken,
+}: {
+  query: GetStuckTransactionsApiQuery;
+  cursor?: string;
+  limit?: number;
+  accessToken: string;
+}) => {
+  const urlSearchParams = new URLSearchParams();
+  if (query.type) urlSearchParams.append("type", query.type);
+  if (query.paymentMethod)
+    urlSearchParams.append("paymentMethod", query.paymentMethod);
+  if (query.paymentChannel)
+    urlSearchParams.append("paymentChannel", query.paymentChannel);
+  if (query.merchantId) urlSearchParams.append("merchantId", query.merchantId);
+  if (query.merchantOrderId)
+    urlSearchParams.append("merchantOrderId", query.merchantOrderId);
+  if (query.detailedStatus)
+    urlSearchParams.append("detailedStatus", query.detailedStatus);
+  if (query.createdAtStart)
+    urlSearchParams.append("createdAtStart", query.createdAtStart);
+  if (query.createdAtEnd)
+    urlSearchParams.append("createdAtEnd", query.createdAtEnd);
+  if (cursor) urlSearchParams.append("cursor", cursor);
+  if (limit) urlSearchParams.append("limit", limit.toString());
+
+  const url = `${
+    process.env.NEXT_PUBLIC_BACKEND_URL
+  }/transactions/stuck-transactions?${urlSearchParams.toString()}`;
+
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+};
+
+export interface HandleStuckTransactionsRequestBody {
+  ids: string[];
+  newPaymentChannel: PaymentChannel;
+}
+
+export const handleStuckTransactionsApi = async ({
   body,
   accessToken,
 }: {
-  body: ResendWithdrawalTransactionsRequestBody;
+  body: HandleStuckTransactionsRequestBody;
   accessToken: string;
 }) => {
-  const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/transactions/withdrawal-resend`;
+  const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/transactions/stuck-transactions`;
 
   return fetch(url, {
     method: "POST",

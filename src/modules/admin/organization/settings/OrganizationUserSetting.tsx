@@ -122,7 +122,7 @@ export function OrganizationUserSetting({
                     scope="col"
                     className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    Email
+                    帳號
                   </th>
                   <th
                     scope="col"
@@ -237,7 +237,7 @@ export function OrganizationUserSetting({
                     scope="col"
                     className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    Email
+                    帳號
                   </th>
                   <th
                     scope="col"

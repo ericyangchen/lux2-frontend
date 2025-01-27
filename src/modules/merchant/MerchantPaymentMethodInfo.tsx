@@ -211,7 +211,7 @@ export default function MerchantPaymentMethodInfo({
                 ) : (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={9}
                       className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center"
                     >
                       沒有餘額資料
