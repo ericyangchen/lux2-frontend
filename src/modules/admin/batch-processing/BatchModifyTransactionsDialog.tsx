@@ -3,7 +3,19 @@ import {
   HandleStuckTransactionsRequestBody,
   handleStuckTransactionsApi,
 } from "@/lib/apis/transactions";
-import { PaymentChannel, Transaction } from "@/lib/types/transaction";
+import {
+  PaymentChannel,
+  PaymentChannelDisplayNames,
+  Transaction,
+} from "@/lib/types/transaction";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shadcn/ui/select";
 import { useMemo, useState } from "react";
 
 import { ApplicationError } from "@/lib/types/applicationError";
@@ -13,24 +25,24 @@ import { Label } from "@/components/shadcn/ui/label";
 import { getApplicationCookies } from "@/lib/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
-const checkIfAllTransactionsHaveSamePaymentChannel = (
-  transactions: Transaction[],
-  selectedTransactionIds: string[]
-) => {
-  if (!transactions) return false;
+// const checkIfAllTransactionsHaveSamePaymentChannel = (
+//   transactions: Transaction[],
+//   selectedTransactionIds: string[]
+// ) => {
+//   if (!transactions) return false;
 
-  const selectedTransactions = transactions.filter((transaction) =>
-    selectedTransactionIds.includes(transaction.id)
-  );
+//   const selectedTransactions = transactions.filter((transaction) =>
+//     selectedTransactionIds.includes(transaction.id)
+//   );
 
-  const paymentChannels = selectedTransactions.map(
-    (transaction) => transaction.paymentChannel
-  );
+//   const paymentChannels = selectedTransactions.map(
+//     (transaction) => transaction.paymentChannel
+//   );
 
-  return paymentChannels.every(
-    (paymentChannel) => paymentChannel === paymentChannels[0]
-  );
-};
+//   return paymentChannels.every(
+//     (paymentChannel) => paymentChannel === paymentChannels[0]
+//   );
+// };
 
 export function BatchModifyTransactionsDialog({
   isOpen,
@@ -52,15 +64,9 @@ export function BatchModifyTransactionsDialog({
   const [isLoading, setIsLoading] = useState(false);
 
   // paymentChannel
-  const [paymentChannel, setPaymentChannel] = useState<PaymentChannel>();
-  const canBatchUpdatePaymentChannel = useMemo(
-    () =>
-      checkIfAllTransactionsHaveSamePaymentChannel(
-        transactions,
-        selectedTransactionIds
-      ),
-    [transactions, selectedTransactionIds]
-  );
+  const [paymentChannel, setPaymentChannel] = useState<
+    PaymentChannel | "all"
+  >();
 
   // note
   const [note, setNote] = useState("");
@@ -75,10 +81,15 @@ export function BatchModifyTransactionsDialog({
     try {
       setIsLoading(true);
 
+      const newPaymentChannel =
+        !paymentChannel || paymentChannel === "all"
+          ? undefined
+          : paymentChannel;
+
       const response = await handleStuckTransactionsApi({
         body: {
           ids: selectedTransactionIds,
-          newPaymentChannel: paymentChannel,
+          newPaymentChannel,
         } as HandleStuckTransactionsRequestBody,
         accessToken,
       });
@@ -132,7 +143,54 @@ export function BatchModifyTransactionsDialog({
                   onClick={handleBatchResend}
                   disabled={isLoading}
                 >
-                  批量重送訂單
+                  批量重送
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label className="whitespace-nowrap font-bold text-md mt-8">
+              更換渠道並重送訂單
+            </Label>
+            {/* paymentChannel */}
+            <div className="flex items-center gap-4">
+              <Label className="whitespace-nowrap">渠道</Label>
+              <div className="w-fit min-w-[150px]">
+                <Select
+                  defaultValue={paymentChannel}
+                  value={paymentChannel}
+                  onValueChange={(value) =>
+                    setPaymentChannel(value as PaymentChannel)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value={"all"} className="h-8"></SelectItem>
+                      {Object.values(PaymentChannel)?.map((paymentChannel) => (
+                        <SelectItem key={paymentChannel} value={paymentChannel}>
+                          {PaymentChannelDisplayNames[paymentChannel]}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-start gap-2 w-full min-h-6">
+              <div>
+                <Button
+                  variant="destructive"
+                  onClick={handleBatchResend}
+                  disabled={
+                    isLoading || !paymentChannel || paymentChannel === "all"
+                  }
+                >
+                  批量重送
                 </Button>
               </div>
             </div>
