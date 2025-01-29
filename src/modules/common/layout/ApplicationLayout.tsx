@@ -21,6 +21,8 @@ import { clearApplicationCookies, getApplicationCookies } from "@/lib/cookie";
 
 import { Badge } from "@/components/shadcn/ui/badge";
 import Head from "next/head";
+import Image from "next/image";
+import { Label } from "@/components/shadcn/ui/label";
 import Link from "next/link";
 import { OrganizationType } from "@/lib/types/organization";
 import { classNames } from "@/lib/utils";
@@ -63,6 +65,27 @@ const UserInfo = ({ user }: { user?: User }) => {
       >
         <IdentificationIcon className="h-4 w-4 mr-2" />
         <span className="max-w-[216px] truncate">{user.id}</span>
+      </Badge>
+    </div>
+  );
+};
+
+const CustomerServiceSupportInfo = () => {
+  return (
+    <div className="p-2 border rounded-md">
+      <div className="flex flex-wrap gap-2 items-center mb-1">
+        <Label className="text-gray-500 text-sm">客服支援</Label>
+      </div>
+      {/* Telegram link */}
+      <Badge
+        variant="outline"
+        className="bg-none border-none cursor-pointer pl-0 flex gap-1"
+        onClick={() => {
+          window.open("https://t.me/smpay1688869");
+        }}
+      >
+        <Image src="/telegram.png" width={16} height={16} alt="" />
+        <span className="max-w-[216px] truncate">Telegram</span>
       </Badge>
     </div>
   );
@@ -227,6 +250,7 @@ export default function ApplicationLayout({
               登出
             </div>
             <UserInfo user={user} />
+            <CustomerServiceSupportInfo />
           </div>
         </div>
 
@@ -399,6 +423,7 @@ export default function ApplicationLayout({
                     登出
                   </div>
                   <UserInfo user={user} />
+                  <CustomerServiceSupportInfo />
                 </div>
               </div>
             </DialogPanel>
