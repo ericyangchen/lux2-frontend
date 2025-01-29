@@ -77,16 +77,28 @@ const CustomerServiceSupportInfo = () => {
         <Label className="text-gray-500 text-sm">客服支援</Label>
       </div>
       {/* Telegram link */}
-      <Badge
-        variant="outline"
-        className="bg-none border-none cursor-pointer pl-0 flex gap-1"
-        onClick={() => {
-          window.open("https://t.me/smpay1688869");
-        }}
-      >
-        <Image src="/telegram.png" width={16} height={16} alt="" />
-        <span className="max-w-[216px] truncate">Telegram</span>
-      </Badge>
+      <div className="flex flex-wrap gap-2 items-center">
+        <Badge
+          variant="outline"
+          className="bg-none border-none cursor-pointer pl-0 flex gap-1"
+          onClick={() => {
+            window.open("https://t.me/smpay1688869");
+          }}
+        >
+          <Image src="/telegram.png" width={16} height={16} alt="" />
+          <span className="max-w-[216px] truncate">客訴專線 1</span>
+        </Badge>
+        <Badge
+          variant="outline"
+          className="bg-none border-none cursor-pointer pl-0 flex gap-1"
+          onClick={() => {
+            window.open("https://t.me/HSMBOSS");
+          }}
+        >
+          <Image src="/telegram.png" width={16} height={16} alt="" />
+          <span className="max-w-[216px] truncate">客訴專線 2</span>
+        </Badge>
+      </div>
     </div>
   );
 };
