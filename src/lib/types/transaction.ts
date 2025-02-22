@@ -81,12 +81,14 @@ export enum PaymentMethod {
 export enum PaymentChannel {
   // NATIVE_GCASH_DIRECT
   NATIVE_GCASH_DIRECT_MIKE = "NATIVE_GCASH_DIRECT_MIKE",
+  NATIVE_GCASH_DIRECT_YUNA = "NATIVE_GCASH_DIRECT_YUNA",
   // SIMULATED_GCASH_DIRECT
   SIMULATED_GCASH_DIRECT_GOLDPAY = "SIMULATED_GCASH_DIRECT_GOLDPAY",
   // SIMULATED_GCASH_QR
   SIMULATED_GCASH_QR_GOLDPAY = "SIMULATED_GCASH_QR_GOLDPAY",
   // QRPH
   QRPH_MIKE = "QRPH_MIKE",
+  QRPH_YUNA = "QRPH_YUNA",
   // MAYA
   MAYA_GOLDPAY = "MAYA_GOLDPAY",
 }
@@ -190,6 +192,7 @@ export const TransactionTypeDisplayNames = {
 export const PaymentChannelCategories = {
   [PaymentMethod.NATIVE_GCASH_DIRECT]: [
     PaymentChannel.NATIVE_GCASH_DIRECT_MIKE,
+    PaymentChannel.NATIVE_GCASH_DIRECT_YUNA,
   ],
   [PaymentMethod.SIMULATED_GCASH_DIRECT]: [
     PaymentChannel.SIMULATED_GCASH_DIRECT_GOLDPAY,
@@ -197,7 +200,7 @@ export const PaymentChannelCategories = {
   [PaymentMethod.SIMULATED_GCASH_QR_DEPOSIT]: [
     PaymentChannel.SIMULATED_GCASH_QR_GOLDPAY,
   ],
-  [PaymentMethod.QRPH]: [PaymentChannel.QRPH_MIKE],
+  [PaymentMethod.QRPH]: [PaymentChannel.QRPH_MIKE, PaymentChannel.QRPH_YUNA],
   [PaymentMethod.MAYA]: [PaymentChannel.MAYA_GOLDPAY],
 };
 
@@ -210,9 +213,11 @@ export const PaymentMethodDisplayNames = {
 };
 export const PaymentChannelDisplayNames = {
   [PaymentChannel.NATIVE_GCASH_DIRECT_MIKE]: "原生Gcash-直連: Mike",
+  [PaymentChannel.NATIVE_GCASH_DIRECT_YUNA]: "原生Gcash-直連: Yuna",
   [PaymentChannel.SIMULATED_GCASH_DIRECT_GOLDPAY]: "仿原生Gcash-直連: Goldpay",
   [PaymentChannel.SIMULATED_GCASH_QR_GOLDPAY]: "仿原生Gcash-QR代收: Goldpay",
   [PaymentChannel.QRPH_MIKE]: "QRPH: Mike",
+  [PaymentChannel.QRPH_YUNA]: "QRPH: Yuna",
   [PaymentChannel.MAYA_GOLDPAY]: "Maya: Goldpay",
 };
 
