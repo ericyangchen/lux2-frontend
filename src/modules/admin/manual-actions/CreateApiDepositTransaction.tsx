@@ -100,7 +100,7 @@ export default function CreateApiDepositTransaction() {
 
       if (response.ok) {
         toast({
-          title: `建立代收訂單 成功`,
+          title: `提交代收訂單 成功`,
           description: `ID: ${data?.id}`,
           variant: "success",
         });
@@ -113,13 +113,13 @@ export default function CreateApiDepositTransaction() {
     } catch (error) {
       if (error instanceof ApplicationError) {
         toast({
-          title: `${error.statusCode} - 建立代收訂單 失敗`,
+          title: `${error.statusCode} - 提交代收訂單 失敗`,
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: `建立代收訂單 失敗`,
+          title: `提交代收訂單 失敗`,
           description: "Unknown error",
           variant: "destructive",
         });
@@ -140,7 +140,7 @@ export default function CreateApiDepositTransaction() {
     <>
       <div className="sm:p-4 sm:border rounded-md w-full lg:h-[calc(100vh-152px)] lg:overflow-y-scroll">
         <Label className="whitespace-nowrap font-bold text-md">
-          手動建立代收訂單
+          手動提交代收訂單
         </Label>
 
         <div className="flex flex-col gap-4 p-4">
@@ -286,7 +286,7 @@ export default function CreateApiDepositTransaction() {
             onClick={handleCreateApiDepositTransaction}
             disabled={disableButton}
           >
-            {isLoading ? "建立中..." : "建立訂單"}
+            {isLoading ? "提交中..." : "提交訂單"}
           </Button>
         </div>
       </div>
@@ -304,7 +304,7 @@ export default function CreateApiDepositTransaction() {
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>建立代收訂單 成功</DialogTitle>
+              <DialogTitle>提交代收訂單 成功</DialogTitle>
               <DialogDescription className="text-black pt-4">
                 <div>
                   <Label className="whitespace-nowrap font-bold text-md pb-4">

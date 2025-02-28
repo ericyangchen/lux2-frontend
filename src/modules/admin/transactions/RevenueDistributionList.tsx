@@ -250,7 +250,7 @@ export function RevenueDistributionList() {
                       通道
                     </th>
                     <th className="px-3 py-2 text-center text-sm font-semibold text-gray-900">
-                      關聯系統自動訂單號
+                      系統自動訂單號
                     </th>
                     <th className="px-3 py-2 text-center text-sm font-semibold text-gray-900">
                       分潤金額
@@ -287,11 +287,11 @@ export function RevenueDistributionList() {
                           copyToClipboard({
                             toast,
                             copyingText: revenue.transactionId,
-                            title: "已複製關聯系統自動訂單號",
+                            title: "已複製系統自動訂單號",
                           })
                         }
                       >
-                        {revenue.id}
+                        {revenue.transactionId}
                       </td>
                       <td className="px-1 py-2 text-center">
                         {formatNumberWithoutMinFraction(revenue.revenue)}

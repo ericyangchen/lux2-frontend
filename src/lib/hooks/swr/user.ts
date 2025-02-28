@@ -83,7 +83,7 @@ const fetchUsersByOrganizationId = async ({
 export const useUsersByOrganizationId = ({
   organizationId,
 }: {
-  organizationId: string;
+  organizationId?: string;
 }) => {
   const { accessToken } = getApplicationCookies();
 

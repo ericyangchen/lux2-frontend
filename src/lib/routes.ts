@@ -27,6 +27,11 @@ export const merchantNavigation = [
     icon: DocumentMagnifyingGlassIcon,
   },
   // {
+  //   name: "手動提單",
+  //   href: "/merchant/manual-actions",
+  //   icon: HandRaisedIcon,
+  // },
+  // {
   //   name: "歷史紀錄",
   //   href: "/merchant/history",
   //   icon: DocumentChartBarIcon,
