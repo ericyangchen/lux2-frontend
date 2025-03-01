@@ -1,6 +1,7 @@
 import {
   BuildingOffice2Icon,
   ChartBarSquareIcon,
+  CurrencyDollarIcon,
   DocumentDuplicateIcon,
   DocumentMagnifyingGlassIcon,
   HandRaisedIcon,
@@ -49,11 +50,11 @@ export const adminNavigation = [
     href: "/admin/organizations",
     icon: BuildingOffice2Icon,
   },
-  // {
-  //   name: "渠道管理",
-  //   href: "/admin/channel-controls",
-  //   icon: CurrencyDollarIcon,
-  // },
+  {
+    name: "上游渠道",
+    href: "/admin/channel-controls",
+    icon: CurrencyDollarIcon,
+  },
   {
     name: "訂單查詢",
     href: "/admin/transactions",

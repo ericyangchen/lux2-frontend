@@ -329,7 +329,7 @@ export function BatchProcessingView() {
             </div>
             {/* paymentChannel */}
             <div className="flex items-center gap-4">
-              <Label className="whitespace-nowrap">渠道</Label>
+              <Label className="whitespace-nowrap">上游渠道</Label>
               <div className="w-fit min-w-[150px]">
                 <Select
                   defaultValue={paymentChannel}
@@ -521,10 +521,10 @@ export function BatchProcessingView() {
                     </th>
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
                       <span className="font-bold">通道</span>
-                      <span className="font-light"> / 渠道</span>
+                      <span className="font-light"> / 上游渠道</span>
                     </th>
                     {/* <th className="px-3 py-2 text-center text-sm font-semibold text-gray-900">
-                      渠道
+                      上游渠道
                     </th> */}
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
                       單位

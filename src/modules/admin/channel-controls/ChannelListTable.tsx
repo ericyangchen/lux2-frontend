@@ -30,7 +30,7 @@ export default function ChannelListTable() {
   return (
     <div className="py-2 pb-4">
       <div className="flex justify-between items-center h-7">
-        <Label className="text-md font-semibold px-2">總代理渠道</Label>
+        <Label className="text-md font-semibold px-2">總代理上游渠道</Label>
         <button
           className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 rounded-md transition-colors duration-200"
           // onClick={() => setIsAddDialogOpen(true)}
@@ -52,7 +52,7 @@ export default function ChannelListTable() {
                 scope="col"
                 className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
               >
-                渠道
+                上游渠道
               </th>
               <th
                 scope="col"
@@ -192,7 +192,7 @@ export default function ChannelListTable() {
                   colSpan={6}
                   className="px-4 py-4 text-sm text-gray-500 text-center"
                 >
-                  沒有渠道
+                  沒有上游渠道
                 </td>
               </tr>
             )}

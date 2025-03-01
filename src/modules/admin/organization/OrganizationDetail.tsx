@@ -24,7 +24,9 @@ export function OrganizationDetail({
     <div className="border rounded-lg p-4 divide-y min-h-fit xl:h-[calc(100vh-84px)] xl:overflow-y-scroll">
       <OrganizationInfo organizationId={organizationId} />
       <OrganizationBalance organizationId={organizationId} />
-      <OrganizationPaymentMethodSetting organizationId={organizationId} />
+      {organization.type !== OrganizationType.GENERAL_AGENT && (
+        <OrganizationPaymentMethodSetting organizationId={organizationId} />
+      )}
       {organization.type !== OrganizationType.AGENT && (
         <OrganizationSettings organizationId={organizationId} />
       )}

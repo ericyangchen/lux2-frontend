@@ -263,7 +263,7 @@ export function OrganizationPaymentMethodAddDialog({
         </div>
         <div className="py-4 flex flex-col">
           <Label className="whitespace-nowrap w-[70px] pb-3">
-            {type && TransactionTypeDisplayNames[type]}渠道設定
+            {type && TransactionTypeDisplayNames[type]}上游渠道設定
           </Label>
 
           {paymentMethod && (
@@ -272,7 +272,7 @@ export function OrganizationPaymentMethodAddDialog({
                 <thead className="whitespace-nowrap w-full">
                   <tr>
                     <th className="max-w-[70px] px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                      渠道
+                      上游渠道
                     </th>
                     <th className="px-3 py-2 text-center text-sm font-semibold text-gray-900">
                       最小金額
@@ -431,7 +431,7 @@ export function OrganizationPaymentMethodAddDialog({
                     ]);
                   }}
                 >
-                  新增渠道
+                  新增上游渠道
                 </Button>
               )}
             </div>

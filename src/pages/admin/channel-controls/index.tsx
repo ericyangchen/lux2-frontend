@@ -4,7 +4,7 @@ import { ChannelControlView } from "@/modules/admin/channel-controls/ChannelCont
 export default function ChannelControlPage() {
   return (
     <div className="flex flex-col h-full">
-      <ApplicationHeader title="渠道管理" />
+      <ApplicationHeader title="上游渠道" />
       <ChannelControlView />
     </div>
   );

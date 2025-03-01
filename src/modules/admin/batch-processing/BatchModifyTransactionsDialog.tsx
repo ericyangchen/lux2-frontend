@@ -151,11 +151,11 @@ export function BatchModifyTransactionsDialog({
 
           <div className="flex flex-col gap-2">
             <Label className="whitespace-nowrap font-bold text-md mt-8">
-              更換渠道並重送訂單
+              更換上游渠道並重送訂單
             </Label>
             {/* paymentChannel */}
             <div className="flex items-center gap-4">
-              <Label className="whitespace-nowrap">渠道</Label>
+              <Label className="whitespace-nowrap">上游渠道</Label>
               <div className="w-fit min-w-[150px]">
                 <Select
                   defaultValue={paymentChannel}
