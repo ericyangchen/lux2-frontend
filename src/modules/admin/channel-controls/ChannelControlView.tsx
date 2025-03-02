@@ -6,12 +6,12 @@ import { useRouter } from "next/router";
 
 enum Tab {
   ChannelList = "ChannelList",
-  BatchModification = "BatchModification",
+  // BatchModification = "BatchModification",
 }
 
 const tabDisplayNames = {
-  [Tab.ChannelList]: "總代理",
-  [Tab.BatchModification]: "批量修改",
+  [Tab.ChannelList]: "上游渠道",
+  // [Tab.BatchModification]: "批量修改",
 };
 
 export function ChannelControlView() {
