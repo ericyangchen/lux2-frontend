@@ -198,7 +198,7 @@ export function ApiTransactionInfoDialog({
             </div>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
               <Label className="whitespace-nowrap min-w-[100px] font-normal">
-                渠道:
+                上游渠道:
               </Label>
               <div className="font-mono">
                 {PaymentChannelDisplayNames[transaction.paymentChannel]}

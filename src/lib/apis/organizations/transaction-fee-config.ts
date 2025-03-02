@@ -132,3 +132,104 @@ export const getPaymentMethodInfoByOrganizationIdApi = async ({
     },
   });
 };
+
+// For GENERAL_AGENT PaymentChannel setting
+export const createGeneralAgentTransactionFeeConfig = async ({
+  accessToken,
+  organizationId,
+  type,
+  paymentMethod,
+  paymentChannel,
+  percentageFee,
+  fixedFee,
+  minAmount,
+  maxAmount,
+  settlementInterval,
+  enabled,
+}: {
+  accessToken: string;
+  organizationId: string;
+  type: string;
+  paymentMethod: PaymentMethod;
+  paymentChannel: string;
+  percentageFee: string;
+  fixedFee: string;
+  minAmount?: string;
+  maxAmount?: string;
+  settlementInterval?: string;
+  enabled?: boolean;
+}) => {
+  const url = `${backendUrl}/organizations/${encodeURIComponent(
+    organizationId
+  )}/transaction-fee-configs/`;
+
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      type,
+      paymentMethod,
+      paymentChannel,
+      percentageFee,
+      fixedFee,
+      minAmount,
+      maxAmount,
+      settlementInterval,
+      enabled,
+    }),
+  });
+};
+
+export const updateGeneralAgentTransactionFeeConfig = async ({
+  accessToken,
+  transactionFeeConfigId,
+  organizationId,
+  type,
+  paymentMethod,
+  paymentChannel,
+  percentageFee,
+  fixedFee,
+  minAmount,
+  maxAmount,
+  settlementInterval,
+  enabled,
+}: {
+  accessToken: string;
+  transactionFeeConfigId: string;
+  organizationId: string;
+  type: string;
+  paymentMethod: PaymentMethod;
+  paymentChannel: string;
+  percentageFee: string;
+  fixedFee: string;
+  minAmount?: string;
+  maxAmount?: string;
+  settlementInterval?: string;
+  enabled?: boolean;
+}) => {
+  const url = `${backendUrl}/organizations/${encodeURIComponent(
+    organizationId
+  )}/transaction-fee-configs/${encodeURIComponent(transactionFeeConfigId)}`;
+
+  return fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      type,
+      paymentMethod,
+      paymentChannel,
+      percentageFee,
+      fixedFee,
+      minAmount,
+      maxAmount,
+      settlementInterval,
+      enabled,
+    }),
+  });
+};

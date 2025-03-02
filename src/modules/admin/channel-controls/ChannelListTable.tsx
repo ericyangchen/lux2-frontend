@@ -1,4 +1,5 @@
 import {
+  PaymentChannel,
   PaymentChannelDisplayNames,
   PaymentMethodDisplayNames,
   TransactionType,
@@ -6,11 +7,14 @@ import {
 } from "@/lib/types/transaction";
 import { formatNumber, formatNumberInPercentage } from "@/lib/number";
 
+import { ChannelAddDialog } from "./ChannelAddDialog";
+import { ChannelEditDialog } from "./ChannelEditDialog";
 import { Label } from "@/components/shadcn/ui/label";
-import { Switch } from "@/components/shadcn/ui/switch";
+import { TransactionFeeConfig } from "@/lib/types/transaction-fee-config";
 import { classNames } from "@/lib/utils";
 import { getApplicationCookies } from "@/lib/cookie";
 import { useOrganizationTransactionFeeConfigs } from "@/lib/hooks/swr/transaction-fee-config";
+import { useState } from "react";
 
 export default function ChannelListTable() {
   const { organizationId } = getApplicationCookies();
@@ -27,13 +31,34 @@ export default function ChannelListTable() {
       a.paymentChannel.localeCompare(b.paymentChannel)
   );
 
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const closeAddDialog = () => {
+    setIsAddDialogOpen(false);
+  };
+
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingTransactionFeeConfig, setEditingTransactionFeeConfig] =
+    useState<TransactionFeeConfig>();
+  const openEditDialog = ({
+    editingTransactionFeeConfig,
+  }: {
+    editingTransactionFeeConfig: TransactionFeeConfig;
+  }) => {
+    setEditingTransactionFeeConfig(editingTransactionFeeConfig);
+    setIsEditDialogOpen(true);
+  };
+  const closeEditDialog = () => {
+    setIsEditDialogOpen(false);
+    setEditingTransactionFeeConfig(undefined);
+  };
+
   return (
     <div className="py-2 pb-4">
       <div className="flex justify-between items-center h-7">
-        <Label className="text-md font-semibold px-2">總代理渠道</Label>
+        <Label className="text-md font-semibold px-2">上游渠道</Label>
         <button
           className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 rounded-md transition-colors duration-200"
-          // onClick={() => setIsAddDialogOpen(true)}
+          onClick={() => setIsAddDialogOpen(true)}
         >
           新增
         </button>
@@ -50,15 +75,15 @@ export default function ChannelListTable() {
               </th>
               <th
                 scope="col"
-                className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-              >
-                渠道
-              </th>
-              <th
-                scope="col"
                 className="px-3 py-3.5 text-sm font-semibold text-gray-900"
               >
                 通道
+              </th>
+              <th
+                scope="col"
+                className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+              >
+                上游渠道
               </th>
               <th
                 scope="col"
@@ -94,7 +119,7 @@ export default function ChannelListTable() {
                 scope="col"
                 className="px-3 py-3.5 text-sm font-semibold text-gray-900"
               >
-                開關
+                狀態
               </th>
               <th
                 scope="col"
@@ -118,17 +143,17 @@ export default function ChannelListTable() {
                   >
                     {TransactionTypeDisplayNames[transactionFeeConfig.type]}
                   </td>
-                  <td className="text-left whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-bold">
-                    {
-                      PaymentChannelDisplayNames[
-                        transactionFeeConfig.paymentChannel
-                      ]
-                    }
-                  </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-700">
                     {
                       PaymentMethodDisplayNames[
                         transactionFeeConfig.paymentMethod
+                      ]
+                    }
+                  </td>
+                  <td className="text-left whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-bold">
+                    {
+                      PaymentChannelDisplayNames[
+                        transactionFeeConfig.paymentChannel
                       ]
                     }
                   </td>
@@ -156,30 +181,19 @@ export default function ChannelListTable() {
                       : "無"}
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-700">
-                    <Switch
-                      checked={transactionFeeConfig?.enabled}
-                      onCheckedChange={(value) => {
-                        // setChannelSettings((prev) =>
-                        //   prev.map((channel, index) =>
-                        //     index === idx
-                        //       ? {
-                        //           ...channel,
-                        //           enabled: value,
-                        //         }
-                        //       : channel
-                        //   )
-                        // );
-                      }}
-                    />
+                    {transactionFeeConfig.enabled ? (
+                      <span className="text-green-600">啟用</span>
+                    ) : (
+                      <span className="text-red-600">停用</span>
+                    )}
                   </td>
                   <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                     <button
-                    // onClick={() =>
-                    //   openEditDialog({
-                    //     paymentMethod:
-                    //       paymentMethodConfiguration.paymentMethod,
-                    //   })
-                    // }
+                      onClick={() =>
+                        openEditDialog({
+                          editingTransactionFeeConfig: transactionFeeConfig,
+                        })
+                      }
                     >
                       編輯
                     </button>
@@ -192,13 +206,23 @@ export default function ChannelListTable() {
                   colSpan={6}
                   className="px-4 py-4 text-sm text-gray-500 text-center"
                 >
-                  沒有渠道
+                  沒有上游渠道
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+
+      <ChannelAddDialog isOpen={isAddDialogOpen} closeDialog={closeAddDialog} />
+
+      {organizationId && editingTransactionFeeConfig && (
+        <ChannelEditDialog
+          isOpen={isEditDialogOpen}
+          closeDialog={closeEditDialog}
+          transactionFeeConfig={editingTransactionFeeConfig}
+        />
+      )}
     </div>
   );
 }
