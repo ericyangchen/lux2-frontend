@@ -134,7 +134,8 @@ export default function CreateApiDepositTransaction() {
     setCreatedApiDepositTransaction(undefined);
   };
 
-  const disableButton = !body.merchantId || !body.paymentMethod || !body.amount;
+  const disableButton =
+    !body.merchantId || !body.paymentMethod || !body.amount || isLoading;
 
   return (
     <>
