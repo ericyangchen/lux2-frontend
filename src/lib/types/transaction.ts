@@ -70,7 +70,9 @@ export enum TransactionType {
   WITHDRAWAL = "WITHDRAWAL",
 }
 
-export enum PaymentMethod {}
+export enum PaymentMethod {
+  RMB = "RMB",
+}
 // NATIVE_GCASH_DIRECT = "NATIVE_GCASH_DIRECT",
 // SIMULATED_GCASH_DIRECT = "SIMULATED_GCASH_DIRECT",
 // SIMULATED_GCASH_QR_DEPOSIT = "SIMULATED_GCASH_QR_DEPOSIT", // only for deposit
