@@ -192,6 +192,7 @@ export const TransactionTypeDisplayNames = {
 };
 
 export const PaymentChannelCategories = {
+  [PaymentMethod.RMB]: [PaymentChannel.RMB_CHANNEL],
   // [PaymentMethod.NATIVE_GCASH_DIRECT]: [
   //   PaymentChannel.NATIVE_GCASH_DIRECT_MIKE,
   //   PaymentChannel.NATIVE_GCASH_DIRECT_YUNA,
@@ -207,6 +208,7 @@ export const PaymentChannelCategories = {
 };
 
 export const PaymentMethodDisplayNames = {
+  [PaymentMethod.RMB]: "人民幣",
   // [PaymentMethod.NATIVE_GCASH_DIRECT]: "原生Gcash-直連",
   // [PaymentMethod.SIMULATED_GCASH_DIRECT]: "仿原生Gcash-直連",
   // [PaymentMethod.SIMULATED_GCASH_QR_DEPOSIT]: "仿原生Gcash-QR代收",
@@ -214,6 +216,7 @@ export const PaymentMethodDisplayNames = {
   // [PaymentMethod.MAYA]: "Maya",
 };
 export const PaymentChannelDisplayNames = {
+  [PaymentChannel.RMB_CHANNEL]: "RMB渠道",
   // [PaymentChannel.NATIVE_GCASH_DIRECT_MIKE]: "原生Gcash-直連: Mike",
   // [PaymentChannel.NATIVE_GCASH_DIRECT_YUNA]: "原生Gcash-直連: Yuna",
   // [PaymentChannel.SIMULATED_GCASH_DIRECT_GOLDPAY]: "仿原生Gcash-直連: Goldpay",
