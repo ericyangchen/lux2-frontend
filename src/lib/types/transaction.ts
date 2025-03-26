@@ -79,7 +79,9 @@ export enum PaymentMethod {
 // QRPH = "QRPH",
 // MAYA = "MAYA",
 
-export enum PaymentChannel {}
+export enum PaymentChannel {
+  RMB_CHANNEL = "RMB_CHANNEL",
+}
 // // NATIVE_GCASH_DIRECT
 // NATIVE_GCASH_DIRECT_MIKE = "NATIVE_GCASH_DIRECT_MIKE",
 // NATIVE_GCASH_DIRECT_YUNA = "NATIVE_GCASH_DIRECT_YUNA",
