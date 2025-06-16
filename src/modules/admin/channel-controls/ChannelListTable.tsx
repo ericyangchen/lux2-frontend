@@ -203,7 +203,7 @@ export default function ChannelListTable() {
             ) : (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={10}
                   className="px-4 py-4 text-sm text-gray-500 text-center"
                 >
                   沒有上游渠道
