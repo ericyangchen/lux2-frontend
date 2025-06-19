@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "./shadcn/ui/button";
 import { Calendar } from "./shadcn/ui/calendar";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/classname-utils";
 
 export function DatePicker({
   date,

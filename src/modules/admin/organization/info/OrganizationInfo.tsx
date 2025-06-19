@@ -1,27 +1,16 @@
-import {
-  OrganizationType,
-  OrganizationTypeDisplayNames,
-} from "@/lib/types/organization";
-import {
-  getOrganizationTotpQrCodeApi,
-  setOrganizationTotpSecretApi,
-} from "@/lib/apis/organizations/totp";
-import {
-  useCheckOrganizationTotpEnabled,
-  useOrganizationInfo,
-} from "@/lib/hooks/swr/organization";
-
-import { ApplicationError } from "@/lib/types/applicationError";
+import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { CreateSubOrganizationDialog } from "./CreateSubOrganizationDialog";
 import { EditOrganizationInfoDialog } from "./EditOrganizationInfoDialog";
-import { EditOrganizationTotpDialog } from "./EditOrganizationTotpDialog";
 import { Label } from "@/components/shadcn/ui/label";
-import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/timezone";
-import { copyToClipboard } from "@/lib/copyToClipboard";
-import { getApplicationCookies } from "@/lib/cookie";
+import { OrgType } from "@/lib/enums/organizations/org-type.enum";
+import { OrgTypeDisplayNames } from "@/lib/constants/organization";
+import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/utils/timezone";
+import { copyToClipboard } from "@/lib/utils/copyToClipboard";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import { showTotpQrCodeInNewWindow } from "./utils";
 import { toast } from "@/components/shadcn/ui/use-toast";
+import { useOrganization } from "@/lib/hooks/swr/organization";
 import { useState } from "react";
 
 export default function OrganizationInfo({
@@ -29,13 +18,9 @@ export default function OrganizationInfo({
 }: {
   organizationId: string;
 }) {
-  const { organization } = useOrganizationInfo({ organizationId });
+  const { organization } = useOrganization({ organizationId });
 
-  const { totpEnabled, mutate } = useCheckOrganizationTotpEnabled({
-    organizationId,
-  });
-
-  const isMerchant = organization?.type === OrganizationType.MERCHANT;
+  const isMerchant = organization?.type === OrgType.MERCHANT;
 
   const [isCreateSubOrgDialogOpen, setIsCreateSubOrgDialogOpen] =
     useState(false);
@@ -53,120 +38,6 @@ export default function OrganizationInfo({
   };
   const closeEditDialog = () => {
     setIsEditOrgDialogOpen(false);
-  };
-
-  const handleShowTotpQrCode = async () => {
-    const { accessToken } = getApplicationCookies();
-
-    if (!accessToken) return;
-
-    try {
-      const res = await getOrganizationTotpQrCodeApi({
-        organizationId,
-        accessToken,
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        // open qr code dialog
-        toast({
-          title: "QR Code 已在新分頁開啟",
-          description: "",
-          variant: "success",
-        });
-
-        if (
-          !showTotpQrCodeInNewWindow({
-            name: organization?.name,
-            qrCode: data.qrCode,
-          })
-        ) {
-          toast({
-            title: "QR Code 在新分頁開啟失敗",
-            description: "",
-            variant: "destructive",
-          });
-        }
-      } else {
-        throw new ApplicationError(data);
-      }
-    } catch (error) {
-      if (error instanceof ApplicationError) {
-        toast({
-          title: `${error.statusCode} - QR Code 開啟失敗`,
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: `QR Code 開啟失敗`,
-          description: "Unknown error",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
-  const handleEnableTotp = async () => {
-    const { accessToken } = getApplicationCookies();
-
-    if (!accessToken) return;
-
-    try {
-      const res = await setOrganizationTotpSecretApi({
-        organizationId,
-        accessToken,
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        mutate();
-
-        // open qr code dialog
-        toast({
-          title: "QR Code 已在新分頁開啟",
-          description: "",
-          variant: "success",
-        });
-
-        if (
-          !showTotpQrCodeInNewWindow({
-            name: organization?.name,
-            qrCode: data.qrCode,
-          })
-        ) {
-          toast({
-            title: "QR Code 在新分頁開啟失敗",
-            description: "",
-            variant: "destructive",
-          });
-        }
-      } else {
-        throw new ApplicationError(data);
-      }
-    } catch (error) {
-      if (error instanceof ApplicationError) {
-        toast({
-          title: `${error.statusCode} - QR Code 開啟失敗`,
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: `QR Code 開啟失敗`,
-          description: "Unknown error",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
-  const [isEditOrgTotpDialogOpen, setIsEditOrgTotpDialogOpen] = useState(false);
-
-  const openEditTotpDialog = () => {
-    setIsEditOrgTotpDialogOpen(true);
   };
 
   return (
@@ -190,8 +61,7 @@ export default function OrganizationInfo({
               單位類別:
             </div>
             <div className="text-base font-mono">
-              {OrganizationTypeDisplayNames[organization.type] ||
-                organization.type}
+              {OrgTypeDisplayNames[organization.type] || organization.type}
             </div>
           </div>
           {/* id */}
@@ -242,20 +112,6 @@ export default function OrganizationInfo({
           </div>
 
           <div className="flex items-center gap-2">
-            {totpEnabled ? (
-              <>
-                <Button variant="outline" onClick={handleShowTotpQrCode}>
-                  顯示驗證碼
-                </Button>
-                <Button variant="outline" onClick={openEditTotpDialog}>
-                  編輯驗證碼
-                </Button>
-              </>
-            ) : (
-              <Button variant="outline" onClick={handleEnableTotp}>
-                啟用驗證碼
-              </Button>
-            )}
             <Button variant="outline" onClick={openEditDialog}>
               編輯單位
             </Button>
@@ -277,11 +133,6 @@ export default function OrganizationInfo({
       <EditOrganizationInfoDialog
         isOpen={isEditOrgDialogOpen}
         closeDialog={closeEditDialog}
-        organization={organization}
-      />
-      <EditOrganizationTotpDialog
-        isOpen={isEditOrgTotpDialogOpen}
-        closeDialog={() => setIsEditOrgTotpDialogOpen(false)}
         organization={organization}
       />
     </>

@@ -1,6 +1,6 @@
-import { OrganizationType } from "../types/organization";
-import { UserRole } from "../types/user";
-import { useOrganizationInfo } from "./swr/organization";
+import { OrgType } from "../enums/organizations/org-type.enum";
+import { UserRole } from "../enums/users/user-role.enum";
+import { useOrganization } from "./swr/organization";
 import { useUser } from "./swr/user";
 
 export const useUserPermission = ({
@@ -10,7 +10,7 @@ export const useUserPermission = ({
 }) => {
   const { user } = useUser();
 
-  const { organization: userOrg } = useOrganizationInfo({
+  const { organization: userOrg } = useOrganization({
     organizationId: user?.organizationId,
   });
 
@@ -18,19 +18,26 @@ export const useUserPermission = ({
     return {};
   }
 
-  const isGeneralAgentOrg = userOrg?.type === OrganizationType.GENERAL_AGENT;
-  const isMerchantOrg = userOrg?.type === OrganizationType.MERCHANT;
+  const isAdminOrg = userOrg?.type === OrgType.ADMIN;
+  const isMerchantOrg = userOrg?.type === OrgType.MERCHANT;
 
-  const isAdministrator = user.role === UserRole.ADMINISTRATOR;
-  const isOperator = user.role === UserRole.OPERATOR;
+  const isOwner = isAdminOrg
+    ? user.role === UserRole.ADMIN_OWNER
+    : user.role === UserRole.MERCHANT_OWNER;
+  const isStaff = isAdminOrg
+    ? user.role === UserRole.ADMIN_STAFF
+    : user.role === UserRole.MERCHANT_STAFF;
+
+  const isDeveloper = user.role === UserRole.DEVELOPER;
 
   const accessingSelfOrg = accessingOrganizationId === user.organizationId;
 
   return {
-    isGeneralAgentOrg,
+    isAdminOrg,
     isMerchantOrg,
-    isAdministrator,
-    isOperator,
+    isOwner,
+    isStaff,
+    isDeveloper,
     accessingSelfOrg,
   };
 };

@@ -11,25 +11,30 @@ import {
   DialogPanel,
   TransitionChild,
 } from "@headlessui/react";
-import { User, UserRoleDisplayNames } from "@/lib/types/user";
 import {
   adminNavigation,
   developerNavigation,
   merchantNavigation,
-} from "@/lib/routes";
-import { clearApplicationCookies, getApplicationCookies } from "@/lib/cookie";
+} from "@/lib/utils/routes";
+import {
+  clearApplicationCookies,
+  getApplicationCookies,
+} from "@/lib/utils/cookie";
 
 import { Badge } from "@/components/shadcn/ui/badge";
 import Head from "next/head";
 import Image from "next/image";
 import { Label } from "@/components/shadcn/ui/label";
 import Link from "next/link";
-import { OrganizationType } from "@/lib/types/organization";
-import { classNames } from "@/lib/utils";
-import { companyName } from "@/lib/constants";
-import { copyToClipboard } from "@/lib/copyToClipboard";
+import { OrgType } from "@/lib/enums/organizations/org-type.enum";
+import { User } from "@/lib/types/user";
+import { UserRole } from "@/lib/enums/users/user-role.enum";
+import { UserRoleDisplayNames } from "@/lib/constants/user";
+import { classNames } from "@/lib/utils/classname-utils";
+import { companyName } from "@/lib/constants/common";
+import { copyToClipboard } from "@/lib/utils/copyToClipboard";
 import { useNavigation } from "@/lib/hooks/useNavigation";
-import { useOrganizationInfo } from "@/lib/hooks/swr/organization";
+import { useOrganization } from "@/lib/hooks/swr/organization";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
@@ -82,7 +87,7 @@ const CustomerServiceSupportInfo = () => {
           variant="outline"
           className="bg-none border-none cursor-pointer pl-0 flex gap-1"
           onClick={() => {
-            window.open("https://t.me/smpay1688869");
+            // window.open("https://t.me/smpay1688869");
           }}
         >
           <Image src="/telegram.png" width={16} height={16} alt="" />
@@ -92,7 +97,7 @@ const CustomerServiceSupportInfo = () => {
           variant="outline"
           className="bg-none border-none cursor-pointer pl-0 flex gap-1"
           onClick={() => {
-            window.open("https://t.me/SM_BOSS01");
+            // window.open("https://t.me/SM_BOSS01");
           }}
         >
           <Image src="/telegram.png" width={16} height={16} alt="" />
@@ -113,13 +118,12 @@ export default function ApplicationLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { organizationId } = getApplicationCookies();
-  const { organization } = useOrganizationInfo({ organizationId });
-
-  const isMerchant = organization?.type === OrganizationType.MERCHANT;
-  const isAdmin = organization?.type === OrganizationType.GENERAL_AGENT;
-  const isDeveloper = false;
-
+  const { organization } = useOrganization({ organizationId });
   const { user } = useUser();
+
+  const isMerchant = organization?.type === OrgType.MERCHANT;
+  const isAdmin = organization?.type === OrgType.ADMIN;
+  const isDeveloper = isAdmin && user?.role === UserRole.DEVELOPER;
 
   const router = useRouter();
 

@@ -1,7 +1,5 @@
-export enum UserRole {
-  ADMINISTRATOR = "ADMINISTRATOR",
-  OPERATOR = "OPERATOR",
-}
+import { OrgType } from "../enums/organizations/org-type.enum";
+import { UserRole } from "../enums/users/user-role.enum";
 
 export interface User {
   id: string;
@@ -9,14 +7,10 @@ export interface User {
   name: string;
   email: string;
   password?: string;
+  orgType: OrgType;
   role: UserRole;
+  totpSecret?: string;
   createdAt: string;
   updatedAt?: string;
   deletedAt?: string;
 }
-
-/** constants */
-export const UserRoleDisplayNames = {
-  [UserRole.ADMINISTRATOR]: "管理員",
-  [UserRole.OPERATOR]: "操作員",
-};

@@ -19,20 +19,20 @@ import {
 import {
   getManualTransactionByIdApi,
   getManualTransactionsApi,
-} from "@/lib/apis/manual-transactions";
+} from "@/lib/apis/manual-transactions-archive";
 import { useEffect, useState } from "react";
 
-import { ApplicationError } from "@/lib/types/applicationError";
+import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { OrganizationSearchBar } from "../common/OrganizationSearchBar";
-import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/timezone";
-import { copyToClipboard } from "@/lib/copyToClipboard";
-import { formatNumberWithoutMinFraction } from "@/lib/number";
-import { getApplicationCookies } from "@/lib/cookie";
+import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/utils/timezone";
+import { copyToClipboard } from "@/lib/utils/copyToClipboard";
+import { formatNumberWithoutMinFraction } from "@/lib/utils/number";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useRouter } from "next/router";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
@@ -277,7 +277,7 @@ export function ManualTransactionList() {
             </div>
             {/* paymentMethod */}
             <div className="flex items-center gap-4">
-              <Label className="whitespace-nowrap">通道</Label>
+              <Label className="whitespace-nowrap">支付類型</Label>
               <div className="w-fit min-w-[150px]">
                 <Select
                   defaultValue={paymentMethod}
@@ -377,7 +377,7 @@ export function ManualTransactionList() {
                       類別
                     </th>
                     <th className="px-3 py-2 text-center text-sm font-semibold text-gray-900">
-                      通道
+                      支付類型
                     </th>
                     <th className="px-3 py-2 text-center text-sm font-semibold text-gray-900">
                       單位 ID

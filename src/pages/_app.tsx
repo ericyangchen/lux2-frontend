@@ -6,7 +6,7 @@ import ApplicationLayout from "@/modules/common/layout/ApplicationLayout";
 import Head from "next/head";
 import { SWRConfig } from "swr";
 import { Toaster } from "@/components/shadcn/ui/toaster";
-import { routesWithoutLayout } from "@/lib/routes";
+import { routesWithoutLayout } from "@/lib/utils/routes";
 import { useAuthGuard } from "@/lib/hooks/useAuthGuard";
 import { useRouter } from "next/router";
 

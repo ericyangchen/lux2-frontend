@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/shadcn/ui/select";
 
-import { ApplicationError } from "@/lib/types/applicationError";
+import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
@@ -19,11 +19,11 @@ import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { OrganizationSearchBar } from "../common/OrganizationSearchBar";
 import { Revenue } from "@/lib/types/revenue";
-import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/timezone";
-import { copyToClipboard } from "@/lib/copyToClipboard";
-import { formatNumberWithoutMinFraction } from "@/lib/number";
-import { getApplicationCookies } from "@/lib/cookie";
-import { getRevenuesApi } from "@/lib/apis/revenues";
+import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/utils/timezone";
+import { copyToClipboard } from "@/lib/utils/copyToClipboard";
+import { formatNumberWithoutMinFraction } from "@/lib/utils/number";
+import { getApplicationCookies } from "@/lib/utils/cookie";
+import { getRevenuesApi } from "@/lib/apis/revenues-archive";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
@@ -143,7 +143,7 @@ export function RevenueDistributionList() {
           <div className="flex items-center gap-4 w-full lg:w-fit flex-wrap px-4">
             {/* transactionId */}
             <div className="flex items-center gap-4 w-full lg:w-fit">
-              <Label className="whitespace-nowrap">系統自動訂單號(TX)</Label>
+              <Label className="whitespace-nowrap">系統訂單號(TX)</Label>
               <Input
                 id="transactionId"
                 className="w-full sm:min-w-[220px] font-mono"
@@ -162,7 +162,7 @@ export function RevenueDistributionList() {
             </div>
             {/* paymentMethod */}
             <div className="flex items-center gap-4">
-              <Label className="whitespace-nowrap">通道</Label>
+              <Label className="whitespace-nowrap">支付類型</Label>
               <div className="w-fit min-w-[150px]">
                 <Select
                   defaultValue={paymentMethod}
@@ -247,10 +247,10 @@ export function RevenueDistributionList() {
                       單位 ID
                     </th>
                     <th className="px-3 py-2 text-center text-sm font-semibold text-gray-900">
-                      通道
+                      支付類型
                     </th>
                     <th className="px-3 py-2 text-center text-sm font-semibold text-gray-900">
-                      系統自動訂單號
+                      系統訂單號
                     </th>
                     <th className="px-3 py-2 text-center text-sm font-semibold text-gray-900">
                       分潤金額
@@ -287,7 +287,7 @@ export function RevenueDistributionList() {
                           copyToClipboard({
                             toast,
                             copyingText: revenue.transactionId,
-                            title: "已複製系統自動訂單號",
+                            title: "已複製系統訂單號",
                           })
                         }
                       >

@@ -1,0 +1,5 @@
+export enum WithdrawalToAccountType {
+  GCASH_ACCOUNT = 'GCASH_ACCOUNT',
+  MAYA_ACCOUNT = 'MAYA_ACCOUNT',
+  BANK_ACCOUNT = 'BANK_ACCOUNT',
+}

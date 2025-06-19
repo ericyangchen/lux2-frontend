@@ -1,9 +1,9 @@
-import { Calculator } from "@/lib/calculator";
+import { Calculator } from "@/lib/utils/calculator";
 import { Label } from "@/components/shadcn/ui/label";
 import OrganizationBalanceTable from "./OrganizationBalanceTable";
-import { classNames } from "@/lib/utils";
-import { currencySymbol } from "@/lib/constants";
-import { formatNumber } from "@/lib/number";
+import { classNames } from "@/lib/utils/classname-utils";
+import { currencySymbol } from "@/lib/constants/common";
+import { formatNumber } from "@/lib/utils/number";
 import { useBalances } from "@/lib/hooks/swr/balance";
 
 const Stat = ({

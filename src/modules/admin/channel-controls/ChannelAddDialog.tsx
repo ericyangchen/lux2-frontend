@@ -1,8 +1,11 @@
 import {
-  ChannelSettings,
-  createGeneralAgentTransactionFeeConfig,
-  createOrganizationTransactionFeeConfigsWithSamePaymentMethod,
-} from "@/lib/apis/organizations/transaction-fee-config";
+  DepositAccountTypeDisplayNames,
+  PaymentChannelCategories,
+  PaymentChannelDisplayNames,
+  PaymentMethodDisplayNames,
+  TransactionTypeDisplayNames,
+  WithdrawalAccountTypeDisplayNames,
+} from "@/lib/constants/transaction";
 import {
   Dialog,
   DialogContent,
@@ -12,15 +15,6 @@ import {
   DialogTitle,
 } from "@/components/shadcn/ui/dialog";
 import {
-  PaymentChannel,
-  PaymentChannelCategories,
-  PaymentChannelDisplayNames,
-  PaymentMethod,
-  PaymentMethodDisplayNames,
-  TransactionType,
-  TransactionTypeDisplayNames,
-} from "@/lib/types/transaction";
-import {
   Select,
   SelectContent,
   SelectGroup,
@@ -29,18 +23,40 @@ import {
   SelectValue,
 } from "@/components/shadcn/ui/select";
 
-import { ApplicationError } from "@/lib/types/applicationError";
+import { ApiCreateTransactionFeeSetting } from "@/lib/apis/txn-fee-settings/post";
+import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import Decimal from "decimal.js";
+import { DepositToAccountType } from "@/lib/enums/transactions/deposit-to-account-type.enum";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
+import { OrgType } from "@/lib/enums/organizations/org-type.enum";
+import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { Switch } from "@/components/shadcn/ui/switch";
+import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
+import { WithdrawalToAccountType } from "@/lib/enums/transactions/withdrawal-to-account-type.enum";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { convertStringNumberToPercentageNumber } from "@/lib/number";
-import { getApplicationCookies } from "@/lib/cookie";
-import { useOrganizationTransactionFeeConfigs } from "@/lib/hooks/swr/transaction-fee-config";
+import { convertStringNumberToPercentageNumber } from "@/lib/utils/number";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
+import { useTransactionFeeSettings } from "@/lib/hooks/swr/transaction-fee-setting";
+
+interface FeeSettingData {
+  accountType: string;
+  accountTypeDisplay: string;
+  percentage: string;
+  fixed: string;
+}
+
+interface ChannelSettings {
+  paymentChannel: string;
+  minAmount?: string;
+  maxAmount?: string;
+  settlementInterval?: string;
+  enabled?: boolean;
+  feeSettings: FeeSettingData[];
+}
 
 export function ChannelAddDialog({
   isOpen,
@@ -55,149 +71,204 @@ export function ChannelAddDialog({
 
   const [transactionType, setTransactionType] = useState<TransactionType>();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
-  const [paymentChannel, setPaymentChannel] = useState<PaymentChannel>();
-  const [percentageFee, setPercentageFee] = useState<string>("");
-  const [fixedFee, setFixedFee] = useState<string>("0");
-  const [minAmount, setMinAmount] = useState<string>();
-  const [maxAmount, setMaxAmount] = useState<string>();
-  const [settlementInterval, setSettlementInterval] = useState<string>();
-  const [enabled, setEnabled] = useState<boolean>(false);
-
+  const [channelSettings, setChannelSettings] = useState<ChannelSettings[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [percentageFeeInPercentage, setPercentageFeeInPercentage] =
-    useState("");
 
-  const { transactionFeeConfigs, mutate } =
-    useOrganizationTransactionFeeConfigs({
-      organizationId,
-    });
+  // Store raw input values for percentage fields to allow typing intermediate values like "1."
+  const [percentageInputs, setPercentageInputs] = useState<{
+    [key: string]: string;
+  }>({});
+
+  const { transactionFeeSettings, mutate } = useTransactionFeeSettings({
+    orgType: OrgType.ADMIN,
+  });
+
+  // Get payment methods that already have configured channels for the selected transaction type
+  const configuredPaymentMethods = new Set(
+    transactionFeeSettings
+      .filter((setting) => setting.type === transactionType)
+      .map((setting) => setting.paymentMethod)
+  );
+
+  // Filter out payment methods that already have configured channels
+  const availablePaymentMethods = Object.values(PaymentMethod).filter(
+    (method) => !configuredPaymentMethods.has(method)
+  );
 
   const disableButton =
+    !transactionType ||
     !paymentMethod ||
-    isNaN(parseFloat(percentageFee)) ||
-    isNaN(parseFloat(percentageFeeInPercentage)) ||
-    isNaN(parseFloat(fixedFee)) ||
-    parseFloat(percentageFee) >= 1 ||
-    parseFloat(fixedFee) < 0 ||
-    parseFloat(percentageFee) < 0 ||
-    (!!minAmount && isNaN(parseFloat(minAmount))) ||
-    (!!maxAmount && isNaN(parseFloat(maxAmount))) ||
-    (!!minAmount && parseFloat(minAmount) < 0) ||
-    (!!maxAmount && parseFloat(maxAmount) < 0) ||
-    (!!minAmount &&
-      !!maxAmount &&
-      parseFloat(minAmount) > parseFloat(maxAmount));
+    channelSettings?.length === 0 ||
+    channelSettings?.some(
+      (channel) =>
+        !channel.paymentChannel ||
+        (channel.minAmount && isNaN(parseFloat(channel.minAmount))) ||
+        (channel.maxAmount && isNaN(parseFloat(channel.maxAmount))) ||
+        (channel.minAmount && parseFloat(channel.minAmount) < 0) ||
+        (channel.maxAmount && parseFloat(channel.maxAmount) < 0) ||
+        (channel.minAmount &&
+          channel.maxAmount &&
+          parseFloat(channel.minAmount) > parseFloat(channel.maxAmount)) ||
+        channel.feeSettings.some(
+          (fee) =>
+            isNaN(parseFloat(fee.percentage)) ||
+            isNaN(parseFloat(fee.fixed)) ||
+            parseFloat(fee.percentage) >= 1 ||
+            parseFloat(fee.fixed) < 0 ||
+            parseFloat(fee.percentage) < 0
+        )
+    );
 
-  const remainingPaymentChannel = paymentMethod
-    ? PaymentChannelCategories[paymentMethod].filter(
+  const remainingChannel = paymentMethod
+    ? PaymentChannelCategories[paymentMethod]?.filter(
         (paymentChannel) =>
-          !transactionFeeConfigs.some(
-            (transactionFeeConfig) =>
-              transactionFeeConfig.type === transactionType &&
-              transactionFeeConfig.paymentChannel === paymentChannel
+          !channelSettings.some(
+            (channel) => channel.paymentChannel === paymentChannel
           )
-      )
+      ) || []
     : [];
-
-  // Handler for the percentage input in decimal format
-  const handleDecimalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPercentageFee(value);
-
-    // Also update the percentage input accordingly
-    if (!isNaN(parseFloat(value))) {
-      setPercentageFeeInPercentage(
-        convertStringNumberToPercentageNumber(value).toString()
-      );
-    } else {
-      setPercentageFeeInPercentage("");
-    }
-  };
-
-  // Handler for the percentage input in percentage format
-  const handlePercentageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-
-    setPercentageFeeInPercentage(value);
-
-    const parsedValue = parseFloat(value);
-
-    if (!isNaN(parsedValue) && parsedValue.toString() === value) {
-      const percentageValue = new Decimal(parsedValue);
-      setPercentageFee(percentageValue.dividedBy(100).toString());
-    } else {
-      setPercentageFee("");
-    }
-  };
 
   const handleCloseDialog = () => {
     closeDialog();
+    setTransactionType(undefined);
     setPaymentMethod(undefined);
-    setPercentageFee("");
-    setPercentageFeeInPercentage("");
-    setFixedFee("0");
-    setMinAmount(undefined);
-    setMaxAmount(undefined);
-    setSettlementInterval(undefined);
-    setEnabled(false);
+    setChannelSettings([]);
+    setPercentageInputs({});
   };
 
-  const handleAddPaymentChannel = async () => {
+  const updateFeeSettingPercentage = (
+    channelIdx: number,
+    feeIdx: number,
+    percentage: string
+  ) => {
+    const newChannelSettings = [...channelSettings];
+    newChannelSettings[channelIdx].feeSettings[feeIdx].percentage = percentage;
+    setChannelSettings(newChannelSettings);
+  };
+
+  const updateFeeSettingFixed = (
+    channelIdx: number,
+    feeIdx: number,
+    fixed: string
+  ) => {
+    const newChannelSettings = [...channelSettings];
+    newChannelSettings[channelIdx].feeSettings[feeIdx].fixed = fixed;
+    setChannelSettings(newChannelSettings);
+  };
+
+  const createDefaultFeeSettings = (): FeeSettingData[] => {
+    const defaultFeeSettings: FeeSettingData[] = [];
+    if (transactionType === TransactionType.API_DEPOSIT) {
+      defaultFeeSettings.push({
+        accountType: DepositToAccountType.DEFAULT,
+        accountTypeDisplay:
+          DepositAccountTypeDisplayNames[DepositToAccountType.DEFAULT],
+        percentage: "0",
+        fixed: "0",
+      });
+    } else {
+      Object.values(WithdrawalToAccountType).forEach((accountType) => {
+        defaultFeeSettings.push({
+          accountType,
+          accountTypeDisplay: WithdrawalAccountTypeDisplayNames[accountType],
+          percentage: "0",
+          fixed: "0",
+        });
+      });
+    }
+    return defaultFeeSettings;
+  };
+
+  const handleTransactionTypeChange = (value: string) => {
+    const type = value as TransactionType;
+    setTransactionType(type);
+    setPaymentMethod(undefined);
+    setChannelSettings([]);
+    setPercentageInputs({});
+  };
+
+  const handlePaymentMethodChange = (value: string) => {
+    const method = value as PaymentMethod;
+    setPaymentMethod(method);
+    setChannelSettings([]);
+    setPercentageInputs({});
+  };
+
+  const handleAddPaymentMethod = async () => {
     const { accessToken, organizationId } = getApplicationCookies();
+
     if (
-      disableButton ||
-      !accessToken ||
-      !organizationId ||
       !transactionType ||
       !paymentMethod ||
-      !paymentChannel ||
-      !percentageFee ||
-      !fixedFee
+      disableButton ||
+      !accessToken ||
+      !organizationId
     )
       return;
 
-    const formattedSettlementInterval = settlementInterval
-      ? parseInt(settlementInterval) > 1
-        ? `${parseInt(settlementInterval)} days`
-        : `${parseInt(settlementInterval)} day`
-      : `0 day`;
-
     try {
       setIsLoading(true);
-      const response = await createGeneralAgentTransactionFeeConfig({
-        accessToken,
-        organizationId,
-        type: transactionType,
-        paymentMethod,
-        paymentChannel,
-        percentageFee,
-        fixedFee,
-        minAmount,
-        maxAmount,
-        settlementInterval: formattedSettlementInterval,
-        enabled,
-      });
-      const data = await response.json();
-      if (response.ok) {
-        handleCloseDialog();
-        toast({
-          title: `上游渠道新增成功`,
-          variant: "success",
+
+      // Create settings for each channel
+      for (const channelSetting of channelSettings) {
+        const settlementInterval = channelSetting.settlementInterval;
+        const formattedSettlementInterval = settlementInterval
+          ? parseInt(settlementInterval) > 1
+            ? `${parseInt(settlementInterval)} days`
+            : `${parseInt(settlementInterval)} day`
+          : undefined;
+
+        // Create the fee setting list from the fee settings
+        const createFeeSettingList = () => {
+          const feeList: any = {};
+          channelSetting.feeSettings.forEach((fee) => {
+            feeList[fee.accountType] = {
+              percentage: fee.percentage,
+              fixed: fee.fixed,
+            };
+          });
+
+          return feeList;
+        };
+
+        const response = await ApiCreateTransactionFeeSetting({
+          organizationId,
+          orgType: OrgType.ADMIN,
+          type: transactionType,
+          paymentMethod,
+          paymentChannel: channelSetting.paymentChannel as any,
+          feeSettingList: createFeeSettingList(),
+          minAmount: channelSetting.minAmount || undefined,
+          maxAmount: channelSetting.maxAmount || undefined,
+          settlementInterval: formattedSettlementInterval,
+          enabled: channelSetting.enabled ?? true,
+          accessToken,
         });
-        mutate();
-      } else {
-        throw new ApplicationError(data);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new ApplicationError(errorData);
+        }
       }
+
+      handleCloseDialog();
+      toast({
+        title: `${TransactionTypeDisplayNames[transactionType!]}通道新增成功`,
+        variant: "success",
+      });
+      mutate();
     } catch (error) {
       if (error instanceof ApplicationError) {
         toast({
-          title: `${error.statusCode} - 上游渠道新增失敗`,
+          title: `${error.statusCode} - ${
+            TransactionTypeDisplayNames[transactionType!]
+          }通道新增失敗`,
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: `上游渠道新增失敗`,
+          title: `${TransactionTypeDisplayNames[transactionType!]}通道新增失敗`,
           description: "Unknown error",
           variant: "destructive",
         });
@@ -209,59 +280,37 @@ export function ChannelAddDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCloseDialog}>
-      <DialogContent className="max-w-[600px]">
+      <DialogContent className="max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>新增上游渠道</DialogTitle>
+          <DialogTitle>
+            新增
+            {transactionType && TransactionTypeDisplayNames[transactionType]}
+            支付類型
+          </DialogTitle>
+          <DialogDescription>新增一個通道</DialogDescription>
         </DialogHeader>
+
         <div className="flex flex-col gap-4 py-4">
           <div className="flex items-center gap-4">
             <Label className="whitespace-nowrap w-[70px]">類別</Label>
             <div className="w-fit min-w-[150px]">
-              <Select
-                defaultValue={transactionType}
-                value={transactionType}
-                onValueChange={(value) =>
-                  setTransactionType(value as TransactionType)
-                }
-              >
+              <Select onValueChange={handleTransactionTypeChange}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="選擇交易類別" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value={TransactionType.DEPOSIT}>
-                      {TransactionTypeDisplayNames[TransactionType.DEPOSIT]}
-                    </SelectItem>
-                    <SelectItem value={TransactionType.WITHDRAWAL}>
-                      {TransactionTypeDisplayNames[TransactionType.WITHDRAWAL]}
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Label className="whitespace-nowrap w-[70px]">通道</Label>
-            <div className="w-fit min-w-[200px]">
-              <Select
-                defaultValue={paymentMethod}
-                onValueChange={(value) =>
-                  setPaymentMethod(value as PaymentMethod)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {Object.values(PaymentMethod).map((paymentMethod) => {
-                      return (
-                        <SelectItem key={paymentMethod} value={paymentMethod}>
-                          {PaymentMethodDisplayNames[paymentMethod]}
+                    {Object.values(TransactionType)
+                      .filter(
+                        (type) =>
+                          type === TransactionType.API_DEPOSIT ||
+                          type === TransactionType.API_WITHDRAWAL
+                      )
+                      .map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {TransactionTypeDisplayNames[type]}
                         </SelectItem>
-                      );
-                    })}
+                      ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -269,117 +318,281 @@ export function ChannelAddDialog({
           </div>
 
           <div className="flex items-center gap-4">
-            <Label className="whitespace-nowrap w-[70px]">上游渠道</Label>
-            <div className="w-fit min-w-[200px]">
+            <Label className="whitespace-nowrap w-[70px]">支付類型</Label>
+            <div className="w-fit min-w-[150px]">
               <Select
-                value={paymentChannel}
-                onValueChange={(value) =>
-                  setPaymentChannel(value as PaymentChannel)
-                }
+                value={paymentMethod}
+                onValueChange={handlePaymentMethodChange}
+                disabled={!transactionType}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="選擇通道" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {Object.values(remainingPaymentChannel).map(
-                      (paymentChannel) => {
+                    {availablePaymentMethods.length > 0 ? (
+                      availablePaymentMethods.map((paymentMethod) => {
                         return (
-                          <SelectItem
-                            key={paymentChannel}
-                            value={paymentChannel}
-                          >
-                            {PaymentChannelDisplayNames[paymentChannel]}
+                          <SelectItem key={paymentMethod} value={paymentMethod}>
+                            {PaymentMethodDisplayNames[paymentMethod]}
                           </SelectItem>
                         );
-                      }
+                      })
+                    ) : (
+                      <SelectItem value="" disabled>
+                        所有支付類型都已配置
+                      </SelectItem>
                     )}
                   </SelectGroup>
                 </SelectContent>
               </Select>
             </div>
           </div>
+        </div>
 
-          <div className="flex items-center gap-4">
-            <Label className="whitespace-nowrap w-[70px]">手續費率</Label>
-            <div className="flex items-center gap-2 w-fit">
-              {/* <Input
-                id="percentageFee"
-                className="max-w-[100px]"
-                value={percentageFee}
-                onChange={handleDecimalChange}
-              />
-              <div>=</div> */}
-              <Input
-                id="percentageFeeInPercentage"
-                className="max-w-[80px]"
-                value={percentageFeeInPercentage}
-                onChange={handlePercentageChange}
-              />
-              <span>%</span>
-            </div>
+        {availablePaymentMethods.length === 0 && transactionType ? (
+          <div className="py-8 text-center text-gray-500">
+            <p>所有支付類型都已配置完成</p>
+            <p className="text-sm mt-2">如需新增通道，請使用編輯功能</p>
           </div>
-          <div className="flex items-center gap-4">
-            <Label className="whitespace-nowrap w-[70px]">固定手續費</Label>
-            <Input
-              id="fixedFee"
-              className="max-w-[100px]"
-              value={fixedFee}
-              onChange={(e) => setFixedFee(e.target.value)}
-            />
-          </div>
+        ) : (
+          <div className="py-4 flex flex-col">
+            <Label className="whitespace-nowrap w-[70px] pb-3">
+              {transactionType && TransactionTypeDisplayNames[transactionType]}
+              上游渠道設定
+            </Label>
 
-          <div className="flex items-center gap-4">
-            <Label className="whitespace-nowrap w-[70px]">最小金額</Label>
-            <Input
-              value={minAmount}
-              placeholder="無限制"
-              className="max-w-[100px]"
-              onChange={(e) => {
-                setMinAmount(e.target.value);
-              }}
-            />
-          </div>
-          <div className="flex items-center gap-4">
-            <Label className="whitespace-nowrap w-[70px]">最大金額</Label>
-            <Input
-              value={maxAmount}
-              placeholder="無限制"
-              className="max-w-[100px]"
-              onChange={(e) => {
-                setMaxAmount(e.target.value);
-              }}
-            />
-          </div>
-          <div className="flex items-center gap-4">
-            <Label className="whitespace-nowrap w-[70px]">結算天數</Label>
-            <Input
-              value={settlementInterval}
-              className="max-w-[100px]"
-              onChange={(e) => {
-                setSettlementInterval(e.target.value);
-              }}
-            />
-          </div>
+            {paymentMethod && (
+              <div className="space-y-4">
+                {channelSettings.map((channelSetting, channelIdx) => (
+                  <div key={channelIdx} className="border p-4 rounded-md">
+                    {/* Channel Header */}
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center space-x-4">
+                        <Select
+                          value={channelSetting.paymentChannel}
+                          onValueChange={(value) => {
+                            const newChannelSettings = [...channelSettings];
+                            newChannelSettings[channelIdx].paymentChannel =
+                              value;
+                            setChannelSettings(newChannelSettings);
+                          }}
+                        >
+                          <SelectTrigger className="w-48">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {PaymentChannelCategories[paymentMethod]?.map(
+                                (paymentChannel) => {
+                                  return (
+                                    <SelectItem
+                                      key={paymentChannel}
+                                      value={paymentChannel}
+                                      disabled={
+                                        channelSettings.some(
+                                          (channel) =>
+                                            channel.paymentChannel ===
+                                            paymentChannel
+                                        ) &&
+                                        paymentChannel !==
+                                          channelSetting?.paymentChannel
+                                      }
+                                    >
+                                      {PaymentChannelDisplayNames[
+                                        paymentChannel
+                                      ] || paymentChannel}
+                                    </SelectItem>
+                                  );
+                                }
+                              )}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
 
-          <div className="flex items-center gap-4">
-            <Label className="whitespace-nowrap w-[70px]">狀態</Label>
-            <Switch
-              className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-red-600"
-              checked={enabled}
-              onCheckedChange={(value) => {
-                setEnabled(value);
-              }}
-            />
-            {enabled ? (
-              <span className="text-green-600">啟用</span>
-            ) : (
-              <span className="text-red-600">停用</span>
+                        <Switch
+                          checked={channelSetting.enabled}
+                          onCheckedChange={(checked) => {
+                            const newChannelSettings = [...channelSettings];
+                            newChannelSettings[channelIdx].enabled = checked;
+                            setChannelSettings(newChannelSettings);
+                          }}
+                        />
+                        <span className="text-sm text-gray-600">啟用</span>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const newChannelSettings = channelSettings.filter(
+                            (_, index) => index !== channelIdx
+                          );
+                          setChannelSettings(newChannelSettings);
+                        }}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        <XMarkIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    {/* Channel Settings */}
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <Label className="text-sm">最小金額</Label>
+                        <Input
+                          placeholder="0"
+                          value={channelSetting.minAmount || ""}
+                          onChange={(e) => {
+                            const newChannelSettings = [...channelSettings];
+                            newChannelSettings[channelIdx].minAmount =
+                              e.target.value;
+                            setChannelSettings(newChannelSettings);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm">最大金額</Label>
+                        <Input
+                          placeholder="0"
+                          value={channelSetting.maxAmount || ""}
+                          onChange={(e) => {
+                            const newChannelSettings = [...channelSettings];
+                            newChannelSettings[channelIdx].maxAmount =
+                              e.target.value;
+                            setChannelSettings(newChannelSettings);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm">結算天數</Label>
+                        <Input
+                          placeholder="0"
+                          value={channelSetting.settlementInterval || ""}
+                          onChange={(e) => {
+                            const newChannelSettings = [...channelSettings];
+                            newChannelSettings[channelIdx].settlementInterval =
+                              e.target.value;
+                            setChannelSettings(newChannelSettings);
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Fee Settings */}
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">手續費設定</Label>
+                      {channelSetting.feeSettings.map((feeSetting, feeIdx) => (
+                        <div
+                          key={feeIdx}
+                          className="flex items-center space-x-4 p-3 bg-gray-50 rounded"
+                        >
+                          <div className="w-24">
+                            <span className="text-sm font-medium">
+                              {feeSetting.accountTypeDisplay}
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Label className="text-sm">費率</Label>
+                            <Input
+                              className="w-20"
+                              value={
+                                percentageInputs[`${channelIdx}-${feeIdx}`] ??
+                                convertStringNumberToPercentageNumber(
+                                  feeSetting.percentage
+                                ).toString()
+                              }
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                const inputKey = `${channelIdx}-${feeIdx}`;
+
+                                // Allow empty string, decimal point, and valid number patterns
+                                if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                                  // Store the raw input value
+                                  setPercentageInputs((prev) => ({
+                                    ...prev,
+                                    [inputKey]: value,
+                                  }));
+
+                                  const parsedValue = parseFloat(value);
+                                  if (!isNaN(parsedValue)) {
+                                    const percentageValue = new Decimal(
+                                      parsedValue
+                                    );
+                                    updateFeeSettingPercentage(
+                                      channelIdx,
+                                      feeIdx,
+                                      percentageValue.dividedBy(100).toString()
+                                    );
+                                  } else if (value === "") {
+                                    updateFeeSettingPercentage(
+                                      channelIdx,
+                                      feeIdx,
+                                      "0"
+                                    );
+                                  }
+                                }
+                              }}
+                              onBlur={() => {
+                                // Clear the raw input on blur to show formatted value
+                                const inputKey = `${channelIdx}-${feeIdx}`;
+                                setPercentageInputs((prev) => {
+                                  const newInputs = { ...prev };
+                                  delete newInputs[inputKey];
+                                  return newInputs;
+                                });
+                              }}
+                            />
+                            <span className="text-sm">%</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Label className="text-sm">固定費</Label>
+                            <Input
+                              className="w-24"
+                              value={feeSetting.fixed}
+                              onChange={(e) =>
+                                updateFeeSettingFixed(
+                                  channelIdx,
+                                  feeIdx,
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                {remainingChannel.length > 0 && (
+                  <div className="mt-4">
+                    <button
+                      onClick={() => {
+                        setChannelSettings([
+                          ...channelSettings,
+                          {
+                            paymentChannel: remainingChannel[0],
+                            enabled: true,
+                            feeSettings: createDefaultFeeSettings(),
+                          },
+                        ]);
+                      }}
+                      className="text-sm text-blue-600 hover:text-blue-900"
+                    >
+                      + 新增上游渠道
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
-        </div>
+        )}
+
         <DialogFooter>
-          <Button onClick={handleAddPaymentChannel} disabled={disableButton}>
+          <Button
+            onClick={handleAddPaymentMethod}
+            disabled={disableButton || isLoading}
+            className="bg-purple-700 hover:bg-purple-800"
+          >
             {isLoading ? "新增中..." : "新增"}
           </Button>
         </DialogFooter>

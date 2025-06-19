@@ -1,14 +1,17 @@
 import { NextRouter, useRouter } from "next/router";
-import { clearApplicationCookies, getApplicationCookies } from "../cookie";
+import {
+  clearApplicationCookies,
+  getApplicationCookies,
+} from "../utils/cookie";
 import {
   getOrganizationBaseUrl,
   getOrganizationPrefixUrl,
   isLoginRoutes,
   isPublicRoutes,
-} from "../routes";
+} from "../utils/routes";
 
 import { useEffect } from "react";
-import { useOrganizationInfo } from "./swr/organization";
+import { useOrganization } from "./swr/organization";
 
 const clearAndRedirectToLogin = (router: NextRouter) => {
   clearApplicationCookies();
@@ -25,7 +28,7 @@ export const useAuthGuard = () => {
   const isPublicRoute = isPublicRoutes(router.pathname);
   const isLoginRoute = isLoginRoutes(router.pathname);
 
-  const { organization, isLoading } = useOrganizationInfo({ organizationId });
+  const { organization, isLoading } = useOrganization({ organizationId });
 
   const organizationPrefixUrl = getOrganizationPrefixUrl(organization?.type);
   const organizationBaseUrl = getOrganizationBaseUrl(organization?.type);

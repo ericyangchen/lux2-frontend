@@ -14,14 +14,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/ui/select";
-import { User, UserRole, UserRoleDisplayNames } from "@/lib/types/user";
-import { deleteUserApi, updateUserApi } from "@/lib/apis/organizations/users";
 
-import { ApplicationError } from "@/lib/types/applicationError";
+import { ApiDeleteUser } from "@/lib/apis/users/delete";
+import { ApiUpdateUser } from "@/lib/apis/users/patch";
+import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
-import { getApplicationCookies } from "@/lib/cookie";
+import { User } from "@/lib/types/user";
+import { UserRole } from "@/lib/enums/users/user-role.enum";
+import { UserRoleDisplayNames } from "@/lib/constants/user";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 import { useUsersByOrganizationId } from "@/lib/hooks/swr/user";
@@ -59,8 +62,7 @@ export function UserEditDialog({
     try {
       setIsUpdateLoading(true);
 
-      const response = await updateUserApi({
-        organizationId,
+      const response = await ApiUpdateUser({
         userId: user.id,
         name,
         email,
@@ -110,8 +112,7 @@ export function UserEditDialog({
     try {
       setIsDeleteLoading(true);
 
-      const response = await deleteUserApi({
-        organizationId,
+      const response = await ApiDeleteUser({
         userId: user.id,
         accessToken,
       });
@@ -202,11 +203,17 @@ export function UserEditDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value={UserRole.ADMINISTRATOR}>
-                      {UserRoleDisplayNames[UserRole.ADMINISTRATOR]}
+                    <SelectItem value={UserRole.ADMIN_OWNER}>
+                      {UserRoleDisplayNames[UserRole.ADMIN_OWNER]}
                     </SelectItem>
-                    <SelectItem value={UserRole.OPERATOR}>
-                      {UserRoleDisplayNames[UserRole.OPERATOR]}
+                    <SelectItem value={UserRole.ADMIN_STAFF}>
+                      {UserRoleDisplayNames[UserRole.ADMIN_STAFF]}
+                    </SelectItem>
+                    <SelectItem value={UserRole.MERCHANT_OWNER}>
+                      {UserRoleDisplayNames[UserRole.MERCHANT_OWNER]}
+                    </SelectItem>
+                    <SelectItem value={UserRole.MERCHANT_STAFF}>
+                      {UserRoleDisplayNames[UserRole.MERCHANT_STAFF]}
                     </SelectItem>
                   </SelectGroup>
                 </SelectContent>

@@ -1,15 +1,10 @@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/shadcn/ui/dialog";
-import {
-  OrganizationType,
-  OrganizationTypeDisplayNames,
-} from "@/lib/types/organization";
 import {
   Select,
   SelectContent,
@@ -19,12 +14,14 @@ import {
   SelectValue,
 } from "@/components/shadcn/ui/select";
 
-import { ApplicationError } from "@/lib/types/applicationError";
+import { ApiCreateOrganization } from "@/lib/apis/organizations/post";
+import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
-import { createOrganizationApi } from "@/lib/apis/organizations/organization";
-import { getApplicationCookies } from "@/lib/cookie";
+import { OrgType } from "@/lib/enums/organizations/org-type.enum";
+import { OrgTypeDisplayNames } from "@/lib/constants/organization";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useOrganizationWithChildren } from "@/lib/hooks/swr/organization";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
@@ -46,7 +43,7 @@ export function CreateSubOrganizationDialog({
   });
 
   const [name, setName] = useState("");
-  const [type, setType] = useState<string>(OrganizationType.MERCHANT);
+  const [type, setType] = useState<OrgType>(OrgType.MERCHANT);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleCreateSubOrg = async () => {
@@ -56,7 +53,7 @@ export function CreateSubOrganizationDialog({
 
     try {
       setIsLoading(true);
-      const response = await createOrganizationApi({
+      const response = await ApiCreateOrganization({
         name,
         type,
         parentId: parentOrganizationId,
@@ -96,7 +93,7 @@ export function CreateSubOrganizationDialog({
   const handleCloseDialog = () => {
     closeDialog();
     setName("");
-    setType(OrganizationType.MERCHANT);
+    setType(OrgType.MERCHANT);
   };
 
   return (
@@ -118,17 +115,20 @@ export function CreateSubOrganizationDialog({
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right">類別</Label>
             <div className="col-span-3">
-              <Select defaultValue={type} onValueChange={setType}>
+              <Select
+                defaultValue={type}
+                onValueChange={(value) => setType(value as OrgType)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value={OrganizationType.AGENT}>
-                      {OrganizationTypeDisplayNames[OrganizationType.AGENT]}
+                    <SelectItem value={OrgType.AGENT}>
+                      {OrgTypeDisplayNames[OrgType.AGENT]}
                     </SelectItem>
-                    <SelectItem value={OrganizationType.MERCHANT}>
-                      {OrganizationTypeDisplayNames[OrganizationType.MERCHANT]}
+                    <SelectItem value={OrgType.MERCHANT}>
+                      {OrgTypeDisplayNames[OrgType.MERCHANT]}
                     </SelectItem>
                   </SelectGroup>
                 </SelectContent>

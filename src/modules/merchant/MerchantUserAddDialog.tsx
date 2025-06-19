@@ -6,14 +6,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/shadcn/ui/dialog";
-import { UserRole, UserRoleDisplayNames } from "@/lib/types/user";
 
-import { ApplicationError } from "@/lib/types/applicationError";
+import { ApiCreateUser } from "@/lib/apis/users/post";
+import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
-import { createUserApi } from "@/lib/apis/organizations/users";
-import { getApplicationCookies } from "@/lib/cookie";
+import { OrgType } from "@/lib/enums/organizations/org-type.enum";
+import { UserRole } from "@/lib/enums/users/user-role.enum";
+import { UserRoleDisplayNames } from "@/lib/constants/user";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 import { useUsersByOrganizationId } from "@/lib/hooks/swr/user";
@@ -21,13 +23,15 @@ import { useUsersByOrganizationId } from "@/lib/hooks/swr/user";
 export function MerchantUserAddDialog({
   isOpen,
   closeDialog,
-  role,
   organizationId,
+  role,
+  orgType,
 }: {
   isOpen: boolean;
   closeDialog: () => void;
-  role?: UserRole;
   organizationId: string;
+  role?: UserRole;
+  orgType?: OrgType;
 }) {
   const { toast } = useToast();
 
@@ -43,16 +47,18 @@ export function MerchantUserAddDialog({
   const handleAddUser = async () => {
     const { accessToken } = getApplicationCookies();
 
-    if (!name || !email || !password || !role || !accessToken) return;
+    if (!name || !email || !password || !role || !orgType || !accessToken)
+      return;
 
     try {
       setIsLoading(true);
-      const response = await createUserApi({
+      const response = await ApiCreateUser({
         organizationId,
         name,
         email,
         password,
         role,
+        orgType,
         accessToken,
       });
       const data = await response.json();

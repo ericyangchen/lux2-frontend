@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { allNavigation } from "../routes";
+import { allNavigation } from "../utils/routes";
 import { useRouter } from "next/router";
 
 export const useNavigation = () => {

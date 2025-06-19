@@ -1,31 +1,34 @@
+import {
+  CreatorTypeDisplayNames,
+  TransactionLogActionDisplayNames,
+} from "@/lib/constants/transaction-logs";
 import { Dialog, DialogContent } from "@/components/shadcn/ui/dialog";
 import {
   PaymentChannelDisplayNames,
   PaymentMethodDisplayNames,
-  TransactionDetailedStatusDisplayNames,
-  TransactionDetailedStatusRequireProcessing,
-  TransactionStatus,
+  TransactionInternalStatusDisplayNames,
   TransactionStatusDisplayNames,
   TransactionTypeDisplayNames,
-} from "@/lib/types/transaction";
+} from "@/lib/constants/transaction";
 import {
   formatNumberInPercentage,
   formatNumberWithoutMinFraction,
-} from "@/lib/number";
+} from "@/lib/utils/number";
 import { useEffect, useState } from "react";
 
-import { ApplicationError } from "@/lib/types/applicationError";
+import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
-import { classNames } from "@/lib/utils";
-import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/timezone";
-import { copyToClipboard } from "@/lib/copyToClipboard";
-import { getApplicationCookies } from "@/lib/cookie";
-import { updateTransactionMetadataNoteApi } from "@/lib/apis/transaction-metadata";
+import { PROBLEM_WITHDRAWAL_INTERNAL_STATUSES } from "@/lib/constants/problem-withdrawal-statuses";
+import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
+import { classNames } from "@/lib/utils/classname-utils";
+import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/utils/timezone";
+import { copyToClipboard } from "@/lib/utils/copyToClipboard";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 import { useTransaction } from "@/lib/hooks/swr/transaction";
-import { useTransactionMetadata } from "@/lib/hooks/swr/transaction-metadata";
+import { useTransactionLogs } from "@/lib/hooks/swr/transaction-logs";
 
 export function ApiTransactionInfoDialog({
   isOpen,
@@ -42,81 +45,22 @@ export function ApiTransactionInfoDialog({
     transactionId,
   });
 
-  const { transactionMetadata, mutate: mutateTransactionMetadata } =
-    useTransactionMetadata({
-      transactionId,
-    });
+  const { transactionLogs, isLoading: isLoadingLogs } = useTransactionLogs({
+    transactionId,
+  });
 
   const handleCloseDialog = () => {
     closeDialog();
-    setNote("");
-    setIsEditingNote(false);
   };
 
-  const [isEditingNote, setIsEditingNote] = useState(false);
-  const [note, setNote] = useState<string>(transactionMetadata?.note || "");
-
-  const handleEditTransactionNote = async () => {
-    const { accessToken } = getApplicationCookies();
-
-    if (!accessToken) return;
-
-    try {
-      const response = await updateTransactionMetadataNoteApi({
-        transactionId,
-        note,
-        accessToken,
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        mutateTransactionMetadata(data?.transactionMetadata);
-      } else {
-        throw new ApplicationError(data);
-      }
-
-      mutateTransactionMetadata();
-      setIsEditingNote(false);
-
-      toast({
-        title: "已儲存備注",
-        description: `備注: ${note}`,
-        variant: "success",
-      });
-    } catch (error) {
-      if (error instanceof ApplicationError) {
-        toast({
-          title: "儲存備注失敗",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "儲存備注失敗",
-          description: "Unknown error",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
-  const handleAbortEditTransactionNote = () => {
-    setNote(transactionMetadata?.note || "");
-    setIsEditingNote(false);
-  };
-
-  useEffect(() => {
-    if (isEditingNote) return;
-
-    if (transactionMetadata?.note !== note) {
-      setNote(transactionMetadata?.note || "");
-    }
-  }, [isEditingNote, note, transactionMetadata]);
+  // Sort transaction logs by createdAt ascending
+  const sortedLogs = transactionLogs.sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCloseDialog}>
-      <DialogContent className="max-w-[600px] max-h-[100vh] overflow-y-auto">
+      <DialogContent className="max-w-[800px] max-h-[100vh] overflow-y-auto">
         {transaction && (
           <div className="flex flex-col gap-2">
             {/* 訂單資訊 */}
@@ -125,7 +69,7 @@ export function ApiTransactionInfoDialog({
             </Label>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
               <Label className="whitespace-nowrap min-w-[100px] font-normal">
-                系統自動訂單號:
+                系統訂單號:
               </Label>
               <div
                 className="font-mono cursor-pointer"
@@ -133,7 +77,7 @@ export function ApiTransactionInfoDialog({
                   copyToClipboard({
                     toast,
                     copyingText: transaction.id,
-                    title: "已複製系統自動訂單號",
+                    title: "已複製系統訂單號",
                   })
                 }
               >
@@ -178,7 +122,7 @@ export function ApiTransactionInfoDialog({
               <Label className="whitespace-nowrap min-w-[100px] font-normal">
                 通知 URL:
               </Label>
-              <div className="font-mono">{transaction.notifyUrl}</div>
+              <div className="font-mono">{transaction.notifyUrl || "無"}</div>
             </div>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
               <Label className="whitespace-nowrap min-w-[100px] font-normal">
@@ -190,7 +134,7 @@ export function ApiTransactionInfoDialog({
             </div>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
               <Label className="whitespace-nowrap min-w-[100px] font-normal">
-                通道:
+                支付類型:
               </Label>
               <div className="font-mono">
                 {PaymentMethodDisplayNames[transaction.paymentMethod]}
@@ -209,9 +153,7 @@ export function ApiTransactionInfoDialog({
                 結算天數:
               </Label>
               <div className="font-mono">
-                {transaction.settlementInterval
-                  ? transaction.settlementInterval
-                  : "無"}
+                {transaction.settlementInterval || "無"}
               </div>
             </div>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
@@ -219,7 +161,7 @@ export function ApiTransactionInfoDialog({
                 手續費率:
               </Label>
               <div className="font-mono">
-                {formatNumberInPercentage(transaction.percentageFee)}
+                {formatNumberInPercentage(transaction.feePercentage)}
               </div>
             </div>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
@@ -227,7 +169,7 @@ export function ApiTransactionInfoDialog({
                 固定手續費:
               </Label>
               <div className="font-mono">
-                {formatNumberWithoutMinFraction(transaction.fixedFee)}
+                {formatNumberWithoutMinFraction(transaction.feeFixed)}
               </div>
             </div>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
@@ -261,16 +203,16 @@ export function ApiTransactionInfoDialog({
               <div className="font-mono">
                 <span
                   className={classNames(
-                    TransactionDetailedStatusRequireProcessing.includes(
-                      transaction.detailedStatus
+                    PROBLEM_WITHDRAWAL_INTERNAL_STATUSES.includes(
+                      transaction.internalStatus
                     )
                       ? "text-orange-500"
                       : ""
                   )}
                 >
                   {
-                    TransactionDetailedStatusDisplayNames[
-                      transaction.detailedStatus
+                    TransactionInternalStatusDisplayNames[
+                      transaction.internalStatus
                     ]
                   }
                 </span>
@@ -297,7 +239,19 @@ export function ApiTransactionInfoDialog({
               <Label className="whitespace-nowrap min-w-[100px] font-normal">
                 訊息:
               </Label>
-              <div className="font-mono">{transaction.message}</div>
+              <div className="font-mono">{transaction.message || "無"}</div>
+            </div>
+            <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
+              <Label className="whitespace-nowrap min-w-[100px] font-normal">
+                成功時間:
+              </Label>
+              <div className="font-mono">
+                {transaction.successAt
+                  ? convertDatabaseTimeToReadablePhilippinesTime(
+                      transaction.successAt
+                    )
+                  : "無"}
+              </div>
             </div>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
               <Label className="whitespace-nowrap min-w-[100px] font-normal">
@@ -320,87 +274,6 @@ export function ApiTransactionInfoDialog({
               </div>
             </div>
 
-            {/* 備註 */}
-            <Label className="whitespace-nowrap font-bold text-md mt-8">
-              備註
-            </Label>
-            <div className="flex flex-col items-start gap-2 w-full min-h-6">
-              <Input
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                disabled={!isEditingNote}
-              />
-              <div>
-                {isEditingNote ? (
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handleAbortEditTransactionNote}
-                      className="bg-red-500 hover:bg-red-600"
-                    >
-                      放棄編輯
-                    </Button>
-                    <Button
-                      onClick={handleEditTransactionNote}
-                      className="bg-blue-500 hover:bg-blue-600"
-                    >
-                      儲存編輯
-                    </Button>
-                  </div>
-                ) : (
-                  <Button onClick={() => setIsEditingNote(true)}>
-                    編輯備注
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* 上游資訊 */}
-            <Label className="whitespace-nowrap font-bold text-md mt-8">
-              上游資訊
-            </Label>
-            <div className="flex items-start gap-4 w-full min-h-6">
-              <Label className="whitespace-nowrap min-w-[100px] mt-[5px] font-normal">
-                上游 API 回覆:
-              </Label>
-              <div className="font-mono flex-1">
-                {transactionMetadata?.upstreamReceiveResponse && (
-                  <pre className="text-xs bg-gray-100 rounded-md whitespace-pre-wrap p-4 overflow-auto">
-                    {JSON.stringify(
-                      transactionMetadata.upstreamReceiveResponse,
-                      null,
-                      2
-                    )}
-                  </pre>
-                )}
-              </div>
-            </div>
-            <div className="flex items-start gap-4 w-full min-h-6">
-              <Label className="whitespace-nowrap min-w-[100px] mt-[5px] font-normal">
-                上游 Notify 回覆:
-              </Label>
-              <div className="font-mono flex-1">
-                {transactionMetadata?.upstreamNotifyResponse && (
-                  <pre className="text-xs bg-gray-100 rounded-md whitespace-pre-wrap p-4 overflow-auto">
-                    {JSON.stringify(
-                      transactionMetadata.upstreamNotifyResponse,
-                      null,
-                      2
-                    )}
-                  </pre>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
-              <Label className="whitespace-nowrap min-w-[100px] font-normal">
-                上游 Notify 時間:
-              </Label>
-              <div className="font-mono">
-                {convertDatabaseTimeToReadablePhilippinesTime(
-                  transaction.upstreamNotifiedAt
-                )}
-              </div>
-            </div>
-
             {/* 分潤資訊 */}
             <Label className="whitespace-nowrap font-bold text-md mt-8">
               分潤資訊
@@ -418,10 +291,10 @@ export function ApiTransactionInfoDialog({
                 分潤資訊:
               </Label>
               <div className="font-mono flex-1">
-                {transaction.revenueDistributionInfo && (
+                {transaction.transactionFeeAllocationTable && (
                   <pre className="text-xs bg-gray-100 rounded-md whitespace-pre-wrap p-4 overflow-auto">
                     {JSON.stringify(
-                      transaction.revenueDistributionInfo,
+                      transaction.transactionFeeAllocationTable,
                       null,
                       2
                     )}
@@ -429,6 +302,87 @@ export function ApiTransactionInfoDialog({
                 )}
               </div>
             </div>
+
+            {/* 交易日誌 */}
+            <Label className="whitespace-nowrap font-bold text-md mt-8">
+              交易日誌
+            </Label>
+            {isLoadingLogs ? (
+              <div className="text-center py-4">
+                <Label className="text-gray-400">載入中...</Label>
+              </div>
+            ) : sortedLogs.length > 0 ? (
+              <div className="flex flex-col border rounded-md overflow-hidden">
+                <div className="bg-gray-50 px-4 py-2 border-b">
+                  <div className="grid grid-cols-5 gap-4 text-sm font-semibold text-gray-900">
+                    <div>時間</div>
+                    <div>動作</div>
+                    <div>觸發者</div>
+                    <div>創建者類型</div>
+                    <div>詳細資料</div>
+                  </div>
+                </div>
+                <div className="max-h-96 overflow-y-auto">
+                  {sortedLogs.map((log, index) => (
+                    <div
+                      key={log.id}
+                      className={classNames(
+                        index % 2 === 0 ? "bg-white" : "bg-gray-50",
+                        "px-4 py-3 border-b last:border-b-0"
+                      )}
+                    >
+                      <div className="grid grid-cols-5 gap-4 text-sm">
+                        <div className="font-mono text-xs">
+                          {convertDatabaseTimeToReadablePhilippinesTime(
+                            log.createdAt
+                          )}
+                        </div>
+                        <div className="font-medium">
+                          {TransactionLogActionDisplayNames[log.action] ||
+                            log.action}
+                        </div>
+                        <div className="font-mono text-xs">
+                          {log.triggeredBy || "系統"}
+                        </div>
+                        <div className="text-xs">
+                          {CreatorTypeDisplayNames[log.creatorType] ||
+                            log.creatorType}
+                        </div>
+                        <div className="text-xs">
+                          {log.data ? (
+                            <details className="cursor-pointer">
+                              <summary className="text-blue-600 hover:text-blue-800">
+                                查看詳情
+                              </summary>
+                              <pre className="mt-2 text-xs bg-gray-100 rounded p-2 overflow-auto max-w-xs">
+                                {JSON.stringify(log.data, null, 2)}
+                              </pre>
+                            </details>
+                          ) : (
+                            <span className="text-gray-400">無</span>
+                          )}
+                        </div>
+                      </div>
+                      {(log.route || log.method) && (
+                        <div className="mt-2 text-xs text-gray-500 font-mono">
+                          {log.method} {log.route}
+                        </div>
+                      )}
+                      {log.creatorIdentifier && (
+                        <div className="mt-1 text-xs text-gray-500">
+                          創建者: {log.creatorIdentifier}{" "}
+                          {log.creatorIp && `(${log.creatorIp})`}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <Label className="text-gray-400">無交易日誌</Label>
+              </div>
+            )}
           </div>
         )}
       </DialogContent>

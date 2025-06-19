@@ -1,6 +1,6 @@
 import Head from "next/head";
-import { clearApplicationCookies } from "@/lib/cookie";
-import { companyName } from "@/lib/constants";
+import { clearApplicationCookies } from "@/lib/utils/cookie";
+import { companyName } from "@/lib/constants/common";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 

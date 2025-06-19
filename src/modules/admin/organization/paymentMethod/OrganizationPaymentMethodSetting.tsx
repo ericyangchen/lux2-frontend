@@ -1,21 +1,19 @@
-import {
-  TransactionType,
-  TransactionTypeDisplayNames,
-} from "@/lib/types/transaction";
-
 import { Label } from "@/components/shadcn/ui/label";
 import OrganizationPaymentMethodTable from "./OrganizationPaymentMethodTable";
-import { classNames } from "@/lib/utils";
+import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
+import { TransactionTypeDisplayNames } from "@/lib/constants/transaction";
+import { classNames } from "@/lib/utils/classname-utils";
 import { useState } from "react";
 
 enum Tab {
-  Deposit = "Deposit",
-  Withdrawal = "Withdrawal",
+  API_DEPOSIT = "API_Deposit",
+  API_WITHDRAWAL = "API_Withdrawal",
 }
 
 const tabDisplayNames = {
-  [Tab.Deposit]: TransactionTypeDisplayNames[TransactionType.DEPOSIT],
-  [Tab.Withdrawal]: TransactionTypeDisplayNames[TransactionType.WITHDRAWAL],
+  [Tab.API_DEPOSIT]: TransactionTypeDisplayNames[TransactionType.API_DEPOSIT],
+  [Tab.API_WITHDRAWAL]:
+    TransactionTypeDisplayNames[TransactionType.API_WITHDRAWAL],
 };
 
 export default function OrganizationPaymentMethodSetting({
@@ -23,16 +21,16 @@ export default function OrganizationPaymentMethodSetting({
 }: {
   organizationId: string;
 }) {
-  const [selectedTab, setSelectedTab] = useState<string>(Tab.Deposit);
+  const [selectedTab, setSelectedTab] = useState<string>(Tab.API_DEPOSIT);
 
   const type =
-    selectedTab === Tab.Deposit
-      ? TransactionType.DEPOSIT
-      : TransactionType.WITHDRAWAL;
+    selectedTab === Tab.API_DEPOSIT
+      ? TransactionType.API_DEPOSIT
+      : TransactionType.API_WITHDRAWAL;
 
   return (
     <div className="py-8">
-      <Label className="text-xl font-bold">通道設定</Label>
+      <Label className="text-xl font-bold">支付類型設定</Label>
 
       <div className="px-0 sm:px-4 py-4">
         <div className="sm:hidden">

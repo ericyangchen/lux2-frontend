@@ -1,4 +1,4 @@
-import { PaymentMethod } from "./transaction";
+import { PaymentMethod } from "../enums/transactions/payment-method.enum";
 
 export interface Balance {
   id: string;

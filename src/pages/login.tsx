@@ -6,7 +6,8 @@ import {
 } from "@/components/shadcn/ui/card";
 import React, { useState } from "react";
 
-import { ApplicationError } from "@/lib/types/applicationError";
+import { ApiLogin } from "@/lib/apis/auth/post";
+import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import CopyText from "@/modules/common/CopyText";
 import Head from "next/head";
@@ -14,10 +15,9 @@ import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { Organization } from "@/lib/types/organization";
 import { User } from "@/lib/types/user";
-import { companyName } from "@/lib/constants";
-import { getOrganizationBaseUrl } from "@/lib/routes";
-import { loginApi } from "@/lib/apis/auth/login";
-import { setApplicationCookies } from "@/lib/cookie";
+import { companyName } from "@/lib/constants/common";
+import { getOrganizationBaseUrl } from "@/lib/utils/routes";
+import { setApplicationCookies } from "@/lib/utils/cookie";
 import { useRouter } from "next/router";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
@@ -35,19 +35,17 @@ export default function LoginPage() {
   const handleLoginRedirect = ({
     accessToken,
     user,
-    organization,
   }: {
     accessToken: string;
     user: User;
-    organization: Organization;
   }) => {
     setApplicationCookies({
       userId: user.id,
-      organizationId: organization.id,
+      organizationId: user.organizationId,
       accessToken,
     });
 
-    const organizationBaseUrl = getOrganizationBaseUrl(organization.type);
+    const organizationBaseUrl = getOrganizationBaseUrl(user.orgType);
 
     if (!organizationBaseUrl) {
       throw new ApplicationError({
@@ -64,12 +62,11 @@ export default function LoginPage() {
       setLoading(true);
       setUnauthorizedIp("");
 
-      const payload = {
+      const response = await ApiLogin({
         email,
         password,
         totpCode: twoFactorCode,
-      };
-      const response = await loginApi(payload);
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -80,17 +77,13 @@ export default function LoginPage() {
       // response ok
       const data = await response.json();
 
-      const { accessToken, user, organization } = data;
+      const { accessToken, user, totpRequired } = data;
 
       // Check if the response is valid
-      if (!accessToken || !user || !organization) {
-        const message = `Invalid server response: ${
-          accessToken ? "" : "no accessToken"
-        }${user ? "" : ", no user"}${organization ? "" : ", no organization"}`;
-
+      if (!accessToken || !user) {
         toast({
           title: "500 - Login failed",
-          description: message,
+          description: "No accessToken or user",
           variant: "destructive",
         });
 
@@ -98,7 +91,7 @@ export default function LoginPage() {
       }
 
       // successful login, redirect
-      handleLoginRedirect({ accessToken, user, organization });
+      handleLoginRedirect({ accessToken, user });
 
       return;
     } catch (error) {

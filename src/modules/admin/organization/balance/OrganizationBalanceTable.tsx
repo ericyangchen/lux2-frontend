@@ -1,7 +1,7 @@
 import { Balance } from "@/lib/types/balance";
-import { Calculator } from "@/lib/calculator";
-import { PaymentMethodDisplayNames } from "@/lib/types/transaction";
-import { formatNumber } from "@/lib/number";
+import { Calculator } from "@/lib/utils/calculator";
+import { PaymentMethodDisplayNames } from "@/lib/constants/transaction";
+import { formatNumber } from "@/lib/utils/number";
 
 export default function OrganizationBalanceTable({
   balances,
@@ -20,7 +20,7 @@ export default function OrganizationBalanceTable({
                     scope="col"
                     className="text-left px-3 py-3.5 text-sm font-semibold text-gray-900 pl-4 sm:pl-6"
                   >
-                    通道
+                    支付類型
                   </th>
                   <th
                     scope="col"

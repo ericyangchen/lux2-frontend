@@ -1,0 +1,44 @@
+export enum UserActivityAction {
+  // Authentication
+  LOGIN = 'LOGIN',
+  LOGOUT = 'LOGOUT',
+
+  // User Management
+  CREATE_USER = 'CREATE_USER',
+  UPDATE_USER = 'UPDATE_USER',
+  DELETE_USER = 'DELETE_USER',
+
+  // OTP Management
+  ENABLE_OTP = 'ENABLE_OTP',
+  DISABLE_OTP = 'DISABLE_OTP',
+
+  // IP Management
+  ADD_LOGIN_IP = 'ADD_LOGIN_IP',
+  REMOVE_LOGIN_IP = 'REMOVE_LOGIN_IP',
+
+  /**
+   * MERCHANT ACTIONS
+   */
+  // Merchant Requested Withdrawal Management
+  CREATE_MERCHANT_REQUESTED_WITHDRAWAL = 'CREATE_MERCHANT_REQUESTED_WITHDRAWAL',
+
+  /**
+   * ADMIN ACTIONS
+   */
+  // Organization Management
+  CREATE_ORGANIZATION = 'CREATE_ORGANIZATION',
+  UPDATE_ORGANIZATION = 'UPDATE_ORGANIZATION',
+
+  // Withdrawal IP Management
+  ADD_WITHDRAWAL_IP = 'ADD_WITHDRAWAL_IP',
+  REMOVE_WITHDRAWAL_IP = 'REMOVE_WITHDRAWAL_IP',
+
+  // Notification Management
+  // TRIGGER_NOTIFICATION = 'TRIGGER_NOTIFICATION',
+
+  // Transaction Fee Management
+  MODIFY_TRANSACTION_FEE_SETTINGS = 'MODIFY_TRANSACTION_FEE_SETTINGS',
+
+  // Balance Management
+  MODIFY_BALANCE = 'MODIFY_BALANCE',
+}
