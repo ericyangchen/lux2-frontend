@@ -7,9 +7,9 @@ import {
   ComboboxOptions,
 } from "@headlessui/react";
 
-import { OrganizationType } from "@/lib/types/organization";
+import { OrgType } from "@/lib/enums/organizations/org-type.enum";
 import { flattenOrganizations } from "./flattenOrganizations";
-import { getApplicationCookies } from "@/lib/cookie";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useOrganizationWithChildren } from "@/lib/hooks/swr/organization";
 import { useState } from "react";
 
@@ -20,7 +20,7 @@ export function OrganizationSearchBar({
 }: {
   selectedOrganizationId?: string;
   setSelectedOrganizationId: (id: string) => void;
-  organizationType?: OrganizationType;
+  organizationType?: OrgType;
 }) {
   const { organization } = useOrganizationWithChildren({
     organizationId: getApplicationCookies().organizationId,

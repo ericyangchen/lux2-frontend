@@ -1,7 +1,7 @@
 import { ApplicationHeader } from "@/modules/common/ApplicationHeader";
 import { OrganizationDetail } from "@/modules/admin/organization/OrganizationDetail";
 import { OrganizationList } from "@/modules/admin/organization/OrganizationList";
-import { getApplicationCookies } from "@/lib/cookie";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useOrganizationWithChildren } from "@/lib/hooks/swr/organization";
 import { useState } from "react";
 

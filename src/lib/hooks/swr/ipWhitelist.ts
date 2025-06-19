@@ -1,8 +1,8 @@
-import { ApplicationError } from "@/lib/types/applicationError";
+import { ApiGetOrganizationIpWhitelists } from "@/lib/apis/ip-whitelists/get";
+import { ApplicationError } from "@/lib/error/applicationError";
 import { IpWhitelist } from "@/lib/types/ip-whitelist";
-import { USE_ORGANIZATION_IP_WHITELISTS_REFRESH_INTERVAL } from "./constants";
-import { getApplicationCookies } from "@/lib/cookie";
-import { getOrganizationIpWhitelistsByOrganizationIdApi } from "@/lib/apis/organizations/ip-whitelist";
+import { USE_ORGANIZATION_IP_WHITELISTS_REFRESH_INTERVAL } from "../../constants/swr-refresh-interval";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import useSWR from "swr";
 
 const fetchOrganizationIpWhitelistsByOrganizationId = async ({
@@ -12,7 +12,7 @@ const fetchOrganizationIpWhitelistsByOrganizationId = async ({
   organizationId: string;
   accessToken: string;
 }) => {
-  const response = await getOrganizationIpWhitelistsByOrganizationIdApi({
+  const response = await ApiGetOrganizationIpWhitelists({
     organizationId,
     accessToken,
   });
@@ -44,7 +44,7 @@ export const useIpWhitelists = ({
   );
 
   return {
-    ipWhitelists: (data?.ipWhitelists as IpWhitelist[]) || [],
+    ipWhitelists: (data as IpWhitelist[]) || [],
     isLoading: isLoading,
     isError: error,
     mutate,

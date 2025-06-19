@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import ChannelListTable from "./ChannelListTable";
-import { classNames } from "@/lib/utils";
+import { classNames } from "@/lib/utils/classname-utils";
 import { useRouter } from "next/router";
 
 enum Tab {

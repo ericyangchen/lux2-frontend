@@ -1,13 +1,15 @@
+import {
+  ApiGetOrganizationBalance,
+  ApiGetSystemBalances,
+} from "@/lib/apis/balances/get";
 import { Balance, SystemBalance } from "@/lib/types/balance";
 import {
   USD_SYSTEM_BALANCE_REFRESH_INTERVAL,
   USE_BALANCES_REFRESH_INTERVAL,
-} from "./constants";
+} from "../../constants/swr-refresh-interval";
 
-import { ApplicationError } from "@/lib/types/applicationError";
-import { getApplicationCookies } from "@/lib/cookie";
-import { getOrganizationBalancesApi } from "@/lib/apis/organizations/balance";
-import { getSystemBalanceApi } from "@/lib/apis/balances/getSystemBalance";
+import { ApplicationError } from "@/lib/error/applicationError";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import useSWR from "swr";
 
 const fetchBalancesByOrganizationId = async ({
@@ -17,7 +19,7 @@ const fetchBalancesByOrganizationId = async ({
   organizationId: string;
   accessToken: string;
 }) => {
-  const response = await getOrganizationBalancesApi({
+  const response = await ApiGetOrganizationBalance({
     organizationId,
     accessToken,
   });
@@ -49,7 +51,7 @@ export const useBalances = ({
   );
 
   return {
-    balances: (data?.balances as Balance[]) || [],
+    balances: (data as Balance[]) || [],
     isLoading: isLoading,
     isError: error,
     mutate,
@@ -57,7 +59,7 @@ export const useBalances = ({
 };
 
 const fetchSystemBalance = async ({ accessToken }: { accessToken: string }) => {
-  const response = await getSystemBalanceApi({
+  const response = await ApiGetSystemBalances({
     accessToken,
   });
 

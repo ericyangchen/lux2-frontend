@@ -1,10 +1,13 @@
-import { User, UserRole, UserRoleDisplayNames } from "@/lib/types/user";
-
 import { Label } from "@/components/shadcn/ui/label";
+import { OrgType } from "@/lib/enums/organizations/org-type.enum";
+import { User } from "@/lib/types/user";
 import { UserAddDialog } from "./UserAddDialog";
 import { UserEditDialog } from "./UserEditDialog";
-import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/timezone";
-import { copyToClipboard } from "@/lib/copyToClipboard";
+import { UserRole } from "@/lib/enums/users/user-role.enum";
+import { UserRoleDisplayNames } from "@/lib/constants/user";
+import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/utils/timezone";
+import { copyToClipboard } from "@/lib/utils/copyToClipboard";
+import { useOrganization } from "@/lib/hooks/swr/organization";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 import { useUserPermission } from "@/lib/hooks/useUserPermission";
@@ -18,18 +21,25 @@ export function OrganizationUserSetting({
   const { toast } = useToast();
 
   const { users } = useUsersByOrganizationId({ organizationId });
+  const { organization } = useOrganization({ organizationId });
 
   const permission = useUserPermission({
     accessingOrganizationId: organizationId,
   });
 
-  const administratorUsers = users?.filter(
-    (user) => user.role === UserRole.ADMINISTRATOR
-  );
+  const ownerUserRole =
+    organization?.type === OrgType.ADMIN
+      ? UserRole.ADMIN_OWNER
+      : UserRole.MERCHANT_OWNER;
 
-  const operatorUsers = users?.filter(
-    (user) => user.role === UserRole.OPERATOR
-  );
+  const staffUserRole =
+    organization?.type === OrgType.ADMIN
+      ? UserRole.ADMIN_STAFF
+      : UserRole.MERCHANT_STAFF;
+
+  const ownerUsers = users?.filter((user) => user.role === ownerUserRole);
+
+  const staffUsers = users?.filter((user) => user.role === staffUserRole);
 
   // Add Dialog
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -73,33 +83,35 @@ export function OrganizationUserSetting({
    * - Show Edit Button
    * - Show Delete Button
    */
-  const showAdminAddButton =
-    (permission.accessingSelfOrg && permission.isAdministrator) ||
-    (permission.isGeneralAgentOrg &&
-      permission.isAdministrator &&
-      administratorUsers?.length == 0);
-  const showAdminEditButton =
-    permission.accessingSelfOrg && permission.isAdministrator;
-  const showOperatorAddButton =
-    permission.accessingSelfOrg && permission.isAdministrator;
-  const showOperatorEditButton =
-    permission.accessingSelfOrg && permission.isAdministrator;
+  const showOwnerAddButton =
+    permission.isDeveloper ||
+    (permission.accessingSelfOrg && permission.isOwner) ||
+    (permission.isAdminOrg && permission.isOwner && ownerUsers?.length == 0);
+  const showOwnerEditButton =
+    permission.isDeveloper ||
+    (permission.accessingSelfOrg && permission.isOwner);
+  const showStaffAddButton =
+    permission.isDeveloper ||
+    (permission.accessingSelfOrg && permission.isStaff);
+  const showStaffEditButton =
+    permission.isDeveloper ||
+    (permission.accessingSelfOrg && permission.isStaff);
 
   return (
     <div className="">
-      {/* Administrator */}
+      {/* Organization Owner */}
       <div className="px-0 sm:px-4">
         <div className="py-2 pb-4">
           <div className="flex justify-between items-center h-7">
             <Label className="text-md font-semibold px-2">
-              {UserRoleDisplayNames[UserRole.ADMINISTRATOR]}
+              {UserRoleDisplayNames[ownerUserRole]}
             </Label>
-            {showAdminAddButton && (
+            {showOwnerAddButton && (
               <button
                 className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 rounded-md transition-colors duration-200"
                 onClick={() =>
                   openAddDialog({
-                    role: UserRole.ADMINISTRATOR,
+                    role: ownerUserRole,
                   })
                 }
               >
@@ -145,38 +157,38 @@ export function OrganizationUserSetting({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {administratorUsers?.length ? (
-                  administratorUsers?.map((administratorUser) => (
-                    <tr key={administratorUser.id}>
+                {ownerUsers?.length ? (
+                  ownerUsers?.map((ownerUser) => (
+                    <tr key={ownerUser.id}>
                       <td
                         className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-500 sm:pl-6 font-mono cursor-pointer"
                         onClick={() =>
                           copyToClipboard({
                             toast,
-                            copyingText: administratorUser.id,
+                            copyingText: ownerUser.id,
                           })
                         }
                       >
-                        {administratorUser.id}
+                        {ownerUser.id}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-semibold">
-                        {administratorUser.email}
+                        {ownerUser.email}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {administratorUser.name}
+                        {ownerUser.name}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {convertDatabaseTimeToReadablePhilippinesTime(
-                          administratorUser.createdAt
+                          ownerUser.createdAt
                         )}
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium">
-                        {showAdminEditButton && (
+                        {showOwnerEditButton && (
                           <button
                             className="text-gray-900 hover:text-black"
                             onClick={() =>
                               openEditDialog({
-                                id: administratorUser.id,
+                                id: ownerUser.id,
                               })
                             }
                           >
@@ -192,7 +204,7 @@ export function OrganizationUserSetting({
                       colSpan={5}
                       className="px-4 py-4 text-sm text-gray-500 text-center"
                     >
-                      沒有{UserRoleDisplayNames[UserRole.ADMINISTRATOR]}
+                      沒有{UserRoleDisplayNames[ownerUserRole]}
                     </td>
                   </tr>
                 )}
@@ -202,19 +214,19 @@ export function OrganizationUserSetting({
         </div>
       </div>
 
-      {/* Operator */}
+      {/* Organization Staff */}
       <div className="px-0 sm:px-4">
         <div className="py-2 pb-4">
           <div className="flex justify-between items-center h-7">
             <Label className="text-md font-semibold px-2">
-              {UserRoleDisplayNames[UserRole.OPERATOR]}
+              {UserRoleDisplayNames[staffUserRole]}
             </Label>
-            {showOperatorAddButton && (
+            {showStaffAddButton && (
               <button
                 className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 rounded-md transition-colors duration-200"
                 onClick={() =>
                   openAddDialog({
-                    role: UserRole.OPERATOR,
+                    role: staffUserRole,
                   })
                 }
               >
@@ -260,38 +272,38 @@ export function OrganizationUserSetting({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {operatorUsers?.length ? (
-                  operatorUsers?.map((operatorUser) => (
-                    <tr key={operatorUser.id}>
+                {staffUsers?.length ? (
+                  staffUsers?.map((staffUser) => (
+                    <tr key={staffUser.id}>
                       <td
                         className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-500 sm:pl-6 font-mono cursor-pointer"
                         onClick={() =>
                           copyToClipboard({
                             toast,
-                            copyingText: operatorUser.id,
+                            copyingText: staffUser.id,
                           })
                         }
                       >
-                        {operatorUser.id}
+                        {staffUser.id}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-semibold">
-                        {operatorUser.email}
+                        {staffUser.email}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {operatorUser.name}
+                        {staffUser.name}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {convertDatabaseTimeToReadablePhilippinesTime(
-                          operatorUser.createdAt
+                          staffUser.createdAt
                         )}
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium">
-                        {showOperatorEditButton && (
+                        {showStaffEditButton && (
                           <button
                             className="text-gray-900 hover:text-black"
                             onClick={() =>
                               openEditDialog({
-                                id: operatorUser.id,
+                                id: staffUser.id,
                               })
                             }
                           >
@@ -307,7 +319,7 @@ export function OrganizationUserSetting({
                       colSpan={5}
                       className="px-4 py-4 text-sm text-gray-500 text-center"
                     >
-                      沒有{UserRoleDisplayNames[UserRole.OPERATOR]}
+                      沒有{UserRoleDisplayNames[staffUserRole]}
                     </td>
                   </tr>
                 )}
@@ -322,6 +334,7 @@ export function OrganizationUserSetting({
         isOpen={isAddDialogOpen}
         closeDialog={closeAddDialog}
         role={addDialogRole}
+        orgType={organization?.type}
         organizationId={organizationId}
       />
       {editUser && (

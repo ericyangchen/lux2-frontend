@@ -1,11 +1,11 @@
-import { PaymentMethod } from "./transaction";
+import { PaymentMethod } from "../enums/transactions/payment-method.enum";
 
 export interface Revenue {
   id: string;
-  transactionId: string;
   organizationId: string;
   paymentMethod: PaymentMethod;
   revenue: string;
+  fromTransactionId: string;
   createdAt: string;
   updatedAt?: string;
   deletedAt?: string;

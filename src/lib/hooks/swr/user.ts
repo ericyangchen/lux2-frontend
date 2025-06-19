@@ -1,28 +1,22 @@
+import { ApiGetOrganizationUsers, ApiGetUserById } from "@/lib/apis/users/get";
 import {
   USE_USERS_REFRESH_INTERVAL,
   USE_USER_REFRESH_INTERVAL,
-} from "./constants";
-import {
-  getUserByIdApi,
-  getUsersByOrganizationIdApi,
-} from "../../apis/organizations/users";
+} from "../../constants/swr-refresh-interval";
 
-import { ApplicationError } from "@/lib/types/applicationError";
+import { ApplicationError } from "@/lib/error/applicationError";
 import { User } from "@/lib/types/user";
-import { getApplicationCookies } from "@/lib/cookie";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import useSWR from "swr";
 
 const fetchUserById = async ({
-  organizationId,
   userId,
   accessToken,
 }: {
-  organizationId: string;
   userId: string;
   accessToken: string;
 }) => {
-  const response = await getUserByIdApi({
-    organizationId,
+  const response = await ApiGetUserById({
     userId,
     accessToken,
   });
@@ -39,18 +33,18 @@ const fetchUserById = async ({
 };
 
 export const useUser = () => {
-  const { accessToken, organizationId, userId } = getApplicationCookies();
+  const { accessToken, userId } = getApplicationCookies();
 
-  const shouldFetch = accessToken && organizationId && userId;
+  const shouldFetch = accessToken && userId;
 
   const { data, error, isLoading, mutate } = useSWR(
-    shouldFetch ? { key: "user", organizationId, userId, accessToken } : null,
+    shouldFetch ? { key: "user", userId, accessToken } : null,
     fetchUserById,
     { refreshInterval: USE_USER_REFRESH_INTERVAL }
   );
 
   return {
-    user: data?.user as User,
+    user: data as User,
     isLoading: isLoading,
     isError: error,
     mutate,
@@ -64,7 +58,7 @@ const fetchUsersByOrganizationId = async ({
   organizationId: string;
   accessToken: string;
 }) => {
-  const response = await getUsersByOrganizationIdApi({
+  const response = await ApiGetOrganizationUsers({
     organizationId,
     accessToken,
   });
@@ -96,7 +90,7 @@ export const useUsersByOrganizationId = ({
   );
 
   return {
-    users: (data?.users as User[]) || [],
+    users: (data as User[]) || [],
     isLoading: isLoading,
     isError: error,
     mutate,

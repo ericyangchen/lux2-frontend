@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ApiTransactionList } from "./ApiTransactionList";
 import { ManualTransactionList } from "./ManualTransactionList";
 import { RevenueDistributionList } from "./RevenueDistributionList";
-import { classNames } from "@/lib/utils";
+import { classNames } from "@/lib/utils/classname-utils";
 import { useRouter } from "next/router";
 
 enum Tab {
@@ -13,7 +13,7 @@ enum Tab {
 }
 
 const tabDisplayNames = {
-  [Tab.ApiTransaction]: "自動訂單",
+  [Tab.ApiTransaction]: "代收付訂單",
   [Tab.ManualTransaction]: "手動訂單",
   [Tab.RevenueDistribution]: "訂單分潤",
 };
@@ -92,8 +92,8 @@ export function TransactionListView() {
       </div>
 
       {selectedTab === Tab.ApiTransaction && <ApiTransactionList />}
-      {selectedTab === Tab.ManualTransaction && <ManualTransactionList />}
-      {selectedTab === Tab.RevenueDistribution && <RevenueDistributionList />}
+      {/* {selectedTab === Tab.ManualTransaction && <ManualTransactionList />} */}
+      {/* {selectedTab === Tab.RevenueDistribution && <RevenueDistributionList />} */}
     </div>
   );
 }

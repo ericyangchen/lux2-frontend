@@ -1,4 +1,11 @@
 import {
+  ApiGetSystemTransactionCount,
+  ApiGetTransactionById,
+  ApiGetTransactionCountByOrganizationId,
+  ApiGetTransactions,
+  ApiGetTransactionsByMerchantId,
+} from "@/lib/apis/transactions/get";
+import {
   DailyTransactionCountByOrganizationId,
   SystemDailyTransactionCount,
   Transaction,
@@ -7,15 +14,15 @@ import {
   USE_DAILY_TRANSACTION_COUNT_BY_ORGANIZATION_ID_REFRESH_INTERVAL,
   USE_SYSTEM_DAILY_TRANSACTION_COUNT_REFRESH_INTERVAL,
   USE_TRANSACTION_REFRESH_INTERVAL,
-} from "./constants";
-import {
-  getSystemDailyTransactionCountApi,
-  getTransactionByIdApi,
-} from "@/lib/apis/transactions";
+} from "../../constants/swr-refresh-interval";
 
-import { ApplicationError } from "@/lib/types/applicationError";
-import { getApplicationCookies } from "@/lib/cookie";
-import { getDailyTransactionCountByOrganizationIdApi } from "@/lib/apis/organizations/transaction";
+import { ApplicationError } from "@/lib/error/applicationError";
+import { PaymentChannel } from "@/lib/enums/transactions/payment-channel.enum";
+import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
+import { TransactionInternalStatus } from "@/lib/enums/transactions/transaction-internal-status.enum";
+import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
+import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import useSWR from "swr";
 
 const fetchTransactionById = async ({
@@ -25,8 +32,8 @@ const fetchTransactionById = async ({
   transactionId: string;
   accessToken: string;
 }) => {
-  const response = await getTransactionByIdApi({
-    transactionId,
+  const response = await ApiGetTransactionById({
+    id: transactionId,
     accessToken,
   });
 
@@ -57,7 +64,257 @@ export const useTransaction = ({
   );
 
   return {
-    transaction: data?.transaction as Transaction,
+    transaction: data as Transaction,
+    isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
+const fetchOrganizationTransactions = async ({
+  merchantId,
+  type,
+  merchantOrderId,
+  paymentMethod,
+  paymentChannel,
+  internalStatus,
+  revenueDistributed,
+  status,
+  createdAtStart,
+  createdAtEnd,
+  limit,
+  cursorCreatedAt,
+  cursorId,
+  accessToken,
+}: {
+  merchantId: string;
+  type?: TransactionType;
+  merchantOrderId?: string;
+  paymentMethod?: PaymentMethod;
+  paymentChannel?: PaymentChannel;
+  internalStatus?: TransactionInternalStatus;
+  revenueDistributed?: boolean;
+  status?: TransactionStatus;
+  createdAtStart?: string;
+  createdAtEnd?: string;
+  limit?: number;
+  cursorCreatedAt?: string;
+  cursorId?: string;
+  accessToken: string;
+}) => {
+  const response = await ApiGetTransactionsByMerchantId({
+    merchantId,
+    type,
+    merchantOrderId,
+    paymentMethod,
+    paymentChannel,
+    internalStatus,
+    revenueDistributed,
+    status,
+    createdAtStart,
+    createdAtEnd,
+    limit,
+    cursorCreatedAt,
+    cursorId,
+    accessToken,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+
+    const error = new ApplicationError(errorData);
+
+    throw error;
+  }
+
+  return response.json();
+};
+
+export const useOrganizationTransactions = ({
+  merchantId,
+  type,
+  merchantOrderId,
+  paymentMethod,
+  paymentChannel,
+  internalStatus,
+  revenueDistributed,
+  status,
+  createdAtStart,
+  createdAtEnd,
+  limit,
+  cursorCreatedAt,
+  cursorId,
+}: {
+  merchantId: string;
+  type?: TransactionType;
+  merchantOrderId?: string;
+  paymentMethod?: PaymentMethod;
+  paymentChannel?: PaymentChannel;
+  internalStatus?: TransactionInternalStatus;
+  revenueDistributed?: boolean;
+  status?: TransactionStatus;
+  createdAtStart?: string;
+  createdAtEnd?: string;
+  limit?: number;
+  cursorCreatedAt?: string;
+  cursorId?: string;
+}) => {
+  const { accessToken } = getApplicationCookies();
+
+  const shouldFetch = accessToken && merchantId;
+
+  const { data, error, isLoading, mutate } = useSWR(
+    shouldFetch
+      ? {
+          key: "transactions-by-merchant-id",
+          merchantId,
+          type,
+          merchantOrderId,
+          paymentMethod,
+          paymentChannel,
+          internalStatus,
+          revenueDistributed,
+          status,
+          createdAtStart,
+          createdAtEnd,
+          limit,
+          cursorCreatedAt,
+          cursorId,
+          accessToken,
+        }
+      : null,
+    fetchOrganizationTransactions,
+    { refreshInterval: 0 }
+  );
+
+  return {
+    transactions: (data?.data as Transaction[]) || [],
+    pagination: data?.pagination,
+    isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
+const fetchTransactions = async ({
+  type,
+  merchantId,
+  merchantOrderId,
+  paymentMethod,
+  paymentChannel,
+  internalStatus,
+  revenueDistributed,
+  status,
+  createdAtStart,
+  createdAtEnd,
+  limit,
+  cursorCreatedAt,
+  cursorId,
+  accessToken,
+}: {
+  type?: TransactionType;
+  merchantId?: string;
+  merchantOrderId?: string;
+  paymentMethod?: PaymentMethod;
+  paymentChannel?: PaymentChannel;
+  internalStatus?: TransactionInternalStatus;
+  revenueDistributed?: boolean;
+  status?: TransactionStatus;
+  createdAtStart?: string;
+  createdAtEnd?: string;
+  limit?: number;
+  cursorCreatedAt?: string;
+  cursorId?: string;
+  accessToken: string;
+}) => {
+  const response = await ApiGetTransactions({
+    type,
+    merchantId,
+    merchantOrderId,
+    paymentMethod,
+    paymentChannel,
+    internalStatus,
+    revenueDistributed,
+    status,
+    createdAtStart,
+    createdAtEnd,
+    limit,
+    cursorCreatedAt,
+    cursorId,
+    accessToken,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+
+    const error = new ApplicationError(errorData);
+
+    throw error;
+  }
+
+  return response.json();
+};
+
+export const useTransactions = ({
+  merchantId,
+  type,
+  merchantOrderId,
+  paymentMethod,
+  paymentChannel,
+  internalStatus,
+  revenueDistributed,
+  status,
+  createdAtStart,
+  createdAtEnd,
+  limit,
+  cursorCreatedAt,
+  cursorId,
+}: {
+  type?: TransactionType;
+  merchantId?: string;
+  merchantOrderId?: string;
+  paymentMethod?: PaymentMethod;
+  paymentChannel?: PaymentChannel;
+  internalStatus?: TransactionInternalStatus;
+  revenueDistributed?: boolean;
+  status?: TransactionStatus;
+  createdAtStart?: string;
+  createdAtEnd?: string;
+  limit?: number;
+  cursorCreatedAt?: string;
+  cursorId?: string;
+}) => {
+  const { accessToken } = getApplicationCookies();
+
+  const shouldFetch = accessToken && merchantId;
+
+  const { data, error, isLoading, mutate } = useSWR(
+    shouldFetch
+      ? {
+          key: "transactions",
+          type,
+          merchantId,
+          merchantOrderId,
+          paymentMethod,
+          paymentChannel,
+          internalStatus,
+          revenueDistributed,
+          status,
+          createdAtStart,
+          createdAtEnd,
+          limit,
+          cursorCreatedAt,
+          cursorId,
+          accessToken,
+        }
+      : null,
+    fetchTransactions,
+    { refreshInterval: 0 }
+  );
+
+  return {
+    transactions: (data?.data as Transaction[]) || [],
+    pagination: data?.pagination,
     isLoading,
     isError: error,
     mutate,
@@ -69,7 +326,8 @@ const fetchSystemDailyTransactionCount = async ({
 }: {
   accessToken: string;
 }) => {
-  const response = await getSystemDailyTransactionCountApi({
+  const response = await ApiGetSystemTransactionCount({
+    period: "daily",
     accessToken,
   });
 
@@ -110,8 +368,9 @@ const fetchDailyTransactionCountByOrganizationId = async ({
   organizationId: string;
   accessToken: string;
 }) => {
-  const response = await getDailyTransactionCountByOrganizationIdApi({
+  const response = await ApiGetTransactionCountByOrganizationId({
     organizationId,
+    period: "daily",
     accessToken,
   });
 

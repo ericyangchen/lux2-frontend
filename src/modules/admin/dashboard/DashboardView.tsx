@@ -1,9 +1,9 @@
-import { formatNumber, formatNumberInInteger } from "@/lib/number";
+import { formatNumber, formatNumberInInteger } from "@/lib/utils/number";
 
-import { Calculator } from "@/lib/calculator";
+import { Calculator } from "@/lib/utils/calculator";
 import { Label } from "@/components/shadcn/ui/label";
-import { classNames } from "@/lib/utils";
-import { currencySymbol } from "@/lib/constants";
+import { classNames } from "@/lib/utils/classname-utils";
+import { currencySymbol } from "@/lib/constants/common";
 import { useSystemBalance } from "@/lib/hooks/swr/balance";
 import { useSystemDailyTransactionCount } from "@/lib/hooks/swr/transaction";
 

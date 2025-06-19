@@ -7,13 +7,13 @@ import {
   DialogTitle,
 } from "@/components/shadcn/ui/dialog";
 
-import { ApplicationError } from "@/lib/types/applicationError";
+import { ApiCreateIpWhitelist } from "@/lib/apis/ip-whitelists/post";
+import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
-import { IpWhitelistType } from "@/lib/types/ip-whitelist";
+import { IpWhitelistType } from "@/lib/enums/ip-whitelists/ip-whitelist-type.enum";
 import { Label } from "@/components/shadcn/ui/label";
-import { createOrganizationIpWhitelistApi } from "@/lib/apis/organizations/ip-whitelist";
-import { getApplicationCookies } from "@/lib/cookie";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useIpWhitelists } from "@/lib/hooks/swr/ipWhitelist";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
@@ -53,9 +53,8 @@ export function IpWhitelistAddDialog({
     try {
       setIsLoading(true);
 
-      const response = await createOrganizationIpWhitelistApi({
+      const response = await ApiCreateIpWhitelist({
         organizationId,
-        creatorId: user.id,
         type,
         ipAddress,
         accessToken,

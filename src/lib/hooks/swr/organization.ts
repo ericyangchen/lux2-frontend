@@ -1,16 +1,15 @@
 import {
-  USE_ORGANIZATION_INFO_REFRESH_INTERVAL,
-  USE_ORGANIZATION_WITH_CHILDREN_REFRESH_INTERVAL,
-} from "./constants";
+  ApiGetOrganizationById,
+  ApiGetOrganizationWithChildren,
+} from "@/lib/apis/organizations/get";
 import {
-  getOrganizationInfoApi,
-  getOrganizationWithChildrenApi,
-} from "../../apis/organizations/organization";
+  USE_ORGANIZATION_REFRESH_INTERVAL,
+  USE_ORGANIZATION_WITH_CHILDREN_REFRESH_INTERVAL,
+} from "../../constants/swr-refresh-interval";
 
-import { ApplicationError } from "@/lib/types/applicationError";
+import { ApplicationError } from "@/lib/error/applicationError";
 import { Organization } from "@/lib/types/organization";
-import { checkOrganizationTotpEnabledApi } from "@/lib/apis/organizations/totp";
-import { getApplicationCookies } from "@/lib/cookie";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import useSWR from "swr";
 
 const fetchOrganizationWithChildren = async ({
@@ -20,7 +19,7 @@ const fetchOrganizationWithChildren = async ({
   organizationId: string;
   accessToken: string;
 }) => {
-  const response = await getOrganizationWithChildrenApi({
+  const response = await ApiGetOrganizationWithChildren({
     organizationId,
     accessToken,
   });
@@ -46,27 +45,29 @@ export const useOrganizationWithChildren = ({
   const shouldFetch = accessToken && organizationId;
 
   const { data, error, isLoading, mutate } = useSWR(
-    shouldFetch ? { key: "organizations", organizationId, accessToken } : null,
+    shouldFetch
+      ? { key: "organization-with-children", organizationId, accessToken }
+      : null,
     fetchOrganizationWithChildren,
     { refreshInterval: USE_ORGANIZATION_WITH_CHILDREN_REFRESH_INTERVAL }
   );
 
   return {
-    organization: data?.organization as Organization,
+    organization: data as Organization,
     isLoading: isLoading,
     isError: error,
     mutate,
   };
 };
 
-const fetchOrganizationInfo = async ({
+const fetchOrganizationById = async ({
   organizationId,
   accessToken,
 }: {
   organizationId: string;
   accessToken: string;
 }) => {
-  const response = await getOrganizationInfoApi({
+  const response = await ApiGetOrganizationById({
     organizationId,
     accessToken,
   });
@@ -82,7 +83,7 @@ const fetchOrganizationInfo = async ({
   return response.json();
 };
 
-export const useOrganizationInfo = ({
+export const useOrganization = ({
   organizationId,
 }: {
   organizationId?: string;
@@ -92,64 +93,15 @@ export const useOrganizationInfo = ({
   const shouldFetch = accessToken && organizationId;
 
   const { data, error, isLoading, mutate } = useSWR(
-    shouldFetch
-      ? { key: "organization-info", organizationId, accessToken }
-      : null,
-    fetchOrganizationInfo,
+    shouldFetch ? { key: "organization", organizationId, accessToken } : null,
+    fetchOrganizationById,
     {
-      refreshInterval: USE_ORGANIZATION_INFO_REFRESH_INTERVAL,
+      refreshInterval: USE_ORGANIZATION_REFRESH_INTERVAL,
     }
   );
 
   return {
-    organization: data?.organization as Organization,
-    isLoading: isLoading,
-    isError: error,
-    mutate,
-  };
-};
-
-const fetchCheckOrganizationTotpEnabled = async ({
-  organizationId,
-  accessToken,
-}: {
-  organizationId: string;
-  accessToken: string;
-}) => {
-  const response = await checkOrganizationTotpEnabledApi({
-    organizationId,
-    accessToken,
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-
-    const error = new ApplicationError(errorData);
-
-    throw error;
-  }
-
-  return response.json();
-};
-
-export const useCheckOrganizationTotpEnabled = ({
-  organizationId,
-}: {
-  organizationId?: string;
-}) => {
-  const { accessToken } = getApplicationCookies();
-
-  const shouldFetch = accessToken && organizationId;
-
-  const { data, error, isLoading, mutate } = useSWR(
-    shouldFetch
-      ? { key: "organization-totp-enabled", organizationId, accessToken }
-      : null,
-    fetchCheckOrganizationTotpEnabled
-  );
-
-  return {
-    totpEnabled: data?.enabled as boolean,
+    organization: data as Organization,
     isLoading: isLoading,
     isError: error,
     mutate,

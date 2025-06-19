@@ -1,13 +1,13 @@
-import { formatNumber, formatNumberInInteger } from "@/lib/number";
+import { formatNumber, formatNumberInInteger } from "@/lib/utils/number";
 
-import { Calculator } from "@/lib/calculator";
+import { Calculator } from "@/lib/utils/calculator";
 import { Label } from "@/components/shadcn/ui/label";
 import MerchantPaymentMethodInfo from "./MerchantPaymentMethodInfo";
 import OrganizationBalanceTable from "../admin/organization/balance/OrganizationBalanceTable";
 import OrganizationPaymentMethodTable from "../admin/organization/paymentMethod/OrganizationPaymentMethodTable";
-import { classNames } from "@/lib/utils";
-import { currencySymbol } from "@/lib/constants";
-import { getApplicationCookies } from "@/lib/cookie";
+import { classNames } from "@/lib/utils/classname-utils";
+import { currencySymbol } from "@/lib/constants/common";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useBalances } from "@/lib/hooks/swr/balance";
 import { useDailyTransactionCountByOrganizationId } from "@/lib/hooks/swr/transaction";
 
@@ -102,7 +102,8 @@ export default function MerchantDashboardView() {
               }
             >
               {formatNumberInInteger(
-                dailyTransactionCountByOrganizationId?.dailyTotal || "0"
+                dailyTransactionCountByOrganizationId?.totalCount?.toString() ||
+                  "0"
               )}
             </dd>
           </div>
@@ -117,14 +118,10 @@ export default function MerchantDashboardView() {
               }
             >
               {formatNumberInInteger(
-                dailyTransactionCountByOrganizationId?.dailyDepositSuccessTotal ||
+                dailyTransactionCountByOrganizationId?.depositCount?.toString() ||
                   "0"
               )}{" "}
-              /{" "}
-              {formatNumberInInteger(
-                dailyTransactionCountByOrganizationId?.dailyDepositFailedTotal ||
-                  "0"
-              )}
+              / {"0"}
             </dd>
           </div>
 
@@ -138,21 +135,17 @@ export default function MerchantDashboardView() {
               }
             >
               {formatNumberInInteger(
-                dailyTransactionCountByOrganizationId?.dailyWithdrawalSuccessTotal ||
+                dailyTransactionCountByOrganizationId?.withdrawalCount?.toString() ||
                   "0"
               )}{" "}
-              /{" "}
-              {formatNumberInInteger(
-                dailyTransactionCountByOrganizationId?.dailyWithdrawalFailedTotal ||
-                  "0"
-              )}
+              / {"0"}
             </dd>
           </div>
         </dl>
       </div>
 
       <div className="py-8">
-        <Label className="text-xl font-bold">通道</Label>
+        <Label className="text-xl font-bold">支付類型</Label>
         <MerchantPaymentMethodInfo organizationId={organizationId} />
       </div>
     </div>

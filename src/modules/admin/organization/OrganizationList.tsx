@@ -3,16 +3,14 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import {
-  Organization,
-  OrganizationType,
-  OrganizationTypeDisplayNames,
-} from "@/lib/types/organization";
 import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/shadcn/ui/badge";
 import { Button } from "@/components/shadcn/ui/button";
-import { classNames } from "@/lib/utils";
+import { OrgType } from "@/lib/enums/organizations/org-type.enum";
+import { OrgTypeDisplayNames } from "@/lib/constants/organization";
+import { Organization } from "@/lib/types/organization";
+import { classNames } from "@/lib/utils/classname-utils";
 
 function flattenOrganizations(org: Organization, depth = 0) {
   let flatList = [{ ...org, depth }];
@@ -124,14 +122,14 @@ export function OrganizationList({
             onChange={handleTypeChange}
           >
             <option value="">所有單位</option>
-            <option value={OrganizationType.GENERAL_AGENT}>
-              {OrganizationTypeDisplayNames[OrganizationType.GENERAL_AGENT]}
+            <option value={OrgType.ADMIN}>
+              {OrgTypeDisplayNames[OrgType.ADMIN]}
             </option>
-            <option value={OrganizationType.AGENT}>
-              {OrganizationTypeDisplayNames[OrganizationType.AGENT]}
+            <option value={OrgType.AGENT}>
+              {OrgTypeDisplayNames[OrgType.AGENT]}
             </option>
-            <option value={OrganizationType.MERCHANT}>
-              {OrganizationTypeDisplayNames[OrganizationType.MERCHANT]}
+            <option value={OrgType.MERCHANT}>
+              {OrgTypeDisplayNames[OrgType.MERCHANT]}
             </option>
           </select>
         </div>
@@ -188,7 +186,7 @@ export function OrganizationList({
               </div>
 
               <div className="flex items-center">
-                {org.type === OrganizationType.GENERAL_AGENT && (
+                {org.type === OrgType.ADMIN && (
                   <Badge
                     className="border-purple-800 bg-purple-800 text-white"
                     variant="outline"
@@ -196,7 +194,7 @@ export function OrganizationList({
                     總
                   </Badge>
                 )}
-                {org.type === OrganizationType.AGENT && (
+                {org.type === OrgType.AGENT && (
                   <Badge
                     className="border-gray-800 text-gray-800"
                     variant="outline"
@@ -204,7 +202,7 @@ export function OrganizationList({
                     代
                   </Badge>
                 )}
-                {org.type === OrganizationType.MERCHANT && (
+                {org.type === OrgType.MERCHANT && (
                   <Badge variant="outline" className="bg-black text-white">
                     商
                   </Badge>

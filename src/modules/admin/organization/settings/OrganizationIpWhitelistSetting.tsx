@@ -1,9 +1,9 @@
 import { IpWhitelistAddDialog } from "./IpWhitelistAddDialog";
 import { IpWhitelistRemoveDialog } from "./IpWhitelistRemoveDialog";
-import { IpWhitelistType } from "@/lib/types/ip-whitelist";
+import { IpWhitelistType } from "@/lib/enums/ip-whitelists/ip-whitelist-type.enum";
 import { Label } from "@/components/shadcn/ui/label";
-import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/timezone";
-import { copyToClipboard } from "@/lib/copyToClipboard";
+import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/utils/timezone";
+import { copyToClipboard } from "@/lib/utils/copyToClipboard";
 import { useIpWhitelists } from "@/lib/hooks/swr/ipWhitelist";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
@@ -119,12 +119,13 @@ export function OrganizationIpWhitelistSetting({
                           onClick={() =>
                             copyToClipboard({
                               toast,
-                              description: `創建者 ID: ${loginIpWhitelist.creatorId}`,
-                              copyingText: loginIpWhitelist.creatorId,
+                              description: `創建者 ID: ${loginIpWhitelist?.creatorIdentifier}`,
+                              copyingText:
+                                loginIpWhitelist?.creatorIdentifier || "",
                             })
                           }
                         >
-                          {loginIpWhitelist.creatorId}
+                          {loginIpWhitelist?.creatorIdentifier}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {convertDatabaseTimeToReadablePhilippinesTime(
@@ -219,12 +220,13 @@ export function OrganizationIpWhitelistSetting({
                           onClick={() =>
                             copyToClipboard({
                               toast,
-                              description: `創建者 ID: ${withdrawalIpWhitelist.creatorId}`,
-                              copyingText: withdrawalIpWhitelist.creatorId,
+                              description: `創建者 ID: ${withdrawalIpWhitelist?.creatorIdentifier}`,
+                              copyingText:
+                                withdrawalIpWhitelist?.creatorIdentifier || "",
                             })
                           }
                         >
-                          {withdrawalIpWhitelist.creatorId}
+                          {withdrawalIpWhitelist?.creatorIdentifier}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {convertDatabaseTimeToReadablePhilippinesTime(

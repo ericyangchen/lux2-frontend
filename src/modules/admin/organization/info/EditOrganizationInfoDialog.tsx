@@ -7,17 +7,17 @@ import {
 } from "@/components/shadcn/ui/dialog";
 import { useEffect, useState } from "react";
 import {
-  useOrganizationInfo,
+  useOrganization,
   useOrganizationWithChildren,
 } from "@/lib/hooks/swr/organization";
 
-import { ApplicationError } from "@/lib/types/applicationError";
+import { ApiUpdateOrganization } from "@/lib/apis/organizations/patch";
+import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { Organization } from "@/lib/types/organization";
-import { getApplicationCookies } from "@/lib/cookie";
-import { updateOrganizationInfoApi } from "@/lib/apis/organizations/organization";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
 export function EditOrganizationInfoDialog({
@@ -35,7 +35,7 @@ export function EditOrganizationInfoDialog({
   const { mutate: mutateList } = useOrganizationWithChildren({
     organizationId: userOrganizationId,
   });
-  const { mutate: mutateInfo } = useOrganizationInfo({
+  const { mutate: mutateInfo } = useOrganization({
     organizationId: organization.id,
   });
 
@@ -48,7 +48,7 @@ export function EditOrganizationInfoDialog({
     if (!name || !organization || !accessToken) return;
     try {
       setIsLoading(true);
-      const response = await updateOrganizationInfoApi({
+      const response = await ApiUpdateOrganization({
         organizationId: organization.id,
         name,
         accessToken,

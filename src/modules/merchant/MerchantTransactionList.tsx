@@ -1,12 +1,12 @@
 import {
-  PaymentMethod,
+  ApiGetTransactionByMerchantIdAndMerchantOrderId,
+  ApiGetTransactionsByMerchantId,
+} from "@/lib/apis/transactions/get";
+import {
   PaymentMethodDisplayNames,
-  Transaction,
-  TransactionStatus,
   TransactionStatusDisplayNames,
-  TransactionType,
   TransactionTypeDisplayNames,
-} from "@/lib/types/transaction";
+} from "@/lib/constants/transaction";
 import {
   Select,
   SelectContent,
@@ -19,27 +19,23 @@ import {
   convertDatabaseTimeToReadablePhilippinesTime,
   convertToEndOfDay,
   convertToStartOfDay,
-} from "@/lib/timezone";
-import {
-  getOrganizationTransactionByMerchantOrderIdApi,
-  getOrganizationTransactionsApi,
-} from "@/lib/apis/organizations/transaction";
-import {
-  getTransactionByMerchantOrderIdApi,
-  getTransactionsApi,
-} from "@/lib/apis/transactions";
+} from "@/lib/utils/timezone";
 import { useEffect, useState } from "react";
 
-import { ApplicationError } from "@/lib/types/applicationError";
+import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { DatePicker } from "@/components/DatePicker";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
-import { classNames } from "@/lib/utils";
-import { copyToClipboard } from "@/lib/copyToClipboard";
-import { formatNumberWithoutMinFraction } from "@/lib/number";
-import { getApplicationCookies } from "@/lib/cookie";
+import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
+import { Transaction } from "@/lib/types/transaction";
+import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
+import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
+import { classNames } from "@/lib/utils/classname-utils";
+import { copyToClipboard } from "@/lib/utils/copyToClipboard";
+import { formatNumberWithoutMinFraction } from "@/lib/utils/number";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
 const MerchantQueryTypes = {
@@ -93,15 +89,15 @@ export function MerchantTransactionList() {
     try {
       if (searchByMerchantOrderId) {
         // 1. search by merchantOrderId
-        const response = await getOrganizationTransactionByMerchantOrderIdApi({
-          organizationId,
+        const response = await ApiGetTransactionByMerchantIdAndMerchantOrderId({
+          merchantId: organizationId,
           merchantOrderId,
           accessToken,
         });
         const data = await response.json();
 
         if (response.ok) {
-          setTransactions([data?.transaction]);
+          setTransactions([data]);
           setCurrentQueryType(MerchantQueryTypes.SEARCH_BY_MERCHANT_ORDER_ID);
         } else {
           throw new ApplicationError(data);
@@ -131,23 +127,27 @@ export function MerchantTransactionList() {
           createdAtEnd: endDateQuery,
         };
 
-        const cursor = isLoadMore && !!nextCursor ? nextCursor : undefined;
+        const cursorData =
+          isLoadMore && !!nextCursor
+            ? {
+                cursorCreatedAt: nextCursor.split("|")[0],
+                cursorId: nextCursor.split("|")[1],
+              }
+            : {};
 
-        const response = await getOrganizationTransactionsApi({
-          query,
-          organizationId,
-          cursor,
+        const response = await ApiGetTransactionsByMerchantId({
+          merchantId: organizationId,
+          ...query,
+          ...cursorData,
           accessToken,
         });
         const data = await response.json();
 
         if (response.ok) {
           setTransactions((prev) =>
-            isLoadMore
-              ? [...(prev || []), ...(data?.transactions || [])]
-              : data?.transactions
+            isLoadMore ? [...(prev || []), ...(data?.data || [])] : data?.data
           );
-          setNextCursor(data?.nextCursor);
+          setNextCursor(data?.pagination?.nextCursor);
 
           setCurrentQueryType(MerchantQueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS);
         } else {
@@ -254,13 +254,17 @@ export function MerchantTransactionList() {
                   <SelectContent>
                     <SelectGroup>
                       <SelectItem value={"all"} className="h-8"></SelectItem>
-                      <SelectItem value={TransactionType.DEPOSIT}>
-                        {TransactionTypeDisplayNames[TransactionType.DEPOSIT]}
-                      </SelectItem>
-                      <SelectItem value={TransactionType.WITHDRAWAL}>
+                      <SelectItem value={TransactionType.API_DEPOSIT}>
                         {
                           TransactionTypeDisplayNames[
-                            TransactionType.WITHDRAWAL
+                            TransactionType.API_DEPOSIT
+                          ]
+                        }
+                      </SelectItem>
+                      <SelectItem value={TransactionType.API_WITHDRAWAL}>
+                        {
+                          TransactionTypeDisplayNames[
+                            TransactionType.API_WITHDRAWAL
                           ]
                         }
                       </SelectItem>
@@ -271,7 +275,7 @@ export function MerchantTransactionList() {
             </div>
             {/* paymentMethod */}
             <div className="flex items-center gap-4">
-              <Label className="whitespace-nowrap">通道</Label>
+              <Label className="whitespace-nowrap">支付類型</Label>
               <div className="w-fit min-w-[150px]">
                 <Select
                   defaultValue={paymentMethod}
@@ -406,7 +410,7 @@ export function MerchantTransactionList() {
                       類別
                     </th>
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      通道
+                      支付類型
                     </th>
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
                       金額

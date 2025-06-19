@@ -1,19 +1,15 @@
-import { Organization, OrganizationType } from "@/lib/types/organization";
 import {
-  PaymentChannel,
+  ApiGetTransactionById,
+  ApiGetTransactions,
+} from "@/lib/apis/transactions/get";
+import {
   PaymentChannelCategories,
   PaymentChannelDisplayNames,
-  PaymentMethod,
   PaymentMethodDisplayNames,
-  Transaction,
-  TransactionDetailedStatus,
-  TransactionDetailedStatusDisplayNames,
-  TransactionDetailedStatusRequireProcessing,
-  TransactionStatus,
+  TransactionInternalStatusDisplayNames,
   TransactionStatusDisplayNames,
-  TransactionType,
   TransactionTypeDisplayNames,
-} from "@/lib/types/transaction";
+} from "@/lib/constants/transaction";
 import {
   Select,
   SelectContent,
@@ -26,27 +22,32 @@ import {
   convertDatabaseTimeToReadablePhilippinesTime,
   convertToEndOfDay,
   convertToStartOfDay,
-} from "@/lib/timezone";
-import {
-  getTransactionByIdApi,
-  getTransactionsApi,
-} from "@/lib/apis/transactions";
+} from "@/lib/utils/timezone";
 import { useEffect, useState } from "react";
 
 import { ApiTransactionInfoDialog } from "../common/ApiTransactionInfoDialog";
-import { ApplicationError } from "@/lib/types/applicationError";
+import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { DatePicker } from "@/components/DatePicker";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
+import { OrgType } from "@/lib/enums/organizations/org-type.enum";
+import { Organization } from "@/lib/types/organization";
 import { OrganizationSearchBar } from "../common/OrganizationSearchBar";
-import { classNames } from "@/lib/utils";
-import { copyToClipboard } from "@/lib/copyToClipboard";
+import { PROBLEM_WITHDRAWAL_INTERNAL_STATUSES } from "@/lib/constants/problem-withdrawal-statuses";
+import { PaymentChannel } from "@/lib/enums/transactions/payment-channel.enum";
+import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
+import { Transaction } from "@/lib/types/transaction";
+import { TransactionInternalStatus } from "@/lib/enums/transactions/transaction-internal-status.enum";
+import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
+import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
+import { classNames } from "@/lib/utils/classname-utils";
+import { copyToClipboard } from "@/lib/utils/copyToClipboard";
 import { flattenOrganizations } from "../common/flattenOrganizations";
-import { formatNumberWithoutMinFraction } from "@/lib/number";
-import { getApplicationCookies } from "@/lib/cookie";
+import { formatNumberWithoutMinFraction } from "@/lib/utils/number";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useOrganizationWithChildren } from "@/lib/hooks/swr/organization";
 import { useRouter } from "next/router";
 import { useToast } from "@/components/shadcn/ui/use-toast";
@@ -90,8 +91,8 @@ export function ApiTransactionList() {
   const [transactionStatus, setTransactionStatus] = useState<
     TransactionStatus | "all"
   >("all");
-  const [transactionDetailedStatus, setTransactionDetailedStatus] = useState<
-    TransactionDetailedStatus | "all"
+  const [transactionInternalStatus, setTransactionInternalStatus] = useState<
+    TransactionInternalStatus | "all"
   >("all");
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
@@ -107,7 +108,10 @@ export function ApiTransactionList() {
 
   const [currentQueryType, setCurrentQueryType] = useState<string>();
 
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [nextCursor, setNextCursor] = useState<{
+    createdAt: string;
+    id: string;
+  } | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
 
   const handleSearch = async (isLoadMore: boolean = false) => {
@@ -128,14 +132,14 @@ export function ApiTransactionList() {
     try {
       // 1. search by transactionId
       if (searchById) {
-        const response = await getTransactionByIdApi({
-          transactionId,
+        const response = await ApiGetTransactionById({
+          id: transactionId,
           accessToken,
         });
         const data = await response.json();
 
         if (response.ok) {
-          setTransactions([data?.transaction]);
+          setTransactions([data]);
           setCurrentQueryType(QueryTypes.SEARCH_BY_TRANSACTION_ID);
         } else {
           throw new ApplicationError(data);
@@ -156,32 +160,28 @@ export function ApiTransactionList() {
           transactionStatus && transactionStatus !== "all"
             ? transactionStatus
             : undefined;
-        const transactionDetailedStatusQuery =
-          transactionDetailedStatus && transactionDetailedStatus !== "all"
-            ? transactionDetailedStatus
+        const transactionInternalStatusQuery =
+          transactionInternalStatus && transactionInternalStatus !== "all"
+            ? transactionInternalStatus
             : undefined;
         const startDateQuery = startDate
           ? convertToStartOfDay(startDate)
           : undefined;
         const endDateQuery = endDate ? convertToEndOfDay(endDate) : undefined;
 
-        const query = {
+        const response = await ApiGetTransactions({
           type: transactionTypeQuery,
           merchantId,
           merchantOrderId,
           paymentMethod: paymentMethodQuery,
           paymentChannel: paymentChannelQuery,
           status: transactionStatusQuery,
-          detailedStatus: transactionDetailedStatusQuery,
+          internalStatus: transactionInternalStatusQuery,
           createdAtStart: startDateQuery,
           createdAtEnd: endDateQuery,
-        };
-
-        const cursor = isLoadMore && !!nextCursor ? nextCursor : undefined;
-
-        const response = await getTransactionsApi({
-          query,
-          cursor,
+          cursorCreatedAt:
+            isLoadMore && nextCursor ? nextCursor.createdAt : undefined,
+          cursorId: isLoadMore && nextCursor ? nextCursor.id : undefined,
           accessToken,
         });
         const data = await response.json();
@@ -189,10 +189,10 @@ export function ApiTransactionList() {
         if (response.ok) {
           setTransactions((prev) =>
             isLoadMore
-              ? [...(prev || []), ...(data?.transactions || [])]
-              : data?.transactions
+              ? [...(prev || []), ...(data?.data || [])]
+              : data?.data || []
           );
-          setNextCursor(data?.nextCursor);
+          setNextCursor(data?.pagination?.nextCursor || null);
 
           setCurrentQueryType(QueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS);
         } else {
@@ -202,13 +202,13 @@ export function ApiTransactionList() {
     } catch (error) {
       if (error instanceof ApplicationError) {
         toast({
-          title: `${error.statusCode} - 自動訂單查詢失敗`,
+          title: `${error.statusCode} - 訂單查詢失敗`,
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: `自動訂單查詢失敗`,
+          title: `訂單查詢失敗`,
           description: "Unknown error",
           variant: "destructive",
         });
@@ -230,7 +230,7 @@ export function ApiTransactionList() {
     setMerchantId("");
     setMerchantOrderId("");
     setTransactionStatus("all");
-    setTransactionDetailedStatus("all");
+    setTransactionInternalStatus("all");
     setStartDate(undefined);
     setEndDate(undefined);
   };
@@ -265,12 +265,12 @@ export function ApiTransactionList() {
         {/* search by transactionId */}
         <div className="pb-4 flex flex-col gap-4">
           <Label className="whitespace-nowrap font-bold text-md">
-            單筆查詢: 系統自動訂單號
+            單筆查詢: 系統訂單號
           </Label>
           {/* transactionId */}
           <div className="flex items-center gap-4 w-full lg:w-fit px-4">
             <Label className="whitespace-nowrap">
-              系統自動訂單號(TX)<span className="text-red-500">*</span>
+              系統訂單號(txn)<span className="text-red-500">*</span>
             </Label>
             <Input
               id="transactionId"
@@ -304,13 +304,17 @@ export function ApiTransactionList() {
                   <SelectContent>
                     <SelectGroup>
                       <SelectItem value={"all"} className="h-8"></SelectItem>
-                      <SelectItem value={TransactionType.DEPOSIT}>
-                        {TransactionTypeDisplayNames[TransactionType.DEPOSIT]}
-                      </SelectItem>
-                      <SelectItem value={TransactionType.WITHDRAWAL}>
+                      <SelectItem value={TransactionType.API_DEPOSIT}>
                         {
                           TransactionTypeDisplayNames[
-                            TransactionType.WITHDRAWAL
+                            TransactionType.API_DEPOSIT
+                          ]
+                        }
+                      </SelectItem>
+                      <SelectItem value={TransactionType.API_WITHDRAWAL}>
+                        {
+                          TransactionTypeDisplayNames[
+                            TransactionType.API_WITHDRAWAL
                           ]
                         }
                       </SelectItem>
@@ -321,7 +325,7 @@ export function ApiTransactionList() {
             </div>
             {/* paymentMethod */}
             <div className="flex items-center gap-4">
-              <Label className="whitespace-nowrap">通道</Label>
+              <Label className="whitespace-nowrap">支付類型</Label>
               <div className="w-fit min-w-[150px]">
                 <Select
                   defaultValue={paymentMethod}
@@ -381,7 +385,7 @@ export function ApiTransactionList() {
               <OrganizationSearchBar
                 selectedOrganizationId={merchantId}
                 setSelectedOrganizationId={setMerchantId}
-                organizationType={OrganizationType.MERCHANT}
+                organizationType={OrgType.MERCHANT}
               />
             </div>
             {/* merchantOrderId */}
@@ -426,11 +430,11 @@ export function ApiTransactionList() {
               <Label className="whitespace-nowrap">詳細狀態</Label>
               <div className="w-fit min-w-[350px]">
                 <Select
-                  defaultValue={transactionDetailedStatus}
-                  value={transactionDetailedStatus}
+                  defaultValue={transactionInternalStatus}
+                  value={transactionInternalStatus}
                   onValueChange={(value) => {
-                    setTransactionDetailedStatus(
-                      value as TransactionDetailedStatus
+                    setTransactionInternalStatus(
+                      value as TransactionInternalStatus
                     );
                   }}
                 >
@@ -440,24 +444,24 @@ export function ApiTransactionList() {
                   <SelectContent>
                     <SelectGroup>
                       <SelectItem value={"all"} className="h-8"></SelectItem>
-                      {Object.values(TransactionDetailedStatus).map(
-                        (detailedStatus) => (
+                      {Object.values(TransactionInternalStatus).map(
+                        (internalStatus) => (
                           <SelectItem
-                            key={detailedStatus}
-                            value={detailedStatus}
+                            key={internalStatus}
+                            value={internalStatus}
                           >
                             <span
                               className={classNames(
-                                TransactionDetailedStatusRequireProcessing.includes(
-                                  detailedStatus
+                                PROBLEM_WITHDRAWAL_INTERNAL_STATUSES.includes(
+                                  internalStatus
                                 )
                                   ? "text-orange-500"
                                   : ""
                               )}
                             >
                               {
-                                TransactionDetailedStatusDisplayNames[
-                                  detailedStatus
+                                TransactionInternalStatusDisplayNames[
+                                  internalStatus
                                 ]
                               }
                             </span>
@@ -534,7 +538,7 @@ export function ApiTransactionList() {
             <div className="pb-2">
               <Label className="whitespace-nowrap font-bold text-md">
                 {currentQueryType === QueryTypes.SEARCH_BY_TRANSACTION_ID
-                  ? "單筆查詢結果: 系統自動訂單號"
+                  ? "單筆查詢結果: 系統訂單號"
                   : "多筆查詢結果"}
               </Label>
             </div>
@@ -543,13 +547,13 @@ export function ApiTransactionList() {
                 <thead className="whitespace-nowrap w-full">
                   <tr className="h-10">
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      系統自動訂單號
+                      系統訂單號
                     </th>
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
                       類別
                     </th>
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      <span className="font-bold">通道</span>
+                      <span className="font-bold">支付類型</span>
                       <span className="font-light"> / 上游渠道</span>
                     </th>
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
@@ -587,7 +591,7 @@ export function ApiTransactionList() {
                           copyToClipboard({
                             toast,
                             copyingText: transaction.id,
-                            title: "已複製系統自動訂單號",
+                            title: "已複製系統訂單號",
                           })
                         }
                       >
@@ -657,8 +661,8 @@ export function ApiTransactionList() {
                       </td>
                       <td
                         className={classNames(
-                          TransactionDetailedStatusRequireProcessing.includes(
-                            transaction.detailedStatus
+                          PROBLEM_WITHDRAWAL_INTERNAL_STATUSES.includes(
+                            transaction.internalStatus
                           )
                             ? "text-orange-500"
                             : "",
@@ -666,8 +670,8 @@ export function ApiTransactionList() {
                         )}
                       >
                         {
-                          TransactionDetailedStatusDisplayNames[
-                            transaction.detailedStatus
+                          TransactionInternalStatusDisplayNames[
+                            transaction.internalStatus
                           ]
                         }
                       </td>
