@@ -1,6 +1,5 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
-
+import { getBackendUrl } from "@/lib/constants/common";
 export const ApiUpdateUser = async ({
   userId,
   name,
@@ -16,7 +15,7 @@ export const ApiUpdateUser = async ({
   role?: string;
   accessToken: string;
 }) => {
-  return fetch(`${backendUrl}/users/${encodeURIComponent(userId)}`, {
+  return fetch(`${getBackendUrl()}/users/${encodeURIComponent(userId)}`, {
     method: "PATCH",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
     body: JSON.stringify({ name, email, password, role }),

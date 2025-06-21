@@ -1,7 +1,7 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
 import { UserActivityAction } from "@/lib/enums/users/user-activity-action.enum";
-import { backendUrl } from "@/lib/constants/common";
 import { buildQueryString } from "@/lib/utils/build-query-string";
+import { getBackendUrl } from "@/lib/constants/common";
 
 export const ApiGetUserActivityLogs = async ({
   userId,
@@ -32,7 +32,7 @@ export const ApiGetUserActivityLogs = async ({
     cursorId,
   });
 
-  return fetch(`${backendUrl}/user-activity-logs?${queryString}`, {
+  return fetch(`${getBackendUrl()}/user-activity-logs?${queryString}`, {
     method: "GET",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
   });

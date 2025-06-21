@@ -1,6 +1,6 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
 import { buildQueryString } from "@/lib/utils/build-query-string";
+import { getBackendUrl } from "@/lib/constants/common";
 
 export const ApiGetOrganizationRevenueByTransactionId = async ({
   organizationId,
@@ -12,7 +12,7 @@ export const ApiGetOrganizationRevenueByTransactionId = async ({
   accessToken: string;
 }) => {
   return fetch(
-    `${backendUrl}/organizations/${encodeURIComponent(
+    `${getBackendUrl()}/organizations/${encodeURIComponent(
       organizationId
     )}/revenues/by-transaction-id/${encodeURIComponent(fromTransactionId)}`,
     {
@@ -30,7 +30,7 @@ export const ApiGetOrganizationRevenues = async ({
   accessToken: string;
 }) => {
   return fetch(
-    `${backendUrl}/organizations/${encodeURIComponent(
+    `${getBackendUrl()}/organizations/${encodeURIComponent(
       organizationId
     )}/revenues`,
     {
@@ -66,7 +66,7 @@ export const ApiGetRevenues = async ({
     cursorId,
   });
 
-  return fetch(`${backendUrl}/revenues?${queryString}`, {
+  return fetch(`${getBackendUrl()}/revenues?${queryString}`, {
     method: "GET",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
   });

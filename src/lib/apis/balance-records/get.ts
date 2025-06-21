@@ -1,8 +1,8 @@
 import { BalanceAction } from "@/lib/enums/balances/balance-action.enum";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
 import { buildQueryString } from "@/lib/utils/build-query-string";
+import { getBackendUrl } from "@/lib/constants/common";
 
 export const ApiGetOrganizationBalanceRecords = async ({
   organizationId,
@@ -30,7 +30,7 @@ export const ApiGetOrganizationBalanceRecords = async ({
     cursorId,
   });
 
-  return fetch(`${backendUrl}/balance-records?${queryString}`, {
+  return fetch(`${getBackendUrl()}/balance-records?${queryString}`, {
     method: "GET",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
   });

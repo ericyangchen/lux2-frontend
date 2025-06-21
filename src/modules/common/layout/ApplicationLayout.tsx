@@ -31,8 +31,8 @@ import { User } from "@/lib/types/user";
 import { UserRole } from "@/lib/enums/users/user-role.enum";
 import { UserRoleDisplayNames } from "@/lib/constants/user";
 import { classNames } from "@/lib/utils/classname-utils";
-import { companyName } from "@/lib/constants/common";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
+import { getCompanyName } from "@/lib/constants/common";
 import { useNavigation } from "@/lib/hooks/useNavigation";
 import { useOrganization } from "@/lib/hooks/swr/organization";
 import { useRouter } from "next/router";
@@ -137,8 +137,8 @@ export default function ApplicationLayout({
       <Head>
         <title>
           {currentNavigation?.name
-            ? `${currentNavigation.name} - ${companyName}`
-            : companyName}
+            ? `${currentNavigation.name} - ${getCompanyName()}`
+            : getCompanyName()}
         </title>
       </Head>
       <div className="h-screen">
@@ -147,7 +147,7 @@ export default function ApplicationLayout({
           <div className="flex grow flex-col gap-y-2 overflow-y-auto border-r border-gray-200 bg-white px-6">
             <div className="flex h-14 shrink-0 items-center justify-center">
               <div className="px-4 py-1 bg-blue-900 text-white rounded-lg">
-                <span className="font-bold text-xl">{companyName}</span>
+                <span className="font-bold text-xl">{getCompanyName()}</span>
               </div>
             </div>
             <nav className="flex flex-1 flex-col">
@@ -305,7 +305,9 @@ export default function ApplicationLayout({
               <div className="flex grow flex-col gap-y-2 overflow-y-auto bg-white px-6 pb-2">
                 <div className="flex h-14 shrink-0 items-center justify-center">
                   <div className="px-4 py-1 bg-blue-900 text-white rounded-lg">
-                    <span className="font-bold text-xl">{companyName}</span>
+                    <span className="font-bold text-xl">
+                      {getCompanyName()}
+                    </span>
                   </div>
                 </div>
                 <nav className="flex flex-1 flex-col">

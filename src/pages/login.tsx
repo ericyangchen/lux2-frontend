@@ -15,7 +15,7 @@ import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { Organization } from "@/lib/types/organization";
 import { User } from "@/lib/types/user";
-import { companyName } from "@/lib/constants/common";
+import { getCompanyName } from "@/lib/constants/common";
 import { getOrganizationBaseUrl } from "@/lib/utils/routes";
 import { setApplicationCookies } from "@/lib/utils/cookie";
 import { useRouter } from "next/router";
@@ -119,14 +119,16 @@ export default function LoginPage() {
   return (
     <>
       <Head>
-        <title>{companyName ? `Login - ${companyName}` : "Login"}</title>
+        <title>
+          {getCompanyName() ? `Login - ${getCompanyName()}` : "Login"}
+        </title>
       </Head>
       <div className="flex justify-center items-center w-full h-screen">
         <Card className="mx-auto w-[400px] max-w-md rounded-none md:rounded-lg">
           <CardHeader>
             <CardTitle className="text-2xl flex justify-center gap-2 items-center">
               <div className="px-2 py-1 bg-blue-900 text-white rounded-lg">
-                {companyName}
+                {getCompanyName()}
               </div>
             </CardTitle>
           </CardHeader>

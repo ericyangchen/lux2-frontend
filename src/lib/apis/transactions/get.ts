@@ -1,6 +1,6 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
 import { buildQueryString } from "@/lib/utils/build-query-string";
+import { getBackendUrl } from "@/lib/constants/common";
 
 export const ApiGetTransactionById = async ({
   id,
@@ -9,7 +9,7 @@ export const ApiGetTransactionById = async ({
   id: string;
   accessToken: string;
 }) => {
-  return fetch(`${backendUrl}/transactions/${id}`, {
+  return fetch(`${getBackendUrl()}/transactions/${id}`, {
     method: "GET",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
   });
@@ -25,7 +25,7 @@ export const ApiGetTransactionByMerchantIdAndMerchantOrderId = async ({
   accessToken: string;
 }) => {
   return fetch(
-    `${backendUrl}/transactions/merchants/${merchantId}/orders/${merchantOrderId}`,
+    `${getBackendUrl()}/transactions/merchants/${merchantId}/orders/${merchantOrderId}`,
     {
       method: "GET",
       headers: SMPayWebHeaderWithAccessToken(accessToken),
@@ -80,7 +80,7 @@ export const ApiGetTransactionsByMerchantId = async ({
   });
 
   return fetch(
-    `${backendUrl}/transactions/merchants/${merchantId}?${queryString}`,
+    `${getBackendUrl()}/transactions/merchants/${merchantId}?${queryString}`,
     {
       method: "GET",
       headers: SMPayWebHeaderWithAccessToken(accessToken),
@@ -135,7 +135,7 @@ export const ApiGetTransactions = async ({
     cursorId,
   });
 
-  return fetch(`${backendUrl}/transactions?${queryString}`, {
+  return fetch(`${getBackendUrl()}/transactions?${queryString}`, {
     method: "GET",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
   });
@@ -155,10 +155,13 @@ export const ApiGetSystemTransactionCount = async ({
     date,
   });
 
-  return fetch(`${backendUrl}/transactions/statistics/system?${queryString}`, {
-    method: "GET",
-    headers: SMPayWebHeaderWithAccessToken(accessToken),
-  });
+  return fetch(
+    `${getBackendUrl()}/transactions/statistics/system?${queryString}`,
+    {
+      method: "GET",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
 };
 
 export const ApiGetTransactionCountByOrganizationId = async ({
@@ -178,7 +181,7 @@ export const ApiGetTransactionCountByOrganizationId = async ({
   });
 
   return fetch(
-    `${backendUrl}/transactions/statistics/organizations/${organizationId}?${queryString}`,
+    `${getBackendUrl()}/transactions/statistics/organizations/${organizationId}?${queryString}`,
     {
       method: "GET",
       headers: SMPayWebHeaderWithAccessToken(accessToken),

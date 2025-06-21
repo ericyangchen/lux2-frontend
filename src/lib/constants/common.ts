@@ -1,10 +1,29 @@
-export const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+const getEnvVar = (key: string) => {
+  const value = process.env[key];
 
-export const companyName =
-  process.env.NEXT_PUBLIC_ENVIRONMENT === "development"
-    ? "SM-Pay (Dev)"
-    : process.env.NEXT_PUBLIC_ENVIRONMENT === "staging"
-    ? "SM-Pay (Staging)"
-    : "SM-Pay";
+  return value;
+};
+
+export const getBackendUrl = () => {
+  return getEnvVar("BACKEND_URL");
+};
+
+export const getEnvironment = () => {
+  return getEnvVar("NEXT_PUBLIC_ENVIRONMENT");
+};
+
+export const getCompanyName = () => {
+  const environment = getEnvironment();
+
+  if (environment === "development") {
+    return "SM-Pay (Dev)";
+  }
+
+  if (environment === "staging") {
+    return "SM-Pay (Staging)";
+  }
+
+  return "SM-Pay";
+};
 
 export const currencySymbol = "₱";

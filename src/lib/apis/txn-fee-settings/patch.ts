@@ -1,7 +1,6 @@
 import { FeeSettingList } from "@/lib/interfaces/txn-fee-settings.interface";
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
-
+import { getBackendUrl } from "@/lib/constants/common";
 export const ApiUpdateTransactionFeeSetting = async ({
   id,
   feeSettingList,
@@ -19,7 +18,7 @@ export const ApiUpdateTransactionFeeSetting = async ({
   enabled?: boolean;
   accessToken: string;
 }) => {
-  return fetch(`${backendUrl}/txn-fee-settings/${id}`, {
+  return fetch(`${getBackendUrl()}/txn-fee-settings/${id}`, {
     method: "PATCH",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
     body: JSON.stringify({

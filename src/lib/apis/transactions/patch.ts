@@ -1,6 +1,5 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
-
+import { getBackendUrl } from "@/lib/constants/common";
 export const ApiUpdateTransactionNote = async ({
   id,
   note,
@@ -10,7 +9,7 @@ export const ApiUpdateTransactionNote = async ({
   note: string;
   accessToken: string;
 }) => {
-  return fetch(`${backendUrl}/transactions/${id}/note`, {
+  return fetch(`${getBackendUrl()}/transactions/${id}/note`, {
     method: "PATCH",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
     body: JSON.stringify({ note }),

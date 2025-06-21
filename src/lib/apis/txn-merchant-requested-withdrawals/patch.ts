@@ -1,6 +1,5 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
-
+import { getBackendUrl } from "@/lib/constants/common";
 export const ApiApproveMerchantRequestedWithdrawal = async ({
   transactionIds,
   adminNote,
@@ -10,7 +9,7 @@ export const ApiApproveMerchantRequestedWithdrawal = async ({
   adminNote?: string;
   accessToken: string;
 }) => {
-  return fetch(`${backendUrl}/merchant-requested-withdrawal/approve`, {
+  return fetch(`${getBackendUrl()}/merchant-requested-withdrawal/approve`, {
     method: "PATCH",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
     body: JSON.stringify({ transactionIds, adminNote }),
@@ -26,7 +25,7 @@ export const ApiRejectMerchantRequestedWithdrawal = async ({
   rejectionReason?: string;
   accessToken: string;
 }) => {
-  return fetch(`${backendUrl}/merchant-requested-withdrawal/reject`, {
+  return fetch(`${getBackendUrl()}/merchant-requested-withdrawal/reject`, {
     method: "PATCH",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
     body: JSON.stringify({ transactionIds, rejectionReason }),

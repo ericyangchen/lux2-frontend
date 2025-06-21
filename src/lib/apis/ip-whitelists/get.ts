@@ -4,11 +4,11 @@ import {
 } from "../smpay-web-header";
 
 import { IpWhitelistType } from "@/lib/enums/ip-whitelists/ip-whitelist-type.enum";
-import { backendUrl } from "@/lib/constants/common";
 import { buildQueryString } from "@/lib/utils/build-query-string";
+import { getBackendUrl } from "@/lib/constants/common";
 
 export const ApiTestIpDetection = async () => {
-  return fetch(`${backendUrl}/ip-detection`, {
+  return fetch(`${getBackendUrl()}/ip-detection`, {
     method: "GET",
     headers: SMPayWebHeader(),
   });
@@ -22,7 +22,7 @@ export const ApiGetOrganizationIpWhitelists = async ({
   accessToken: string;
 }) => {
   return fetch(
-    `${backendUrl}/organizations/${encodeURIComponent(
+    `${getBackendUrl()}/organizations/${encodeURIComponent(
       organizationId
     )}/ip-whitelists`,
     {
@@ -48,7 +48,7 @@ export const ApiCheckIpWhitelisted = async ({
   });
 
   return fetch(
-    `${backendUrl}/organizations/${encodeURIComponent(
+    `${getBackendUrl()}/organizations/${encodeURIComponent(
       organizationId
     )}/ip-whitelists/ip-check/${encodeURIComponent(ipAddress)}?${queryString}`,
     {

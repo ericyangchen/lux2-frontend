@@ -1,6 +1,6 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
 import { buildQueryString } from "@/lib/utils/build-query-string";
+import { getBackendUrl } from "@/lib/constants/common";
 
 export const ApiGetMerchantRequestedWithdrawals = async ({
   merchantId,
@@ -40,8 +40,11 @@ export const ApiGetMerchantRequestedWithdrawals = async ({
     cursorId,
   });
 
-  return fetch(`${backendUrl}/merchant-requested-withdrawal?${queryString}`, {
-    method: "GET",
-    headers: SMPayWebHeaderWithAccessToken(accessToken),
-  });
+  return fetch(
+    `${getBackendUrl()}/merchant-requested-withdrawal?${queryString}`,
+    {
+      method: "GET",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
 };

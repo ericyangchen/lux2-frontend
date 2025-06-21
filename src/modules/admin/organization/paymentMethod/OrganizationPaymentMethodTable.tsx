@@ -5,7 +5,7 @@ import {
   WithdrawalAccountTypeDisplayNames,
 } from "@/lib/constants/transaction";
 import { formatNumber, formatNumberInPercentage } from "@/lib/utils/number";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { Calculator } from "@/lib/utils/calculator";
 import { DepositToAccountType } from "@/lib/enums/transactions/deposit-to-account-type.enum";
@@ -43,45 +43,49 @@ export default function OrganizationPaymentMethodTable({
     }, {} as Record<PaymentMethod, OrganizationTransactionFeeSetting[]>);
 
   // Helper function to get all fee settings from feeSettingList
-  const getAllFeeSettings = (setting: OrganizationTransactionFeeSetting) => {
-    const feeSettings: Array<{
-      accountType: string;
-      accountTypeDisplay: string;
-      percentage: string;
-      fixed: string;
-    }> = [];
+  const getAllFeeSettings = useCallback(
+    (setting: OrganizationTransactionFeeSetting) => {
+      const feeSettings: Array<{
+        accountType: string;
+        accountTypeDisplay: string;
+        percentage: string;
+        fixed: string;
+      }> = [];
 
-    if (type === TransactionType.API_DEPOSIT) {
-      const depositFees = setting.feeSettingList as any;
-      const feeData = depositFees[DepositToAccountType.DEFAULT];
-      if (feeData) {
-        feeSettings.push({
-          accountType: DepositToAccountType.DEFAULT,
-          accountTypeDisplay:
-            DepositAccountTypeDisplayNames[DepositToAccountType.DEFAULT],
-          percentage: feeData.percentage,
-          fixed: feeData.fixed,
-        });
-      }
-    } else {
-      const withdrawalFees = setting.feeSettingList as any;
-
-      // Check each withdrawal account type
-      Object.values(WithdrawalToAccountType).forEach((accountType) => {
-        const feeData = withdrawalFees[accountType];
+      if (type === TransactionType.API_DEPOSIT) {
+        const depositFees = setting.feeSettingList as any;
+        const feeData = depositFees[DepositToAccountType.DEFAULT];
         if (feeData) {
           feeSettings.push({
-            accountType,
-            accountTypeDisplay: WithdrawalAccountTypeDisplayNames[accountType],
+            accountType: DepositToAccountType.DEFAULT,
+            accountTypeDisplay:
+              DepositAccountTypeDisplayNames[DepositToAccountType.DEFAULT],
             percentage: feeData.percentage,
             fixed: feeData.fixed,
           });
         }
-      });
-    }
+      } else {
+        const withdrawalFees = setting.feeSettingList as any;
 
-    return feeSettings;
-  };
+        // Check each withdrawal account type
+        Object.values(WithdrawalToAccountType).forEach((accountType) => {
+          const feeData = withdrawalFees[accountType];
+          if (feeData) {
+            feeSettings.push({
+              accountType,
+              accountTypeDisplay:
+                WithdrawalAccountTypeDisplayNames[accountType],
+              percentage: feeData.percentage,
+              fixed: feeData.fixed,
+            });
+          }
+        });
+      }
+
+      return feeSettings;
+    },
+    [type]
+  );
 
   const paymentMethodConfigurations = useMemo(
     () =>

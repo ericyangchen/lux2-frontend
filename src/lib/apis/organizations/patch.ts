@@ -1,7 +1,6 @@
 import { OrgType } from "@/lib/enums/organizations/org-type.enum";
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
-
+import { getBackendUrl } from "@/lib/constants/common";
 export const ApiUpdateOrganization = async ({
   organizationId,
   name,
@@ -16,7 +15,7 @@ export const ApiUpdateOrganization = async ({
   accessToken: string;
 }) => {
   return fetch(
-    `${backendUrl}/organizations/${encodeURIComponent(organizationId)}`,
+    `${getBackendUrl()}/organizations/${encodeURIComponent(organizationId)}`,
     {
       method: "PATCH",
       headers: SMPayWebHeaderWithAccessToken(accessToken),

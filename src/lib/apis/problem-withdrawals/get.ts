@@ -1,6 +1,6 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
 import { buildQueryString } from "@/lib/utils/build-query-string";
+import { getBackendUrl } from "@/lib/constants/common";
 
 export const ApiGetProblemWithdrawals = async ({
   limit,
@@ -34,7 +34,7 @@ export const ApiGetProblemWithdrawals = async ({
     createdAtEnd,
   });
 
-  return fetch(`${backendUrl}/problem-withdrawals?${queryString}`, {
+  return fetch(`${getBackendUrl()}/problem-withdrawals?${queryString}`, {
     method: "GET",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
   });

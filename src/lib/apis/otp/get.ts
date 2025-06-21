@@ -1,6 +1,5 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
-
+import { getBackendUrl } from "@/lib/constants/common";
 export const ApiGenerateTotpQrCode = async ({
   userId,
   accessToken,
@@ -9,7 +8,7 @@ export const ApiGenerateTotpQrCode = async ({
   accessToken: string;
 }) => {
   return fetch(
-    `${backendUrl}/users/${encodeURIComponent(userId)}/totp/qr-code`,
+    `${getBackendUrl()}/users/${encodeURIComponent(userId)}/totp/qr-code`,
     {
       method: "GET",
       headers: SMPayWebHeaderWithAccessToken(accessToken),

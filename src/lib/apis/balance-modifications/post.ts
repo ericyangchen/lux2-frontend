@@ -1,7 +1,6 @@
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
-
+import { getBackendUrl } from "@/lib/constants/common";
 export interface BalanceModificationRequest {
   organizationId: string;
   paymentMethod: PaymentMethod;
@@ -18,7 +17,7 @@ export const ApiDirectModifyAddBalance = async ({
   referenceId,
   accessToken,
 }: BalanceModificationRequest & { accessToken: string }) => {
-  return fetch(`${backendUrl}/balance-modifications/direct-modify/add`, {
+  return fetch(`${getBackendUrl()}/balance-modifications/direct-modify/add`, {
     method: "POST",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
     body: JSON.stringify({
@@ -39,17 +38,20 @@ export const ApiDirectModifySubtractBalance = async ({
   referenceId,
   accessToken,
 }: BalanceModificationRequest & { accessToken: string }) => {
-  return fetch(`${backendUrl}/balance-modifications/direct-modify/subtract`, {
-    method: "POST",
-    headers: SMPayWebHeaderWithAccessToken(accessToken),
-    body: JSON.stringify({
-      organizationId,
-      paymentMethod,
-      amount,
-      notes,
-      referenceId,
-    }),
-  });
+  return fetch(
+    `${getBackendUrl()}/balance-modifications/direct-modify/subtract`,
+    {
+      method: "POST",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+      body: JSON.stringify({
+        organizationId,
+        paymentMethod,
+        amount,
+        notes,
+        referenceId,
+      }),
+    }
+  );
 };
 
 export const ApiFreezeBalance = async ({
@@ -60,7 +62,7 @@ export const ApiFreezeBalance = async ({
   referenceId,
   accessToken,
 }: BalanceModificationRequest & { accessToken: string }) => {
-  return fetch(`${backendUrl}/balance-modifications/freeze`, {
+  return fetch(`${getBackendUrl()}/balance-modifications/freeze`, {
     method: "POST",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
     body: JSON.stringify({
@@ -81,7 +83,7 @@ export const ApiUnfreezeBalance = async ({
   referenceId,
   accessToken,
 }: BalanceModificationRequest & { accessToken: string }) => {
-  return fetch(`${backendUrl}/balance-modifications/unfreeze`, {
+  return fetch(`${getBackendUrl()}/balance-modifications/unfreeze`, {
     method: "POST",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
     body: JSON.stringify({

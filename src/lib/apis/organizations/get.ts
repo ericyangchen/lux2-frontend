@@ -1,6 +1,5 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
-
+import { getBackendUrl } from "@/lib/constants/common";
 export const ApiGetOrganizationById = async ({
   organizationId,
   accessToken,
@@ -9,7 +8,7 @@ export const ApiGetOrganizationById = async ({
   accessToken: string;
 }) => {
   return fetch(
-    `${backendUrl}/organizations/${encodeURIComponent(organizationId)}`,
+    `${getBackendUrl()}/organizations/${encodeURIComponent(organizationId)}`,
     {
       method: "GET",
       headers: SMPayWebHeaderWithAccessToken(accessToken),
@@ -25,7 +24,9 @@ export const ApiGetOrganizationWithChildren = async ({
   accessToken: string;
 }) => {
   return fetch(
-    `${backendUrl}/organizations/${encodeURIComponent(organizationId)}/full`,
+    `${getBackendUrl()}/organizations/${encodeURIComponent(
+      organizationId
+    )}/full`,
     {
       method: "GET",
       headers: SMPayWebHeaderWithAccessToken(accessToken),
@@ -41,7 +42,9 @@ export const ApiGetOrganizationParents = async ({
   accessToken: string;
 }) => {
   return fetch(
-    `${backendUrl}/organizations/${encodeURIComponent(organizationId)}/parents`,
+    `${getBackendUrl()}/organizations/${encodeURIComponent(
+      organizationId
+    )}/parents`,
     {
       method: "GET",
       headers: SMPayWebHeaderWithAccessToken(accessToken),

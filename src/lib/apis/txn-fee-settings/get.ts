@@ -3,8 +3,8 @@ import { PaymentChannel } from "@/lib/enums/transactions/payment-channel.enum";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
-import { backendUrl } from "@/lib/constants/common";
 import { buildQueryString } from "@/lib/utils/build-query-string";
+import { getBackendUrl } from "@/lib/constants/common";
 
 export const ApiGetOrganizationTransactionFeeSettings = async ({
   organizationId,
@@ -26,7 +26,7 @@ export const ApiGetOrganizationTransactionFeeSettings = async ({
   });
 
   return fetch(
-    `${backendUrl}/organizations/${organizationId}/txn-fee-settings?${queryString}`,
+    `${getBackendUrl()}/organizations/${organizationId}/txn-fee-settings?${queryString}`,
     {
       method: "GET",
       headers: SMPayWebHeaderWithAccessToken(accessToken),
@@ -57,7 +57,7 @@ export const ApiGetTransactionFeeSettings = async ({
     paymentChannel,
   });
 
-  return fetch(`${backendUrl}/txn-fee-settings?${queryString}`, {
+  return fetch(`${getBackendUrl()}/txn-fee-settings?${queryString}`, {
     method: "GET",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
   });

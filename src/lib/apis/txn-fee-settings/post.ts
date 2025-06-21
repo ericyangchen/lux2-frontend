@@ -4,8 +4,7 @@ import { PaymentChannel } from "@/lib/enums/transactions/payment-channel.enum";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
-import { backendUrl } from "@/lib/constants/common";
-
+import { getBackendUrl } from "@/lib/constants/common";
 export const ApiCreateTransactionFeeSetting = async ({
   organizationId,
   orgType,
@@ -31,7 +30,7 @@ export const ApiCreateTransactionFeeSetting = async ({
   enabled?: boolean;
   accessToken: string;
 }) => {
-  return fetch(`${backendUrl}/txn-fee-settings`, {
+  return fetch(`${getBackendUrl()}/txn-fee-settings`, {
     method: "POST",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
     body: JSON.stringify({

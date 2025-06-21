@@ -1,6 +1,5 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
-
+import { getBackendUrl } from "@/lib/constants/common";
 export const ApiGetUserById = async ({
   userId,
   accessToken,
@@ -8,7 +7,7 @@ export const ApiGetUserById = async ({
   userId: string;
   accessToken: string;
 }) => {
-  const url = `${backendUrl}/users/${encodeURIComponent(userId)}`;
+  const url = `${getBackendUrl()}/users/${encodeURIComponent(userId)}`;
 
   return fetch(url, {
     method: "GET",
@@ -23,7 +22,7 @@ export const ApiGetOrganizationUsers = async ({
   organizationId: string;
   accessToken: string;
 }) => {
-  const url = `${backendUrl}/organizations/${encodeURIComponent(
+  const url = `${getBackendUrl()}/organizations/${encodeURIComponent(
     organizationId
   )}/users`;
 
