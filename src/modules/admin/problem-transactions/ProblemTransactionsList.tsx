@@ -17,7 +17,6 @@ import {
   convertToEndOfDay,
   convertToStartOfDay,
 } from "@/lib/utils/timezone";
-import { useEffect, useState } from "react";
 
 import { ApiGetProblemWithdrawals } from "@/lib/apis/problem-withdrawals/get";
 import { ApplicationError } from "@/lib/error/applicationError";
@@ -40,6 +39,7 @@ import { flattenOrganizations } from "../common/flattenOrganizations";
 import { formatNumberWithoutMinFraction } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useOrganizationWithChildren } from "@/lib/hooks/swr/organization";
+import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
 const findOrganizationById = (organizations: Organization[], id: string) => {
@@ -180,10 +180,6 @@ export function ProblemTransactionsList() {
   const isIndeterminate =
     selectedTransactionIds.size > 0 &&
     selectedTransactionIds.size < (transactions?.length || 0);
-
-  useEffect(() => {
-    handleSearch();
-  }, []);
 
   return (
     <div

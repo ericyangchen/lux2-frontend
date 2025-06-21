@@ -80,9 +80,7 @@ export default function DashboardView() {
                 "w-full flex-none text-xl font-medium leading-10 tracking-tight text-gray-900 font-mono"
               }
             >
-              {formatNumberInInteger(
-                systemDailyTransactionCount?.dailyTotal || "0"
-              )}
+              {formatNumberInInteger(systemDailyTransactionCount?.total || "0")}
             </dd>
           </div>
 
@@ -96,11 +94,11 @@ export default function DashboardView() {
               }
             >
               {formatNumberInInteger(
-                systemDailyTransactionCount?.dailyDepositSuccessTotal || "0"
+                systemDailyTransactionCount?.depositSuccessTotal || "0"
               )}{" "}
               /{" "}
               {formatNumberInInteger(
-                systemDailyTransactionCount?.dailyDepositFailedTotal || "0"
+                systemDailyTransactionCount?.depositFailedTotal || "0"
               )}
             </dd>
           </div>
@@ -115,11 +113,11 @@ export default function DashboardView() {
               }
             >
               {formatNumberInInteger(
-                systemDailyTransactionCount?.dailyWithdrawalSuccessTotal || "0"
+                systemDailyTransactionCount?.withdrawalSuccessTotal || "0"
               )}{" "}
               /{" "}
               {formatNumberInInteger(
-                systemDailyTransactionCount?.dailyWithdrawalFailedTotal || "0"
+                systemDailyTransactionCount?.withdrawalFailedTotal || "0"
               )}
             </dd>
           </div>

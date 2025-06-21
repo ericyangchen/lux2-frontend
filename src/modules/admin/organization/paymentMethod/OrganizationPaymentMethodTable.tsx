@@ -142,7 +142,12 @@ export default function OrganizationPaymentMethodTable({
           };
         }
       ),
-    [organizationId, transactionFeeSettingsGroupedByPaymentMethods, type]
+    [
+      getAllFeeSettings,
+      organizationId,
+      transactionFeeSettingsGroupedByPaymentMethods,
+      type,
+    ]
   );
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);

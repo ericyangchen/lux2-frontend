@@ -17,7 +17,6 @@ import {
   convertToEndOfDay,
   convertToStartOfDay,
 } from "@/lib/utils/timezone";
-import { useEffect, useState } from "react";
 
 import { ApiGetMerchantRequestedWithdrawals } from "@/lib/apis/txn-merchant-requested-withdrawals/get";
 import { ApplicationError } from "@/lib/error/applicationError";
@@ -41,6 +40,7 @@ import { flattenOrganizations } from "../common/flattenOrganizations";
 import { formatNumberWithoutMinFraction } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useOrganizationWithChildren } from "@/lib/hooks/swr/organization";
+import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
 const findOrganizationById = (organizations: Organization[], id: string) => {
@@ -197,10 +197,6 @@ export function MerchantWithdrawalRequestList() {
   const isIndeterminate =
     selectedTransactionIds.size > 0 &&
     selectedTransactionIds.size < (transactions?.length || 0);
-
-  useEffect(() => {
-    handleSearch();
-  }, []);
 
   return (
     <div className="flex flex-col gap-4">

@@ -6,18 +6,6 @@ import { TransactionStatus } from "../enums/transactions/transaction-status.enum
 import { TransactionType } from "../enums/transactions/transaction-type.enum";
 import { WithdrawalToAccountType } from "../enums/transactions/withdrawal-to-account-type.enum";
 
-export const PaymentChannelCategories = {
-  [PaymentMethod.NATIVE_GCASH_QR]: [PaymentChannel.NATIVE_GCASH_QR_GOLDPAY],
-  [PaymentMethod.NATIVE_GCASH_DIRECT]: [
-    PaymentChannel.NATIVE_GCASH_DIRECT_GOLDPAY,
-    PaymentChannel.NATIVE_GCASH_DIRECT_BIFU,
-  ],
-  [PaymentMethod.SIMULATED_GCASH_QR]: [],
-  [PaymentMethod.SIMULATED_GCASH_DIRECT]: [],
-  [PaymentMethod.MAYA]: [PaymentChannel.MAYA_GOLDPAY],
-  [PaymentMethod.QRPH]: [],
-};
-
 export const TransactionTypeDisplayNames = {
   [TransactionType.API_DEPOSIT]: "代收",
   [TransactionType.API_WITHDRAWAL]: "代付",
@@ -66,6 +54,8 @@ export const TransactionInternalStatusDisplayNames = {
 
   [TransactionInternalStatus.WITHDRAWAL_UPSTREAM_INSUFFICIENT_BALANCE]:
     "代付-上游餘額不足",
+  [TransactionInternalStatus.WITHDRAWAL_RESUBMISSION_IN_PROGRESS]:
+    "代付-重新提交中",
   [TransactionInternalStatus.WITHDRAWAL_UPSTREAM_SUCCESS_RESPONSE]:
     "代付-上游成功",
   [TransactionInternalStatus.WITHDRAWAL_UPSTREAM_FAILED_RESPONSE]:
@@ -79,24 +69,42 @@ export const TransactionInternalStatusDisplayNames = {
   // MERCHANT_REQUESTED_WITHDRAWAL
   [TransactionInternalStatus.MERCHANT_REQUESTED_WITHDRAWAL_CREATED]:
     "商戶下發-創建成功",
+  [TransactionInternalStatus.MERCHANT_REQUESTED_WITHDRAWAL_SUBMISSION_IN_PROGRESS]:
+    "商戶下發-提交中",
   [TransactionInternalStatus.MERCHANT_REQUESTED_WITHDRAWAL_REJECTED]:
     "商戶下發-拒絕",
 };
 
+export const PaymentChannelCategories = {
+  [PaymentMethod.NATIVE_GCASH]: [
+    PaymentChannel.NATIVE_GCASH_DIRECT_BIFU,
+    PaymentChannel.NATIVE_GCASH_QR_BIFU,
+    PaymentChannel.NATIVE_GCASH_AWAKEN_BIFU,
+    PaymentChannel.NATIVE_GCASH_AWAKEN_REVISION_BIFU,
+    PaymentChannel.NATIVE_GCASH_BIFU_BANK,
+  ],
+  [PaymentMethod.MAYA]: [PaymentChannel.MAYA_BIFU],
+  [PaymentMethod.QRPH]: [PaymentChannel.QRPH_BIFU],
+};
+
 export const PaymentMethodDisplayNames = {
-  [PaymentMethod.NATIVE_GCASH_QR]: "原生GCash QR",
-  [PaymentMethod.NATIVE_GCASH_DIRECT]: "原生GCash Direct",
-  [PaymentMethod.SIMULATED_GCASH_QR]: "仿原生GCash QR",
-  [PaymentMethod.SIMULATED_GCASH_DIRECT]: "仿原生GCash Direct",
+  [PaymentMethod.NATIVE_GCASH]: "原生GCash",
   [PaymentMethod.MAYA]: "Maya",
   [PaymentMethod.QRPH]: "QRPH",
 };
 
 export const PaymentChannelDisplayNames = {
-  [PaymentChannel.NATIVE_GCASH_QR_GOLDPAY]: "GCash QR: GoldPay",
-  [PaymentChannel.NATIVE_GCASH_DIRECT_GOLDPAY]: "GCash Direct: GoldPay",
-  [PaymentChannel.NATIVE_GCASH_DIRECT_BIFU]: "GCash Direct: Bifu",
-  [PaymentChannel.MAYA_GOLDPAY]: "Maya: GoldPay",
+  [PaymentChannel.NATIVE_GCASH_DIRECT_BIFU]:
+    "Native GCash: Bifu Direct (deposit)",
+  [PaymentChannel.NATIVE_GCASH_QR_BIFU]: "Native GCash: Bifu QR (deposit)",
+  [PaymentChannel.NATIVE_GCASH_AWAKEN_BIFU]:
+    "Native GCash: Bifu Awaken (deposit)",
+  [PaymentChannel.NATIVE_GCASH_AWAKEN_REVISION_BIFU]:
+    "Native GCash: Bifu Awaken Revision (deposit)",
+  [PaymentChannel.NATIVE_GCASH_BIFU_BANK]:
+    "Native GCash: Bifu Bank (withdrawal)",
+  [PaymentChannel.MAYA_BIFU]: "Maya: Bifu",
+  [PaymentChannel.QRPH_BIFU]: "QRPH: Bifu",
 };
 
 export const DepositAccountTypeDisplayNames = {

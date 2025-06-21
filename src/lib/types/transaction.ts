@@ -71,16 +71,24 @@ export interface TransactionFeeAllocationTable {
 }
 
 export interface SystemDailyTransactionCount {
-  date: string;
-  depositCount: number;
-  withdrawalCount: number;
-  totalCount: number;
+  period: string;
+  referenceDate: string;
+  total: string;
+  depositSuccessTotal: string;
+  depositFailedTotal: string;
+  withdrawalSuccessTotal: string;
+  withdrawalFailedTotal: string;
+  withdrawalFailedRefundedTotal: string;
 }
 
 export interface DailyTransactionCountByOrganizationId {
   organizationId: string;
-  date: string;
-  depositCount: number;
-  withdrawalCount: number;
-  totalCount: number;
+  period: string;
+  referenceDate: string;
+  total: string;
+  depositSuccessTotal: string;
+  depositFailedTotal: string;
+  withdrawalSuccessTotal: string;
+  withdrawalFailedTotal: string;
+  withdrawalFailedRefundedTotal: string;
 }

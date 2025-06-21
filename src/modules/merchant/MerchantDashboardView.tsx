@@ -102,8 +102,7 @@ export default function MerchantDashboardView() {
               }
             >
               {formatNumberInInteger(
-                dailyTransactionCountByOrganizationId?.totalCount?.toString() ||
-                  "0"
+                dailyTransactionCountByOrganizationId?.total || "0"
               )}
             </dd>
           </div>
@@ -118,10 +117,13 @@ export default function MerchantDashboardView() {
               }
             >
               {formatNumberInInteger(
-                dailyTransactionCountByOrganizationId?.depositCount?.toString() ||
+                dailyTransactionCountByOrganizationId?.depositSuccessTotal ||
                   "0"
               )}{" "}
-              / {"0"}
+              /{" "}
+              {formatNumberInInteger(
+                dailyTransactionCountByOrganizationId?.depositFailedTotal || "0"
+              )}
             </dd>
           </div>
 
@@ -135,10 +137,14 @@ export default function MerchantDashboardView() {
               }
             >
               {formatNumberInInteger(
-                dailyTransactionCountByOrganizationId?.withdrawalCount?.toString() ||
+                dailyTransactionCountByOrganizationId?.withdrawalSuccessTotal ||
                   "0"
               )}{" "}
-              / {"0"}
+              /{" "}
+              {formatNumberInInteger(
+                dailyTransactionCountByOrganizationId?.withdrawalFailedTotal ||
+                  "0"
+              )}
             </dd>
           </div>
         </dl>
