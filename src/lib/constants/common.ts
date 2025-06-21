@@ -4,12 +4,12 @@ const getEnvVar = (key: string) => {
   return value;
 };
 
-export const getBackendUrl = () => {
-  return getEnvVar("BACKEND_URL");
-};
-
 export const getEnvironment = () => {
   return getEnvVar("NEXT_PUBLIC_ENVIRONMENT");
+};
+
+export const getBackendUrl = () => {
+  return getEnvVar("NEXT_PUBLIC_BACKEND_URL");
 };
 
 export const getCompanyName = () => {
