@@ -25,7 +25,6 @@ import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.e
 import { classNames } from "@/lib/utils/classname-utils";
 import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/utils/timezone";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
-import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 import { useTransaction } from "@/lib/hooks/swr/transaction";
 import { useTransactionLogs } from "@/lib/hooks/swr/transaction-logs";
@@ -313,16 +312,7 @@ export function ApiTransactionInfoDialog({
               </div>
             ) : sortedLogs.length > 0 ? (
               <div className="flex flex-col border rounded-md overflow-hidden">
-                <div className="bg-gray-50 px-4 py-2 border-b">
-                  <div className="grid grid-cols-5 gap-4 text-sm font-semibold text-gray-900">
-                    <div>時間</div>
-                    <div>動作</div>
-                    <div>觸發者</div>
-                    <div>創建者類型</div>
-                    <div>詳細資料</div>
-                  </div>
-                </div>
-                <div className="max-h-96 overflow-y-auto">
+                <div className="max-h-[60vh] overflow-y-auto">
                   {sortedLogs.map((log, index) => (
                     <div
                       key={log.id}
@@ -331,47 +321,76 @@ export function ApiTransactionInfoDialog({
                         "px-4 py-3 border-b last:border-b-0"
                       )}
                     >
-                      <div className="grid grid-cols-5 gap-4 text-sm">
-                        <div className="font-mono text-xs">
-                          {convertDatabaseTimeToReadablePhilippinesTime(
-                            log.createdAt
-                          )}
+                      {/* Line 1: action, creatorType(creatorIdentifier, creatorIp), createdAt */}
+                      <div className="flex items-center gap-4 text-sm mb-1 flex-wrap">
+                        <div className="flex items-center gap-1">
+                          <span className="text-gray-500 text-xs">動作:</span>
+                          <span className="font-medium">
+                            {TransactionLogActionDisplayNames[log.action] ||
+                              log.action}
+                          </span>
                         </div>
-                        <div className="font-medium">
-                          {TransactionLogActionDisplayNames[log.action] ||
-                            log.action}
+                        <div className="flex items-center gap-1">
+                          <span className="text-gray-500 text-xs">
+                            創建者類型:
+                          </span>
+                          <span className="text-xs text-gray-700">
+                            {CreatorTypeDisplayNames[log.creatorType] ||
+                              log.creatorType}
+                            {log.creatorIdentifier && (
+                              <span className="text-gray-500">
+                                ({log.creatorIdentifier}
+                                {log.creatorIp && `, ${log.creatorIp}`})
+                              </span>
+                            )}
+                          </span>
                         </div>
-                        <div className="font-mono text-xs">
-                          {log.triggeredBy || "系統"}
-                        </div>
-                        <div className="text-xs">
-                          {CreatorTypeDisplayNames[log.creatorType] ||
-                            log.creatorType}
-                        </div>
-                        <div className="text-xs">
-                          {log.data ? (
-                            <details className="cursor-pointer">
-                              <summary className="text-blue-600 hover:text-blue-800">
-                                查看詳情
-                              </summary>
-                              <pre className="mt-2 text-xs bg-gray-100 rounded p-2 overflow-auto max-w-xs">
-                                {JSON.stringify(log.data, null, 2)}
-                              </pre>
-                            </details>
-                          ) : (
-                            <span className="text-gray-400">無</span>
-                          )}
+                        <div className="flex items-center gap-1 ml-auto">
+                          <span className="text-gray-500 text-xs">時間:</span>
+                          <span className="font-mono text-xs text-gray-600">
+                            {convertDatabaseTimeToReadablePhilippinesTime(
+                              log.createdAt
+                            )}
+                          </span>
                         </div>
                       </div>
+
+                      {/* Line 2: method, route */}
                       {(log.route || log.method) && (
-                        <div className="mt-2 text-xs text-gray-500 font-mono">
-                          {log.method} {log.route}
+                        <div className="flex items-center gap-1 text-xs mb-1">
+                          <span className="text-gray-500">請求:</span>
+                          <span className="text-gray-500 font-mono">
+                            {log.method} {log.route}
+                          </span>
                         </div>
                       )}
-                      {log.creatorIdentifier && (
-                        <div className="mt-1 text-xs text-gray-500">
-                          創建者: {log.creatorIdentifier}{" "}
-                          {log.creatorIp && `(${log.creatorIp})`}
+
+                      {/* Line 3: triggeredBy */}
+                      <div className="flex items-center gap-1 text-xs text-gray-600 mb-1">
+                        <span className="text-gray-500">觸發者:</span>
+                        <span className="font-mono">
+                          {log.triggeredBy || "系統"}
+                        </span>
+                      </div>
+
+                      {/* Line 4: data */}
+                      {log.data && (
+                        <div className="mt-2">
+                          <details className="cursor-pointer">
+                            <summary className="text-blue-600 hover:text-blue-800 select-none text-sm px-2 py-1 bg-blue-50 rounded inline-block">
+                              📋 查看詳情
+                            </summary>
+                            <div className="mt-2 bg-slate-900 rounded-md overflow-hidden">
+                              <div className="bg-slate-800 px-3 py-1 text-xs text-slate-300 font-mono border-b border-slate-700">
+                                JSON
+                              </div>
+                              <pre className="text-xs text-green-400 font-mono p-3 overflow-auto max-h-64 bg-slate-900 whitespace-pre-wrap break-words">
+                                <code className="language-json">
+                                  {JSON.stringify(log.data, null, 2)}
+                                </code>
+                              </pre>
+                            </div>
+                          </details>
                         </div>
                       )}
                     </div>

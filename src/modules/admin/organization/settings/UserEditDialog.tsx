@@ -1,3 +1,7 @@
+import {
+  ApiDeveloperDisableTotp,
+  ApiDeveloperEnableTotp,
+} from "@/lib/apis/developer/users/otp/post";
 import { ApiDisableUserOtp, ApiEnableTotp } from "@/lib/apis/otp/post";
 import {
   Dialog,
@@ -68,10 +72,18 @@ export function UserEditDialog({
       const { accessToken } = getApplicationCookies();
       if (!accessToken) return;
 
-      const response = await ApiEnableTotp({
-        userId: user.id,
-        accessToken,
-      });
+      let response;
+      if (user.role === UserRole.DEVELOPER) {
+        response = await ApiDeveloperEnableTotp({
+          userId: user.id,
+          accessToken,
+        });
+      } else {
+        response = await ApiEnableTotp({
+          userId: user.id,
+          accessToken,
+        });
+      }
 
       if (response.ok) {
         const data = await response.json();
@@ -110,10 +122,18 @@ export function UserEditDialog({
       const { accessToken } = getApplicationCookies();
       if (!accessToken) return;
 
-      const response = await ApiDisableUserOtp({
-        userId: user.id,
-        accessToken,
-      });
+      let response;
+      if (user.role === UserRole.DEVELOPER) {
+        response = await ApiDeveloperDisableTotp({
+          userId: user.id,
+          accessToken,
+        });
+      } else {
+        response = await ApiDisableUserOtp({
+          userId: user.id,
+          accessToken,
+        });
+      }
 
       if (response.ok) {
         setIsOtpEnabled(false);
@@ -157,6 +177,9 @@ export function UserEditDialog({
       currentUser.organizationId === user.organizationId
     )
       return true;
+
+    // DEVELOPER can manage everyone's OTP
+    if (currentUser.role === UserRole.DEVELOPER) return true;
 
     return false;
   };

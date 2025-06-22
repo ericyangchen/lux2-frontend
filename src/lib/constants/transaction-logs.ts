@@ -4,6 +4,7 @@ import { TransactionLogAction } from "../enums/transactions/transaction-log-acti
 // Display names for transaction log actions
 export const TransactionLogActionDisplayNames = {
   [TransactionLogAction.TRANSACTION_CREATED]: "交易創建",
+  [TransactionLogAction.SUBMIT_TO_UPSTREAM]: "提交至上游",
   [TransactionLogAction.UPSTREAM_RESPONSE]: "上游回應",
   [TransactionLogAction.TRANSACTION_SUCCESS]: "交易成功",
   [TransactionLogAction.TRANSACTION_FAILED]: "交易失敗",
