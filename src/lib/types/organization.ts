@@ -6,6 +6,7 @@ export interface Organization {
   type: OrgType;
   parent?: Organization;
   children: Organization[];
+  level: number;
   apiKey?: string;
   createdAt: string;
   updatedAt?: string;
