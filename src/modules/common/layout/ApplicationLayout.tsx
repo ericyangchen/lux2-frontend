@@ -87,7 +87,7 @@ const CustomerServiceSupportInfo = () => {
           variant="outline"
           className="bg-none border-none cursor-pointer pl-0 flex gap-1"
           onClick={() => {
-            // window.open("https://t.me/smpay1688869");
+            window.open("https://t.me/smpay1688869");
           }}
         >
           <Image src="/telegram.png" width={16} height={16} alt="" />
@@ -97,7 +97,7 @@ const CustomerServiceSupportInfo = () => {
           variant="outline"
           className="bg-none border-none cursor-pointer pl-0 flex gap-1"
           onClick={() => {
-            // window.open("https://t.me/SM_BOSS01");
+            window.open("https://t.me/SM_BOSS01");
           }}
         >
           <Image src="/telegram.png" width={16} height={16} alt="" />

@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/ui/select";
+import { useUser, useUsersByOrganizationId } from "@/lib/hooks/swr/user";
 
 import { ApiDeleteUser } from "@/lib/apis/users/delete";
 import { ApiUpdateUser } from "@/lib/apis/users/patch";
@@ -27,7 +28,6 @@ import { UserRoleDisplayNames } from "@/lib/constants/user";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
-import { useUsersByOrganizationId } from "@/lib/hooks/swr/user";
 
 export function MerchantUserEditDialog({
   isOpen,
@@ -42,6 +42,8 @@ export function MerchantUserEditDialog({
 }) {
   const { toast } = useToast();
 
+  const { mutate: mutateUser } = useUser();
+
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState("");
@@ -55,9 +57,11 @@ export function MerchantUserEditDialog({
   });
 
   const handleUpdateUser = async () => {
-    const { accessToken } = getApplicationCookies();
+    const { accessToken, userId } = getApplicationCookies();
 
     if (!organizationId || !accessToken || !user) return;
+
+    const isUpdatingSelf = user.id === userId;
 
     try {
       setIsUpdateLoading(true);
@@ -75,11 +79,25 @@ export function MerchantUserEditDialog({
 
       if (response.ok) {
         closeDialog();
-        toast({
-          title: `${UserRoleDisplayNames[role]} 更新成功`,
-          description: `User ID: ${user.id}`,
-          variant: "success",
-        });
+
+        if (isUpdatingSelf) {
+          toast({
+            title: "個人資料更新成功",
+            description: "正在驗證權限...",
+            duration: 1000,
+          });
+
+          setTimeout(() => {
+            // Trigger user fetch to check if token is still valid
+            mutateUser();
+          }, 1000);
+        } else {
+          toast({
+            title: `${UserRoleDisplayNames[role]} 更新成功`,
+            description: `User ID: ${user.id}`,
+            variant: "success",
+          });
+        }
 
         mutate();
       } else {

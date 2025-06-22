@@ -12,8 +12,11 @@ export class ApplicationError extends Error {
 
     this.message = message || "Unknown error";
     this.statusCode = statusCode;
+
+    this.isAuthError = message?.startsWith("Auth Error") ?? false;
   }
 
   statusCode?: number;
   message: string;
+  isAuthError: boolean;
 }

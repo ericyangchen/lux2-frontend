@@ -23,7 +23,7 @@ import { TransactionInternalStatus } from "@/lib/enums/transactions/transaction-
 import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { getApplicationCookies } from "@/lib/utils/cookie";
-import useSWR from "swr";
+import { useSwrWithAuth } from "../useSwrWithAuth";
 
 const fetchTransactionById = async ({
   transactionId,
@@ -57,7 +57,7 @@ export const useTransaction = ({
 
   const shouldFetch = accessToken && transactionId;
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch ? { key: "transaction", transactionId, accessToken } : null,
     fetchTransactionById,
     { refreshInterval: USE_TRANSACTION_REFRESH_INTERVAL }
@@ -163,7 +163,7 @@ export const useOrganizationTransactions = ({
 
   const shouldFetch = accessToken && merchantId;
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch
       ? {
           key: "transactions-by-merchant-id",
@@ -288,7 +288,7 @@ export const useTransactions = ({
 
   const shouldFetch = accessToken && merchantId;
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch
       ? {
           key: "transactions",
@@ -347,7 +347,7 @@ export const useSystemDailyTransactionCount = () => {
 
   const shouldFetch = accessToken;
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch ? { key: "systemDailyTransactionCount", accessToken } : null,
     fetchSystemDailyTransactionCount,
     { refreshInterval: USE_SYSTEM_DAILY_TRANSACTION_COUNT_REFRESH_INTERVAL }
@@ -394,7 +394,7 @@ export const useDailyTransactionCountByOrganizationId = ({
 
   const shouldFetch = accessToken && organizationId;
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch
       ? {
           key: "dailyTransactionCountByOrganizationId",

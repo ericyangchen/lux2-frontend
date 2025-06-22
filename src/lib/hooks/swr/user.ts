@@ -7,7 +7,7 @@ import {
 import { ApplicationError } from "@/lib/error/applicationError";
 import { User } from "@/lib/types/user";
 import { getApplicationCookies } from "@/lib/utils/cookie";
-import useSWR from "swr";
+import { useSwrWithAuth } from "../useSwrWithAuth";
 
 const fetchUserById = async ({
   userId,
@@ -37,7 +37,7 @@ export const useUser = () => {
 
   const shouldFetch = accessToken && userId;
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch ? { key: "user", userId, accessToken } : null,
     fetchUserById,
     { refreshInterval: USE_USER_REFRESH_INTERVAL }
@@ -83,7 +83,7 @@ export const useUsersByOrganizationId = ({
 
   const shouldFetch = accessToken && organizationId;
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch ? { key: "users", organizationId, accessToken } : null,
     fetchUsersByOrganizationId,
     { refreshInterval: USE_USERS_REFRESH_INTERVAL }

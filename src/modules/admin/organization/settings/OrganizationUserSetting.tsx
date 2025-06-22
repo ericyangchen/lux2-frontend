@@ -92,10 +92,10 @@ export function OrganizationUserSetting({
     (permission.accessingSelfOrg && permission.isOwner);
   const showStaffAddButton =
     permission.isDeveloper ||
-    (permission.accessingSelfOrg && permission.isStaff);
+    (permission.accessingSelfOrg && permission.isOwner);
   const showStaffEditButton =
     permission.isDeveloper ||
-    (permission.accessingSelfOrg && permission.isStaff);
+    (permission.accessingSelfOrg && permission.isOwner);
 
   return (
     <div className="">

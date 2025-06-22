@@ -10,7 +10,7 @@ import {
 import { ApplicationError } from "@/lib/error/applicationError";
 import { Organization } from "@/lib/types/organization";
 import { getApplicationCookies } from "@/lib/utils/cookie";
-import useSWR from "swr";
+import { useSwrWithAuth } from "../useSwrWithAuth";
 
 const fetchOrganizationWithChildren = async ({
   organizationId,
@@ -44,7 +44,7 @@ export const useOrganizationWithChildren = ({
 
   const shouldFetch = accessToken && organizationId;
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch
       ? { key: "organization-with-children", organizationId, accessToken }
       : null,
@@ -92,7 +92,7 @@ export const useOrganization = ({
 
   const shouldFetch = accessToken && organizationId;
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch ? { key: "organization", organizationId, accessToken } : null,
     fetchOrganizationById,
     {
