@@ -76,8 +76,8 @@ export function MerchantUserListView() {
    */
   const showOwnerAddButton = permission.accessingSelfOrg && permission.isOwner;
   const showOwnerEditButton = permission.accessingSelfOrg && permission.isOwner;
-  const showStaffAddButton = permission.accessingSelfOrg && permission.isStaff;
-  const showStaffEditButton = permission.accessingSelfOrg && permission.isStaff;
+  const showStaffAddButton = permission.accessingSelfOrg && permission.isOwner;
+  const showStaffEditButton = permission.accessingSelfOrg && permission.isOwner;
 
   return (
     <div>
@@ -133,6 +133,12 @@ export function MerchantUserListView() {
                     </th>
                     <th
                       scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
+                      OTP
+                    </th>
+                    <th
+                      scope="col"
                       className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-semibold sm:pr-6"
                     >
                       操作
@@ -165,6 +171,18 @@ export function MerchantUserListView() {
                             ownerUser.createdAt
                           )}
                         </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <div className="flex items-center">
+                            <div
+                              className={`w-2 h-2 rounded-full mr-2 ${
+                                ownerUser.isOtpEnabled
+                                  ? "bg-green-500"
+                                  : "bg-gray-400"
+                              }`}
+                            ></div>
+                            {ownerUser.isOtpEnabled ? "已啟用" : "未啟用"}
+                          </div>
+                        </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium">
                           {showOwnerEditButton && (
                             <button
@@ -184,7 +202,7 @@ export function MerchantUserListView() {
                   ) : (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={6}
                         className="px-4 py-4 text-sm text-gray-500 text-center"
                       >
                         沒有{UserRoleDisplayNames[UserRole.MERCHANT_OWNER]}
@@ -248,6 +266,12 @@ export function MerchantUserListView() {
                     </th>
                     <th
                       scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
+                      OTP
+                    </th>
+                    <th
+                      scope="col"
                       className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-semibold sm:pr-6"
                     >
                       操作
@@ -280,6 +304,18 @@ export function MerchantUserListView() {
                             staffUser.createdAt
                           )}
                         </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <div className="flex items-center">
+                            <div
+                              className={`w-2 h-2 rounded-full mr-2 ${
+                                staffUser.isOtpEnabled
+                                  ? "bg-green-500"
+                                  : "bg-gray-400"
+                              }`}
+                            ></div>
+                            {staffUser.isOtpEnabled ? "已啟用" : "未啟用"}
+                          </div>
+                        </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium">
                           {showStaffEditButton && (
                             <button
@@ -299,7 +335,7 @@ export function MerchantUserListView() {
                   ) : (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={6}
                         className="px-4 py-4 text-sm text-gray-500 text-center"
                       >
                         沒有{UserRoleDisplayNames[UserRole.MERCHANT_STAFF]}
@@ -311,28 +347,28 @@ export function MerchantUserListView() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Dialog */}
-        {organizationId && (
-          <>
-            <MerchantUserAddDialog
-              isOpen={isAddDialogOpen}
-              closeDialog={closeAddDialog}
-              role={addDialogRole}
-              orgType={OrgType.MERCHANT}
+      {/* Dialog */}
+      {organizationId && (
+        <>
+          <MerchantUserAddDialog
+            isOpen={isAddDialogOpen}
+            closeDialog={closeAddDialog}
+            role={addDialogRole}
+            orgType={OrgType.MERCHANT}
+            organizationId={organizationId}
+          />
+          {editUser && (
+            <MerchantUserEditDialog
+              isOpen={isEditDialogOpen}
+              closeDialog={closeEditDialog}
+              user={editUser}
               organizationId={organizationId}
             />
-            {editUser && (
-              <MerchantUserEditDialog
-                isOpen={isEditDialogOpen}
-                closeDialog={closeEditDialog}
-                user={editUser}
-                organizationId={organizationId}
-              />
-            )}
-          </>
-        )}
-      </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

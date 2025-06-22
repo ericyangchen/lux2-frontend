@@ -1,5 +1,6 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
 import { getBackendUrl } from "@/lib/constants/common";
+
 export const ApiEnableTotp = async ({
   userId,
   accessToken,
@@ -28,6 +29,28 @@ export const ApiDisableTotp = async ({
     {
       method: "POST",
       headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
+};
+
+export const ApiDisableUserOtp = async ({
+  userId,
+  accessToken,
+  token,
+}: {
+  userId: string;
+  accessToken: string;
+  token?: string;
+}) => {
+  return fetch(
+    `${getBackendUrl()}/users/${encodeURIComponent(userId)}/totp/disable`,
+    {
+      method: "POST",
+      headers: {
+        ...SMPayWebHeaderWithAccessToken(accessToken),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token }),
     }
   );
 };

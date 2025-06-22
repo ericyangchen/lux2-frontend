@@ -20,7 +20,9 @@ export function OrganizationUserSetting({
 }) {
   const { toast } = useToast();
 
-  const { users } = useUsersByOrganizationId({ organizationId });
+  const { users, mutate: mutateUsers } = useUsersByOrganizationId({
+    organizationId,
+  });
   const { organization } = useOrganization({ organizationId });
 
   const permission = useUserPermission({
@@ -150,6 +152,12 @@ export function OrganizationUserSetting({
                   </th>
                   <th
                     scope="col"
+                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
+                    OTP
+                  </th>
+                  <th
+                    scope="col"
                     className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-semibold sm:pr-6"
                   >
                     操作
@@ -182,6 +190,18 @@ export function OrganizationUserSetting({
                           ownerUser.createdAt
                         )}
                       </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <div className="flex items-center">
+                          <div
+                            className={`w-2 h-2 rounded-full mr-2 ${
+                              ownerUser.isOtpEnabled
+                                ? "bg-green-500"
+                                : "bg-gray-400"
+                            }`}
+                          ></div>
+                          {ownerUser.isOtpEnabled ? "已啟用" : "未啟用"}
+                        </div>
+                      </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium">
                         {showOwnerEditButton && (
                           <button
@@ -201,7 +221,7 @@ export function OrganizationUserSetting({
                 ) : (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={6}
                       className="px-4 py-4 text-sm text-gray-500 text-center"
                     >
                       沒有{UserRoleDisplayNames[ownerUserRole]}
@@ -265,6 +285,12 @@ export function OrganizationUserSetting({
                   </th>
                   <th
                     scope="col"
+                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
+                    OTP
+                  </th>
+                  <th
+                    scope="col"
                     className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-semibold sm:pr-6"
                   >
                     操作
@@ -297,6 +323,18 @@ export function OrganizationUserSetting({
                           staffUser.createdAt
                         )}
                       </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <div className="flex items-center">
+                          <div
+                            className={`w-2 h-2 rounded-full mr-2 ${
+                              staffUser.isOtpEnabled
+                                ? "bg-green-500"
+                                : "bg-gray-400"
+                            }`}
+                          ></div>
+                          {staffUser.isOtpEnabled ? "已啟用" : "未啟用"}
+                        </div>
+                      </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium">
                         {showStaffEditButton && (
                           <button
@@ -316,7 +354,7 @@ export function OrganizationUserSetting({
                 ) : (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={6}
                       className="px-4 py-4 text-sm text-gray-500 text-center"
                     >
                       沒有{UserRoleDisplayNames[staffUserRole]}
