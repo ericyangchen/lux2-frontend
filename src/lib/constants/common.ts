@@ -10,11 +10,8 @@ export const getEnvironment = () => {
 };
 
 export const getBackendUrl = () => {
-  if (process.env.NEXT_PUBLIC_ENVIRONMENT === "development") {
-    return "http://localhost:8080";
-  }
-
   return "https://api.dev.sm-pay.org";
+  return "http://localhost:8080";
   return getEnvVar("NEXT_PUBLIC_BACKEND_URL");
 };
 

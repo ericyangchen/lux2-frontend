@@ -62,6 +62,15 @@ export default function LoginPage() {
       setLoading(true);
       setUnauthorizedIp("");
 
+      if (!email || !password) {
+        toast({
+          title: "400 - Login failed",
+          description: "Email and password are required",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const response = await ApiLogin({
         email,
         password,
@@ -100,9 +109,13 @@ export default function LoginPage() {
       // store unauthorized IP
       if (
         errorData.statusCode === 401 &&
-        errorData.message.startsWith("Unauthorized Login IP")
+        typeof errorData.message === "string" &&
+        errorData.message.startsWith("Auth Error: IP not whitelisted for Login")
       ) {
-        const ip = errorData.message.split("Unauthorized Login IP:")[1].trim();
+        const ip = errorData.message
+          .split("Auth Error: IP not whitelisted for Login:")[1]
+          .split(" - (version:")[0]
+          .trim();
         setUnauthorizedIp(ip);
       }
 
