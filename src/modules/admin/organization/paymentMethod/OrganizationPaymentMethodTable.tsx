@@ -89,8 +89,8 @@ export default function OrganizationPaymentMethodTable({
 
   const paymentMethodConfigurations = useMemo(
     () =>
-      Object.entries(transactionFeeSettingsGroupedByPaymentMethods)?.map(
-        ([paymentMethod, transactionFeeSettings]) => {
+      Object.entries(transactionFeeSettingsGroupedByPaymentMethods)
+        ?.map(([paymentMethod, transactionFeeSettings]) => {
           let minAmount;
           let maxAmount;
 
@@ -142,10 +142,15 @@ export default function OrganizationPaymentMethodTable({
                   ...setting,
                   feeSettings: allFeeSettings,
                 };
-              }),
+              })
+              .sort((a, b) => a.paymentChannel.localeCompare(b.paymentChannel)),
           };
-        }
-      ),
+        })
+        .sort((a, b) =>
+          PaymentMethodDisplayNames[a.paymentMethod].localeCompare(
+            PaymentMethodDisplayNames[b.paymentMethod]
+          )
+        ),
     [
       getAllFeeSettings,
       organizationId,
@@ -246,9 +251,6 @@ export default function OrganizationPaymentMethodTable({
                     <div className="p-4">
                       {paymentMethodConfiguration.channels.length > 0 ? (
                         <div className="space-y-4">
-                          <h4 className="text-sm font-medium text-gray-700 mb-2">
-                            上游渠道
-                          </h4>
                           {paymentMethodConfiguration.channels.map(
                             (channel, channelIdx) => (
                               <div

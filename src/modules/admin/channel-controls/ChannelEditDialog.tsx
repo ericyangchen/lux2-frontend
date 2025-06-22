@@ -25,6 +25,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { ApiCreateTransactionFeeSetting } from "@/lib/apis/txn-fee-settings/post";
+import { ApiDeleteTransactionFeeSetting } from "@/lib/apis/txn-fee-settings/delete";
 import { ApiUpdateTransactionFeeSetting } from "@/lib/apis/txn-fee-settings/patch";
 import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
@@ -156,6 +157,8 @@ export function ChannelEditDialog({
     closeDialog();
     setEditableSettings([]);
     setPercentageInputs({});
+    setNewChannels(new Set());
+    setRemovedChannelIds(new Set());
   };
 
   const updateFeeSettingPercentage = (
@@ -199,6 +202,11 @@ export function ChannelEditDialog({
   // Track which settings are new (not in original transactionFeeSettings)
   const [newChannels, setNewChannels] = useState<Set<string>>(new Set());
 
+  // Track removed channel IDs for deletion
+  const [removedChannelIds, setRemovedChannelIds] = useState<Set<string>>(
+    new Set()
+  );
+
   const removeChannel = (settingIdx: number) => {
     const settingToRemove = editableSettings[settingIdx];
     const newSettings = editableSettings.filter(
@@ -206,7 +214,7 @@ export function ChannelEditDialog({
     );
     setEditableSettings(newSettings);
 
-    // Remove from newChannels if it was a new channel
+    // If it was a new channel, remove from newChannels
     if (newChannels.has(settingToRemove.paymentChannel)) {
       setNewChannels((prev) => {
         const newSet = new Set<string>();
@@ -217,6 +225,13 @@ export function ChannelEditDialog({
         });
         return newSet;
       });
+    } else {
+      // If it was an existing channel, track it for deletion
+      if (settingToRemove.id) {
+        setRemovedChannelIds(
+          (prev) => new Set([...Array.from(prev), settingToRemove.id])
+        );
+      }
     }
   };
 
@@ -287,6 +302,19 @@ export function ChannelEditDialog({
 
     try {
       setIsLoading(true);
+
+      // Delete removed channels first
+      for (const removedId of Array.from(removedChannelIds)) {
+        const response = await ApiDeleteTransactionFeeSetting({
+          id: removedId,
+          accessToken,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new ApplicationError(errorData);
+        }
+      }
 
       // Separate new settings from existing ones
       const newSettings = editableSettings.filter((setting) =>
@@ -429,17 +457,8 @@ export function ChannelEditDialog({
                     {/* Channel Header */}
                     <div className="flex justify-between items-center mb-4">
                       <div className="flex items-center space-x-4">
-                        <Select
-                          value={setting.paymentChannel}
-                          onValueChange={(value) =>
-                            updateSettingProperty(
-                              settingIdx,
-                              "paymentChannel",
-                              value
-                            )
-                          }
-                        >
-                          <SelectTrigger className="w-48">
+                        <Select value={setting.paymentChannel} disabled>
+                          <SelectTrigger className="w-58">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>

@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 
 import ChannelListTable from "./ChannelListTable";
+import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { classNames } from "@/lib/utils/classname-utils";
 import { useRouter } from "next/router";
 
 enum Tab {
-  ChannelList = "ChannelList",
-  // BatchModification = "BatchModification",
+  DepositChannelList = "DepositChannelList",
+  WithdrawalChannelList = "WithdrawalChannelList",
 }
 
 const tabDisplayNames = {
-  [Tab.ChannelList]: "上游渠道",
-  // [Tab.BatchModification]: "批量修改",
+  [Tab.DepositChannelList]: "代收渠道",
+  [Tab.WithdrawalChannelList]: "代付渠道",
 };
 
 export function ChannelControlView() {
@@ -19,7 +20,7 @@ export function ChannelControlView() {
   const { query } = router;
 
   const [selectedTab, setSelectedTab] = useState<string>(
-    (query.tab as Tab) || Tab.ChannelList
+    (query.tab as Tab) || Tab.DepositChannelList
   );
 
   const handleSelectTab = useCallback(
@@ -87,7 +88,12 @@ export function ChannelControlView() {
         </div>
       </div>
 
-      {selectedTab === Tab.ChannelList && <ChannelListTable />}
+      {selectedTab === Tab.DepositChannelList && (
+        <ChannelListTable transactionType={TransactionType.API_DEPOSIT} />
+      )}
+      {selectedTab === Tab.WithdrawalChannelList && (
+        <ChannelListTable transactionType={TransactionType.API_WITHDRAWAL} />
+      )}
     </div>
   );
 }

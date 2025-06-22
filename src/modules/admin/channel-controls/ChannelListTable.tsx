@@ -21,31 +21,39 @@ import { WithdrawalToAccountType } from "@/lib/enums/transactions/withdrawal-to-
 import { classNames } from "@/lib/utils/classname-utils";
 import { useTransactionFeeSettings } from "@/lib/hooks/swr/transaction-fee-setting";
 
-export default function ChannelListTable() {
+interface ChannelListTableProps {
+  transactionType: TransactionType;
+}
+
+export default function ChannelListTable({
+  transactionType,
+}: ChannelListTableProps) {
   const { transactionFeeSettings } = useTransactionFeeSettings({
     orgType: OrgType.ADMIN,
   });
 
-  // Group transaction fee settings by transaction type and payment method
-  const transactionFeeSettingsGroupedByTypeAndPaymentMethod = useMemo(() => {
-    const grouped: Record<
-      string,
-      Partial<Record<PaymentMethod, OrganizationTransactionFeeSetting[]>>
+  // Filter transaction fee settings by the provided transaction type
+  const filteredTransactionFeeSettings = useMemo(() => {
+    return transactionFeeSettings.filter(
+      (setting) => setting.type === transactionType
+    );
+  }, [transactionFeeSettings, transactionType]);
+
+  // Group filtered transaction fee settings by payment method
+  const transactionFeeSettingsGroupedByPaymentMethod = useMemo(() => {
+    const grouped: Partial<
+      Record<PaymentMethod, OrganizationTransactionFeeSetting[]>
     > = {};
 
-    transactionFeeSettings.forEach((setting) => {
-      const typeKey = setting.type;
-      if (!grouped[typeKey]) {
-        grouped[typeKey] = {};
+    filteredTransactionFeeSettings.forEach((setting) => {
+      if (!grouped[setting.paymentMethod]) {
+        grouped[setting.paymentMethod] = [];
       }
-      if (!grouped[typeKey]![setting.paymentMethod]) {
-        grouped[typeKey]![setting.paymentMethod] = [];
-      }
-      grouped[typeKey]![setting.paymentMethod]!.push(setting);
+      grouped[setting.paymentMethod]!.push(setting);
     });
 
     return grouped;
-  }, [transactionFeeSettings]);
+  }, [filteredTransactionFeeSettings]);
 
   // Helper function to get all fee settings from feeSettingList
   const getAllFeeSettings = (setting: OrganizationTransactionFeeSetting) => {
@@ -106,65 +114,67 @@ export default function ChannelListTable() {
       >;
     }> = [];
 
-    Object.entries(transactionFeeSettingsGroupedByTypeAndPaymentMethod).forEach(
-      ([type, paymentMethodGroup]) => {
-        Object.entries(paymentMethodGroup || {}).forEach(
-          ([paymentMethod, settings]) => {
-            if (!settings || !Array.isArray(settings)) return;
+    Object.entries(transactionFeeSettingsGroupedByPaymentMethod).forEach(
+      ([paymentMethod, settings]) => {
+        if (!settings || !Array.isArray(settings)) return;
 
-            let minAmount;
-            let maxAmount;
+        let minAmount;
+        let maxAmount;
 
-            // Calculate min/max amounts across all enabled channels
-            const isMinAmountUnlimited = settings.some(
-              (setting) => !setting.minAmount && setting.enabled
-            );
-            const isMaxAmountUnlimited = settings.some(
-              (setting) => !setting.maxAmount && setting.enabled
-            );
-
-            for (const setting of settings) {
-              if (!setting.enabled) {
-                continue;
-              }
-
-              if (!isMinAmountUnlimited && setting.minAmount) {
-                if (!minAmount) {
-                  minAmount = setting.minAmount;
-                } else if (Calculator.toBig(setting.minAmount).lt(minAmount)) {
-                  minAmount = setting.minAmount;
-                }
-              }
-
-              if (!isMaxAmountUnlimited && setting.maxAmount) {
-                if (!maxAmount) {
-                  maxAmount = setting.maxAmount;
-                } else if (Calculator.toBig(setting.maxAmount).gt(maxAmount)) {
-                  maxAmount = setting.maxAmount;
-                }
-              }
-            }
-
-            configurations.push({
-              type: type as TransactionType,
-              paymentMethod: paymentMethod as PaymentMethod,
-              minAmount,
-              maxAmount,
-              channels: settings.map((setting) => {
-                const allFeeSettings = getAllFeeSettings(setting);
-                return {
-                  ...setting,
-                  feeSettings: allFeeSettings,
-                };
-              }),
-            });
-          }
+        // Calculate min/max amounts across all enabled channels
+        const isMinAmountUnlimited = settings.some(
+          (setting) => !setting.minAmount && setting.enabled
         );
+        const isMaxAmountUnlimited = settings.some(
+          (setting) => !setting.maxAmount && setting.enabled
+        );
+
+        for (const setting of settings) {
+          if (!setting.enabled) {
+            continue;
+          }
+
+          if (!isMinAmountUnlimited && setting.minAmount) {
+            if (!minAmount) {
+              minAmount = setting.minAmount;
+            } else if (Calculator.toBig(setting.minAmount).lt(minAmount)) {
+              minAmount = setting.minAmount;
+            }
+          }
+
+          if (!isMaxAmountUnlimited && setting.maxAmount) {
+            if (!maxAmount) {
+              maxAmount = setting.maxAmount;
+            } else if (Calculator.toBig(setting.maxAmount).gt(maxAmount)) {
+              maxAmount = setting.maxAmount;
+            }
+          }
+        }
+
+        configurations.push({
+          type: transactionType,
+          paymentMethod: paymentMethod as PaymentMethod,
+          minAmount,
+          maxAmount,
+          channels: settings
+            .map((setting) => {
+              const allFeeSettings = getAllFeeSettings(setting);
+              return {
+                ...setting,
+                feeSettings: allFeeSettings,
+              };
+            })
+            .sort((a, b) => a.paymentChannel.localeCompare(b.paymentChannel)),
+        });
       }
     );
 
-    return configurations;
-  }, [transactionFeeSettingsGroupedByTypeAndPaymentMethod]);
+    return configurations.sort((a, b) =>
+      PaymentMethodDisplayNames[a.paymentMethod].localeCompare(
+        PaymentMethodDisplayNames[b.paymentMethod]
+      )
+    );
+  }, [transactionFeeSettingsGroupedByPaymentMethod, transactionType]);
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const closeAddDialog = () => {
@@ -193,9 +203,18 @@ export default function ChannelListTable() {
       <div className="px-0 sm:px-4">
         <div className="py-2 pb-4">
           <div className="flex justify-between items-center h-7">
-            <Label className="text-md font-semibold px-2">上游渠道控制</Label>
+            <div className="flex items-center">
+              <span className="text-sm font-medium text-gray-700">
+                支付類型: {paymentMethodConfigurations.length} (上游渠道:{" "}
+                {paymentMethodConfigurations.reduce(
+                  (total, config) => total + config.channels.length,
+                  0
+                )}
+                )
+              </span>
+            </div>
             <button
-              className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 rounded-md transition-colors duration-200"
+              className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-3 py-1.5 rounded-md transition-colors duration-200 shadow-sm"
               onClick={() => setIsAddDialogOpen(true)}
             >
               新增
@@ -203,196 +222,157 @@ export default function ChannelListTable() {
           </div>
 
           <div className="mt-4 space-y-6">
-            {Object.values(TransactionType).map((transactionType) => {
-              const typeConfigurations = paymentMethodConfigurations.filter(
-                (config) => config.type === transactionType
-              );
-
-              if (typeConfigurations.length === 0) return null;
-
-              return (
-                <div key={transactionType} className="space-y-4">
-                  {/* Transaction Type Header */}
-                  <div className="flex items-center space-x-2">
-                    <h2 className="text-lg font-bold text-gray-900">
-                      {TransactionTypeDisplayNames[transactionType]}
-                    </h2>
-                    <span
-                      className={classNames(
-                        transactionType === TransactionType.API_DEPOSIT
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-red-100 text-red-800",
-                        "px-2 py-1 rounded-full text-xs font-medium"
-                      )}
-                    >
-                      {typeConfigurations.length} 個支付類型
-                    </span>
+            {/* Payment Method Cards */}
+            {paymentMethodConfigurations.map((config, idx) => (
+              <div
+                key={`${config.type}-${config.paymentMethod}-${idx}`}
+                className="bg-white border border-gray-200 rounded-lg shadow-sm"
+              >
+                {/* Payment Method Header */}
+                <div className="flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50">
+                  <div className="flex items-center space-x-4">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {PaymentMethodDisplayNames[config.paymentMethod]}
+                    </h3>
+                    <div className="text-sm text-gray-600">
+                      <span>總最小金額: </span>
+                      <span className="font-medium">
+                        {config.minAmount
+                          ? formatNumber(config.minAmount)
+                          : "無限制"}
+                      </span>
+                      <span className="mx-2">|</span>
+                      <span>總最大金額: </span>
+                      <span className="font-medium">
+                        {config.maxAmount
+                          ? formatNumber(config.maxAmount)
+                          : "無限制"}
+                      </span>
+                    </div>
                   </div>
+                  <button
+                    className="text-sm font-medium text-purple-700 hover:text-purple-800"
+                    onClick={() =>
+                      openEditDialog(config.type, config.paymentMethod)
+                    }
+                  >
+                    編輯
+                  </button>
+                </div>
 
-                  {/* Payment Method Cards */}
-                  {typeConfigurations.map((config, idx) => (
-                    <div
-                      key={`${config.type}-${config.paymentMethod}-${idx}`}
-                      className="bg-white border border-gray-200 rounded-lg shadow-sm"
-                    >
-                      {/* Payment Method Header */}
-                      <div className="flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50">
-                        <div className="flex items-center space-x-4">
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            {PaymentMethodDisplayNames[config.paymentMethod]}
-                          </h3>
-                          <div className="text-sm text-gray-600">
-                            <span>總最小金額: </span>
-                            <span className="font-medium">
-                              {config.minAmount
-                                ? formatNumber(config.minAmount)
-                                : "無限制"}
-                            </span>
-                            <span className="mx-2">|</span>
-                            <span>總最大金額: </span>
-                            <span className="font-medium">
-                              {config.maxAmount
-                                ? formatNumber(config.maxAmount)
-                                : "無限制"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Payment Channels List */}
-                      <div className="p-4">
-                        {config.channels.length > 0 ? (
-                          <div className="space-y-4">
-                            <h4 className="text-sm font-medium text-gray-700 mb-2">
-                              上游渠道
-                            </h4>
-                            {config.channels.map((channel, channelIdx) => (
-                              <div
-                                key={channelIdx}
-                                className={`border rounded-md p-3 ${
+                {/* Payment Channels List */}
+                <div className="p-4">
+                  {config.channels.length > 0 ? (
+                    <div className="space-y-4">
+                      {config.channels.map((channel, channelIdx) => (
+                        <div
+                          key={channelIdx}
+                          className={`border rounded-md p-3 ${
+                            channel.enabled
+                              ? "border-gray-200 bg-white"
+                              : "border-gray-300 bg-gray-50 opacity-75"
+                          }`}
+                        >
+                          {/* Channel Header */}
+                          <div className="flex justify-between items-center mb-3">
+                            <div
+                              className={`font-medium ${
+                                channel.enabled
+                                  ? "text-gray-900"
+                                  : "text-gray-500"
+                              }`}
+                            >
+                              {PaymentChannelDisplayNames[
+                                channel.paymentChannel
+                              ] || channel.paymentChannel}
+                              {!channel.enabled && (
+                                <span className="ml-2 text-xs text-red-600 font-normal">
+                                  (已停用)
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              {channel.minAmount && (
+                                <span className="text-xs text-gray-500">
+                                  最小: {formatNumber(channel.minAmount)}
+                                </span>
+                              )}
+                              {channel.maxAmount && (
+                                <span className="text-xs text-gray-500">
+                                  最大: {formatNumber(channel.maxAmount)}
+                                </span>
+                              )}
+                              {channel.settlementInterval && (
+                                <span className="text-xs text-gray-500">
+                                  結算: {channel.settlementInterval}
+                                </span>
+                              )}
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
                                   channel.enabled
-                                    ? "border-gray-200 bg-white"
-                                    : "border-gray-300 bg-gray-50 opacity-75"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
                                 }`}
                               >
-                                {/* Channel Header */}
-                                <div className="flex justify-between items-center mb-3">
-                                  <div
-                                    className={`font-medium ${
-                                      channel.enabled
-                                        ? "text-gray-900"
-                                        : "text-gray-500"
-                                    }`}
-                                  >
-                                    {PaymentChannelDisplayNames[
-                                      channel.paymentChannel
-                                    ] || channel.paymentChannel}
-                                    {!channel.enabled && (
-                                      <span className="ml-2 text-xs text-red-600 font-normal">
-                                        (已停用)
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="flex items-center space-x-3">
-                                    {channel.minAmount && (
-                                      <span className="text-xs text-gray-500">
-                                        最小: {formatNumber(channel.minAmount)}
-                                      </span>
-                                    )}
-                                    {channel.maxAmount && (
-                                      <span className="text-xs text-gray-500">
-                                        最大: {formatNumber(channel.maxAmount)}
-                                      </span>
-                                    )}
-                                    {channel.settlementInterval && (
-                                      <span className="text-xs text-gray-500">
-                                        結算: {channel.settlementInterval}
-                                      </span>
-                                    )}
-                                    <span
-                                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                        channel.enabled
-                                          ? "bg-green-100 text-green-800"
-                                          : "bg-red-100 text-red-800"
-                                      }`}
-                                    >
-                                      {channel.enabled ? "啟用" : "停用"}
-                                    </span>
-                                    <button
-                                      className="text-sm font-medium text-purple-700 hover:text-purple-800"
-                                      onClick={() =>
-                                        openEditDialog(
-                                          config.type,
-                                          config.paymentMethod
-                                        )
-                                      }
-                                    >
-                                      編輯
-                                    </button>
-                                  </div>
-                                </div>
+                                {channel.enabled ? "啟用" : "停用"}
+                              </span>
+                            </div>
+                          </div>
 
-                                {/* Fee Settings */}
-                                <div className="space-y-2">
-                                  {channel.feeSettings.map(
-                                    (feeSetting, feeIdx) => (
-                                      <div
-                                        key={feeIdx}
-                                        className={`flex justify-between items-center p-2 rounded ${
-                                          channel.enabled
-                                            ? "bg-gray-50"
-                                            : "bg-gray-100"
-                                        }`}
-                                      >
-                                        <span
-                                          className={`text-sm font-medium ${
-                                            channel.enabled
-                                              ? "text-gray-700"
-                                              : "text-gray-500"
-                                          }`}
-                                        >
-                                          {feeSetting.accountTypeDisplay}
-                                        </span>
-                                        <div
-                                          className={`text-sm space-x-3 ${
-                                            channel.enabled
-                                              ? "text-gray-600"
-                                              : "text-gray-500"
-                                          }`}
-                                        >
-                                          <span>
-                                            費率:{" "}
-                                            <span className="font-medium">
-                                              {formatNumberInPercentage(
-                                                feeSetting.percentage
-                                              )}
-                                            </span>
-                                          </span>
-                                          <span>
-                                            固定費:{" "}
-                                            <span className="font-medium">
-                                              {formatNumber(feeSetting.fixed)}
-                                            </span>
-                                          </span>
-                                        </div>
-                                      </div>
-                                    )
-                                  )}
+                          {/* Fee Settings */}
+                          <div className="space-y-2">
+                            {channel.feeSettings.map((feeSetting, feeIdx) => (
+                              <div
+                                key={feeIdx}
+                                className={`flex justify-between items-center p-2 rounded ${
+                                  channel.enabled ? "bg-gray-50" : "bg-gray-100"
+                                }`}
+                              >
+                                <span
+                                  className={`text-sm font-medium ${
+                                    channel.enabled
+                                      ? "text-gray-700"
+                                      : "text-gray-500"
+                                  }`}
+                                >
+                                  {feeSetting.accountTypeDisplay}
+                                </span>
+                                <div
+                                  className={`text-sm space-x-3 ${
+                                    channel.enabled
+                                      ? "text-gray-600"
+                                      : "text-gray-500"
+                                  }`}
+                                >
+                                  <span>
+                                    費率:{" "}
+                                    <span className="font-medium">
+                                      {formatNumberInPercentage(
+                                        feeSetting.percentage
+                                      )}
+                                    </span>
+                                  </span>
+                                  <span>
+                                    固定費:{" "}
+                                    <span className="font-medium">
+                                      {formatNumber(feeSetting.fixed)}
+                                    </span>
+                                  </span>
                                 </div>
                               </div>
                             ))}
                           </div>
-                        ) : (
-                          <div className="text-sm text-gray-500 text-center py-4">
-                            沒有配置的上游通道
-                          </div>
-                        )}
-                      </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  ) : (
+                    <div className="text-sm text-gray-500 text-center py-4">
+                      沒有配置的上游通道
+                    </div>
+                  )}
                 </div>
-              );
-            })}
+              </div>
+            ))}
 
             {paymentMethodConfigurations.length === 0 && (
               <div className="text-center py-8 text-gray-500">
@@ -412,9 +392,9 @@ export default function ChannelListTable() {
           transactionType={editingPaymentMethod.transactionType}
           paymentMethod={editingPaymentMethod.paymentMethod}
           transactionFeeSettings={
-            transactionFeeSettingsGroupedByTypeAndPaymentMethod[
-              editingPaymentMethod.transactionType
-            ]?.[editingPaymentMethod.paymentMethod] || []
+            transactionFeeSettingsGroupedByPaymentMethod[
+              editingPaymentMethod.paymentMethod
+            ] || []
           }
         />
       )}
