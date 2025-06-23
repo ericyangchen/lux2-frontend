@@ -203,6 +203,44 @@ export function MerchantTransactionList() {
     }
   }, [currentQueryType]);
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "已複製",
+      description: "已複製到剪貼板",
+    });
+  };
+
+  const formatDateTime = (dateString: string) => {
+    return convertDatabaseTimeToReadablePhilippinesTime(dateString);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "SUCCESS":
+        return "text-green-600";
+      case "FAILED":
+        return "text-red-600";
+      case "PENDING":
+        return "text-yellow-600";
+      default:
+        return "text-gray-600";
+    }
+  };
+
+  const getStatusIndicatorColor = (status: string) => {
+    switch (status) {
+      case "SUCCESS":
+        return "bg-green-500";
+      case "FAILED":
+        return "bg-red-500";
+      case "PENDING":
+        return "bg-yellow-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
   return (
     <div
       className="sm:p-4 sm:border rounded-md w-full lg:h-[calc(100vh-152px)] h-[calc(100vh-56px)] overflow-y-scroll"
@@ -399,90 +437,154 @@ export function MerchantTransactionList() {
                   : "多筆查詢結果"}
               </Label>
             </div>
-            <div className="flex flex-col border rounded-md overflow-x-scroll">
-              <table className="divide-y table-auto text-sm">
-                <thead className="whitespace-nowrap w-full">
-                  <tr className="h-10">
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+            <div className="bg-white rounded-lg shadow-sm border overflow-x-auto">
+              <table className="w-full min-w-[1400px]">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                      ID
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
                       商戶訂單號
                     </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      類別
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                      交易類型
                     </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
                       支付類型
                     </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+                    <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
                       金額
                     </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+                    <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
                       手續費
                     </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
                       狀態
                     </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
                       訊息
                     </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      創建時間
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                      建立時間
                     </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
                       更新時間
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-100">
                   {transactions?.map((transaction) => (
-                    <tr key={transaction.id}>
-                      <td
-                        className="px-1 py-2 font-mono text-center cursor-pointer"
-                        onClick={() =>
-                          copyToClipboard({
-                            toast,
-                            copyingText: transaction.merchantOrderId,
-                            title: "已複製商戶訂單號",
-                          })
-                        }
-                      >
-                        {transaction.merchantOrderId}
+                    <tr
+                      key={transaction.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      {/* ID - Full display */}
+                      <td className="px-4 py-3">
+                        <div
+                          className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800"
+                          title={`點擊複製: ${transaction.id}`}
+                          onClick={() => copyToClipboard(transaction.id)}
+                        >
+                          {transaction.id}
+                        </div>
                       </td>
-                      <td className="px-1 py-2 whitespace-nowrap text-center">
-                        {TransactionTypeDisplayNames[transaction.type]}
+
+                      {/* Merchant Order ID */}
+                      <td className="px-4 py-3">
+                        <div
+                          className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800"
+                          title={`點擊複製: ${
+                            transaction.merchantOrderId || "N/A"
+                          }`}
+                          onClick={() =>
+                            transaction.merchantOrderId &&
+                            copyToClipboard(transaction.merchantOrderId)
+                          }
+                        >
+                          {transaction.merchantOrderId || "N/A"}
+                        </div>
                       </td>
-                      <td className="px-1 py-2 whitespace-nowrap text-center">
-                        {PaymentMethodDisplayNames[transaction.paymentMethod]}
+
+                      {/* Transaction Type */}
+                      <td className="px-4 py-3">
+                        <div className="text-sm text-gray-900">
+                          {TransactionTypeDisplayNames[transaction.type] ||
+                            transaction.type}
+                        </div>
                       </td>
-                      <td className="px-1 py-2 text-center">
-                        {formatNumberWithoutMinFraction(transaction.amount)}
+
+                      {/* Payment Method */}
+                      <td className="px-4 py-3">
+                        <div className="text-sm text-gray-900">
+                          {PaymentMethodDisplayNames[
+                            transaction.paymentMethod
+                          ] || transaction.paymentMethod}
+                        </div>
                       </td>
-                      <td className="px-1 py-2 text-center">
-                        {formatNumberWithoutMinFraction(transaction.totalFee)}
+
+                      {/* Amount */}
+                      <td className="px-4 py-3 text-right">
+                        <div className="font-mono font-medium text-gray-900 text-sm">
+                          ₱ {transaction.amount?.toLocaleString() || "0"}
+                        </div>
                       </td>
-                      <td
-                        className={classNames(
-                          transaction.status === TransactionStatus.SUCCESS
-                            ? "text-green-600"
-                            : transaction.status === TransactionStatus.FAILED
-                            ? "text-red-600"
-                            : "",
-                          "px-1 py-2 whitespace-nowrap text-center"
-                        )}
-                      >
-                        {TransactionStatusDisplayNames[transaction.status]}
+
+                      {/* Total Fee */}
+                      <td className="px-4 py-3 text-right">
+                        <div className="font-mono text-gray-600 text-sm">
+                          ₱ {transaction.totalFee?.toLocaleString() || "0"}
+                        </div>
                       </td>
-                      <td className="px-1 py-2 whitespace-nowrap text-center">
-                        {transaction?.message}
+
+                      {/* Status with color */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`w-2 h-2 rounded-full ${getStatusIndicatorColor(
+                              transaction.status
+                            )}`}
+                          ></div>
+                          <span
+                            className={`text-sm whitespace-nowrap ${getStatusColor(
+                              transaction.status
+                            )}`}
+                          >
+                            {TransactionStatusDisplayNames[
+                              transaction.status
+                            ] || transaction.status}
+                          </span>
+                        </div>
                       </td>
-                      <td className="px-1 py-2 text-center">
-                        {convertDatabaseTimeToReadablePhilippinesTime(
-                          transaction.createdAt
-                        )}
+
+                      {/* Message */}
+                      <td className="px-4 py-3">
+                        <div className="relative group">
+                          <div className="text-sm text-gray-600 max-w-xs truncate cursor-help">
+                            {transaction.message || "-"}
+                          </div>
+                          {transaction.message &&
+                            transaction.message.length > 30 && (
+                              <div className="invisible group-hover:visible absolute z-10 w-80 p-2 bg-gray-900 text-white text-sm rounded shadow-lg -top-2 left-0 transform -translate-y-full">
+                                {transaction.message}
+                                <div className="absolute top-full left-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                              </div>
+                            )}
+                        </div>
                       </td>
-                      <td className="px-1 py-2 text-center">
-                        {convertDatabaseTimeToReadablePhilippinesTime(
-                          transaction.updatedAt
-                        )}
+
+                      {/* Created Time */}
+                      <td className="px-4 py-3">
+                        <div className="font-mono text-sm text-gray-600">
+                          {formatDateTime(transaction.createdAt)}
+                        </div>
+                      </td>
+
+                      {/* Updated Time */}
+                      <td className="px-4 py-3">
+                        <div className="font-mono text-sm text-gray-600">
+                          {formatDateTime(transaction.updatedAt)}
+                        </div>
                       </td>
                     </tr>
                   ))}

@@ -11,9 +11,9 @@ export const getEnvironment = () => {
 };
 
 export const getBackendUrl = () => {
+  return "https://api.dev.sm-pay.org"; // dev
   return "http://localhost:8080"; // local
   return "https://api.sm-pay.org"; // production
-  return "https://api.dev.sm-pay.org"; // dev
   return getEnvVar("NEXT_PUBLIC_BACKEND_URL");
 };
 

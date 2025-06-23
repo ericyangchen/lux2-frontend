@@ -261,6 +261,75 @@ export function ApiTransactionList() {
   const [moreInfoTransactionId, setMoreInfoTransactionId] = useState<string>();
   const [isMoreInfoOpen, setIsMoreInfoOpen] = useState(false);
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "已複製",
+      description: "已複製到剪貼板",
+    });
+  };
+
+  const formatDateTime = (dateString: string) => {
+    return convertDatabaseTimeToReadablePhilippinesTime(dateString);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "SUCCESS":
+        return "text-green-600";
+      case "FAILED":
+        return "text-red-600";
+      case "PENDING":
+        return "text-yellow-600";
+      default:
+        return "text-gray-600";
+    }
+  };
+
+  const getStatusIndicatorColor = (status: string) => {
+    switch (status) {
+      case "SUCCESS":
+        return "bg-green-500";
+      case "FAILED":
+        return "bg-red-500";
+      case "PENDING":
+        return "bg-yellow-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
+  const getInternalStatusColor = (
+    internalStatus: TransactionInternalStatus
+  ) => {
+    return PROBLEM_WITHDRAWAL_INTERNAL_STATUSES.includes(internalStatus)
+      ? "text-orange-500"
+      : "text-gray-700";
+  };
+
+  const getTransactionTypeBadge = (type: TransactionType) => {
+    switch (type) {
+      case TransactionType.API_DEPOSIT:
+        return (
+          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-gray-900 border border-gray-300">
+            {TransactionTypeDisplayNames[type]}
+          </span>
+        );
+      case TransactionType.API_WITHDRAWAL:
+        return (
+          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-900 text-white">
+            {TransactionTypeDisplayNames[type]}
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-gray-900">
+            {TransactionTypeDisplayNames[type] || type}
+          </span>
+        );
+    }
+  };
+
   return (
     <div
       className="sm:p-4 sm:border rounded-md w-full lg:h-[calc(100vh-152px)] h-[calc(100vh-56px)] overflow-y-scroll"
@@ -548,154 +617,188 @@ export function ApiTransactionList() {
                   : "多筆查詢結果"}
               </Label>
             </div>
-            <div className="flex flex-col border rounded-md overflow-x-scroll">
-              <table className="divide-y table-auto text-sm">
-                <thead className="whitespace-nowrap w-full">
-                  <tr className="h-10">
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+            <div className="bg-white rounded-lg shadow-sm border overflow-x-auto">
+              <table className="w-full min-w-[1800px]">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
                       系統訂單號
                     </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      類別
-                    </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      <span className="font-bold">支付類型</span>
-                      <span className="font-light"> / 上游渠道</span>
-                    </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      單位
-                    </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
                       商戶訂單號
                     </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                      商戶
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                      類別
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                      支付類型
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                      上游渠道
+                    </th>
+                    <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
                       金額
                     </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+                    <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
                       手續費
                     </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
                       狀態
                     </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
                       詳細狀態
                     </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
                       創建時間
                     </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+                    <th className="px-4 py-3 text-center text-sm font-medium text-gray-700 whitespace-nowrap sticky right-0 bg-gray-50 border-l">
                       更多
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-100">
                   {transactions?.map((transaction) => (
-                    <tr key={transaction.id}>
-                      <td
-                        className="px-1 py-2 font-mono text-center cursor-pointer"
-                        onClick={() =>
-                          copyToClipboard({
-                            toast,
-                            copyingText: transaction.id,
-                            title: "已複製系統訂單號",
-                          })
-                        }
-                      >
-                        {transaction.id}
-                      </td>
-                      <td className="px-1 py-2 whitespace-nowrap text-center">
-                        {TransactionTypeDisplayNames[transaction.type]}
-                      </td>
-                      <td className="px-1 py-2 whitespace-nowrap text-center">
-                        <div className="font-bold">
-                          {PaymentMethodDisplayNames[transaction.paymentMethod]}
+                    <tr
+                      key={transaction.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      {/* System Transaction ID */}
+                      <td className="px-4 py-3">
+                        <div
+                          className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800"
+                          title={`點擊複製: ${transaction.id}`}
+                          onClick={() => copyToClipboard(transaction.id)}
+                        >
+                          {transaction.id}
                         </div>
-                        <div className="font-light">
-                          {
-                            PaymentChannelDisplayNames[
-                              transaction.paymentChannel
-                            ]
+                      </td>
+
+                      {/* Merchant Order ID */}
+                      <td className="px-4 py-3">
+                        <div
+                          className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800"
+                          title={`點擊複製: ${
+                            transaction.merchantOrderId || "N/A"
+                          }`}
+                          onClick={() =>
+                            transaction.merchantOrderId &&
+                            copyToClipboard(transaction.merchantOrderId)
                           }
+                        >
+                          {transaction.merchantOrderId || "N/A"}
                         </div>
                       </td>
-                      <td
-                        className="px-1 py-2 font-mono text-center cursor-pointer"
-                        onClick={() =>
-                          copyToClipboard({
-                            toast,
-                            copyingText: transaction.merchantId,
-                            title: "已複製單位 ID",
-                          })
-                        }
-                      >
-                        {
-                          findOrganizationById(
+
+                      {/* Merchant/Organization */}
+                      <td className="px-4 py-3">
+                        <div
+                          className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800"
+                          title={`點擊複製: ${transaction.merchantId}`}
+                          onClick={() =>
+                            copyToClipboard(transaction.merchantId)
+                          }
+                        >
+                          {findOrganizationById(
                             organizations,
                             transaction.merchantId
-                          )?.name
-                        }
+                          )?.name || transaction.merchantId}
+                        </div>
                       </td>
-                      <td
-                        className="px-1 py-2 font-mono text-center cursor-pointer"
-                        onClick={() =>
-                          copyToClipboard({
-                            toast,
-                            copyingText: transaction.merchantOrderId,
-                            title: "已複製商戶訂單號",
-                          })
-                        }
-                      >
-                        {transaction.merchantOrderId}
+
+                      {/* Transaction Type */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          {getTransactionTypeBadge(transaction.type)}
+                        </div>
                       </td>
-                      <td className="px-1 py-2 text-center">
-                        {formatNumberWithoutMinFraction(transaction.amount)}
+
+                      {/* Payment Method */}
+                      <td className="px-4 py-3">
+                        <div className="text-sm text-gray-900">
+                          {PaymentMethodDisplayNames[
+                            transaction.paymentMethod
+                          ] || transaction.paymentMethod}
+                        </div>
                       </td>
-                      <td className="px-1 py-2 text-center">
-                        {formatNumberWithoutMinFraction(transaction.totalFee)}
+
+                      {/* Payment Channel */}
+                      <td className="px-4 py-3">
+                        <div className="text-sm text-gray-600">
+                          {PaymentChannelDisplayNames[
+                            transaction.paymentChannel
+                          ] || transaction.paymentChannel}
+                        </div>
                       </td>
-                      <td
-                        className={classNames(
-                          transaction.status === TransactionStatus.SUCCESS
-                            ? "text-green-600"
-                            : transaction.status === TransactionStatus.FAILED
-                            ? "text-red-600"
-                            : "",
-                          "px-1 py-2 whitespace-nowrap text-center"
-                        )}
-                      >
-                        {TransactionStatusDisplayNames[transaction.status]}
+
+                      {/* Amount */}
+                      <td className="px-4 py-3 text-right">
+                        <div className="font-mono font-medium text-gray-900 text-sm">
+                          ₱ {transaction.amount?.toLocaleString() || "0"}
+                        </div>
                       </td>
-                      <td
-                        className={classNames(
-                          PROBLEM_WITHDRAWAL_INTERNAL_STATUSES.includes(
+
+                      {/* Total Fee */}
+                      <td className="px-4 py-3 text-right">
+                        <div className="font-mono text-gray-600 text-sm">
+                          ₱ {transaction.totalFee?.toLocaleString() || "0"}
+                        </div>
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`w-2 h-2 rounded-full ${getStatusIndicatorColor(
+                              transaction.status
+                            )}`}
+                          ></div>
+                          <span
+                            className={`text-sm whitespace-nowrap ${getStatusColor(
+                              transaction.status
+                            )}`}
+                          >
+                            {TransactionStatusDisplayNames[
+                              transaction.status
+                            ] || transaction.status}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Internal Status */}
+                      <td className="px-4 py-3">
+                        <span
+                          className={`text-sm whitespace-nowrap ${getInternalStatusColor(
                             transaction.internalStatus
-                          )
-                            ? "text-orange-500"
-                            : "",
-                          "px-1 py-2 text-center"
-                        )}
-                      >
-                        {
-                          TransactionInternalStatusDisplayNames[
+                          )}`}
+                        >
+                          {TransactionInternalStatusDisplayNames[
                             transaction.internalStatus
-                          ]
-                        }
+                          ] || transaction.internalStatus}
+                        </span>
                       </td>
-                      <td className="px-1 py-2 text-center">
-                        {convertDatabaseTimeToReadablePhilippinesTime(
-                          transaction.createdAt
-                        )}
+
+                      {/* Created Time */}
+                      <td className="px-4 py-3">
+                        <div className="font-mono text-sm text-gray-600">
+                          {formatDateTime(transaction.createdAt)}
+                        </div>
                       </td>
-                      <td className="px-1 py-2 text-center">
+
+                      {/* More Info - Sticky Right */}
+                      <td className="px-4 py-3 text-center sticky right-0 bg-white border-l">
                         <Button
                           className="rounded-md p-2 text-center"
                           variant="outline"
+                          size="sm"
                           onClick={() => {
                             setMoreInfoTransactionId(transaction.id);
                             setIsMoreInfoOpen(true);
                           }}
                         >
-                          <InformationCircleIcon className="h-5" />
+                          <InformationCircleIcon className="h-4 w-4" />
                         </Button>
                       </td>
                     </tr>

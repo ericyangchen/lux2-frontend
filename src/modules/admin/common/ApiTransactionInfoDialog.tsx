@@ -121,7 +121,11 @@ export function ApiTransactionInfoDialog({
               <Label className="whitespace-nowrap min-w-[100px] font-normal">
                 通知 URL:
               </Label>
-              <div className="font-mono">{transaction.notifyUrl || "無"}</div>
+              <div className="font-mono">
+                {transaction.notifyUrl || (
+                  <span className="text-sm text-gray-600">-</span>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
               <Label className="whitespace-nowrap min-w-[100px] font-normal">
@@ -152,7 +156,9 @@ export function ApiTransactionInfoDialog({
                 結算天數:
               </Label>
               <div className="font-mono">
-                {transaction.settlementInterval || "無"}
+                {transaction.settlementInterval || (
+                  <span className="text-sm text-gray-600">-</span>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
@@ -238,18 +244,24 @@ export function ApiTransactionInfoDialog({
               <Label className="whitespace-nowrap min-w-[100px] font-normal">
                 訊息:
               </Label>
-              <div className="font-mono">{transaction.message || "無"}</div>
+              <div className="font-mono">
+                {transaction.message || (
+                  <span className="text-sm text-gray-600">-</span>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
               <Label className="whitespace-nowrap min-w-[100px] font-normal">
                 成功時間:
               </Label>
               <div className="font-mono">
-                {transaction.successAt
-                  ? convertDatabaseTimeToReadablePhilippinesTime(
-                      transaction.successAt
-                    )
-                  : "無"}
+                {transaction.successAt ? (
+                  convertDatabaseTimeToReadablePhilippinesTime(
+                    transaction.successAt
+                  )
+                ) : (
+                  <span className="text-sm text-gray-600">-</span>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
@@ -273,35 +285,6 @@ export function ApiTransactionInfoDialog({
               </div>
             </div>
 
-            {/* 分潤資訊 */}
-            <Label className="whitespace-nowrap font-bold text-md mt-8">
-              分潤資訊
-            </Label>
-            <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
-              <Label className="whitespace-nowrap min-w-[100px] font-normal">
-                分潤狀態:
-              </Label>
-              <div className="font-mono">
-                {transaction.revenueDistributed ? "已分潤" : "未分潤"}
-              </div>
-            </div>
-            <div className="flex items-start gap-4 w-full min-h-6">
-              <Label className="whitespace-nowrap min-w-[100px] mt-[5px] font-normal">
-                分潤資訊:
-              </Label>
-              <div className="font-mono flex-1">
-                {transaction.transactionFeeAllocationTable && (
-                  <pre className="text-xs bg-gray-100 rounded-md whitespace-pre-wrap p-4 overflow-auto">
-                    {JSON.stringify(
-                      transaction.transactionFeeAllocationTable,
-                      null,
-                      2
-                    )}
-                  </pre>
-                )}
-              </div>
-            </div>
-
             {/* 交易日誌 */}
             <Label className="whitespace-nowrap font-bold text-md mt-8">
               交易日誌
@@ -312,7 +295,7 @@ export function ApiTransactionInfoDialog({
               </div>
             ) : sortedLogs.length > 0 ? (
               <div className="flex flex-col border rounded-md overflow-hidden">
-                <div className="max-h-[60vh] overflow-y-auto">
+                <div className="space-y-0">
                   {sortedLogs.map((log, index) => (
                     <div
                       key={log.id}
@@ -332,7 +315,7 @@ export function ApiTransactionInfoDialog({
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="text-gray-500 text-xs">
-                            創建者類型:
+                            觸發者類型:
                           </span>
                           <span className="text-xs text-gray-700">
                             {CreatorTypeDisplayNames[log.creatorType] ||
@@ -384,11 +367,19 @@ export function ApiTransactionInfoDialog({
                               <div className="bg-slate-800 px-3 py-1 text-xs text-slate-300 font-mono border-b border-slate-700">
                                 JSON
                               </div>
-                              <pre className="text-xs text-green-400 font-mono p-3 overflow-auto max-h-64 bg-slate-900 whitespace-pre-wrap break-words">
-                                <code className="language-json">
-                                  {JSON.stringify(log.data, null, 2)}
-                                </code>
-                              </pre>
+                              <div
+                                className="overflow-x-auto"
+                                style={{ maxWidth: "calc(100vw - 120px)" }}
+                              >
+                                <pre
+                                  className="text-xs text-green-400 font-mono p-3 bg-slate-900 whitespace-pre-wrap break-words"
+                                  style={{ minWidth: "max-content" }}
+                                >
+                                  <code className="language-json">
+                                    {JSON.stringify(log.data, null, 2)}
+                                  </code>
+                                </pre>
+                              </div>
                             </div>
                           </details>
                         </div>
@@ -399,9 +390,46 @@ export function ApiTransactionInfoDialog({
               </div>
             ) : (
               <div className="text-center py-4">
-                <Label className="text-gray-400">無交易日誌</Label>
+                <span className="text-sm text-gray-600">-</span>
               </div>
             )}
+
+            {/* 分潤資訊 */}
+            <Label className="whitespace-nowrap font-bold text-md mt-8">
+              分潤資訊
+            </Label>
+            <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
+              <Label className="whitespace-nowrap min-w-[100px] font-normal">
+                分潤狀態:
+              </Label>
+              <div className="font-mono">
+                {transaction.revenueDistributed ? "已分潤" : "未分潤"}
+              </div>
+            </div>
+            <div className="flex items-start gap-4 w-full min-h-6">
+              <Label className="whitespace-nowrap min-w-[100px] mt-[5px] font-normal">
+                分潤資訊:
+              </Label>
+              <div className="font-mono flex-1 min-w-0">
+                {transaction.transactionFeeAllocationTable && (
+                  <div
+                    className="overflow-x-auto"
+                    style={{ maxWidth: "calc(100vw - 220px)" }}
+                  >
+                    <pre
+                      className="text-xs bg-gray-100 rounded-md whitespace-pre-wrap break-words p-4"
+                      style={{ minWidth: "max-content" }}
+                    >
+                      {JSON.stringify(
+                        transaction.transactionFeeAllocationTable,
+                        null,
+                        2
+                      )}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </DialogContent>

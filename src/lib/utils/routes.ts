@@ -2,6 +2,7 @@ import {
   BuildingOffice2Icon,
   ChartBarSquareIcon,
   CheckCircleIcon,
+  ClipboardDocumentListIcon,
   CurrencyDollarIcon,
   DocumentDuplicateIcon,
   DocumentMagnifyingGlassIcon,
@@ -34,6 +35,11 @@ export const merchantNavigation = [
     name: "提領請求",
     href: "/merchant/merchant-requested-withdrawals",
     icon: WalletIcon,
+  },
+  {
+    name: "操作紀錄",
+    href: "/merchant/user-activity-logs",
+    icon: ClipboardDocumentListIcon,
   },
   // {
   //   name: "手動提單",
@@ -82,6 +88,11 @@ export const adminNavigation = [
     name: "待處理交易",
     href: "/admin/problem-transactions",
     icon: ExclamationTriangleIcon,
+  },
+  {
+    name: "操作紀錄",
+    href: "/admin/user-activity-logs",
+    icon: ClipboardDocumentListIcon,
   },
   // {
   //   name: "報表",
