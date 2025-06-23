@@ -3,12 +3,13 @@ import {
   ApiGetTransactions,
 } from "@/lib/apis/transactions/get";
 import {
-  PaymentChannelCategories,
+  DepositPaymentChannelCategories,
   PaymentChannelDisplayNames,
   PaymentMethodDisplayNames,
   TransactionInternalStatusDisplayNames,
   TransactionStatusDisplayNames,
   TransactionTypeDisplayNames,
+  WithdrawalPaymentChannelCategories,
 } from "@/lib/constants/transaction";
 import {
   Select,
@@ -99,9 +100,14 @@ export function ApiTransactionList() {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  const paymentChannelCategories =
+    transactionType === TransactionType.API_DEPOSIT
+      ? DepositPaymentChannelCategories
+      : WithdrawalPaymentChannelCategories;
+
   const filteredPaymentChannels =
     paymentMethod && paymentMethod !== "all"
-      ? PaymentChannelCategories[paymentMethod]
+      ? paymentChannelCategories[paymentMethod]
       : Object.values(PaymentChannel);
 
   const [transactions, setTransactions] = useState<Transaction[]>();

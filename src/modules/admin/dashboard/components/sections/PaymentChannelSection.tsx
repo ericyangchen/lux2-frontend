@@ -13,13 +13,16 @@ import {
   Tooltip,
 } from "recharts";
 import {
+  PaymentChannelDisplayNames,
+  PaymentMethodDisplayNames,
+} from "@/lib/constants/transaction";
+import {
   SystemChannelPerformance,
   SystemPaymentMethodDistribution,
 } from "@/lib/types/transaction";
 import { formatNumber, formatNumberInInteger } from "@/lib/utils/number";
 
 import { ChartCard } from "../cards/ChartCard";
-import { PaymentChannelDisplayNames } from "@/lib/constants/transaction";
 import { currencySymbol } from "@/lib/constants/common";
 import { transformPaymentMethodData } from "../../utils/chartDataTransformers";
 
@@ -80,7 +83,12 @@ export const PaymentChannelSection = ({
                 iconType="circle"
                 formatter={(value, entry) => (
                   <span style={{ color: entry.color, fontWeight: "500" }}>
-                    {value} ({entry.payload?.value || 0} 筆)
+                    {
+                      PaymentMethodDisplayNames[
+                        value as keyof typeof PaymentMethodDisplayNames
+                      ]
+                    }{" "}
+                    ({entry.payload?.value || 0} 筆)
                   </span>
                 )}
               />

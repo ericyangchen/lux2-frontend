@@ -91,10 +91,10 @@ export function MerchantRequestedWithdrawalCreate({
     }
 
     // Validate phone number if provided
-    if (receiverPhoneNumber && !/^(\+63|0)?9\d{9}$/.test(receiverPhoneNumber)) {
+    if (receiverPhoneNumber && !/^09\d{9}$/.test(receiverPhoneNumber)) {
       toast({
         title: "電話號碼格式錯誤",
-        description: "請使用 +639XXXXXXXXX 或 09XXXXXXXXX 格式",
+        description: "請使用 09XXXXXXXXX 格式",
         variant: "destructive",
       });
       return;

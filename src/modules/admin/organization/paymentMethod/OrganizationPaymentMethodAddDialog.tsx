@@ -1,9 +1,10 @@
 import {
   DepositAccountTypeDisplayNames,
-  PaymentChannelCategories,
+  DepositPaymentChannelCategories,
   PaymentChannelDisplayNames,
   PaymentMethodDisplayNames,
   WithdrawalAccountTypeDisplayNames,
+  WithdrawalPaymentChannelCategories,
 } from "@/lib/constants/transaction";
 import {
   Dialog,
@@ -123,8 +124,13 @@ export function OrganizationPaymentMethodAddDialog({
         )
     );
 
+  const paymentChannelCategories =
+    type === TransactionType.API_DEPOSIT
+      ? DepositPaymentChannelCategories
+      : WithdrawalPaymentChannelCategories;
+
   const remainingChannel = paymentMethod
-    ? PaymentChannelCategories[paymentMethod]?.filter(
+    ? paymentChannelCategories[paymentMethod]?.filter(
         (paymentChannel) =>
           !channelSettings.some(
             (channel) => channel.paymentChannel === paymentChannel
@@ -345,7 +351,7 @@ export function OrganizationPaymentMethodAddDialog({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
-                              {PaymentChannelCategories[paymentMethod]?.map(
+                              {paymentChannelCategories[paymentMethod]?.map(
                                 (paymentChannel) => {
                                   return (
                                     <SelectItem

@@ -1,22 +1,26 @@
 export enum PaymentChannel {
-  /**
-   * PaymentMethod: NATIVE_GCASH
+  /*
+   * BIFU
    */
-  // deposit only
+  /* NATIVE_GCASH Deposit */
   NATIVE_GCASH_DIRECT_BIFU = "NATIVE_GCASH_DIRECT_BIFU", // 110
   NATIVE_GCASH_QR_BIFU = "NATIVE_GCASH_QR_BIFU", // 111
   NATIVE_GCASH_AWAKEN_BIFU = "NATIVE_GCASH_AWAKEN_BIFU", // 113
   NATIVE_GCASH_AWAKEN_REVISION_BIFU = "NATIVE_GCASH_AWAKEN_REVISION_BIFU", // 114
-  // withdrawal only
+  /* NATIVE_GCASH Withdrawal */
   NATIVE_GCASH_BIFU_BANK = "NATIVE_GCASH_BIFU_BANK", // 100
 
-  /**
-   * PaymentMethod: MAYA
-   */
-  MAYA_BIFU = "MAYA_BIFU", // 107
+  /* QRPH Deposit */
+  QRPH_BIFU_DEPOSIT = "QRPH_BIFU_DEPOSIT", // 112
+  /* QRPH Withdrawal */
+  QRPH_BIFU_BANK_WITHDRAWAL = "QRPH_BIFU_BANK_WITHDRAWAL", // 100
 
-  /**
-   * PaymentMethod: QRPH
+  /* MAYA Deposit */
+  MAYA_BIFU_DEPOSIT = "MAYA_BIFU_DEPOSIT", // 107
+  /* MAYA Withdrawal */
+  MAYA_BIFU_BANK_WITHDRAWAL = "MAYA_BIFU_BANK_WITHDRAWAL", // 100
+
+  /*
+   *
    */
-  QRPH_BIFU = "QRPH_BIFU", // 112
 }
