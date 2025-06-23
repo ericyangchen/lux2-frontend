@@ -5,15 +5,15 @@ const getEnvVar = (key: string) => {
 };
 
 export const getEnvironment = () => {
-  return "production"; // production
   return "development"; // development, local
+  return "production"; // production
   return getEnvVar("NEXT_PUBLIC_ENVIRONMENT");
 };
 
 export const getBackendUrl = () => {
+  return "http://localhost:8080"; // local
   return "https://api.sm-pay.org"; // production
   return "https://api.dev.sm-pay.org"; // dev
-  return "http://localhost:8080"; // local
   return getEnvVar("NEXT_PUBLIC_BACKEND_URL");
 };
 
