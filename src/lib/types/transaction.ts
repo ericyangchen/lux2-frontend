@@ -92,3 +92,50 @@ export interface DailyTransactionCountByOrganizationId {
   withdrawalFailedTotal: string;
   withdrawalFailedRefundedTotal: string;
 }
+
+export interface WeeklyTransactionTrendDay {
+  name: string; // Day name (e.g., "Monday", "Tuesday")
+  date: string; // Date in YYYY-MM-DD format
+  total: number;
+  deposit: number;
+  withdrawal: number;
+  success: number;
+  failed: number;
+}
+
+export interface SystemWeeklyTransactionTrends {
+  referenceDate: string;
+  weeklyData: WeeklyTransactionTrendDay[];
+}
+
+export interface WeeklyTransactionTrendsByOrganizationId {
+  organizationId: string;
+  referenceDate: string;
+  weeklyData: WeeklyTransactionTrendDay[];
+}
+
+export interface PaymentMethodDistributionItem {
+  paymentMethod: PaymentMethod;
+  total: number;
+  totalAmount: number;
+}
+
+export interface SystemPaymentMethodDistribution {
+  referenceDate: string;
+  paymentMethodData: PaymentMethodDistributionItem[];
+}
+
+export interface ChannelPerformanceItem {
+  channel: string; // Payment channel name
+  total: number; // Total transactions
+  success: number; // Successful transactions
+  failed: number; // Failed transactions
+  successRate: number; // Success rate percentage
+  successVolume: number; // Total volume of successful transactions
+  totalFees: number; // Total fees collected
+}
+
+export interface SystemChannelPerformance {
+  referenceDate: string;
+  channelPerformanceData: ChannelPerformanceItem[];
+}

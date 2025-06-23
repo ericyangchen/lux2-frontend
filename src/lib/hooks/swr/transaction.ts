@@ -1,14 +1,22 @@
 import {
+  ApiGetSystemChannelPerformance,
+  ApiGetSystemPaymentMethodDistribution,
   ApiGetSystemTransactionCount,
+  ApiGetSystemWeeklyTransactionTrends,
   ApiGetTransactionById,
   ApiGetTransactionCountByOrganizationId,
   ApiGetTransactions,
   ApiGetTransactionsByMerchantId,
+  ApiGetWeeklyTransactionTrendsByOrganizationId,
 } from "@/lib/apis/transactions/get";
 import {
   DailyTransactionCountByOrganizationId,
+  SystemChannelPerformance,
   SystemDailyTransactionCount,
+  SystemPaymentMethodDistribution,
+  SystemWeeklyTransactionTrends,
   Transaction,
+  WeeklyTransactionTrendsByOrganizationId,
 } from "@/lib/types/transaction";
 import {
   USE_DAILY_TRANSACTION_COUNT_BY_ORGANIZATION_ID_REFRESH_INTERVAL,
@@ -412,6 +420,198 @@ export const useDailyTransactionCountByOrganizationId = ({
   return {
     dailyTransactionCountByOrganizationId:
       data as DailyTransactionCountByOrganizationId,
+    isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
+const fetchSystemWeeklyTransactionTrends = async ({
+  date,
+  accessToken,
+}: {
+  date?: string;
+  accessToken: string;
+}) => {
+  const response = await ApiGetSystemWeeklyTransactionTrends({
+    date,
+    accessToken,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+
+    const error = new ApplicationError(errorData);
+
+    throw error;
+  }
+
+  return response.json();
+};
+
+export const useSystemWeeklyTransactionTrends = (date?: string) => {
+  const { accessToken } = getApplicationCookies();
+
+  const shouldFetch = accessToken;
+
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
+    shouldFetch
+      ? { key: "systemWeeklyTransactionTrends", date, accessToken }
+      : null,
+    fetchSystemWeeklyTransactionTrends,
+    { refreshInterval: USE_SYSTEM_DAILY_TRANSACTION_COUNT_REFRESH_INTERVAL }
+  );
+
+  return {
+    systemWeeklyTransactionTrends: data as SystemWeeklyTransactionTrends,
+    isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
+const fetchWeeklyTransactionTrendsByOrganizationId = async ({
+  organizationId,
+  date,
+  accessToken,
+}: {
+  organizationId: string;
+  date?: string;
+  accessToken: string;
+}) => {
+  const response = await ApiGetWeeklyTransactionTrendsByOrganizationId({
+    organizationId,
+    date,
+    accessToken,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+
+    const error = new ApplicationError(errorData);
+
+    throw error;
+  }
+
+  return response.json();
+};
+
+export const useWeeklyTransactionTrendsByOrganizationId = ({
+  organizationId,
+  date,
+}: {
+  organizationId?: string;
+  date?: string;
+}) => {
+  const { accessToken } = getApplicationCookies();
+
+  const shouldFetch = accessToken && organizationId;
+
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
+    shouldFetch
+      ? {
+          key: "weeklyTransactionTrendsByOrganizationId",
+          organizationId,
+          date,
+          accessToken,
+        }
+      : null,
+    fetchWeeklyTransactionTrendsByOrganizationId,
+    {
+      refreshInterval:
+        USE_DAILY_TRANSACTION_COUNT_BY_ORGANIZATION_ID_REFRESH_INTERVAL,
+    }
+  );
+
+  return {
+    weeklyTransactionTrendsByOrganizationId:
+      data as WeeklyTransactionTrendsByOrganizationId,
+    isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
+const fetchSystemPaymentMethodDistribution = async ({
+  date,
+  accessToken,
+}: {
+  date?: string;
+  accessToken: string;
+}) => {
+  const response = await ApiGetSystemPaymentMethodDistribution({
+    date,
+    accessToken,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+
+    const error = new ApplicationError(errorData);
+
+    throw error;
+  }
+
+  return response.json();
+};
+
+export const useSystemPaymentMethodDistribution = (date?: string) => {
+  const { accessToken } = getApplicationCookies();
+
+  const shouldFetch = accessToken;
+
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
+    shouldFetch
+      ? { key: "systemPaymentMethodDistribution", date, accessToken }
+      : null,
+    fetchSystemPaymentMethodDistribution,
+    { refreshInterval: USE_SYSTEM_DAILY_TRANSACTION_COUNT_REFRESH_INTERVAL }
+  );
+
+  return {
+    systemPaymentMethodDistribution: data as SystemPaymentMethodDistribution,
+    isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
+const fetchSystemChannelPerformance = async ({
+  date,
+  accessToken,
+}: {
+  date?: string;
+  accessToken: string;
+}) => {
+  const response = await ApiGetSystemChannelPerformance({
+    date,
+    accessToken,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+
+    const error = new ApplicationError(errorData);
+
+    throw error;
+  }
+
+  return response.json();
+};
+
+export const useSystemChannelPerformance = (date?: string) => {
+  const { accessToken } = getApplicationCookies();
+
+  const shouldFetch = accessToken;
+
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
+    shouldFetch ? { key: "systemChannelPerformance", date, accessToken } : null,
+    fetchSystemChannelPerformance,
+    { refreshInterval: USE_SYSTEM_DAILY_TRANSACTION_COUNT_REFRESH_INTERVAL }
+  );
+
+  return {
+    systemChannelPerformance: data as SystemChannelPerformance,
     isLoading,
     isError: error,
     mutate,

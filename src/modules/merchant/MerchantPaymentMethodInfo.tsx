@@ -194,6 +194,13 @@ export default function MerchantPaymentMethodInfo({
         {availablePaymentMethods.map((paymentMethod) => {
           const config = getPaymentMethodConfiguration(paymentMethod, type);
 
+          // Get consolidated fee settings from the first enabled channel
+          // (assuming all channels for same payment method have same fees)
+          const consolidatedFeeSettings =
+            config.channels.length > 0 ? config.channels[0].feeSettings : [];
+
+          const isEnabled = config.channels.some((channel) => channel.enabled);
+
           return (
             <div
               key={`${type}-${paymentMethod}`}
@@ -221,6 +228,15 @@ export default function MerchantPaymentMethodInfo({
                           : "無限制"}
                       </span>
                     </div>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        isEnabled
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {isEnabled ? "啟用" : "停用"}
+                    </span>
                   </div>
                   {config.balance && (
                     <div className="text-right text-sm">
@@ -233,85 +249,41 @@ export default function MerchantPaymentMethodInfo({
                 </div>
               </div>
 
-              {/* Payment Channels List */}
+              {/* Fee Settings */}
               <div className="p-4">
-                {config.channels.length > 0 ? (
-                  <div className="space-y-4">
-                    {config.channels.map((channel, channelIdx) => (
+                {isEnabled && consolidatedFeeSettings.length > 0 ? (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">
+                      手續費資訊
+                    </h4>
+                    {consolidatedFeeSettings.map((feeSetting, feeIdx) => (
                       <div
-                        key={channelIdx}
-                        className="border border-gray-200 rounded-md p-3"
+                        key={feeIdx}
+                        className="flex justify-between items-center p-3 bg-gray-50 rounded-md"
                       >
-                        {/* Channel Header */}
-                        <div className="flex justify-between items-center mb-3">
-                          <div className="font-medium text-gray-900">
-                            {PaymentChannelDisplayNames[
-                              channel.paymentChannel
-                            ] || channel.paymentChannel}
-                          </div>
-                          <div className="flex items-center space-x-3">
-                            {channel.minAmount && (
-                              <span className="text-xs text-gray-500">
-                                最小: {formatNumber(channel.minAmount)}
-                              </span>
-                            )}
-                            {channel.maxAmount && (
-                              <span className="text-xs text-gray-500">
-                                最大: {formatNumber(channel.maxAmount)}
-                              </span>
-                            )}
-                            {channel.settlementInterval && (
-                              <span className="text-xs text-gray-500">
-                                結算: {channel.settlementInterval}
-                              </span>
-                            )}
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                channel.enabled
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {channel.enabled ? "啟用" : "停用"}
+                        <span className="text-sm font-medium text-gray-700">
+                          {feeSetting.accountTypeDisplay}
+                        </span>
+                        <div className="text-sm text-gray-600 space-x-4">
+                          <span>
+                            費率:{" "}
+                            <span className="font-medium">
+                              {formatNumberInPercentage(feeSetting.percentage)}
                             </span>
-                          </div>
-                        </div>
-
-                        {/* Fee Settings */}
-                        <div className="space-y-2">
-                          {channel.feeSettings.map((feeSetting, feeIdx) => (
-                            <div
-                              key={feeIdx}
-                              className="flex justify-between items-center p-2 bg-gray-50 rounded"
-                            >
-                              <span className="text-sm font-medium text-gray-700">
-                                {feeSetting.accountTypeDisplay}
-                              </span>
-                              <div className="text-sm text-gray-600 space-x-3">
-                                <span>
-                                  費率:{" "}
-                                  <span className="font-medium">
-                                    {formatNumberInPercentage(
-                                      feeSetting.percentage
-                                    )}
-                                  </span>
-                                </span>
-                                <span>
-                                  固定費:{" "}
-                                  <span className="font-medium">
-                                    {formatNumber(feeSetting.fixed)}
-                                  </span>
-                                </span>
-                              </div>
-                            </div>
-                          ))}
+                          </span>
+                          <span>
+                            固定費:{" "}
+                            <span className="font-medium">
+                              {formatNumber(feeSetting.fixed)}
+                            </span>
+                          </span>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="text-sm text-gray-500 text-center py-4">
-                    沒有啟用的上游通道
+                    {isEnabled ? "無手續費資訊" : "此支付類型未啟用"}
                   </div>
                 )}
               </div>
@@ -328,8 +300,8 @@ export default function MerchantPaymentMethodInfo({
       : TransactionType.API_WITHDRAWAL;
 
   return (
-    <div className="py-8">
-      <Label className="text-xl font-bold">支付方式資訊</Label>
+    <div className="">
+      <Label className="text-xl font-bold">支付類型資訊</Label>
 
       <div className="px-0 sm:px-4 py-4">
         <div className="sm:hidden">

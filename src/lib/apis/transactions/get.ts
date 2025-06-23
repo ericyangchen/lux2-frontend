@@ -188,3 +188,85 @@ export const ApiGetTransactionCountByOrganizationId = async ({
     }
   );
 };
+
+export const ApiGetSystemWeeklyTransactionTrends = async ({
+  date,
+  accessToken,
+}: {
+  date?: string;
+  accessToken: string;
+}) => {
+  const queryString = buildQueryString({
+    date,
+  });
+
+  return fetch(
+    `${getBackendUrl()}/transactions/statistics/system/weekly-trends?${queryString}`,
+    {
+      method: "GET",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
+};
+
+export const ApiGetWeeklyTransactionTrendsByOrganizationId = async ({
+  organizationId,
+  date,
+  accessToken,
+}: {
+  organizationId: string;
+  date?: string;
+  accessToken: string;
+}) => {
+  const queryString = buildQueryString({
+    date,
+  });
+
+  return fetch(
+    `${getBackendUrl()}/transactions/statistics/organizations/${organizationId}/weekly-trends?${queryString}`,
+    {
+      method: "GET",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
+};
+
+export const ApiGetSystemPaymentMethodDistribution = async ({
+  date,
+  accessToken,
+}: {
+  date?: string;
+  accessToken: string;
+}) => {
+  const queryString = buildQueryString({
+    date,
+  });
+
+  return fetch(
+    `${getBackendUrl()}/transactions/statistics/system/payment-method-distribution?${queryString}`,
+    {
+      method: "GET",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
+};
+
+export const ApiGetSystemChannelPerformance = async ({
+  date,
+  accessToken,
+}: {
+  date?: string;
+  accessToken: string;
+}) => {
+  const queryString = buildQueryString({
+    date,
+  });
+
+  return fetch(
+    `${getBackendUrl()}/transactions/statistics/system/channel-performance?${queryString}`,
+    {
+      method: "GET",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
+};

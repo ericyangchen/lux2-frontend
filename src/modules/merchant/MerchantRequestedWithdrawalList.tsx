@@ -23,6 +23,7 @@ import { DatePicker } from "@/components/DatePicker";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
+import { MerchantRequestedWithdrawalTab } from "./MerchantRequestedWithdrawalView";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { Transaction } from "@/lib/types/transaction";
 import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
@@ -33,7 +34,11 @@ import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
-export function MerchantRequestedWithdrawalList() {
+export function MerchantRequestedWithdrawalList({
+  setActiveTab,
+}: {
+  setActiveTab: (tab: MerchantRequestedWithdrawalTab) => void;
+}) {
   const { toast } = useToast();
 
   const { organizationId } = getApplicationCookies();

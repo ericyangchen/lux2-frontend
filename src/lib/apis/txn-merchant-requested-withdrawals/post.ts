@@ -7,9 +7,11 @@ export const ApiCreateMerchantRequestedWithdrawal = async ({
   merchantOrderId,
   amount,
   notifyUrl,
-  accountType,
-  accountName,
-  phoneNumber,
+  bankName,
+  bankAccount,
+  receiverName,
+  receiverEmail,
+  receiverPhoneNumber,
   accessToken,
 }: {
   type: string;
@@ -18,9 +20,11 @@ export const ApiCreateMerchantRequestedWithdrawal = async ({
   merchantOrderId: string;
   amount: string;
   notifyUrl?: string;
-  accountType?: string;
-  accountName?: string;
-  phoneNumber?: string;
+  bankName?: string;
+  bankAccount?: string;
+  receiverName?: string;
+  receiverEmail?: string;
+  receiverPhoneNumber?: string;
   accessToken: string;
 }) => {
   return fetch(`${getBackendUrl()}/merchant-requested-withdrawal`, {
@@ -33,9 +37,11 @@ export const ApiCreateMerchantRequestedWithdrawal = async ({
       merchantOrderId,
       amount,
       notifyUrl,
-      accountType,
-      accountName,
-      phoneNumber,
+      bankName,
+      bankAccount,
+      receiverName,
+      receiverEmail,
+      receiverPhoneNumber,
     }),
   });
 };
