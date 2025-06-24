@@ -1,9 +1,9 @@
 export interface BalanceHistoryItem {
   date: string; // YYYY-MM-DD
-  totalBalance: number;
-  availableBalance: number;
-  frozenBalance: number;
-  unsettledBalance: number;
+  totalBalance: string;
+  availableBalance: string;
+  frozenBalance: string;
+  unsettledBalance: string;
 }
 
 export interface SystemBalanceHistory {

@@ -170,10 +170,10 @@ export default function MerchantDashboardView() {
     organizationBalanceHistory?.balanceHistory || []
   ).map((item) => ({
     name: format(new Date(item.date), "MM/dd"),
-    balance: item.totalBalance,
-    available: item.availableBalance,
-    frozen: item.frozenBalance,
-    unsettled: item.unsettledBalance,
+    balance: Calculator.toFixedForDisplay(item.totalBalance),
+    available: Calculator.toFixedForDisplay(item.availableBalance),
+    frozen: Calculator.toFixedForDisplay(item.frozenBalance),
+    unsettled: Calculator.toFixedForDisplay(item.unsettledBalance),
   }));
 
   const totalBalance = balances?.reduce((acc, balance) => {
@@ -327,28 +327,33 @@ export default function MerchantDashboardView() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             title="總餘額"
-            value={totalBalance || "0"}
+            value={Calculator.toFixedForDisplay(totalBalance) || "0.000"}
             subtitle="您的總金額"
             textColor="text-purple-600"
             icon={WalletIcon}
           />
           <StatCard
             title="可用餘額"
-            value={totalAvailableAmount || "0"}
+            value={
+              Calculator.toFixedForDisplay(totalAvailableAmount) || "0.000"
+            }
             subtitle="可立即使用"
             textColor="text-green-600"
             icon={ChartIcon}
           />
           <StatCard
             title="未結算額度"
-            value={totalDepositUnsettledAmount || "0"}
+            value={
+              Calculator.toFixedForDisplay(totalDepositUnsettledAmount) ||
+              "0.000"
+            }
             subtitle="待處理金額"
             textColor="text-amber-600"
             icon={CreditCardIcon}
           />
           <StatCard
             title="凍結額度"
-            value={totalFrozenAmount || "0"}
+            value={Calculator.toFixedForDisplay(totalFrozenAmount) || "0.000"}
             subtitle="暫時凍結"
             textColor="text-red-600"
             icon={TrendingUpIcon}

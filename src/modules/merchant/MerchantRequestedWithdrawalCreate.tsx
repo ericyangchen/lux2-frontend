@@ -11,6 +11,7 @@ import { ApiCreateMerchantRequestedWithdrawal } from "@/lib/apis/txn-merchant-re
 import { ApplicationError } from "@/lib/error/applicationError";
 import { BANK_NAMES_MAPPING } from "@/lib/constants/bank-names";
 import { Button } from "@/components/shadcn/ui/button";
+import { Calculator } from "@/lib/utils/calculator";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { MerchantRequestedWithdrawalTab } from "./MerchantRequestedWithdrawalView";
@@ -81,10 +82,10 @@ export function MerchantRequestedWithdrawalCreate({
     }
 
     // Validate amount format
-    if (!/^\d+(\.\d{1,2})?$/.test(amount)) {
+    if (!/^\d+(\.\d{1,3})?$/.test(amount)) {
       toast({
         title: "金額格式錯誤",
-        description: "金額必須是有效的數字，最多兩位小數",
+        description: "金額必須是有效的數字，最多三位小數",
         variant: "destructive",
       });
       return;
@@ -186,11 +187,12 @@ export function MerchantRequestedWithdrawalCreate({
                 id="amount"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
+                onBlur={() => setAmount(Calculator.toFixedForDisplay(amount))}
                 placeholder="例如: 1000 或 1000.50"
                 type="text"
               />
               <p className="text-xs text-gray-500">
-                支援最多兩位小數，例如: 120, 120.00, 120.50
+                支援最多三位小數，例如: 120, 120.00, 120.500
               </p>
             </div>
 

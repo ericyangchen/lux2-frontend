@@ -11,6 +11,7 @@ import {
   TransactionTypeDisplayNames,
 } from "@/lib/constants/transaction";
 import {
+  formatNumber,
   formatNumberInPercentage,
   formatNumberWithoutMinFraction,
 } from "@/lib/utils/number";
@@ -174,7 +175,7 @@ export function ApiTransactionInfoDialog({
                 固定手續費:
               </Label>
               <div className="font-mono">
-                {formatNumberWithoutMinFraction(transaction.feeFixed)}
+                {formatNumber(transaction.feeFixed)}
               </div>
             </div>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
@@ -182,7 +183,7 @@ export function ApiTransactionInfoDialog({
                 總手續費:
               </Label>
               <div className="font-mono">
-                {formatNumberWithoutMinFraction(transaction.totalFee)}
+                {formatNumber(transaction.totalFee)}
               </div>
             </div>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
@@ -190,7 +191,7 @@ export function ApiTransactionInfoDialog({
                 金額:
               </Label>
               <div className="font-mono">
-                {formatNumberWithoutMinFraction(transaction.amount)}
+                {formatNumber(transaction.amount)}
               </div>
             </div>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">
@@ -198,7 +199,7 @@ export function ApiTransactionInfoDialog({
                 餘額變動:
               </Label>
               <div className="font-mono">
-                {formatNumberWithoutMinFraction(transaction.balanceChanged)}
+                {formatNumber(transaction.balanceChanged)}
               </div>
             </div>
             <div className="flex items-center gap-4 w-full lg:w-fit min-h-6">

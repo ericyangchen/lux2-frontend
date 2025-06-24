@@ -29,7 +29,7 @@ import { Transaction } from "@/lib/types/transaction";
 import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
 import { classNames } from "@/lib/utils/classname-utils";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
-import { formatNumberWithoutMinFraction } from "@/lib/utils/number";
+import { formatNumber } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
@@ -348,10 +348,10 @@ export function MerchantRequestedWithdrawalList({
                         {PaymentMethodDisplayNames[transaction.paymentMethod]}
                       </td>
                       <td className="px-1 py-2 text-center">
-                        {formatNumberWithoutMinFraction(transaction.amount)}
+                        {formatNumber(transaction.amount)}
                       </td>
                       <td className="px-1 py-2 text-center">
-                        {formatNumberWithoutMinFraction(transaction.totalFee)}
+                        {formatNumber(transaction.totalFee)}
                       </td>
                       <td
                         className={classNames(

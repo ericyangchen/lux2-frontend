@@ -20,6 +20,10 @@ import {
   convertToEndOfDay,
   convertToStartOfDay,
 } from "@/lib/utils/timezone";
+import {
+  formatNumber,
+  formatNumberWithoutMinFraction,
+} from "@/lib/utils/number";
 import { useEffect, useState } from "react";
 
 import { ApplicationError } from "@/lib/error/applicationError";
@@ -34,7 +38,6 @@ import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.e
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { classNames } from "@/lib/utils/classname-utils";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
-import { formatNumberWithoutMinFraction } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
@@ -551,14 +554,14 @@ export function MerchantTransactionList() {
                       {/* Amount */}
                       <td className="px-4 py-3 text-right">
                         <div className="font-mono font-medium text-gray-900 text-sm">
-                          ₱ {transaction.amount?.toLocaleString() || "0"}
+                          ₱ {formatNumber(transaction.amount) || "0.000"}
                         </div>
                       </td>
 
                       {/* Total Fee */}
                       <td className="px-4 py-3 text-right">
                         <div className="font-mono text-gray-600 text-sm">
-                          ₱ {transaction.totalFee?.toLocaleString() || "0"}
+                          ₱ {formatNumber(transaction.totalFee) || "0.000"}
                         </div>
                       </td>
 

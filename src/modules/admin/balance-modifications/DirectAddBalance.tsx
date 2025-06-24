@@ -18,6 +18,7 @@ import {
 import { ApiDirectModifyAddBalance } from "@/lib/apis/balance-modifications/post";
 import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
+import { Calculator } from "@/lib/utils/calculator";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { OrganizationSearchBar } from "../common/OrganizationSearchBar";
@@ -65,7 +66,9 @@ export function DirectAddBalance() {
         const data = await response.json();
         toast({
           title: "餘額加值成功",
-          description: `已為組織 ${organizationId} 加值 ${amount} ${paymentMethod}`,
+          description: `已為組織 ${organizationId} 加值 ${Calculator.toFixedForDisplay(
+            amount
+          )} ${paymentMethod}`,
           variant: "success",
         });
 
@@ -161,9 +164,10 @@ export function DirectAddBalance() {
                 type="number"
                 step="0.01"
                 min="0"
-                placeholder="0.00"
+                placeholder="0.000"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
+                onBlur={() => setAmount(Calculator.toFixedForDisplay(amount))}
               />
             </div>
           </div>

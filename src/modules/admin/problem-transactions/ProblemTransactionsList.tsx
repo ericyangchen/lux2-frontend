@@ -17,6 +17,10 @@ import {
   convertToEndOfDay,
   convertToStartOfDay,
 } from "@/lib/utils/timezone";
+import {
+  formatNumber,
+  formatNumberWithoutMinFraction,
+} from "@/lib/utils/number";
 
 import { ApiGetProblemWithdrawals } from "@/lib/apis/problem-withdrawals/get";
 import { ApplicationError } from "@/lib/error/applicationError";
@@ -36,7 +40,6 @@ import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.e
 import { classNames } from "@/lib/utils/classname-utils";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
 import { flattenOrganizations } from "../common/flattenOrganizations";
-import { formatNumberWithoutMinFraction } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useOrganizationWithChildren } from "@/lib/hooks/swr/organization";
 import { useState } from "react";
@@ -453,10 +456,10 @@ export function ProblemTransactionsList() {
                         </Button>
                       </td>
                       <td className="px-1 py-2 text-center">
-                        {formatNumberWithoutMinFraction(transaction.amount)}
+                        {formatNumber(transaction.amount)}
                       </td>
                       <td className="px-1 py-2 text-center">
-                        {formatNumberWithoutMinFraction(transaction.totalFee)}
+                        {formatNumber(transaction.totalFee)}
                       </td>
                       <td
                         className={classNames(

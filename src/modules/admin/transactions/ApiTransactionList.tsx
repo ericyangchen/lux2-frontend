@@ -29,6 +29,7 @@ import { useEffect, useState } from "react";
 import { ApiTransactionInfoDialog } from "../common/ApiTransactionInfoDialog";
 import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
+import { Calculator } from "@/lib/utils/calculator";
 import { DatePicker } from "@/components/DatePicker";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
@@ -758,14 +759,14 @@ export function ApiTransactionList() {
                       {/* Amount */}
                       <td className="px-4 py-3 text-right">
                         <div className="font-mono font-medium text-gray-900 text-sm">
-                          ₱ {transaction.amount?.toLocaleString() || "0"}
+                          ₱ {Calculator.toFixedForDisplay(transaction.amount)}
                         </div>
                       </td>
 
                       {/* Total Fee */}
                       <td className="px-4 py-3 text-right">
                         <div className="font-mono text-gray-600 text-sm">
-                          ₱ {transaction.totalFee?.toLocaleString() || "0"}
+                          ₱ {Calculator.toFixedForDisplay(transaction.totalFee)}
                         </div>
                       </td>
 

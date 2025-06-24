@@ -1,3 +1,4 @@
+import { Calculator } from "./calculator";
 import Decimal from "decimal.js";
 
 export const formatNumberInInteger = (number: string) => {
@@ -8,10 +9,7 @@ export const formatNumberInInteger = (number: string) => {
 };
 
 export const formatNumber = (number: string) => {
-  return parseFloat(number).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  return Calculator.toFixedForDisplay(number);
 };
 
 export const formatNumberWithoutMinFraction = (number: string) => {

@@ -294,7 +294,7 @@
 //                         {revenue.transactionId}
 //                       </td>
 //                       <td className="px-1 py-2 text-center">
-//                         {formatNumberWithoutMinFraction(revenue.revenue)}
+//                         {formatNumber(revenue.revenue)}
 //                       </td>
 //                       <td className="px-1 py-2 text-center">
 //                         {convertDatabaseTimeToReadablePhilippinesTime(
