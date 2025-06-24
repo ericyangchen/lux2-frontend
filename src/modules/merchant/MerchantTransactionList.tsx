@@ -291,7 +291,10 @@ export function MerchantTransactionList() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value={"all"} className="h-8"></SelectItem>
+                      <SelectItem
+                        value={"all"}
+                        className="h-8 whitespace-nowrap"
+                      ></SelectItem>
                       <SelectItem value={TransactionType.API_DEPOSIT}>
                         {
                           TransactionTypeDisplayNames[
