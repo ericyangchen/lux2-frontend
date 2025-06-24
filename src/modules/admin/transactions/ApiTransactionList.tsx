@@ -206,7 +206,15 @@ export function ApiTransactionList() {
               ? [...(prev || []), ...(data?.data || [])]
               : data?.data || []
           );
-          setNextCursor(data?.pagination?.nextCursor || null);
+          // Ensure nextCursor is properly typed
+          setNextCursor(
+            data?.pagination?.nextCursor
+              ? {
+                  createdAt: data.pagination.nextCursor.createdAt,
+                  id: data.pagination.nextCursor.id,
+                }
+              : null
+          );
           setCurrentQueryType(QueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS);
         } else {
           throw new ApplicationError(data);

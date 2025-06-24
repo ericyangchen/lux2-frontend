@@ -68,7 +68,10 @@ export function MerchantTransactionList() {
 
   const [currentQueryType, setCurrentQueryType] = useState<string>();
 
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [nextCursor, setNextCursor] = useState<{
+    createdAt: string;
+    id: string;
+  } | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
 
   const handleSearch = async (isLoadMore: boolean = false) => {
@@ -135,18 +138,16 @@ export function MerchantTransactionList() {
           createdAtEnd: endDateQuery,
         };
 
-        const cursorData =
-          isLoadMore && !!nextCursor
-            ? {
-                cursorCreatedAt: nextCursor.split("|")[0],
-                cursorId: nextCursor.split("|")[1],
-              }
-            : {};
+        // Parse cursor string into components
+        const cursorCreatedAt =
+          isLoadMore && nextCursor ? nextCursor.createdAt : undefined;
+        const cursorId = isLoadMore && nextCursor ? nextCursor.id : undefined;
 
         const response = await ApiGetTransactionsByMerchantId({
           merchantId: organizationId,
           ...query,
-          ...cursorData,
+          cursorCreatedAt,
+          cursorId,
           accessToken,
         });
         const data = await response.json();
@@ -157,7 +158,15 @@ export function MerchantTransactionList() {
               ? [...(prev || []), ...(data?.data || [])]
               : data?.data || []
           );
-          setNextCursor(data?.pagination?.nextCursor || null);
+          // Ensure nextCursor is properly formatted as a string
+          setNextCursor(
+            data?.pagination?.nextCursor
+              ? {
+                  createdAt: data.pagination.nextCursor.createdAt,
+                  id: data.pagination.nextCursor.id,
+                }
+              : null
+          );
           setCurrentQueryType(MerchantQueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS);
         } else {
           throw new ApplicationError(data);
