@@ -32,8 +32,10 @@ import { DatePicker } from "@/components/DatePicker";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
+import { PROBLEM_WITHDRAWAL_INTERNAL_STATUSES } from "@/lib/constants/problem-withdrawal-statuses";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { Transaction } from "@/lib/types/transaction";
+import { TransactionInternalStatus } from "@/lib/enums/transactions/transaction-internal-status.enum";
 import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { classNames } from "@/lib/utils/classname-utils";
@@ -263,6 +265,29 @@ export function MerchantTransactionList() {
         return "bg-yellow-500";
       default:
         return "bg-gray-500";
+    }
+  };
+
+  const getTransactionTypeBadge = (type: TransactionType) => {
+    switch (type) {
+      case TransactionType.API_DEPOSIT:
+        return (
+          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-gray-900 border border-gray-300">
+            {TransactionTypeDisplayNames[type]}
+          </span>
+        );
+      case TransactionType.API_WITHDRAWAL:
+        return (
+          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-900 text-white">
+            {TransactionTypeDisplayNames[type]}
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-gray-900">
+            {TransactionTypeDisplayNames[type] || type}
+          </span>
+        );
     }
   };
 
@@ -536,9 +561,8 @@ export function MerchantTransactionList() {
 
                       {/* Transaction Type */}
                       <td className="px-4 py-3">
-                        <div className="text-sm text-gray-900">
-                          {TransactionTypeDisplayNames[transaction.type] ||
-                            transaction.type}
+                        <div className="flex items-center gap-2">
+                          {getTransactionTypeBadge(transaction.type)}
                         </div>
                       </td>
 
