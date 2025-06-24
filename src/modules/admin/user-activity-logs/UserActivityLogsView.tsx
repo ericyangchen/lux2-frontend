@@ -87,7 +87,7 @@ export function UserActivityLogsView() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-8">
       {/* Filter Form */}
       <Card>
         <CardHeader>
@@ -178,79 +178,81 @@ export function UserActivityLogsView() {
       </Card>
 
       {/* Results Table */}
-      <div className="overflow-x-auto min-w-[1200px]">
-        <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                時間
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                使用者ID
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                單位ID
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                操作類型
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                描述
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                IP地址
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {logs.map((log) => (
-              <tr key={log.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3">
-                  <div className="font-mono text-sm text-gray-600">
-                    {format(new Date(log.createdAt), "yyyy-MM-dd HH:mm:ss")}
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="font-mono text-sm text-gray-600">
-                    {log.userId}
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="font-mono text-sm text-gray-600">
-                    {log.organizationId || (
-                      <span className="text-sm text-gray-600">-</span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="text-sm text-gray-900">
-                    {USER_ACTIVITY_ACTION_DISPLAY_NAMES[log.action] ||
-                      log.action}
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <div
-                    className="text-sm text-gray-900 max-w-xs truncate"
-                    title={log.description || "-"}
-                  >
-                    {log.description || (
-                      <span className="text-sm text-gray-600">-</span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="font-mono text-sm text-gray-600">
-                    {log.ipAddress}
-                  </div>
-                </td>
+      <div className="border border-gray-200 rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-[1200px] w-full bg-white">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                  時間
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                  使用者ID
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                  單位ID
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                  操作類型
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                  描述
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                  IP地址
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {logs.map((log) => (
+                <tr key={log.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3">
+                    <div className="font-mono text-sm text-gray-600">
+                      {format(new Date(log.createdAt), "yyyy-MM-dd HH:mm:ss")}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="font-mono text-sm text-gray-600">
+                      {log.userId}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="font-mono text-sm text-gray-600">
+                      {log.organizationId || (
+                        <span className="text-sm text-gray-600">-</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="text-sm text-gray-900">
+                      {USER_ACTIVITY_ACTION_DISPLAY_NAMES[log.action] ||
+                        log.action}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div
+                      className="text-sm text-gray-900 max-w-xs truncate"
+                      title={log.description || "-"}
+                    >
+                      {log.description || (
+                        <span className="text-sm text-gray-600">-</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="font-mono text-sm text-gray-600">
+                      {log.ipAddress}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-        {logs.length === 0 && !loading && (
-          <div className="text-center py-8 text-gray-500">暫無資料</div>
-        )}
+          {logs.length === 0 && !loading && (
+            <div className="text-center py-8 text-gray-500">暫無資料</div>
+          )}
+        </div>
       </div>
 
       {nextCursor.cursorCreatedAt && nextCursor.cursorId && (
