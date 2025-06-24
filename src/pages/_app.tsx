@@ -1,5 +1,8 @@
 import "@/styles/globals.css";
 
+import App, { AppContext } from "next/app";
+import { initializeConfigWithValues, serverConfig } from "@/lib/config";
+
 import { Analytics } from "@vercel/analytics/next";
 import type { AppProps } from "next/app";
 import ApplicationLayout from "@/modules/common/layout/ApplicationLayout";
@@ -47,8 +50,24 @@ const FaviconConfig = () => {
   );
 };
 
-export default function App({ Component, pageProps }: AppProps) {
+interface MyAppProps extends AppProps {
+  config?: {
+    backendUrl: string;
+    environment: string;
+  };
+}
+
+// Track if we've already initialized config to avoid re-fetching
+let configInitialized = false;
+
+export default function MyApp({ Component, pageProps, config }: MyAppProps) {
   const router = useRouter();
+
+  // Initialize config cache immediately (only if we have config and haven't initialized yet)
+  if (typeof window !== "undefined" && config && !configInitialized) {
+    initializeConfigWithValues(config);
+    configInitialized = true;
+  }
 
   useAuthGuard();
 
@@ -82,3 +101,23 @@ export default function App({ Component, pageProps }: AppProps) {
     </>
   );
 }
+
+// Get config server-side ONLY if not already initialized
+MyApp.getInitialProps = async (appContext: AppContext) => {
+  // Call default App.getInitialProps
+  const appProps = await App.getInitialProps(appContext);
+
+  // Only fetch config on initial load (server-side) or if not already cached
+  const isServerSide = typeof window === "undefined";
+  const needsConfig = isServerSide || !configInitialized;
+
+  if (needsConfig) {
+    return {
+      ...appProps,
+      config: serverConfig,
+    };
+  }
+
+  // Skip config on subsequent client-side navigations
+  return appProps;
+};

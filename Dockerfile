@@ -12,10 +12,7 @@ RUN yarn install --frozen-lockfile
 # Copy source code
 COPY . .
 
-# Copy env TODO: temporary workaround
-COPY .env ./
-
-# Build the application
+# Build the application (no build-time env vars needed)
 RUN yarn build
 
 # Production stage
@@ -25,9 +22,6 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json yarn.lock ./
-
-# Copy env TODO: temporary workaround
-COPY .env ./
 
 # Install only production dependencies
 RUN yarn install --frozen-lockfile --production=true && yarn cache clean

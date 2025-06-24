@@ -1,20 +1,13 @@
-const getEnvVar = (key: string) => {
-  const value = process.env[key];
-
-  return value;
-};
+import { getCachedConfig } from "@/lib/config";
 
 export const getEnvironment = () => {
-  return "development"; // development, local
-  return "production"; // production
-  return getEnvVar("NEXT_PUBLIC_ENVIRONMENT");
+  const config = getCachedConfig();
+  return config.environment;
 };
 
 export const getBackendUrl = () => {
-  return "https://api.dev.sm-pay.org"; // dev
-  return "http://localhost:8080"; // local
-  return "https://api.sm-pay.org"; // production
-  return getEnvVar("NEXT_PUBLIC_BACKEND_URL");
+  const config = getCachedConfig();
+  return config.backendUrl;
 };
 
 export const getCompanyName = () => {
