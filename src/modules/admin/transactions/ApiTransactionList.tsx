@@ -127,8 +127,14 @@ export function ApiTransactionList() {
       return;
     }
 
+    // Prevent multiple simultaneous load more requests
+    if (isLoadMore && loadingMore) return;
+
     if (!isLoadMore) {
       setIsLoading(true);
+      // Reset pagination state for new searches
+      setNextCursor(null);
+      setTransactions(undefined);
     } else {
       setLoadingMore(true);
     }
@@ -146,6 +152,8 @@ export function ApiTransactionList() {
 
         if (response.ok) {
           setTransactions([data]);
+          // Reset cursor for single ID search
+          setNextCursor(null);
           setCurrentQueryType(QueryTypes.SEARCH_BY_TRANSACTION_ID);
         } else {
           throw new ApplicationError(data);
@@ -199,13 +207,16 @@ export function ApiTransactionList() {
               : data?.data || []
           );
           setNextCursor(data?.pagination?.nextCursor || null);
-
           setCurrentQueryType(QueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS);
         } else {
           throw new ApplicationError(data);
         }
       }
     } catch (error) {
+      // On error, ensure we reset the cursor if it's a new search
+      if (!isLoadMore) {
+        setNextCursor(null);
+      }
       if (error instanceof ApplicationError) {
         toast({
           title: `${error.statusCode} - 訂單查詢失敗`,

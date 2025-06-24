@@ -78,8 +78,14 @@ export function MerchantTransactionList() {
       return;
     }
 
+    // Prevent multiple simultaneous load more requests
+    if (isLoadMore && loadingMore) return;
+
     if (!isLoadMore) {
       setIsLoading(true);
+      // Reset pagination state for new searches
+      setNextCursor(null);
+      setTransactions(undefined);
     } else {
       setLoadingMore(true);
     }
@@ -98,6 +104,8 @@ export function MerchantTransactionList() {
 
         if (response.ok) {
           setTransactions([data]);
+          // Reset cursor for single order search
+          setNextCursor(null);
           setCurrentQueryType(MerchantQueryTypes.SEARCH_BY_MERCHANT_ORDER_ID);
         } else {
           throw new ApplicationError(data);
@@ -145,16 +153,21 @@ export function MerchantTransactionList() {
 
         if (response.ok) {
           setTransactions((prev) =>
-            isLoadMore ? [...(prev || []), ...(data?.data || [])] : data?.data
+            isLoadMore
+              ? [...(prev || []), ...(data?.data || [])]
+              : data?.data || []
           );
-          setNextCursor(data?.pagination?.nextCursor);
-
+          setNextCursor(data?.pagination?.nextCursor || null);
           setCurrentQueryType(MerchantQueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS);
         } else {
           throw new ApplicationError(data);
         }
       }
     } catch (error) {
+      // On error, ensure we reset the cursor if it's a new search
+      if (!isLoadMore) {
+        setNextCursor(null);
+      }
       if (error instanceof ApplicationError) {
         toast({
           title: `${error.statusCode} - 訂單查詢失敗`,
