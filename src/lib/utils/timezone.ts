@@ -1,6 +1,6 @@
 import * as moment from "moment-timezone";
 
-const PHILIPPINES_TIMEZONE = "Asia/Manila";
+export const PHILIPPINES_TIMEZONE = "Asia/Manila";
 
 export const getCurrentTimeInPhilippines = (): string => {
   return moment.tz(PHILIPPINES_TIMEZONE).format("YYYY-MM-DD HH:mm:ss.SSSZ");

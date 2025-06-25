@@ -11,10 +11,9 @@ import { Calendar } from "./shadcn/ui/calendar";
 import { Clock } from "lucide-react";
 import { Input } from "./shadcn/ui/input";
 import { Label } from "./shadcn/ui/label";
+import { PHILIPPINES_TIMEZONE } from "@/lib/utils/timezone";
 import { cn } from "@/lib/utils/classname-utils";
 import { format } from "date-fns";
-
-const PHILIPPINES_TIMEZONE = "Asia/Manila";
 
 export function DateTimePicker({
   date,

@@ -69,7 +69,7 @@ const StatCard = ({
           <div className="flex-1">
             <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
             <p className={`text-2xl font-bold ${textColor} mb-1`}>
-              {currencySymbol} {formatNumber(value)}
+              {currencySymbol} {value}
             </p>
             {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
           </div>
