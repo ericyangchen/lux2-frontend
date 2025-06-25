@@ -4,6 +4,7 @@ export interface Organization {
   id: string;
   name: string;
   type: OrgType;
+  isTestingAccount: boolean;
   parent?: Organization;
   children: Organization[];
   level: number;
