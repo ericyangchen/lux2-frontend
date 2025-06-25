@@ -18,13 +18,13 @@ import {
 import { ApiDirectModifyAddBalance } from "@/lib/apis/balance-modifications/post";
 import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
-import { Calculator } from "@/lib/utils/calculator";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { OrganizationSearchBar } from "../common/OrganizationSearchBar";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { PaymentMethodDisplayNames } from "@/lib/constants/transaction";
 import { Textarea } from "@/components/shadcn/ui/textarea";
+import { formatNumber } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
@@ -66,7 +66,7 @@ export function DirectAddBalance() {
         const data = await response.json();
         toast({
           title: "餘額加值成功",
-          description: `已為組織 ${organizationId} 加值 ${Calculator.toFixedForDisplay(
+          description: `已為組織 ${organizationId} 加值 ${formatNumber(
             amount
           )} ${paymentMethod}`,
           variant: "success",
@@ -167,7 +167,6 @@ export function DirectAddBalance() {
                 placeholder="0.000"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                onBlur={() => setAmount(Calculator.toFixedForDisplay(amount))}
               />
             </div>
           </div>

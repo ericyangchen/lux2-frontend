@@ -187,7 +187,6 @@ export function MerchantRequestedWithdrawalCreate({
                 id="amount"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                onBlur={() => setAmount(Calculator.toFixedForDisplay(amount))}
                 placeholder="例如: 1000 或 1000.50"
                 type="text"
               />

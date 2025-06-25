@@ -24,6 +24,10 @@ import {
   convertToEndOfDay,
   convertToStartOfDay,
 } from "@/lib/utils/timezone";
+import {
+  formatNumber,
+  formatNumberWithoutMinFraction,
+} from "@/lib/utils/number";
 import { useEffect, useState } from "react";
 
 import { ApiTransactionInfoDialog } from "../common/ApiTransactionInfoDialog";
@@ -48,7 +52,6 @@ import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum"
 import { classNames } from "@/lib/utils/classname-utils";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
 import { flattenOrganizations } from "../common/flattenOrganizations";
-import { formatNumberWithoutMinFraction } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useOrganizationWithChildren } from "@/lib/hooks/swr/organization";
 import { useRouter } from "next/router";
@@ -759,15 +762,15 @@ export function ApiTransactionList() {
 
                       {/* Amount */}
                       <td className="px-4 py-3 text-right">
-                        <div className="font-mono font-medium text-gray-900 text-sm">
-                          ₱ {Calculator.toFixedForDisplay(transaction.amount)}
+                        <div className="font-mono text-gray-900">
+                          ₱ {formatNumber(transaction.amount)}
                         </div>
                       </td>
 
                       {/* Total Fee */}
                       <td className="px-4 py-3 text-right">
-                        <div className="font-mono text-gray-600 text-sm">
-                          ₱ {Calculator.toFixedForDisplay(transaction.totalFee)}
+                        <div className="font-mono text-gray-400 text-sm">
+                          ₱ {formatNumber(transaction.totalFee)}
                         </div>
                       </td>
 

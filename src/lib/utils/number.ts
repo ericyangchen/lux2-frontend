@@ -1,4 +1,3 @@
-import { Calculator } from "./calculator";
 import Decimal from "decimal.js";
 
 export const formatNumberInInteger = (number: string) => {
@@ -8,8 +7,16 @@ export const formatNumberInInteger = (number: string) => {
   });
 };
 
-export const formatNumber = (number: string) => {
-  return Calculator.toFixedForDisplay(number);
+export const formatNumber = (number?: string) => {
+  if (!number) return "0.000";
+
+  const parsed = parseFloat(number);
+  if (isNaN(parsed)) return "0.000";
+
+  return parsed.toLocaleString("en-US", {
+    minimumFractionDigits: 3,
+    maximumFractionDigits: 3,
+  });
 };
 
 export const formatNumberWithoutMinFraction = (number: string) => {

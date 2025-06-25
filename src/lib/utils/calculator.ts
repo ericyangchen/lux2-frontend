@@ -38,17 +38,4 @@ export class Calculator {
   static toFixed(value: string | number, decimals: number = 3): string {
     return Calculator.toBig(value).toFixed(decimals);
   }
-
-  static toFixedForDisplay(
-    value?: string | number,
-    decimals: number = 3
-  ): string {
-    if (!value) return "0.000";
-
-    try {
-      return Calculator.toFixed(value, decimals);
-    } catch {
-      return "0.000";
-    }
-  }
 }
