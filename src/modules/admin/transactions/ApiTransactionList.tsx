@@ -103,6 +103,7 @@ export function ApiTransactionList() {
   const [transactionInternalStatus, setTransactionInternalStatus] = useState<
     TransactionInternalStatus | "all"
   >("all");
+  const [amount, setAmount] = useState<string>("");
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
     const today = new Date();
     return moment.tz(today, PHILIPPINES_TIMEZONE).startOf("day").toDate();
@@ -219,6 +220,7 @@ export function ApiTransactionList() {
           createdAtEnd: endDateQuery,
           successAtStart: successStartDateQuery,
           successAtEnd: successEndDateQuery,
+          amount: amount || undefined,
           cursorCreatedAt:
             isLoadMore && nextCursor ? nextCursor.createdAt : undefined,
           cursorId: isLoadMore && nextCursor ? nextCursor.id : undefined,
@@ -525,6 +527,16 @@ export function ApiTransactionList() {
                 className="sm:min-w-[300px] font-mono"
                 value={merchantOrderId}
                 onChange={(e) => setMerchantOrderId(e.target.value)}
+              />
+            </div>
+            {/* amount */}
+            <div className="flex items-center gap-4">
+              <Label className="whitespace-nowrap">金額</Label>
+              <Input
+                type="text"
+                placeholder="輸入金額"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
               />
             </div>
             {/* status */}

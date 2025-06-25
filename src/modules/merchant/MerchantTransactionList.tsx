@@ -67,6 +67,7 @@ export function MerchantTransactionList() {
   const [transactionStatus, setTransactionStatus] = useState<
     TransactionStatus | "all"
   >("all");
+  const [amount, setAmount] = useState<string>("");
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
     const today = new Date();
     return moment.tz(today, PHILIPPINES_TIMEZONE).startOf("day").toDate();
@@ -160,6 +161,7 @@ export function MerchantTransactionList() {
           createdAtEnd: endDateQuery,
           successAtStart: successStartDateQuery,
           successAtEnd: successEndDateQuery,
+          amount: amount || undefined,
         };
 
         // Parse cursor string into components
@@ -418,6 +420,16 @@ export function MerchantTransactionList() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            {/* amount */}
+            <div className="flex items-center gap-4">
+              <Label className="whitespace-nowrap">金額</Label>
+              <Input
+                type="text"
+                placeholder="輸入金額"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
             </div>
             {/* status */}
             <div className="flex items-center gap-4">

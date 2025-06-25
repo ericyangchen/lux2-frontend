@@ -47,6 +47,7 @@ export const ApiGetTransactionsByMerchantId = async ({
   limit,
   cursorCreatedAt,
   cursorId,
+  amount,
   accessToken,
 }: {
   merchantId: string;
@@ -62,6 +63,7 @@ export const ApiGetTransactionsByMerchantId = async ({
   limit?: number;
   cursorCreatedAt?: string;
   cursorId?: string;
+  amount?: string;
   accessToken: string;
 }) => {
   const queryString = buildQueryString({
@@ -77,6 +79,7 @@ export const ApiGetTransactionsByMerchantId = async ({
     limit,
     cursorCreatedAt,
     cursorId,
+    amount,
   });
 
   return fetch(
@@ -104,6 +107,7 @@ export const ApiGetTransactions = async ({
   limit,
   cursorCreatedAt,
   cursorId,
+  amount,
   accessToken,
 }: {
   type?: string;
@@ -121,6 +125,7 @@ export const ApiGetTransactions = async ({
   limit?: number;
   cursorCreatedAt?: string;
   cursorId?: string;
+  amount?: string;
   accessToken: string;
 }) => {
   const queryString = buildQueryString({
@@ -139,6 +144,7 @@ export const ApiGetTransactions = async ({
     limit,
     cursorCreatedAt,
     cursorId,
+    amount,
   });
 
   return fetch(`${getBackendUrl()}/transactions?${queryString}`, {
