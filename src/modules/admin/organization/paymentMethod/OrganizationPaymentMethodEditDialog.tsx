@@ -459,7 +459,10 @@ export function OrganizationPaymentMethodEditDialog({
                     {/* Channel Header */}
                     <div className="flex justify-between items-center mb-4">
                       <div className="flex items-center space-x-4">
-                        <Select value={setting.paymentChannel} disabled>
+                        <Select
+                          value={setting.paymentChannel}
+                          disabled={!newChannels.has(setting.paymentChannel)}
+                        >
                           <SelectTrigger className="w-58">
                             <SelectValue />
                           </SelectTrigger>
