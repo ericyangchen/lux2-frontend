@@ -1,3 +1,5 @@
+import * as moment from "moment-timezone";
+
 import {
   ApiGetTransactionById,
   ApiGetTransactions,
@@ -22,6 +24,7 @@ import {
 import {
   convertDatabaseTimeToReadablePhilippinesTime,
   convertToEndOfDay,
+  convertToPhilippinesTimezone,
   convertToStartOfDay,
 } from "@/lib/utils/timezone";
 import {
@@ -34,7 +37,7 @@ import { ApiTransactionInfoDialog } from "../common/ApiTransactionInfoDialog";
 import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { Calculator } from "@/lib/utils/calculator";
-import { DatePicker } from "@/components/DatePicker";
+import { DateTimePicker } from "@/components/DateTimePicker";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { Input } from "@/components/shadcn/ui/input";
@@ -42,6 +45,7 @@ import { Label } from "@/components/shadcn/ui/label";
 import { OrgType } from "@/lib/enums/organizations/org-type.enum";
 import { Organization } from "@/lib/types/organization";
 import { OrganizationSearchBar } from "../common/OrganizationSearchBar";
+import { PHILIPPINES_TIMEZONE } from "@/lib/constants/common";
 import { PROBLEM_WITHDRAWAL_INTERNAL_STATUSES } from "@/lib/constants/problem-withdrawal-statuses";
 import { PaymentChannel } from "@/lib/enums/transactions/payment-channel.enum";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
@@ -50,8 +54,8 @@ import { TransactionInternalStatus } from "@/lib/enums/transactions/transaction-
 import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { classNames } from "@/lib/utils/classname-utils";
-import { copyToClipboard } from "@/lib/utils/copyToClipboard";
 import { flattenOrganizations } from "../common/flattenOrganizations";
+import { format } from "date-fns";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useOrganizationWithChildren } from "@/lib/hooks/swr/organization";
 import { useRouter } from "next/router";
@@ -99,8 +103,16 @@ export function ApiTransactionList() {
   const [transactionInternalStatus, setTransactionInternalStatus] = useState<
     TransactionInternalStatus | "all"
   >("all");
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
+  const [startDate, setStartDate] = useState<Date | undefined>(() => {
+    const today = new Date();
+    return moment.tz(today, PHILIPPINES_TIMEZONE).startOf("day").toDate();
+  });
+  const [endDate, setEndDate] = useState<Date | undefined>(() => {
+    const today = new Date();
+    return moment.tz(today, PHILIPPINES_TIMEZONE).endOf("day").toDate();
+  });
+  const [successStartDate, setSuccessStartDate] = useState<Date | undefined>();
+  const [successEndDate, setSuccessEndDate] = useState<Date | undefined>();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -183,9 +195,17 @@ export function ApiTransactionList() {
             ? transactionInternalStatus
             : undefined;
         const startDateQuery = startDate
-          ? convertToStartOfDay(startDate)
+          ? convertToPhilippinesTimezone(startDate.toISOString())
           : undefined;
-        const endDateQuery = endDate ? convertToEndOfDay(endDate) : undefined;
+        const endDateQuery = endDate
+          ? convertToPhilippinesTimezone(endDate.toISOString())
+          : undefined;
+        const successStartDateQuery = successStartDate
+          ? convertToPhilippinesTimezone(successStartDate.toISOString())
+          : undefined;
+        const successEndDateQuery = successEndDate
+          ? convertToPhilippinesTimezone(successEndDate.toISOString())
+          : undefined;
 
         const response = await ApiGetTransactions({
           type: transactionTypeQuery,
@@ -197,10 +217,12 @@ export function ApiTransactionList() {
           internalStatus: transactionInternalStatusQuery,
           createdAtStart: startDateQuery,
           createdAtEnd: endDateQuery,
+          successAtStart: successStartDateQuery,
+          successAtEnd: successEndDateQuery,
           cursorCreatedAt:
             isLoadMore && nextCursor ? nextCursor.createdAt : undefined,
           cursorId: isLoadMore && nextCursor ? nextCursor.id : undefined,
-          limit: 50,
+          limit: 30,
           accessToken,
         });
         const data = await response.json();
@@ -257,12 +279,17 @@ export function ApiTransactionList() {
     setTransactionType("all");
     setPaymentMethod("all");
     setPaymentChannel("all");
-    setMerchantId("");
+    setMerchantId(undefined);
     setMerchantOrderId("");
     setTransactionStatus("all");
     setTransactionInternalStatus("all");
-    setStartDate(undefined);
-    setEndDate(undefined);
+    const today = new Date();
+    setStartDate(
+      moment.tz(today, PHILIPPINES_TIMEZONE).startOf("day").toDate()
+    );
+    setEndDate(moment.tz(today, PHILIPPINES_TIMEZONE).endOf("day").toDate());
+    setSuccessStartDate(undefined);
+    setSuccessEndDate(undefined);
   };
 
   const handleClearAll = () => {
@@ -285,7 +312,7 @@ export function ApiTransactionList() {
   const [moreInfoTransactionId, setMoreInfoTransactionId] = useState<string>();
   const [isMoreInfoOpen, setIsMoreInfoOpen] = useState(false);
 
-  const copyToClipboard = (text: string) => {
+  const handleCopyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
       title: "已複製",
@@ -575,23 +602,57 @@ export function ApiTransactionList() {
                 </Select>
               </div>
             </div>
-            {/* startDate */}
-            <div className="flex items-center gap-4 w-full lg:w-fit">
-              <Label className="whitespace-nowrap">起始日期</Label>
-              <DatePicker
-                date={startDate}
-                setDate={setStartDate}
-                placeholder="yyyy/mm/dd"
-              />
-            </div>
-            {/* endDate */}
-            <div className="flex items-center gap-4 w-full lg:w-fit">
-              <Label className="whitespace-nowrap">結束日期</Label>
-              <DatePicker
-                date={endDate}
-                setDate={setEndDate}
-                placeholder="yyyy/mm/dd"
-              />
+            {/* Time Range Sections */}
+            <div className="flex flex-col lg:flex-row gap-4 w-full">
+              {/* Creation Time Range */}
+              <div className="flex flex-col gap-2 flex-1">
+                <Label className="font-medium">創建時間區間</Label>
+                <div className="flex flex-wrap gap-4 pl-4">
+                  <div className="flex items-center gap-4 w-full lg:w-fit">
+                    <Label className="whitespace-nowrap">起始時間</Label>
+                    <DateTimePicker
+                      date={startDate}
+                      setDate={(date) => setStartDate(date)}
+                      placeholder="yyyy/mm/dd HH:mm:ss"
+                      onChange={(date) => setStartDate(date)}
+                    />
+                  </div>
+                  <div className="flex items-center gap-4 w-full lg:w-fit">
+                    <Label className="whitespace-nowrap">結束時間</Label>
+                    <DateTimePicker
+                      date={endDate}
+                      setDate={(date) => setEndDate(date)}
+                      placeholder="yyyy/mm/dd HH:mm:ss"
+                      onChange={(date) => setEndDate(date)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Success Time Range */}
+              <div className="flex flex-col gap-2 flex-1">
+                <Label className="font-medium">成功時間區間</Label>
+                <div className="flex flex-wrap gap-4 pl-4">
+                  <div className="flex items-center gap-4 w-full lg:w-fit">
+                    <Label className="whitespace-nowrap">起始時間</Label>
+                    <DateTimePicker
+                      date={successStartDate}
+                      setDate={(date) => setSuccessStartDate(date)}
+                      placeholder="yyyy/mm/dd HH:mm:ss"
+                      onChange={(date) => setSuccessStartDate(date)}
+                    />
+                  </div>
+                  <div className="flex items-center gap-4 w-full lg:w-fit">
+                    <Label className="whitespace-nowrap">結束時間</Label>
+                    <DateTimePicker
+                      date={successEndDate}
+                      setDate={(date) => setSuccessEndDate(date)}
+                      placeholder="yyyy/mm/dd HH:mm:ss"
+                      onChange={(date) => setSuccessEndDate(date)}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -697,7 +758,7 @@ export function ApiTransactionList() {
                         <div
                           className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800"
                           title={`點擊複製: ${transaction.id}`}
-                          onClick={() => copyToClipboard(transaction.id)}
+                          onClick={() => handleCopyToClipboard(transaction.id)}
                         >
                           {transaction.id}
                         </div>
@@ -712,7 +773,7 @@ export function ApiTransactionList() {
                           }`}
                           onClick={() =>
                             transaction.merchantOrderId &&
-                            copyToClipboard(transaction.merchantOrderId)
+                            handleCopyToClipboard(transaction.merchantOrderId)
                           }
                         >
                           {transaction.merchantOrderId || "N/A"}
@@ -725,7 +786,7 @@ export function ApiTransactionList() {
                           className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800"
                           title={`點擊複製: ${transaction.merchantId}`}
                           onClick={() =>
-                            copyToClipboard(transaction.merchantId)
+                            handleCopyToClipboard(transaction.merchantId)
                           }
                         >
                           {findOrganizationById(

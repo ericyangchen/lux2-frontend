@@ -99,6 +99,8 @@ export const ApiGetTransactions = async ({
   status,
   createdAtStart,
   createdAtEnd,
+  successAtStart,
+  successAtEnd,
   limit,
   cursorCreatedAt,
   cursorId,
@@ -114,6 +116,8 @@ export const ApiGetTransactions = async ({
   status?: string;
   createdAtStart?: string;
   createdAtEnd?: string;
+  successAtStart?: string;
+  successAtEnd?: string;
   limit?: number;
   cursorCreatedAt?: string;
   cursorId?: string;
@@ -130,6 +134,8 @@ export const ApiGetTransactions = async ({
     status,
     createdAtStart,
     createdAtEnd,
+    successAtStart,
+    successAtEnd,
     limit,
     cursorCreatedAt,
     cursorId,

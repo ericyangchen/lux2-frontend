@@ -25,3 +25,5 @@ export const getCompanyName = () => {
 };
 
 export const currencySymbol = "₱";
+
+export const PHILIPPINES_TIMEZONE = "Asia/Manila";

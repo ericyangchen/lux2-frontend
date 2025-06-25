@@ -1,3 +1,5 @@
+import * as moment from "moment-timezone";
+
 import {
   ApiGetTransactionByMerchantIdAndMerchantOrderId,
   ApiGetTransactionsByMerchantId,
@@ -28,10 +30,11 @@ import { useEffect, useState } from "react";
 
 import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
-import { DatePicker } from "@/components/DatePicker";
+import { DateTimePicker } from "@/components/DateTimePicker";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
+import { PHILIPPINES_TIMEZONE } from "@/lib/constants/common";
 import { PROBLEM_WITHDRAWAL_INTERNAL_STATUSES } from "@/lib/constants/problem-withdrawal-statuses";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { Transaction } from "@/lib/types/transaction";
@@ -64,8 +67,16 @@ export function MerchantTransactionList() {
   const [transactionStatus, setTransactionStatus] = useState<
     TransactionStatus | "all"
   >("all");
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
+  const [startDate, setStartDate] = useState<Date | undefined>(() => {
+    const today = new Date();
+    return moment.tz(today, PHILIPPINES_TIMEZONE).startOf("day").toDate();
+  });
+  const [endDate, setEndDate] = useState<Date | undefined>(() => {
+    const today = new Date();
+    return moment.tz(today, PHILIPPINES_TIMEZONE).endOf("day").toDate();
+  });
+  const [successStartDate, setSuccessStartDate] = useState<Date>();
+  const [successEndDate, setSuccessEndDate] = useState<Date>();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -134,6 +145,12 @@ export function MerchantTransactionList() {
           ? convertToStartOfDay(startDate)
           : undefined;
         const endDateQuery = endDate ? convertToEndOfDay(endDate) : undefined;
+        const successStartDateQuery = successStartDate
+          ? convertToStartOfDay(successStartDate)
+          : undefined;
+        const successEndDateQuery = successEndDate
+          ? convertToEndOfDay(successEndDate)
+          : undefined;
 
         const query = {
           type: transactionTypeQuery,
@@ -141,6 +158,8 @@ export function MerchantTransactionList() {
           status: transactionStatusQuery,
           createdAtStart: startDateQuery,
           createdAtEnd: endDateQuery,
+          successAtStart: successStartDateQuery,
+          successAtEnd: successEndDateQuery,
         };
 
         // Parse cursor string into components
@@ -153,7 +172,7 @@ export function MerchantTransactionList() {
           ...query,
           cursorCreatedAt,
           cursorId,
-          limit: 50,
+          limit: 30,
           accessToken,
         });
         const data = await response.json();
@@ -210,8 +229,14 @@ export function MerchantTransactionList() {
     setTransactionType("all");
     setPaymentMethod("all");
     setTransactionStatus("all");
-    setStartDate(undefined);
-    setEndDate(undefined);
+    setStartDate(
+      moment.tz(new Date(), PHILIPPINES_TIMEZONE).startOf("day").toDate()
+    );
+    setEndDate(
+      moment.tz(new Date(), PHILIPPINES_TIMEZONE).endOf("day").toDate()
+    );
+    setSuccessStartDate(undefined);
+    setSuccessEndDate(undefined);
   };
 
   const handleClearAll = () => {
@@ -421,23 +446,57 @@ export function MerchantTransactionList() {
                 </Select>
               </div>
             </div>
-            {/* startDate */}
-            <div className="flex items-center gap-4 w-full lg:w-fit">
-              <Label className="whitespace-nowrap">起始日期</Label>
-              <DatePicker
-                date={startDate}
-                setDate={setStartDate}
-                placeholder="yyyy/mm/dd"
-              />
-            </div>
-            {/* endDate */}
-            <div className="flex items-center gap-4 w-full lg:w-fit">
-              <Label className="whitespace-nowrap">結束日期</Label>
-              <DatePicker
-                date={endDate}
-                setDate={setEndDate}
-                placeholder="yyyy/mm/dd"
-              />
+            {/* Time Range Sections */}
+            <div className="flex flex-col lg:flex-row gap-4 w-full">
+              {/* Creation Time Range */}
+              <div className="flex flex-col gap-2 flex-1">
+                <Label className="font-medium">創建時間區間</Label>
+                <div className="flex flex-wrap gap-4 pl-4">
+                  <div className="flex items-center gap-4 w-full lg:w-fit">
+                    <Label className="whitespace-nowrap">起始時間</Label>
+                    <DateTimePicker
+                      date={startDate}
+                      setDate={(date) => setStartDate(date)}
+                      placeholder="yyyy/mm/dd HH:mm:ss"
+                      onChange={(date) => setStartDate(date)}
+                    />
+                  </div>
+                  <div className="flex items-center gap-4 w-full lg:w-fit">
+                    <Label className="whitespace-nowrap">結束時間</Label>
+                    <DateTimePicker
+                      date={endDate}
+                      setDate={(date) => setEndDate(date)}
+                      placeholder="yyyy/mm/dd HH:mm:ss"
+                      onChange={(date) => setEndDate(date)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Success Time Range */}
+              <div className="flex flex-col gap-2 flex-1">
+                <Label className="font-medium">成功時間區間</Label>
+                <div className="flex flex-wrap gap-4 pl-4">
+                  <div className="flex items-center gap-4 w-full lg:w-fit">
+                    <Label className="whitespace-nowrap">起始時間</Label>
+                    <DateTimePicker
+                      date={successStartDate}
+                      setDate={(date) => setSuccessStartDate(date)}
+                      placeholder="yyyy/mm/dd HH:mm:ss"
+                      onChange={(date) => setSuccessStartDate(date)}
+                    />
+                  </div>
+                  <div className="flex items-center gap-4 w-full lg:w-fit">
+                    <Label className="whitespace-nowrap">結束時間</Label>
+                    <DateTimePicker
+                      date={successEndDate}
+                      setDate={(date) => setSuccessEndDate(date)}
+                      placeholder="yyyy/mm/dd HH:mm:ss"
+                      onChange={(date) => setSuccessEndDate(date)}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

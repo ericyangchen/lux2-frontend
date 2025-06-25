@@ -98,7 +98,7 @@ export function MerchantRequestedWithdrawalList({
         cursorCreatedAt:
           isLoadMore && nextCursor ? nextCursor.createdAt : undefined,
         cursorId: isLoadMore && nextCursor ? nextCursor.id : undefined,
-        limit: 50,
+        limit: 30,
         accessToken,
       });
       const data = await response.json();
