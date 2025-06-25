@@ -197,6 +197,7 @@ export function ApiTransactionList() {
           cursorCreatedAt:
             isLoadMore && nextCursor ? nextCursor.createdAt : undefined,
           cursorId: isLoadMore && nextCursor ? nextCursor.id : undefined,
+          limit: 50,
           accessToken,
         });
         const data = await response.json();

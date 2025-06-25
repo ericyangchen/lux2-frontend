@@ -118,7 +118,7 @@ export function MerchantWithdrawalRequestList() {
 
       const response = await ApiGetMerchantRequestedWithdrawals({
         merchantId: merchantId || undefined,
-        merchantOrderId,
+        merchantOrderId: merchantOrderId || undefined,
         paymentMethod: paymentMethodQuery,
         status: transactionStatusQuery,
         internalStatus: transactionInternalStatusQuery,
@@ -132,11 +132,11 @@ export function MerchantWithdrawalRequestList() {
       const data = await response.json();
 
       if (response.ok) {
-        const newTransactions = data?.data?.merchantRequestedWithdrawals || [];
+        const newTransactions = data?.data || [];
         setTransactions((prev) =>
           isLoadMore ? [...(prev || []), ...newTransactions] : newTransactions
         );
-        setNextCursor(data?.data?.pagination?.nextCursor || null);
+        setNextCursor(data?.pagination?.nextCursor || null);
       } else {
         throw new ApplicationError(data);
       }
@@ -165,9 +165,7 @@ export function MerchantWithdrawalRequestList() {
     setMerchantId("");
     setMerchantOrderId("");
     setPaymentMethod("all");
-    setTransactionStatus(
-      TransactionStatus.MERCHANT_REQUESTED_WITHDRAWAL_PENDING
-    );
+    setTransactionStatus("all");
     setTransactionInternalStatus("all");
     setStartDate(undefined);
     setEndDate(undefined);

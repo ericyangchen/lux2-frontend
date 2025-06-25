@@ -153,6 +153,7 @@ export function MerchantTransactionList() {
           ...query,
           cursorCreatedAt,
           cursorId,
+          limit: 50,
           accessToken,
         });
         const data = await response.json();

@@ -90,7 +90,7 @@ export function MerchantRequestedWithdrawalList({
 
       const response = await ApiGetMerchantRequestedWithdrawals({
         merchantId: organizationId,
-        merchantOrderId,
+        merchantOrderId: merchantOrderId || undefined,
         paymentMethod: paymentMethodQuery,
         status: transactionStatusQuery,
         createdAtStart: startDateQuery,
@@ -98,16 +98,17 @@ export function MerchantRequestedWithdrawalList({
         cursorCreatedAt:
           isLoadMore && nextCursor ? nextCursor.createdAt : undefined,
         cursorId: isLoadMore && nextCursor ? nextCursor.id : undefined,
+        limit: 50,
         accessToken,
       });
       const data = await response.json();
 
       if (response.ok) {
-        const newTransactions = data?.data?.merchantRequestedWithdrawals || [];
+        const newTransactions = data?.data || [];
         setTransactions((prev) =>
           isLoadMore ? [...(prev || []), ...newTransactions] : newTransactions
         );
-        setNextCursor(data?.data?.pagination?.nextCursor || null);
+        setNextCursor(data?.pagination?.nextCursor || null);
       } else {
         throw new ApplicationError(data);
       }
