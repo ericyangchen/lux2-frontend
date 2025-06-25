@@ -114,6 +114,7 @@ export function ProblemTransactionsList() {
         cursorCreatedAt:
           isLoadMore && nextCursor ? nextCursor.cursorCreatedAt : undefined,
         cursorId: isLoadMore && nextCursor ? nextCursor.cursorId : undefined,
+        limit: 50,
         accessToken,
       });
       const data = await response.json();
