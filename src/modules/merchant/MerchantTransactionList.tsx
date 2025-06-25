@@ -293,10 +293,10 @@ export function MerchantTransactionList() {
 
   return (
     <div
-      className="sm:p-4 sm:border rounded-md w-full lg:h-[calc(100vh-152px)] h-[calc(100vh-56px)] overflow-y-scroll"
+      className="sm:p-4 sm:border rounded-md w-full lg:h-[calc(100vh-50px)] h-[calc(100vh-56px)] flex flex-col overflow-auto"
       id="scrollableDiv"
     >
-      {/* search bar */}
+      {/* search bar - fixed */}
       <div className="flex flex-col divide-y pb-8">
         {/* search by: merchantId & merchantOrderId */}
         <div className="py-4 flex flex-col gap-4">
@@ -458,30 +458,11 @@ export function MerchantTransactionList() {
           {isLoading ? "查詢中..." : "查詢"}
         </Button>
       </div>
-      {/* table */}
+
+      {/* table section - scrollable */}
       {currentQueryType && (
-        <div className="pt-4 flex flex-col">
-          <InfiniteScroll
-            dataLength={transactions?.length || 0}
-            next={() => {
-              console.log("loading more");
-              if (nextCursor) handleSearch(true);
-            }}
-            hasMore={!!nextCursor}
-            loader={
-              <div className="h-16 text-center pt-6 pb-4">
-                <Label className="text-gray-400">載入中...</Label>
-              </div>
-            }
-            endMessage={
-              <div className="h-16 text-center pt-6 pb-4">
-                <Label className="text-gray-400">
-                  {transactions?.length ? "沒有更多訂單紀錄" : "沒有訂單紀錄"}
-                </Label>
-              </div>
-            }
-            scrollableTarget="scrollableDiv"
-          >
+        <div className="flex-1">
+          <div className="h-full" id="scrollableDiv">
             <div className="pb-2">
               <Label className="whitespace-nowrap font-bold text-md">
                 {currentQueryType ===
@@ -490,160 +471,168 @@ export function MerchantTransactionList() {
                   : "多筆查詢結果"}
               </Label>
             </div>
-            <div className="bg-white rounded-lg shadow-sm border overflow-x-auto">
-              <table className="w-full min-w-[1400px]">
-                <thead className="bg-gray-50 border-b">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                      ID
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                      商戶訂單號
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                      交易類型
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                      支付類型
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
-                      金額
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
-                      手續費
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                      狀態
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                      訊息
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                      建立時間
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                      更新時間
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {transactions?.map((transaction) => (
-                    <tr
-                      key={transaction.id}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      {/* ID - Full display */}
-                      <td className="px-4 py-3">
-                        <div
-                          className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800"
-                          title={`點擊複製: ${transaction.id}`}
-                          onClick={() => copyToClipboard(transaction.id)}
+            <div className="bg-white rounded-lg shadow-sm border">
+              <div className="overflow-x-auto">
+                <InfiniteScroll
+                  dataLength={transactions?.length || 0}
+                  next={() => {
+                    console.log("loading more");
+                    if (nextCursor) handleSearch(true);
+                  }}
+                  hasMore={!!nextCursor}
+                  loader={
+                    <div className="h-16 text-center pt-6 pb-4">
+                      <Label className="text-gray-400">載入中...</Label>
+                    </div>
+                  }
+                  endMessage={
+                    <div className="h-16 text-center pt-6 pb-4">
+                      <Label className="text-gray-400">
+                        {transactions?.length
+                          ? "沒有更多訂單紀錄"
+                          : "沒有訂單紀錄"}
+                      </Label>
+                    </div>
+                  }
+                  scrollableTarget="scrollableDiv"
+                  className="!overflow-visible"
+                >
+                  <table className="w-full min-w-[1400px]">
+                    <thead className="bg-gray-50 border-b">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                          系統訂單號
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                          商戶訂單號
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                          交易類型
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                          支付類型
+                        </th>
+                        <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
+                          金額
+                        </th>
+                        <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
+                          手續費
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                          狀態
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                          建立時間
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                          更新時間
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {transactions?.map((transaction) => (
+                        <tr
+                          key={transaction.id}
+                          className="hover:bg-gray-50 transition-colors"
                         >
-                          {transaction.id}
-                        </div>
-                      </td>
+                          {/* System Transaction ID */}
+                          <td className="px-4 py-3">
+                            <div
+                              className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800 whitespace-nowrap"
+                              title={`點擊複製: ${transaction.id}`}
+                              onClick={() => copyToClipboard(transaction.id)}
+                            >
+                              {transaction.id}
+                            </div>
+                          </td>
 
-                      {/* Merchant Order ID */}
-                      <td className="px-4 py-3">
-                        <div
-                          className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800"
-                          title={`點擊複製: ${
-                            transaction.merchantOrderId || "N/A"
-                          }`}
-                          onClick={() =>
-                            transaction.merchantOrderId &&
-                            copyToClipboard(transaction.merchantOrderId)
-                          }
-                        >
-                          {transaction.merchantOrderId || "N/A"}
-                        </div>
-                      </td>
+                          {/* Merchant Order ID */}
+                          <td className="px-4 py-3">
+                            <div
+                              className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800 whitespace-nowrap"
+                              title={`點擊複製: ${
+                                transaction.merchantOrderId || "N/A"
+                              }`}
+                              onClick={() =>
+                                transaction.merchantOrderId &&
+                                copyToClipboard(transaction.merchantOrderId)
+                              }
+                            >
+                              {transaction.merchantOrderId || "N/A"}
+                            </div>
+                          </td>
 
-                      {/* Transaction Type */}
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          {getTransactionTypeBadge(transaction.type)}
-                        </div>
-                      </td>
+                          {/* Transaction Type */}
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2 whitespace-nowrap">
+                              {getTransactionTypeBadge(transaction.type)}
+                            </div>
+                          </td>
 
-                      {/* Payment Method */}
-                      <td className="px-4 py-3">
-                        <div className="text-sm text-gray-900">
-                          {PaymentMethodDisplayNames[
-                            transaction.paymentMethod
-                          ] || transaction.paymentMethod}
-                        </div>
-                      </td>
+                          {/* Payment Method */}
+                          <td className="px-4 py-3">
+                            <div className="text-sm text-gray-900 whitespace-nowrap">
+                              {PaymentMethodDisplayNames[
+                                transaction.paymentMethod
+                              ] || transaction.paymentMethod}
+                            </div>
+                          </td>
 
-                      {/* Amount */}
-                      <td className="px-4 py-3 text-right">
-                        <div className="font-mono font-medium text-gray-900 text-sm">
-                          ₱ {formatNumber(transaction.amount) || "0.000"}
-                        </div>
-                      </td>
+                          {/* Amount */}
+                          <td className="px-4 py-3 text-right">
+                            <div className="font-mono font-medium text-gray-900 text-sm whitespace-nowrap">
+                              ₱ {formatNumber(transaction.amount) || "0.000"}
+                            </div>
+                          </td>
 
-                      {/* Total Fee */}
-                      <td className="px-4 py-3 text-right">
-                        <div className="font-mono text-gray-600 text-sm">
-                          ₱ {formatNumber(transaction.totalFee) || "0.000"}
-                        </div>
-                      </td>
+                          {/* Total Fee */}
+                          <td className="px-4 py-3 text-right">
+                            <div className="font-mono text-gray-600 text-sm whitespace-nowrap">
+                              ₱ {formatNumber(transaction.totalFee) || "0.000"}
+                            </div>
+                          </td>
 
-                      {/* Status with color */}
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className={`w-2 h-2 rounded-full ${getStatusIndicatorColor(
-                              transaction.status
-                            )}`}
-                          ></div>
-                          <span
-                            className={`text-sm whitespace-nowrap ${getStatusColor(
-                              transaction.status
-                            )}`}
-                          >
-                            {TransactionStatusDisplayNames[
-                              transaction.status
-                            ] || transaction.status}
-                          </span>
-                        </div>
-                      </td>
+                          {/* Status with color */}
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <div
+                                className={`w-2 h-2 rounded-full ${getStatusIndicatorColor(
+                                  transaction.status
+                                )}`}
+                              ></div>
+                              <span
+                                className={`text-sm whitespace-nowrap ${getStatusColor(
+                                  transaction.status
+                                )}`}
+                              >
+                                {TransactionStatusDisplayNames[
+                                  transaction.status
+                                ] || transaction.status}
+                              </span>
+                            </div>
+                          </td>
 
-                      {/* Message */}
-                      <td className="px-4 py-3">
-                        <div className="relative group">
-                          <div className="text-sm text-gray-600 max-w-xs truncate cursor-help">
-                            {transaction.message || "-"}
-                          </div>
-                          {transaction.message &&
-                            transaction.message.length > 30 && (
-                              <div className="invisible group-hover:visible absolute z-10 w-80 p-2 bg-gray-900 text-white text-sm rounded shadow-lg -top-2 left-0 transform -translate-y-full">
-                                {transaction.message}
-                                <div className="absolute top-full left-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-                              </div>
-                            )}
-                        </div>
-                      </td>
+                          {/* Created Time */}
+                          <td className="px-4 py-3">
+                            <div className="font-mono text-sm text-gray-600 whitespace-nowrap">
+                              {formatDateTime(transaction.createdAt)}
+                            </div>
+                          </td>
 
-                      {/* Created Time */}
-                      <td className="px-4 py-3">
-                        <div className="font-mono text-sm text-gray-600">
-                          {formatDateTime(transaction.createdAt)}
-                        </div>
-                      </td>
-
-                      {/* Updated Time */}
-                      <td className="px-4 py-3">
-                        <div className="font-mono text-sm text-gray-600">
-                          {formatDateTime(transaction.updatedAt)}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                          {/* Updated Time */}
+                          <td className="px-4 py-3">
+                            <div className="font-mono text-sm text-gray-600 whitespace-nowrap">
+                              {formatDateTime(transaction.updatedAt)}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </InfiniteScroll>
+              </div>
             </div>
-          </InfiniteScroll>
+          </div>
         </div>
       )}
     </div>
