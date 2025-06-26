@@ -60,6 +60,8 @@ export const TransactionInternalStatusDisplayNames = {
     "代付-上游成功",
   [TransactionInternalStatus.WITHDRAWAL_UPSTREAM_FAILED_RESPONSE]:
     "代付-上游失敗",
+  [TransactionInternalStatus.WITHDRAWAL_UPSTREAM_FAILED_MANUALLY_SET_TO_FAILED]:
+    "代付-上游失敗(手動設定)",
 
   [TransactionInternalStatus.WITHDRAWAL_UPSTREAM_FAILED_REFUNDED_RESPONSE]:
     "代付-上游失敗(沖回)",
