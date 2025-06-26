@@ -2,6 +2,7 @@ import * as moment from "moment-timezone";
 
 import {
   ApiGetTransactionByMerchantIdAndMerchantOrderId,
+  ApiGetTransactionCountAndSumOfAmountAndFee,
   ApiGetTransactionsByMerchantId,
 } from "@/lib/apis/transactions/get";
 import {
@@ -43,6 +44,7 @@ import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.e
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { classNames } from "@/lib/utils/classname-utils";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
+import { currencySymbol } from "@/lib/constants/common";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
@@ -90,6 +92,15 @@ export function MerchantTransactionList() {
     id: string;
   } | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+
+  const [
+    transactionCountAndSumOfAmountAndFee,
+    setTransactionCountAndSumOfAmountAndFee,
+  ] = useState<{
+    count: string;
+    amountSum: string;
+    totalFeeSum: string;
+  }>();
 
   const handleSearch = async (isLoadMore: boolean = false) => {
     const { accessToken, organizationId } = getApplicationCookies();
@@ -198,6 +209,30 @@ export function MerchantTransactionList() {
         } else {
           throw new ApplicationError(data);
         }
+
+        // Get transaction count and sum of amount and fee (only for new search)
+        if (!isLoadMore) {
+          const transactionCountAndSumOfAmountAndFeeResponse =
+            await ApiGetTransactionCountAndSumOfAmountAndFee({
+              type: transactionTypeQuery,
+              merchantId: organizationId,
+              paymentMethod: paymentMethodQuery,
+              status: transactionStatusQuery,
+              createdAtStart: startDateQuery,
+              createdAtEnd: endDateQuery,
+              successAtStart: successStartDateQuery,
+              successAtEnd: successEndDateQuery,
+              amount: amount || undefined,
+              accessToken,
+            });
+
+          const transactionCountAndSumOfAmountAndFeeData =
+            await transactionCountAndSumOfAmountAndFeeResponse.json();
+
+          setTransactionCountAndSumOfAmountAndFee(
+            transactionCountAndSumOfAmountAndFeeData
+          );
+        }
       }
     } catch (error) {
       // On error, ensure we reset the cursor if it's a new search
@@ -239,6 +274,7 @@ export function MerchantTransactionList() {
     );
     setSuccessStartDate(undefined);
     setSuccessEndDate(undefined);
+    setTransactionCountAndSumOfAmountAndFee(undefined);
   };
 
   const handleClearAll = () => {
@@ -535,13 +571,51 @@ export function MerchantTransactionList() {
       {currentQueryType && (
         <div className="flex-1">
           <div className="h-full" id="scrollableDiv">
-            <div className="pb-2">
+            <div className="pb-2 flex justify-between flex-wrap gap-4">
               <Label className="whitespace-nowrap font-bold text-md">
                 {currentQueryType ===
                 MerchantQueryTypes.SEARCH_BY_MERCHANT_ORDER_ID
                   ? "單筆查詢結果: 商戶訂單號"
                   : "多筆查詢結果"}
               </Label>
+
+              {currentQueryType ===
+                MerchantQueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS &&
+                transactionCountAndSumOfAmountAndFee && (
+                  <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500 whitespace-nowrap">
+                        總筆數:
+                      </span>
+                      <span className="font-mono whitespace-nowrap">
+                        {transactionCountAndSumOfAmountAndFee?.count || 0}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500 whitespace-nowrap">
+                        總金額:
+                      </span>
+                      <span className="font-mono whitespace-nowrap">
+                        {currencySymbol}{" "}
+                        {formatNumber(
+                          transactionCountAndSumOfAmountAndFee?.amountSum || "0"
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500 whitespace-nowrap">
+                        總手續費:
+                      </span>
+                      <span className="font-mono whitespace-nowrap">
+                        {currencySymbol}{" "}
+                        {formatNumber(
+                          transactionCountAndSumOfAmountAndFee?.totalFeeSum ||
+                            "0"
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                )}
             </div>
             <div className="bg-white rounded-lg shadow-sm border">
               <div className="overflow-x-auto">

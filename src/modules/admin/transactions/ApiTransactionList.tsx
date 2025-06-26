@@ -2,6 +2,7 @@ import * as moment from "moment-timezone";
 
 import {
   ApiGetTransactionById,
+  ApiGetTransactionCountAndSumOfAmountAndFee,
   ApiGetTransactions,
 } from "@/lib/apis/transactions/get";
 import {
@@ -28,10 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/ui/select";
-import {
-  formatNumber,
-  formatNumberWithoutMinFraction,
-} from "@/lib/utils/number";
 import { useEffect, useState } from "react";
 
 import { ApiTransactionInfoDialog } from "../common/ApiTransactionInfoDialog";
@@ -54,8 +51,10 @@ import { TransactionInternalStatus } from "@/lib/enums/transactions/transaction-
 import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { classNames } from "@/lib/utils/classname-utils";
+import { currencySymbol } from "@/lib/constants/common";
 import { flattenOrganizations } from "../common/flattenOrganizations";
 import { format } from "date-fns";
+import { formatNumber } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useOrganizationWithChildren } from "@/lib/hooks/swr/organization";
 import { useRouter } from "next/router";
@@ -128,6 +127,15 @@ export function ApiTransactionList() {
       : Object.values(PaymentChannel);
 
   const [transactions, setTransactions] = useState<Transaction[]>();
+
+  const [
+    transactionCountAndSumOfAmountAndFee,
+    setTransactionCountAndSumOfAmountAndFee,
+  ] = useState<{
+    count: string;
+    amountSum: string;
+    totalFeeSum: string;
+  }>();
 
   const [currentQueryType, setCurrentQueryType] = useState<string>();
 
@@ -208,7 +216,7 @@ export function ApiTransactionList() {
           ? convertToPhilippinesTimezone(successEndDate.toISOString())
           : undefined;
 
-        const response = await ApiGetTransactions({
+        const transactionResponse = await ApiGetTransactions({
           type: transactionTypeQuery,
           merchantId,
           merchantOrderId,
@@ -227,9 +235,9 @@ export function ApiTransactionList() {
           limit: 30,
           accessToken,
         });
-        const data = await response.json();
+        const data = await transactionResponse.json();
 
-        if (response.ok) {
+        if (transactionResponse.ok) {
           setTransactions((prev) =>
             isLoadMore
               ? [...(prev || []), ...(data?.data || [])]
@@ -247,6 +255,33 @@ export function ApiTransactionList() {
           setCurrentQueryType(QueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS);
         } else {
           throw new ApplicationError(data);
+        }
+
+        // Get transaction count and sum of amount and fee (only for new search)
+        if (!isLoadMore) {
+          const transactionCountAndSumOfAmountAndFeeResponse =
+            await ApiGetTransactionCountAndSumOfAmountAndFee({
+              type: transactionTypeQuery,
+              merchantId,
+              merchantOrderId,
+              paymentMethod: paymentMethodQuery,
+              paymentChannel: paymentChannelQuery,
+              status: transactionStatusQuery,
+              internalStatus: transactionInternalStatusQuery,
+              createdAtStart: startDateQuery,
+              createdAtEnd: endDateQuery,
+              successAtStart: successStartDateQuery,
+              successAtEnd: successEndDateQuery,
+              amount: amount || undefined,
+              accessToken,
+            });
+
+          const transactionCountAndSumOfAmountAndFeeData =
+            await transactionCountAndSumOfAmountAndFeeResponse.json();
+
+          setTransactionCountAndSumOfAmountAndFee(
+            transactionCountAndSumOfAmountAndFeeData
+          );
         }
       }
     } catch (error) {
@@ -292,6 +327,7 @@ export function ApiTransactionList() {
     setEndDate(moment.tz(today, PHILIPPINES_TIMEZONE).endOf("day").toDate());
     setSuccessStartDate(undefined);
     setSuccessEndDate(undefined);
+    setTransactionCountAndSumOfAmountAndFee(undefined);
   };
 
   const handleClearAll = () => {
@@ -710,12 +746,48 @@ export function ApiTransactionList() {
             }
             scrollableTarget="scrollableDiv"
           >
-            <div className="pb-2">
+            <div className="pb-2 flex justify-between flex-wrap gap-4">
               <Label className="whitespace-nowrap font-bold text-md">
                 {currentQueryType === QueryTypes.SEARCH_BY_TRANSACTION_ID
                   ? "單筆查詢結果: 系統訂單號"
                   : "多筆查詢結果"}
               </Label>
+              {currentQueryType === QueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS &&
+                transactionCountAndSumOfAmountAndFee && (
+                  <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500 whitespace-nowrap">
+                        總筆數:
+                      </span>
+                      <span className="font-mono whitespace-nowrap">
+                        {transactionCountAndSumOfAmountAndFee?.count || 0}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500 whitespace-nowrap">
+                        總金額:
+                      </span>
+                      <span className="font-mono whitespace-nowrap">
+                        {currencySymbol}{" "}
+                        {formatNumber(
+                          transactionCountAndSumOfAmountAndFee?.amountSum || "0"
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500 whitespace-nowrap">
+                        總手續費:
+                      </span>
+                      <span className="font-mono whitespace-nowrap">
+                        {currencySymbol}{" "}
+                        {formatNumber(
+                          transactionCountAndSumOfAmountAndFee?.totalFeeSum ||
+                            "0"
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                )}
             </div>
             <div className="bg-white rounded-lg shadow-sm border overflow-x-auto">
               <table className="w-full min-w-[1800px]">

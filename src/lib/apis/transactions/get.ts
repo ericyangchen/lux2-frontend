@@ -100,6 +100,7 @@ export const ApiGetTransactions = async ({
   internalStatus,
   revenueDistributed,
   status,
+  amount,
   createdAtStart,
   createdAtEnd,
   successAtStart,
@@ -107,7 +108,6 @@ export const ApiGetTransactions = async ({
   limit,
   cursorCreatedAt,
   cursorId,
-  amount,
   accessToken,
 }: {
   type?: string;
@@ -122,10 +122,10 @@ export const ApiGetTransactions = async ({
   createdAtEnd?: string;
   successAtStart?: string;
   successAtEnd?: string;
+  amount?: string;
   limit?: number;
   cursorCreatedAt?: string;
   cursorId?: string;
-  amount?: string;
   accessToken: string;
 }) => {
   const queryString = buildQueryString({
@@ -151,6 +151,62 @@ export const ApiGetTransactions = async ({
     method: "GET",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
   });
+};
+
+export const ApiGetTransactionCountAndSumOfAmountAndFee = async ({
+  type,
+  merchantId,
+  merchantOrderId,
+  paymentMethod,
+  paymentChannel,
+  internalStatus,
+  revenueDistributed,
+  status,
+  amount,
+  createdAtStart,
+  createdAtEnd,
+  successAtStart,
+  successAtEnd,
+  accessToken,
+}: {
+  type?: string;
+  merchantId?: string;
+  merchantOrderId?: string;
+  paymentMethod?: string;
+  paymentChannel?: string;
+  internalStatus?: string;
+  revenueDistributed?: boolean;
+  status?: string;
+  createdAtStart?: string;
+  createdAtEnd?: string;
+  successAtStart?: string;
+  successAtEnd?: string;
+  amount?: string;
+  accessToken: string;
+}) => {
+  const queryString = buildQueryString({
+    type,
+    merchantId,
+    merchantOrderId,
+    paymentMethod,
+    paymentChannel,
+    internalStatus,
+    revenueDistributed,
+    status,
+    amount,
+    createdAtStart,
+    createdAtEnd,
+    successAtStart,
+    successAtEnd,
+  });
+
+  return fetch(
+    `${getBackendUrl()}/transactions/statistics/count-and-sum-of-amount-and-fee?${queryString}`,
+    {
+      method: "GET",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
 };
 
 export const ApiGetSystemTransactionCount = async ({
