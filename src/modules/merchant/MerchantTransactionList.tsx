@@ -1,7 +1,15 @@
+import * as moment from "moment-timezone";
+
 import {
   ApiGetTransactionByMerchantIdAndMerchantOrderId,
   ApiGetTransactionsByMerchantId,
 } from "@/lib/apis/transactions/get";
+import {
+  PHILIPPINES_TIMEZONE,
+  convertDatabaseTimeToReadablePhilippinesTime,
+  convertToEndOfDay,
+  convertToStartOfDay,
+} from "@/lib/utils/timezone";
 import {
   PaymentMethodDisplayNames,
   TransactionStatusDisplayNames,
@@ -16,25 +24,25 @@ import {
   SelectValue,
 } from "@/components/shadcn/ui/select";
 import {
-  convertDatabaseTimeToReadablePhilippinesTime,
-  convertToEndOfDay,
-  convertToStartOfDay,
-} from "@/lib/utils/timezone";
+  formatNumber,
+  formatNumberWithoutMinFraction,
+} from "@/lib/utils/number";
 import { useEffect, useState } from "react";
 
 import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
-import { DatePicker } from "@/components/DatePicker";
+import { DateTimePicker } from "@/components/DateTimePicker";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
+import { PROBLEM_WITHDRAWAL_INTERNAL_STATUSES } from "@/lib/constants/problem-withdrawal-statuses";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { Transaction } from "@/lib/types/transaction";
+import { TransactionInternalStatus } from "@/lib/enums/transactions/transaction-internal-status.enum";
 import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { classNames } from "@/lib/utils/classname-utils";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
-import { formatNumberWithoutMinFraction } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
@@ -59,8 +67,17 @@ export function MerchantTransactionList() {
   const [transactionStatus, setTransactionStatus] = useState<
     TransactionStatus | "all"
   >("all");
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
+  const [amount, setAmount] = useState<string>("");
+  const [startDate, setStartDate] = useState<Date | undefined>(() => {
+    const today = new Date();
+    return moment.tz(today, PHILIPPINES_TIMEZONE).startOf("day").toDate();
+  });
+  const [endDate, setEndDate] = useState<Date | undefined>(() => {
+    const today = new Date();
+    return moment.tz(today, PHILIPPINES_TIMEZONE).endOf("day").toDate();
+  });
+  const [successStartDate, setSuccessStartDate] = useState<Date>();
+  const [successEndDate, setSuccessEndDate] = useState<Date>();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -68,7 +85,10 @@ export function MerchantTransactionList() {
 
   const [currentQueryType, setCurrentQueryType] = useState<string>();
 
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [nextCursor, setNextCursor] = useState<{
+    createdAt: string;
+    id: string;
+  } | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
 
   const handleSearch = async (isLoadMore: boolean = false) => {
@@ -78,8 +98,14 @@ export function MerchantTransactionList() {
       return;
     }
 
+    // Prevent multiple simultaneous load more requests
+    if (isLoadMore && loadingMore) return;
+
     if (!isLoadMore) {
       setIsLoading(true);
+      // Reset pagination state for new searches
+      setNextCursor(null);
+      setTransactions(undefined);
     } else {
       setLoadingMore(true);
     }
@@ -98,6 +124,8 @@ export function MerchantTransactionList() {
 
         if (response.ok) {
           setTransactions([data]);
+          // Reset cursor for single order search
+          setNextCursor(null);
           setCurrentQueryType(MerchantQueryTypes.SEARCH_BY_MERCHANT_ORDER_ID);
         } else {
           throw new ApplicationError(data);
@@ -118,6 +146,12 @@ export function MerchantTransactionList() {
           ? convertToStartOfDay(startDate)
           : undefined;
         const endDateQuery = endDate ? convertToEndOfDay(endDate) : undefined;
+        const successStartDateQuery = successStartDate
+          ? convertToStartOfDay(successStartDate)
+          : undefined;
+        const successEndDateQuery = successEndDate
+          ? convertToEndOfDay(successEndDate)
+          : undefined;
 
         const query = {
           type: transactionTypeQuery,
@@ -125,36 +159,51 @@ export function MerchantTransactionList() {
           status: transactionStatusQuery,
           createdAtStart: startDateQuery,
           createdAtEnd: endDateQuery,
+          successAtStart: successStartDateQuery,
+          successAtEnd: successEndDateQuery,
+          amount: amount || undefined,
         };
 
-        const cursorData =
-          isLoadMore && !!nextCursor
-            ? {
-                cursorCreatedAt: nextCursor.split("|")[0],
-                cursorId: nextCursor.split("|")[1],
-              }
-            : {};
+        // Parse cursor string into components
+        const cursorCreatedAt =
+          isLoadMore && nextCursor ? nextCursor.createdAt : undefined;
+        const cursorId = isLoadMore && nextCursor ? nextCursor.id : undefined;
 
         const response = await ApiGetTransactionsByMerchantId({
           merchantId: organizationId,
           ...query,
-          ...cursorData,
+          cursorCreatedAt,
+          cursorId,
+          limit: 30,
           accessToken,
         });
         const data = await response.json();
 
         if (response.ok) {
           setTransactions((prev) =>
-            isLoadMore ? [...(prev || []), ...(data?.data || [])] : data?.data
+            isLoadMore
+              ? [...(prev || []), ...(data?.data || [])]
+              : data?.data || []
           );
-          setNextCursor(data?.pagination?.nextCursor);
-
+          // Ensure nextCursor is properly formatted as a string
+          setNextCursor(
+            data?.pagination?.nextCursor
+              ? {
+                  createdAt: data.pagination.nextCursor.createdAt,
+                  id: data.pagination.nextCursor.id,
+                }
+              : null
+          );
           setCurrentQueryType(MerchantQueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS);
         } else {
           throw new ApplicationError(data);
         }
       }
     } catch (error) {
+      // On error, ensure we reset the cursor if it's a new search
+      if (!isLoadMore) {
+        setNextCursor(null);
+      }
       if (error instanceof ApplicationError) {
         toast({
           title: `${error.statusCode} - 訂單查詢失敗`,
@@ -182,8 +231,14 @@ export function MerchantTransactionList() {
     setTransactionType("all");
     setPaymentMethod("all");
     setTransactionStatus("all");
-    setStartDate(undefined);
-    setEndDate(undefined);
+    setStartDate(
+      moment.tz(new Date(), PHILIPPINES_TIMEZONE).startOf("day").toDate()
+    );
+    setEndDate(
+      moment.tz(new Date(), PHILIPPINES_TIMEZONE).endOf("day").toDate()
+    );
+    setSuccessStartDate(undefined);
+    setSuccessEndDate(undefined);
   };
 
   const handleClearAll = () => {
@@ -203,12 +258,73 @@ export function MerchantTransactionList() {
     }
   }, [currentQueryType]);
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "已複製",
+      description: "已複製到剪貼板",
+    });
+  };
+
+  const formatDateTime = (dateString: string) => {
+    return convertDatabaseTimeToReadablePhilippinesTime(dateString);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "SUCCESS":
+        return "text-green-600";
+      case "FAILED":
+        return "text-red-600";
+      case "PENDING":
+        return "text-yellow-600";
+      default:
+        return "text-gray-600";
+    }
+  };
+
+  const getStatusIndicatorColor = (status: string) => {
+    switch (status) {
+      case "SUCCESS":
+        return "bg-green-500";
+      case "FAILED":
+        return "bg-red-500";
+      case "PENDING":
+        return "bg-yellow-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
+  const getTransactionTypeBadge = (type: TransactionType) => {
+    switch (type) {
+      case TransactionType.API_DEPOSIT:
+        return (
+          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-gray-900 border border-gray-300">
+            {TransactionTypeDisplayNames[type]}
+          </span>
+        );
+      case TransactionType.API_WITHDRAWAL:
+        return (
+          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-900 text-white">
+            {TransactionTypeDisplayNames[type]}
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-gray-900">
+            {TransactionTypeDisplayNames[type] || type}
+          </span>
+        );
+    }
+  };
+
   return (
     <div
-      className="sm:p-4 sm:border rounded-md w-full lg:h-[calc(100vh-152px)] h-[calc(100vh-56px)] overflow-y-scroll"
+      className="sm:p-4 sm:border rounded-md w-full lg:h-[calc(100vh-50px)] h-[calc(100vh-56px)] flex flex-col overflow-auto"
       id="scrollableDiv"
     >
-      {/* search bar */}
+      {/* search bar - fixed */}
       <div className="flex flex-col divide-y pb-8">
         {/* search by: merchantId & merchantOrderId */}
         <div className="py-4 flex flex-col gap-4">
@@ -253,7 +369,10 @@ export function MerchantTransactionList() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value={"all"} className="h-8"></SelectItem>
+                      <SelectItem
+                        value={"all"}
+                        className="h-8 whitespace-nowrap"
+                      ></SelectItem>
                       <SelectItem value={TransactionType.API_DEPOSIT}>
                         {
                           TransactionTypeDisplayNames[
@@ -302,6 +421,16 @@ export function MerchantTransactionList() {
                 </Select>
               </div>
             </div>
+            {/* amount */}
+            <div className="flex items-center gap-4">
+              <Label className="whitespace-nowrap">金額</Label>
+              <Input
+                type="text"
+                placeholder="輸入金額"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+            </div>
             {/* status */}
             <div className="flex items-center gap-4">
               <Label className="whitespace-nowrap">狀態</Label>
@@ -329,23 +458,57 @@ export function MerchantTransactionList() {
                 </Select>
               </div>
             </div>
-            {/* startDate */}
-            <div className="flex items-center gap-4 w-full lg:w-fit">
-              <Label className="whitespace-nowrap">起始日期</Label>
-              <DatePicker
-                date={startDate}
-                setDate={setStartDate}
-                placeholder="yyyy/mm/dd"
-              />
-            </div>
-            {/* endDate */}
-            <div className="flex items-center gap-4 w-full lg:w-fit">
-              <Label className="whitespace-nowrap">結束日期</Label>
-              <DatePicker
-                date={endDate}
-                setDate={setEndDate}
-                placeholder="yyyy/mm/dd"
-              />
+            {/* Time Range Sections */}
+            <div className="flex flex-col lg:flex-row gap-4 w-full">
+              {/* Creation Time Range */}
+              <div className="flex flex-col gap-2 flex-1">
+                <Label className="font-medium">創建時間區間</Label>
+                <div className="flex flex-wrap gap-4 pl-4">
+                  <div className="flex items-center gap-4 w-full lg:w-fit">
+                    <Label className="whitespace-nowrap">起始時間</Label>
+                    <DateTimePicker
+                      date={startDate}
+                      setDate={(date) => setStartDate(date)}
+                      placeholder="yyyy/mm/dd HH:mm:ss"
+                      onChange={(date) => setStartDate(date)}
+                    />
+                  </div>
+                  <div className="flex items-center gap-4 w-full lg:w-fit">
+                    <Label className="whitespace-nowrap">結束時間</Label>
+                    <DateTimePicker
+                      date={endDate}
+                      setDate={(date) => setEndDate(date)}
+                      placeholder="yyyy/mm/dd HH:mm:ss"
+                      onChange={(date) => setEndDate(date)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Success Time Range */}
+              <div className="flex flex-col gap-2 flex-1">
+                <Label className="font-medium">成功時間區間</Label>
+                <div className="flex flex-wrap gap-4 pl-4">
+                  <div className="flex items-center gap-4 w-full lg:w-fit">
+                    <Label className="whitespace-nowrap">起始時間</Label>
+                    <DateTimePicker
+                      date={successStartDate}
+                      setDate={(date) => setSuccessStartDate(date)}
+                      placeholder="yyyy/mm/dd HH:mm:ss"
+                      onChange={(date) => setSuccessStartDate(date)}
+                    />
+                  </div>
+                  <div className="flex items-center gap-4 w-full lg:w-fit">
+                    <Label className="whitespace-nowrap">結束時間</Label>
+                    <DateTimePicker
+                      date={successEndDate}
+                      setDate={(date) => setSuccessEndDate(date)}
+                      placeholder="yyyy/mm/dd HH:mm:ss"
+                      onChange={(date) => setSuccessEndDate(date)}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -367,30 +530,11 @@ export function MerchantTransactionList() {
           {isLoading ? "查詢中..." : "查詢"}
         </Button>
       </div>
-      {/* table */}
+
+      {/* table section - scrollable */}
       {currentQueryType && (
-        <div className="pt-4 flex flex-col">
-          <InfiniteScroll
-            dataLength={transactions?.length || 0}
-            next={() => {
-              console.log("loading more");
-              if (nextCursor) handleSearch(true);
-            }}
-            hasMore={!!nextCursor}
-            loader={
-              <div className="h-16 text-center pt-6 pb-4">
-                <Label className="text-gray-400">載入中...</Label>
-              </div>
-            }
-            endMessage={
-              <div className="h-16 text-center pt-6 pb-4">
-                <Label className="text-gray-400">
-                  {transactions?.length ? "沒有更多訂單紀錄" : "沒有訂單紀錄"}
-                </Label>
-              </div>
-            }
-            scrollableTarget="scrollableDiv"
-          >
+        <div className="flex-1">
+          <div className="h-full" id="scrollableDiv">
             <div className="pb-2">
               <Label className="whitespace-nowrap font-bold text-md">
                 {currentQueryType ===
@@ -399,97 +543,168 @@ export function MerchantTransactionList() {
                   : "多筆查詢結果"}
               </Label>
             </div>
-            <div className="flex flex-col border rounded-md overflow-x-scroll">
-              <table className="divide-y table-auto text-sm">
-                <thead className="whitespace-nowrap w-full">
-                  <tr className="h-10">
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      商戶訂單號
-                    </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      類別
-                    </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      支付類型
-                    </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      金額
-                    </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      手續費
-                    </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      狀態
-                    </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      訊息
-                    </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      創建時間
-                    </th>
-                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      更新時間
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {transactions?.map((transaction) => (
-                    <tr key={transaction.id}>
-                      <td
-                        className="px-1 py-2 font-mono text-center cursor-pointer"
-                        onClick={() =>
-                          copyToClipboard({
-                            toast,
-                            copyingText: transaction.merchantOrderId,
-                            title: "已複製商戶訂單號",
-                          })
-                        }
-                      >
-                        {transaction.merchantOrderId}
-                      </td>
-                      <td className="px-1 py-2 whitespace-nowrap text-center">
-                        {TransactionTypeDisplayNames[transaction.type]}
-                      </td>
-                      <td className="px-1 py-2 whitespace-nowrap text-center">
-                        {PaymentMethodDisplayNames[transaction.paymentMethod]}
-                      </td>
-                      <td className="px-1 py-2 text-center">
-                        {formatNumberWithoutMinFraction(transaction.amount)}
-                      </td>
-                      <td className="px-1 py-2 text-center">
-                        {formatNumberWithoutMinFraction(transaction.totalFee)}
-                      </td>
-                      <td
-                        className={classNames(
-                          transaction.status === TransactionStatus.SUCCESS
-                            ? "text-green-600"
-                            : transaction.status === TransactionStatus.FAILED
-                            ? "text-red-600"
-                            : "",
-                          "px-1 py-2 whitespace-nowrap text-center"
-                        )}
-                      >
-                        {TransactionStatusDisplayNames[transaction.status]}
-                      </td>
-                      <td className="px-1 py-2 whitespace-nowrap text-center">
-                        {transaction?.message}
-                      </td>
-                      <td className="px-1 py-2 text-center">
-                        {convertDatabaseTimeToReadablePhilippinesTime(
-                          transaction.createdAt
-                        )}
-                      </td>
-                      <td className="px-1 py-2 text-center">
-                        {convertDatabaseTimeToReadablePhilippinesTime(
-                          transaction.updatedAt
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="bg-white rounded-lg shadow-sm border">
+              <div className="overflow-x-auto">
+                <InfiniteScroll
+                  dataLength={transactions?.length || 0}
+                  next={() => {
+                    console.log("loading more");
+                    if (nextCursor) handleSearch(true);
+                  }}
+                  hasMore={!!nextCursor}
+                  loader={
+                    <div className="h-16 text-center pt-6 pb-4">
+                      <Label className="text-gray-400">載入中...</Label>
+                    </div>
+                  }
+                  endMessage={
+                    <div className="h-16 text-center pt-6 pb-4">
+                      <Label className="text-gray-400">
+                        {transactions?.length
+                          ? "沒有更多訂單紀錄"
+                          : "沒有訂單紀錄"}
+                      </Label>
+                    </div>
+                  }
+                  scrollableTarget="scrollableDiv"
+                  className="!overflow-visible"
+                >
+                  <table className="w-full min-w-[1400px]">
+                    <thead className="bg-gray-50 border-b">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                          系統訂單號
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                          商戶訂單號
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                          交易類型
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                          支付類型
+                        </th>
+                        <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
+                          金額
+                        </th>
+                        <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
+                          手續費
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                          狀態
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                          建立時間
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                          更新時間
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {transactions?.map((transaction) => (
+                        <tr
+                          key={transaction.id}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
+                          {/* System Transaction ID */}
+                          <td className="px-4 py-3">
+                            <div
+                              className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800 whitespace-nowrap"
+                              title={`點擊複製: ${transaction.id}`}
+                              onClick={() => copyToClipboard(transaction.id)}
+                            >
+                              {transaction.id}
+                            </div>
+                          </td>
+
+                          {/* Merchant Order ID */}
+                          <td className="px-4 py-3">
+                            <div
+                              className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800 whitespace-nowrap"
+                              title={`點擊複製: ${
+                                transaction.merchantOrderId || "N/A"
+                              }`}
+                              onClick={() =>
+                                transaction.merchantOrderId &&
+                                copyToClipboard(transaction.merchantOrderId)
+                              }
+                            >
+                              {transaction.merchantOrderId || "N/A"}
+                            </div>
+                          </td>
+
+                          {/* Transaction Type */}
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2 whitespace-nowrap">
+                              {getTransactionTypeBadge(transaction.type)}
+                            </div>
+                          </td>
+
+                          {/* Payment Method */}
+                          <td className="px-4 py-3">
+                            <div className="text-sm text-gray-900 whitespace-nowrap">
+                              {PaymentMethodDisplayNames[
+                                transaction.paymentMethod
+                              ] || transaction.paymentMethod}
+                            </div>
+                          </td>
+
+                          {/* Amount */}
+                          <td className="px-4 py-3 text-right">
+                            <div className="font-mono font-medium text-gray-900 text-sm whitespace-nowrap">
+                              ₱ {formatNumber(transaction.amount) || "0.000"}
+                            </div>
+                          </td>
+
+                          {/* Total Fee */}
+                          <td className="px-4 py-3 text-right">
+                            <div className="font-mono text-gray-600 text-sm whitespace-nowrap">
+                              ₱ {formatNumber(transaction.totalFee) || "0.000"}
+                            </div>
+                          </td>
+
+                          {/* Status with color */}
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <div
+                                className={`w-2 h-2 rounded-full ${getStatusIndicatorColor(
+                                  transaction.status
+                                )}`}
+                              ></div>
+                              <span
+                                className={`text-sm whitespace-nowrap ${getStatusColor(
+                                  transaction.status
+                                )}`}
+                              >
+                                {TransactionStatusDisplayNames[
+                                  transaction.status
+                                ] || transaction.status}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Created Time */}
+                          <td className="px-4 py-3">
+                            <div className="font-mono text-sm text-gray-600 whitespace-nowrap">
+                              {formatDateTime(transaction.createdAt)}
+                            </div>
+                          </td>
+
+                          {/* Updated Time */}
+                          <td className="px-4 py-3">
+                            <div className="font-mono text-sm text-gray-600 whitespace-nowrap">
+                              {formatDateTime(transaction.updatedAt)}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </InfiniteScroll>
+              </div>
             </div>
-          </InfiniteScroll>
+          </div>
         </div>
       )}
     </div>

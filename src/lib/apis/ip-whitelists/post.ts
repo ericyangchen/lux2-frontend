@@ -1,7 +1,6 @@
 import { IpWhitelistType } from "@/lib/enums/ip-whitelists/ip-whitelist-type.enum";
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
-
+import { getBackendUrl } from "@/lib/constants/common";
 export const ApiCreateIpWhitelist = async ({
   organizationId,
   ipAddress,
@@ -13,7 +12,7 @@ export const ApiCreateIpWhitelist = async ({
   type: IpWhitelistType;
   accessToken: string;
 }) => {
-  return fetch(`${backendUrl}/ip-whitelists`, {
+  return fetch(`${getBackendUrl()}/ip-whitelists`, {
     method: "POST",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
     body: JSON.stringify({ organizationId, type, ipAddress }),

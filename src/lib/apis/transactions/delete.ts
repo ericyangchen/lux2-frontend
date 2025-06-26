@@ -1,6 +1,5 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
-
+import { getBackendUrl } from "@/lib/constants/common";
 export const ApiDeleteTransaction = async ({
   id,
   accessToken,
@@ -8,7 +7,7 @@ export const ApiDeleteTransaction = async ({
   id: string;
   accessToken: string;
 }) => {
-  return fetch(`${backendUrl}/transactions/${id}`, {
+  return fetch(`${getBackendUrl()}/transactions/${id}`, {
     method: "DELETE",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
   });

@@ -8,19 +8,24 @@ export const TransactionLogActionDisplayNames = {
   [TransactionLogAction.UPSTREAM_RESPONSE]: "上游回應",
   [TransactionLogAction.TRANSACTION_SUCCESS]: "交易成功",
   [TransactionLogAction.TRANSACTION_FAILED]: "交易失敗",
+
+  // Admin actions
   [TransactionLogAction.SET_TO_FAILED_BY_ADMIN]: "管理員設為失敗",
-  [TransactionLogAction.FAILED_ADDED_TO_RETRY_QUEUE]: "失敗加入重試隊列",
-  [TransactionLogAction.SEND_NOTIFICATION_TO_MERCHANT]: "發送通知給商戶",
+  [TransactionLogAction.RESUBMISSION_TRIGGERED]: "觸發重送",
+  [TransactionLogAction.APPROVED_MERCHANT_REQUESTED_WITHDRAWAL]: "批准下發",
+  [TransactionLogAction.REJECTED_MERCHANT_REQUESTED_WITHDRAWAL]: "拒絕下發",
+
+  [TransactionLogAction.SEND_NOTIFICATION_TO_MERCHANT]: "發送異步通知",
   [TransactionLogAction.MANUALLY_TRIGGER_NOTIFICATION_TO_MERCHANT]:
-    "手動觸發商戶通知",
-  [TransactionLogAction.REVENUE_DISTRIBUTED]: "收益分配",
+    "手動觸發異步通知",
+  [TransactionLogAction.REVENUE_DISTRIBUTED]: "分潤完成",
 };
 
 // Display names for creator types
 export const CreatorTypeDisplayNames = {
   [CreatorType.MERCHANT_API]: "商戶 API",
-  [CreatorType.MERCHANT_WEB]: "商戶網頁",
-  [CreatorType.ADMIN_API]: "管理員 API",
-  [CreatorType.ADMIN_WEB]: "管理員網頁",
-  [CreatorType.INTERNAL_SYSTEM]: "內部系統",
+  [CreatorType.MERCHANT_WEB]: "商戶 Web",
+  [CreatorType.ADMIN_API]: "總代理 API",
+  [CreatorType.ADMIN_WEB]: "總代理 Web",
+  [CreatorType.INTERNAL_SYSTEM]: "系統",
 };

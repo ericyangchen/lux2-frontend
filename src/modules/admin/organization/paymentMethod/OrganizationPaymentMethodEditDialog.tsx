@@ -1,9 +1,10 @@
 import {
   DepositAccountTypeDisplayNames,
-  PaymentChannelCategories,
+  DepositPaymentChannelCategories,
   PaymentChannelDisplayNames,
   PaymentMethodDisplayNames,
   WithdrawalAccountTypeDisplayNames,
+  WithdrawalPaymentChannelCategories,
 } from "@/lib/constants/transaction";
 import {
   Dialog,
@@ -23,6 +24,7 @@ import {
 } from "@/components/shadcn/ui/select";
 
 import { ApiCreateTransactionFeeSetting } from "@/lib/apis/txn-fee-settings/post";
+import { ApiDeleteTransactionFeeSetting } from "@/lib/apis/txn-fee-settings/delete";
 import { ApiUpdateTransactionFeeSetting } from "@/lib/apis/txn-fee-settings/patch";
 import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
@@ -69,7 +71,11 @@ export function OrganizationPaymentMethodEditDialog({
 
   const [editableSettings, setEditableSettings] = useState<
     OrganizationTransactionFeeSetting[]
-  >(transactionFeeSettings.map((setting) => ({ ...setting })));
+  >(
+    transactionFeeSettings
+      .map((setting) => ({ ...setting }))
+      .sort((a, b) => a.paymentChannel.localeCompare(b.paymentChannel))
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   // Store raw input values for percentage fields to allow typing intermediate values like "1."
@@ -139,18 +145,27 @@ export function OrganizationPaymentMethodEditDialog({
       );
     });
 
+  const paymentChannelCategories =
+    type === TransactionType.API_DEPOSIT
+      ? DepositPaymentChannelCategories
+      : WithdrawalPaymentChannelCategories;
+
   const remainingChannel = paymentMethod
-    ? PaymentChannelCategories[paymentMethod]?.filter(
-        (paymentChannel) =>
-          !editableSettings.some(
-            (setting) => setting.paymentChannel === paymentChannel
-          )
-      ) || []
+    ? paymentChannelCategories[paymentMethod]
+        ?.filter(
+          (paymentChannel) =>
+            !editableSettings.some(
+              (setting) => setting.paymentChannel === paymentChannel
+            )
+        )
+        .sort((a, b) => a.localeCompare(b)) || []
     : [];
 
   const handleCloseDialog = () => {
     closeDialog();
     setEditableSettings([]);
+    setNewChannels(new Set());
+    setRemovedChannelIds(new Set());
   };
 
   const updateFeeSettingPercentage = (
@@ -198,7 +213,7 @@ export function OrganizationPaymentMethodEditDialog({
     );
     setEditableSettings(newSettings);
 
-    // Remove from newChannels if it was a new channel
+    // If it was a new channel, remove from newChannels
     if (newChannels.has(settingToRemove.paymentChannel)) {
       setNewChannels((prev) => {
         const newSet = new Set<string>();
@@ -209,11 +224,23 @@ export function OrganizationPaymentMethodEditDialog({
         });
         return newSet;
       });
+    } else {
+      // If it was an existing channel, track it for deletion
+      if (settingToRemove.id) {
+        setRemovedChannelIds(
+          (prev) => new Set([...Array.from(prev), settingToRemove.id])
+        );
+      }
     }
   };
 
   // Track which settings are new (not in original transactionFeeSettings)
   const [newChannels, setNewChannels] = useState<Set<string>>(new Set());
+
+  // Track removed channel IDs for deletion
+  const [removedChannelIds, setRemovedChannelIds] = useState<Set<string>>(
+    new Set()
+  );
 
   const addNewChannel = () => {
     if (remainingChannel.length === 0) return;
@@ -274,6 +301,19 @@ export function OrganizationPaymentMethodEditDialog({
 
     try {
       setIsLoading(true);
+
+      // Delete removed channels first
+      for (const removedId of Array.from(removedChannelIds)) {
+        const response = await ApiDeleteTransactionFeeSetting({
+          id: removedId,
+          accessToken,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new ApplicationError(errorData);
+        }
+      }
 
       // Separate new settings from existing ones
       const newSettings = editableSettings.filter((setting) =>
@@ -384,13 +424,19 @@ export function OrganizationPaymentMethodEditDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {Object.values(PaymentMethod).map((paymentMethod) => {
-                      return (
-                        <SelectItem key={paymentMethod} value={paymentMethod}>
-                          {PaymentMethodDisplayNames[paymentMethod]}
-                        </SelectItem>
-                      );
-                    })}
+                    {Object.values(PaymentMethod)
+                      .sort((a, b) =>
+                        PaymentMethodDisplayNames[a].localeCompare(
+                          PaymentMethodDisplayNames[b]
+                        )
+                      )
+                      .map((paymentMethod) => {
+                        return (
+                          <SelectItem key={paymentMethod} value={paymentMethod}>
+                            {PaymentMethodDisplayNames[paymentMethod]}
+                          </SelectItem>
+                        );
+                      })}
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -415,21 +461,22 @@ export function OrganizationPaymentMethodEditDialog({
                       <div className="flex items-center space-x-4">
                         <Select
                           value={setting.paymentChannel}
-                          onValueChange={(value) =>
-                            updateSettingProperty(
-                              settingIdx,
-                              "paymentChannel",
-                              value
-                            )
-                          }
+                          disabled={!newChannels.has(setting.paymentChannel)}
                         >
-                          <SelectTrigger className="w-48">
+                          <SelectTrigger className="w-58">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
-                              {PaymentChannelCategories[paymentMethod]?.map(
-                                (paymentChannel) => {
+                              {paymentChannelCategories[paymentMethod]
+                                ?.sort((a, b) =>
+                                  (
+                                    PaymentChannelDisplayNames[a] || a
+                                  ).localeCompare(
+                                    PaymentChannelDisplayNames[b] || b
+                                  )
+                                )
+                                .map((paymentChannel) => {
                                   return (
                                     <SelectItem
                                       key={paymentChannel}
@@ -448,8 +495,7 @@ export function OrganizationPaymentMethodEditDialog({
                                       ] || paymentChannel}
                                     </SelectItem>
                                   );
-                                }
-                              )}
+                                })}
                             </SelectGroup>
                           </SelectContent>
                         </Select>

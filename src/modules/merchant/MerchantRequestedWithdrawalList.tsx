@@ -23,17 +23,22 @@ import { DatePicker } from "@/components/DatePicker";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
+import { MerchantRequestedWithdrawalTab } from "./MerchantRequestedWithdrawalView";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { Transaction } from "@/lib/types/transaction";
 import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
 import { classNames } from "@/lib/utils/classname-utils";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
-import { formatNumberWithoutMinFraction } from "@/lib/utils/number";
+import { formatNumber } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
-export function MerchantRequestedWithdrawalList() {
+export function MerchantRequestedWithdrawalList({
+  setActiveTab,
+}: {
+  setActiveTab: (tab: MerchantRequestedWithdrawalTab) => void;
+}) {
   const { toast } = useToast();
 
   const { organizationId } = getApplicationCookies();
@@ -85,7 +90,7 @@ export function MerchantRequestedWithdrawalList() {
 
       const response = await ApiGetMerchantRequestedWithdrawals({
         merchantId: organizationId,
-        merchantOrderId,
+        merchantOrderId: merchantOrderId || undefined,
         paymentMethod: paymentMethodQuery,
         status: transactionStatusQuery,
         createdAtStart: startDateQuery,
@@ -93,16 +98,17 @@ export function MerchantRequestedWithdrawalList() {
         cursorCreatedAt:
           isLoadMore && nextCursor ? nextCursor.createdAt : undefined,
         cursorId: isLoadMore && nextCursor ? nextCursor.id : undefined,
+        limit: 30,
         accessToken,
       });
       const data = await response.json();
 
       if (response.ok) {
-        const newTransactions = data?.data?.merchantRequestedWithdrawals || [];
+        const newTransactions = data?.data || [];
         setTransactions((prev) =>
           isLoadMore ? [...(prev || []), ...newTransactions] : newTransactions
         );
-        setNextCursor(data?.data?.pagination?.nextCursor || null);
+        setNextCursor(data?.pagination?.nextCursor || null);
       } else {
         throw new ApplicationError(data);
       }
@@ -343,10 +349,10 @@ export function MerchantRequestedWithdrawalList() {
                         {PaymentMethodDisplayNames[transaction.paymentMethod]}
                       </td>
                       <td className="px-1 py-2 text-center">
-                        {formatNumberWithoutMinFraction(transaction.amount)}
+                        {formatNumber(transaction.amount)}
                       </td>
                       <td className="px-1 py-2 text-center">
-                        {formatNumberWithoutMinFraction(transaction.totalFee)}
+                        {formatNumber(transaction.totalFee)}
                       </td>
                       <td
                         className={classNames(

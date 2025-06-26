@@ -1,22 +1,15 @@
 import { NextRouter, useRouter } from "next/router";
 import {
-  clearApplicationCookies,
-  getApplicationCookies,
-} from "../utils/cookie";
-import {
   getOrganizationBaseUrl,
   getOrganizationPrefixUrl,
   isLoginRoutes,
   isPublicRoutes,
 } from "../utils/routes";
 
+import { getApplicationCookies } from "../utils/cookie";
+import { handleAuthError } from "../utils/auth";
 import { useEffect } from "react";
 import { useOrganization } from "./swr/organization";
-
-const clearAndRedirectToLogin = (router: NextRouter) => {
-  clearApplicationCookies();
-  router.push("/login");
-};
 
 export const useAuthGuard = () => {
   const router = useRouter();
@@ -28,7 +21,9 @@ export const useAuthGuard = () => {
   const isPublicRoute = isPublicRoutes(router.pathname);
   const isLoginRoute = isLoginRoutes(router.pathname);
 
-  const { organization, isLoading } = useOrganization({ organizationId });
+  const { organization, isLoading: isOrganizationLoading } = useOrganization({
+    organizationId,
+  });
 
   const organizationPrefixUrl = getOrganizationPrefixUrl(organization?.type);
   const organizationBaseUrl = getOrganizationBaseUrl(organization?.type);
@@ -41,12 +36,11 @@ export const useAuthGuard = () => {
     // redirect to login if no access
     if (!hasAccess && !isLoginRoute) {
       console.log("!hasAccess && !isLoginRoute");
-      clearAndRedirectToLogin(router);
+      handleAuthError(router);
       return;
     }
 
-    // loading organization
-    if (isLoading) {
+    if (isOrganizationLoading) {
       console.log("isLoading");
       return;
     }
@@ -64,7 +58,7 @@ export const useAuthGuard = () => {
     // cannot get organization
     if (!organizationBaseUrl || !organizationPrefixUrl) {
       console.log("!organizationBaseUrl || !organizationPrefixUrl");
-      clearAndRedirectToLogin(router);
+      handleAuthError(router);
       return;
     }
 
@@ -81,8 +75,8 @@ export const useAuthGuard = () => {
     hasAccess,
     router,
     isPublicRoute,
-    isLoading,
     organizationBaseUrl,
     organizationPrefixUrl,
+    isOrganizationLoading,
   ]);
 };

@@ -1,3 +1,4 @@
+import { ApiDisableUserOtp, ApiEnableTotp } from "@/lib/apis/otp/post";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/ui/select";
+import { useUser, useUsersByOrganizationId } from "@/lib/hooks/swr/user";
 
 import { ApiDeleteUser } from "@/lib/apis/users/delete";
 import { ApiUpdateUser } from "@/lib/apis/users/patch";
@@ -25,9 +27,9 @@ import { User } from "@/lib/types/user";
 import { UserRole } from "@/lib/enums/users/user-role.enum";
 import { UserRoleDisplayNames } from "@/lib/constants/user";
 import { getApplicationCookies } from "@/lib/utils/cookie";
+import { showTotpQrCodeInNewWindow } from "../admin/organization/info/utils";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
-import { useUsersByOrganizationId } from "@/lib/hooks/swr/user";
 
 export function MerchantUserEditDialog({
   isOpen,
@@ -42,22 +44,182 @@ export function MerchantUserEditDialog({
 }) {
   const { toast } = useToast();
 
+  const { user: currentUser, mutate: mutateUser } = useUser();
+
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>(user.role);
+  const [isOtpEnabled, setIsOtpEnabled] = useState(user.isOtpEnabled);
 
   const [isUpdateLoading, setIsUpdateLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+  const [isOtpLoading, setIsOtpLoading] = useState(false);
 
   const { mutate } = useUsersByOrganizationId({
     organizationId,
   });
 
+  // OTP Management
+
+  const handleEnableOtp = async () => {
+    try {
+      setIsOtpLoading(true);
+      const { accessToken } = getApplicationCookies();
+      if (!accessToken) return;
+
+      const response = await ApiEnableTotp({
+        userId: user.id,
+        accessToken,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        showTotpQrCodeInNewWindow({
+          name: user.name,
+          qrCode: data.qrCodeUrl,
+        });
+        setIsOtpEnabled(true);
+        mutateUser();
+        mutate();
+        toast({
+          title: "成功",
+          description: "OTP 已啟用",
+        });
+      } else {
+        toast({
+          title: "錯誤",
+          description: "無法啟用 OTP",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "錯誤",
+        description: "啟用 OTP 時發生錯誤",
+        variant: "destructive",
+      });
+    } finally {
+      setIsOtpLoading(false);
+    }
+  };
+
+  const handleDisableOtp = async () => {
+    try {
+      setIsOtpLoading(true);
+      const { accessToken } = getApplicationCookies();
+      if (!accessToken) return;
+
+      const response = await ApiDisableUserOtp({
+        userId: user.id,
+        accessToken,
+      });
+
+      if (response.ok) {
+        setIsOtpEnabled(false);
+        mutateUser();
+        mutate();
+        toast({
+          title: "成功",
+          description: "OTP 已停用",
+        });
+      } else {
+        toast({
+          title: "錯誤",
+          description: "無法停用 OTP",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "錯誤",
+        description: "停用 OTP 時發生錯誤",
+        variant: "destructive",
+      });
+    } finally {
+      setIsOtpLoading(false);
+    }
+  };
+
+  // Permission checks for OTP management
+  const canManageOtp = () => {
+    if (!currentUser) return false;
+
+    // Users can manage their own OTP
+    if (currentUser.id === user.id) return true;
+
+    // ADMIN_OWNER can manage everyone's OTP
+    if (currentUser.role === UserRole.ADMIN_OWNER) return true;
+
+    // MERCHANT_OWNER can manage OTP for users in their organization
+    if (
+      currentUser.role === UserRole.MERCHANT_OWNER &&
+      currentUser.organizationId === user.organizationId
+    )
+      return true;
+
+    return false;
+  };
+
+  const canOnlyGenerateOrEnable = () => {
+    if (!currentUser) return false;
+    return currentUser.id === user.id;
+  };
+
+  const renderOtpSection = () => {
+    const hasOtp = isOtpEnabled;
+    const canManage = canManageOtp();
+    const canOnlyGenOrEnable = canOnlyGenerateOrEnable();
+
+    if (!canManage) return null;
+
+    return (
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label className="text-right">OTP 管理</Label>
+        <div className="col-span-3 flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <div
+              className={`w-2 h-2 rounded-full ${
+                hasOtp ? "bg-green-500" : "bg-gray-400"
+              }`}
+            ></div>
+            <span className="text-sm">{hasOtp ? "已啟用" : "未啟用"}</span>
+          </div>
+          <div className="flex gap-2">
+            {hasOtp ? (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDisableOtp}
+                disabled={isOtpLoading}
+              >
+                停用 OTP
+              </Button>
+            ) : (
+              canOnlyGenOrEnable && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEnableOtp}
+                  disabled={isOtpLoading}
+                  className="text-green-600 border-green-600 hover:bg-green-50"
+                >
+                  啟用 OTP
+                </Button>
+              )
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const handleUpdateUser = async () => {
-    const { accessToken } = getApplicationCookies();
+    const { accessToken, userId } = getApplicationCookies();
 
     if (!organizationId || !accessToken || !user) return;
+
+    const isUpdatingSelf = user.id === userId;
 
     try {
       setIsUpdateLoading(true);
@@ -75,11 +237,25 @@ export function MerchantUserEditDialog({
 
       if (response.ok) {
         closeDialog();
-        toast({
-          title: `${UserRoleDisplayNames[role]} 更新成功`,
-          description: `User ID: ${user.id}`,
-          variant: "success",
-        });
+
+        if (isUpdatingSelf) {
+          toast({
+            title: "個人資料更新成功",
+            description: "正在驗證權限...",
+            duration: 1000,
+          });
+
+          setTimeout(() => {
+            // Trigger user fetch to check if token is still valid
+            mutateUser();
+          }, 1000);
+        } else {
+          toast({
+            title: `${UserRoleDisplayNames[role]} 更新成功`,
+            description: `User ID: ${user.id}`,
+            variant: "success",
+          });
+        }
 
         mutate();
       } else {
@@ -214,6 +390,7 @@ export function MerchantUserEditDialog({
               </Select>
             </div>
           </div>
+          {renderOtpSection()}
         </div>
         <DialogFooter className="flex flex-row justify-between sm:justify-between">
           <div>

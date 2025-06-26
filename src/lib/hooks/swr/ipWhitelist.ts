@@ -3,7 +3,7 @@ import { ApplicationError } from "@/lib/error/applicationError";
 import { IpWhitelist } from "@/lib/types/ip-whitelist";
 import { USE_ORGANIZATION_IP_WHITELISTS_REFRESH_INTERVAL } from "../../constants/swr-refresh-interval";
 import { getApplicationCookies } from "@/lib/utils/cookie";
-import useSWR from "swr";
+import { useSwrWithAuth } from "../useSwrWithAuth";
 
 const fetchOrganizationIpWhitelistsByOrganizationId = async ({
   organizationId,
@@ -37,7 +37,7 @@ export const useIpWhitelists = ({
 
   const shouldFetch = accessToken && organizationId;
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch ? { key: "ip-whitelists", organizationId, accessToken } : null,
     fetchOrganizationIpWhitelistsByOrganizationId,
     { refreshInterval: USE_ORGANIZATION_IP_WHITELISTS_REFRESH_INTERVAL }

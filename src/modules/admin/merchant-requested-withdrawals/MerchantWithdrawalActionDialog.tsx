@@ -58,7 +58,7 @@ export function MerchantWithdrawalActionDialog({
         toast({
           title: "審核通過成功",
           description: `成功通過 ${selectedTransactionIds.length} 筆商戶提領請求`,
-          variant: "default",
+          variant: "success",
         });
         onSuccess();
         handleCloseDialog();

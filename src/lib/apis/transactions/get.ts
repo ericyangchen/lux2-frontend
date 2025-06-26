@@ -1,6 +1,6 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
 import { buildQueryString } from "@/lib/utils/build-query-string";
+import { getBackendUrl } from "@/lib/constants/common";
 
 export const ApiGetTransactionById = async ({
   id,
@@ -9,7 +9,7 @@ export const ApiGetTransactionById = async ({
   id: string;
   accessToken: string;
 }) => {
-  return fetch(`${backendUrl}/transactions/${id}`, {
+  return fetch(`${getBackendUrl()}/transactions/${id}`, {
     method: "GET",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
   });
@@ -25,7 +25,7 @@ export const ApiGetTransactionByMerchantIdAndMerchantOrderId = async ({
   accessToken: string;
 }) => {
   return fetch(
-    `${backendUrl}/transactions/merchants/${merchantId}/orders/${merchantOrderId}`,
+    `${getBackendUrl()}/transactions/merchants/${merchantId}/orders/${merchantOrderId}`,
     {
       method: "GET",
       headers: SMPayWebHeaderWithAccessToken(accessToken),
@@ -47,6 +47,7 @@ export const ApiGetTransactionsByMerchantId = async ({
   limit,
   cursorCreatedAt,
   cursorId,
+  amount,
   accessToken,
 }: {
   merchantId: string;
@@ -62,6 +63,7 @@ export const ApiGetTransactionsByMerchantId = async ({
   limit?: number;
   cursorCreatedAt?: string;
   cursorId?: string;
+  amount?: string;
   accessToken: string;
 }) => {
   const queryString = buildQueryString({
@@ -77,10 +79,11 @@ export const ApiGetTransactionsByMerchantId = async ({
     limit,
     cursorCreatedAt,
     cursorId,
+    amount,
   });
 
   return fetch(
-    `${backendUrl}/transactions/merchants/${merchantId}?${queryString}`,
+    `${getBackendUrl()}/transactions/merchants/${merchantId}?${queryString}`,
     {
       method: "GET",
       headers: SMPayWebHeaderWithAccessToken(accessToken),
@@ -99,9 +102,12 @@ export const ApiGetTransactions = async ({
   status,
   createdAtStart,
   createdAtEnd,
+  successAtStart,
+  successAtEnd,
   limit,
   cursorCreatedAt,
   cursorId,
+  amount,
   accessToken,
 }: {
   type?: string;
@@ -114,9 +120,12 @@ export const ApiGetTransactions = async ({
   status?: string;
   createdAtStart?: string;
   createdAtEnd?: string;
+  successAtStart?: string;
+  successAtEnd?: string;
   limit?: number;
   cursorCreatedAt?: string;
   cursorId?: string;
+  amount?: string;
   accessToken: string;
 }) => {
   const queryString = buildQueryString({
@@ -130,12 +139,15 @@ export const ApiGetTransactions = async ({
     status,
     createdAtStart,
     createdAtEnd,
+    successAtStart,
+    successAtEnd,
     limit,
     cursorCreatedAt,
     cursorId,
+    amount,
   });
 
-  return fetch(`${backendUrl}/transactions?${queryString}`, {
+  return fetch(`${getBackendUrl()}/transactions?${queryString}`, {
     method: "GET",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
   });
@@ -155,10 +167,13 @@ export const ApiGetSystemTransactionCount = async ({
     date,
   });
 
-  return fetch(`${backendUrl}/transactions/statistics/system?${queryString}`, {
-    method: "GET",
-    headers: SMPayWebHeaderWithAccessToken(accessToken),
-  });
+  return fetch(
+    `${getBackendUrl()}/transactions/statistics/system?${queryString}`,
+    {
+      method: "GET",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
 };
 
 export const ApiGetTransactionCountByOrganizationId = async ({
@@ -178,7 +193,89 @@ export const ApiGetTransactionCountByOrganizationId = async ({
   });
 
   return fetch(
-    `${backendUrl}/transactions/statistics/organizations/${organizationId}?${queryString}`,
+    `${getBackendUrl()}/transactions/statistics/organizations/${organizationId}?${queryString}`,
+    {
+      method: "GET",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
+};
+
+export const ApiGetSystemWeeklyTransactionTrends = async ({
+  date,
+  accessToken,
+}: {
+  date?: string;
+  accessToken: string;
+}) => {
+  const queryString = buildQueryString({
+    date,
+  });
+
+  return fetch(
+    `${getBackendUrl()}/transactions/statistics/system/weekly-trends?${queryString}`,
+    {
+      method: "GET",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
+};
+
+export const ApiGetWeeklyTransactionTrendsByOrganizationId = async ({
+  organizationId,
+  date,
+  accessToken,
+}: {
+  organizationId: string;
+  date?: string;
+  accessToken: string;
+}) => {
+  const queryString = buildQueryString({
+    date,
+  });
+
+  return fetch(
+    `${getBackendUrl()}/transactions/statistics/organizations/${organizationId}/weekly-trends?${queryString}`,
+    {
+      method: "GET",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
+};
+
+export const ApiGetSystemPaymentMethodDistribution = async ({
+  date,
+  accessToken,
+}: {
+  date?: string;
+  accessToken: string;
+}) => {
+  const queryString = buildQueryString({
+    date,
+  });
+
+  return fetch(
+    `${getBackendUrl()}/transactions/statistics/system/payment-method-distribution?${queryString}`,
+    {
+      method: "GET",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
+};
+
+export const ApiGetSystemChannelPerformance = async ({
+  date,
+  accessToken,
+}: {
+  date?: string;
+  accessToken: string;
+}) => {
+  const queryString = buildQueryString({
+    date,
+  });
+
+  return fetch(
+    `${getBackendUrl()}/transactions/statistics/system/channel-performance?${queryString}`,
     {
       method: "GET",
       headers: SMPayWebHeaderWithAccessToken(accessToken),

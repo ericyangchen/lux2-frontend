@@ -5,7 +5,7 @@ import {
   WithdrawalAccountTypeDisplayNames,
 } from "@/lib/constants/transaction";
 import { formatNumber, formatNumberInPercentage } from "@/lib/utils/number";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { Calculator } from "@/lib/utils/calculator";
 import { DepositToAccountType } from "@/lib/enums/transactions/deposit-to-account-type.enum";
@@ -43,50 +43,54 @@ export default function OrganizationPaymentMethodTable({
     }, {} as Record<PaymentMethod, OrganizationTransactionFeeSetting[]>);
 
   // Helper function to get all fee settings from feeSettingList
-  const getAllFeeSettings = (setting: OrganizationTransactionFeeSetting) => {
-    const feeSettings: Array<{
-      accountType: string;
-      accountTypeDisplay: string;
-      percentage: string;
-      fixed: string;
-    }> = [];
+  const getAllFeeSettings = useCallback(
+    (setting: OrganizationTransactionFeeSetting) => {
+      const feeSettings: Array<{
+        accountType: string;
+        accountTypeDisplay: string;
+        percentage: string;
+        fixed: string;
+      }> = [];
 
-    if (type === TransactionType.API_DEPOSIT) {
-      const depositFees = setting.feeSettingList as any;
-      const feeData = depositFees[DepositToAccountType.DEFAULT];
-      if (feeData) {
-        feeSettings.push({
-          accountType: DepositToAccountType.DEFAULT,
-          accountTypeDisplay:
-            DepositAccountTypeDisplayNames[DepositToAccountType.DEFAULT],
-          percentage: feeData.percentage,
-          fixed: feeData.fixed,
-        });
-      }
-    } else {
-      const withdrawalFees = setting.feeSettingList as any;
-
-      // Check each withdrawal account type
-      Object.values(WithdrawalToAccountType).forEach((accountType) => {
-        const feeData = withdrawalFees[accountType];
+      if (type === TransactionType.API_DEPOSIT) {
+        const depositFees = setting.feeSettingList as any;
+        const feeData = depositFees[DepositToAccountType.DEFAULT];
         if (feeData) {
           feeSettings.push({
-            accountType,
-            accountTypeDisplay: WithdrawalAccountTypeDisplayNames[accountType],
+            accountType: DepositToAccountType.DEFAULT,
+            accountTypeDisplay:
+              DepositAccountTypeDisplayNames[DepositToAccountType.DEFAULT],
             percentage: feeData.percentage,
             fixed: feeData.fixed,
           });
         }
-      });
-    }
+      } else {
+        const withdrawalFees = setting.feeSettingList as any;
 
-    return feeSettings;
-  };
+        // Check each withdrawal account type
+        Object.values(WithdrawalToAccountType).forEach((accountType) => {
+          const feeData = withdrawalFees[accountType];
+          if (feeData) {
+            feeSettings.push({
+              accountType,
+              accountTypeDisplay:
+                WithdrawalAccountTypeDisplayNames[accountType],
+              percentage: feeData.percentage,
+              fixed: feeData.fixed,
+            });
+          }
+        });
+      }
+
+      return feeSettings;
+    },
+    [type]
+  );
 
   const paymentMethodConfigurations = useMemo(
     () =>
-      Object.entries(transactionFeeSettingsGroupedByPaymentMethods)?.map(
-        ([paymentMethod, transactionFeeSettings]) => {
+      Object.entries(transactionFeeSettingsGroupedByPaymentMethods)
+        ?.map(([paymentMethod, transactionFeeSettings]) => {
           let minAmount;
           let maxAmount;
 
@@ -138,11 +142,21 @@ export default function OrganizationPaymentMethodTable({
                   ...setting,
                   feeSettings: allFeeSettings,
                 };
-              }),
+              })
+              .sort((a, b) => a.paymentChannel.localeCompare(b.paymentChannel)),
           };
-        }
-      ),
-    [organizationId, transactionFeeSettingsGroupedByPaymentMethods, type]
+        })
+        .sort((a, b) =>
+          PaymentMethodDisplayNames[a.paymentMethod].localeCompare(
+            PaymentMethodDisplayNames[b.paymentMethod]
+          )
+        ),
+    [
+      getAllFeeSettings,
+      organizationId,
+      transactionFeeSettingsGroupedByPaymentMethods,
+      type,
+    ]
   );
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -237,9 +251,6 @@ export default function OrganizationPaymentMethodTable({
                     <div className="p-4">
                       {paymentMethodConfiguration.channels.length > 0 ? (
                         <div className="space-y-4">
-                          <h4 className="text-sm font-medium text-gray-700 mb-2">
-                            上游渠道
-                          </h4>
                           {paymentMethodConfiguration.channels.map(
                             (channel, channelIdx) => (
                               <div

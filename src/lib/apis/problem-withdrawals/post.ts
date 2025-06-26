@@ -1,6 +1,5 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
-
+import { getBackendUrl } from "@/lib/constants/common";
 export const ApiHandleProblemWithdrawals = async ({
   transactionIds,
   newPaymentChannel,
@@ -10,7 +9,7 @@ export const ApiHandleProblemWithdrawals = async ({
   newPaymentChannel: string;
   accessToken: string;
 }) => {
-  return fetch(`${backendUrl}/problem-withdrawals/handle`, {
+  return fetch(`${getBackendUrl()}/problem-withdrawals/handle`, {
     method: "POST",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
     body: JSON.stringify({ transactionIds, newPaymentChannel }),

@@ -1,4 +1,5 @@
 import { ApplicationError } from "@/lib/error/applicationError";
+import { Badge } from "@/components/shadcn/ui/badge";
 import { Button } from "@/components/shadcn/ui/button";
 import { CreateSubOrganizationDialog } from "./CreateSubOrganizationDialog";
 import { EditOrganizationInfoDialog } from "./EditOrganizationInfoDialog";
@@ -51,8 +52,13 @@ export default function OrganizationInfo({
             <div className="text-sm font-medium leading-6 text-gray-500">
               單位名稱:
             </div>
-            <div className="text-base truncate max-w-[250px]">
+            <div className="text-base truncate max-w-[250px] flex items-center gap-2">
               {organization.name}
+              {organization.isTestingAccount && (
+                <Badge variant="outline" className="bg-yellow-500 text-black">
+                  測試帳號
+                </Badge>
+              )}
             </div>
           </div>
           {/* type */}

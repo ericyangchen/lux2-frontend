@@ -1,6 +1,5 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
-
+import { getBackendUrl } from "@/lib/constants/common";
 export const ApiCreateMerchantRequestedWithdrawal = async ({
   type,
   paymentMethod,
@@ -8,9 +7,11 @@ export const ApiCreateMerchantRequestedWithdrawal = async ({
   merchantOrderId,
   amount,
   notifyUrl,
-  accountType,
-  accountName,
-  phoneNumber,
+  bankName,
+  bankAccount,
+  receiverName,
+  receiverEmail,
+  receiverPhoneNumber,
   accessToken,
 }: {
   type: string;
@@ -19,12 +20,14 @@ export const ApiCreateMerchantRequestedWithdrawal = async ({
   merchantOrderId: string;
   amount: string;
   notifyUrl?: string;
-  accountType?: string;
-  accountName?: string;
-  phoneNumber?: string;
+  bankName?: string;
+  bankAccount?: string;
+  receiverName?: string;
+  receiverEmail?: string;
+  receiverPhoneNumber?: string;
   accessToken: string;
 }) => {
-  return fetch(`${backendUrl}/merchant-requested-withdrawal`, {
+  return fetch(`${getBackendUrl()}/merchant-requested-withdrawal`, {
     method: "POST",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
     body: JSON.stringify({
@@ -34,9 +37,11 @@ export const ApiCreateMerchantRequestedWithdrawal = async ({
       merchantOrderId,
       amount,
       notifyUrl,
-      accountType,
-      accountName,
-      phoneNumber,
+      bankName,
+      bankAccount,
+      receiverName,
+      receiverEmail,
+      receiverPhoneNumber,
     }),
   });
 };

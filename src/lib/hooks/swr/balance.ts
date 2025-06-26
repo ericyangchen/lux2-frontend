@@ -10,7 +10,7 @@ import {
 
 import { ApplicationError } from "@/lib/error/applicationError";
 import { getApplicationCookies } from "@/lib/utils/cookie";
-import useSWR from "swr";
+import { useSwrWithAuth } from "../useSwrWithAuth";
 
 const fetchBalancesByOrganizationId = async ({
   organizationId,
@@ -44,7 +44,7 @@ export const useBalances = ({
 
   const shouldFetch = accessToken && organizationId;
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch ? { key: "balances", organizationId, accessToken } : null,
     fetchBalancesByOrganizationId,
     { refreshInterval: USE_BALANCES_REFRESH_INTERVAL }
@@ -80,7 +80,7 @@ export const useSystemBalance = () => {
 
   const shouldFetch = accessToken;
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch ? { key: "systemBalance", accessToken } : null,
     fetchSystemBalance,
     { refreshInterval: USD_SYSTEM_BALANCE_REFRESH_INTERVAL }

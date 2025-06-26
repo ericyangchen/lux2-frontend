@@ -24,6 +24,7 @@ import { OrganizationSearchBar } from "../common/OrganizationSearchBar";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { PaymentMethodDisplayNames } from "@/lib/constants/transaction";
 import { Textarea } from "@/components/shadcn/ui/textarea";
+import { formatNumber } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
@@ -65,7 +66,9 @@ export function DirectAddBalance() {
         const data = await response.json();
         toast({
           title: "餘額加值成功",
-          description: `已為組織 ${organizationId} 加值 ${amount} ${paymentMethod}`,
+          description: `已為組織 ${organizationId} 加值 ${formatNumber(
+            amount
+          )} ${paymentMethod}`,
           variant: "success",
         });
 
@@ -161,7 +164,7 @@ export function DirectAddBalance() {
                 type="number"
                 step="0.01"
                 min="0"
-                placeholder="0.00"
+                placeholder="0.000"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
               />

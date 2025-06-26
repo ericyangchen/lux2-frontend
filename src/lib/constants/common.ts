@@ -1,10 +1,27 @@
-export const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+import { getCachedConfig } from "@/lib/config";
 
-export const companyName =
-  process.env.NEXT_PUBLIC_ENVIRONMENT === "development"
-    ? "SM-Pay (Dev)"
-    : process.env.NEXT_PUBLIC_ENVIRONMENT === "staging"
-    ? "SM-Pay (Staging)"
-    : "SM-Pay";
+export const getEnvironment = () => {
+  const config = getCachedConfig();
+  return config.environment;
+};
+
+export const getBackendUrl = () => {
+  const config = getCachedConfig();
+  return config.backendUrl;
+};
+
+export const getCompanyName = () => {
+  const environment = getEnvironment();
+
+  if (environment === "development") {
+    return "SM-Pay (Dev)";
+  }
+
+  if (environment === "staging") {
+    return "SM-Pay (Staging)";
+  }
+
+  return "SM-Pay";
+};
 
 export const currencySymbol = "₱";

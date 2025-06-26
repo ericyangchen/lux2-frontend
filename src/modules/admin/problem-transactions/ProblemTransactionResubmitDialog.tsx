@@ -1,9 +1,5 @@
 import { Dialog, DialogContent } from "@/components/shadcn/ui/dialog";
 import {
-  PaymentChannelCategories,
-  PaymentChannelDisplayNames,
-} from "@/lib/constants/transaction";
-import {
   Select,
   SelectContent,
   SelectGroup,
@@ -17,6 +13,7 @@ import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { Label } from "@/components/shadcn/ui/label";
 import { PaymentChannel } from "@/lib/enums/transactions/payment-channel.enum";
+import { PaymentChannelDisplayNames } from "@/lib/constants/transaction";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";

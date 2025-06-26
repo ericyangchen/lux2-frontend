@@ -17,7 +17,10 @@ import {
   convertToEndOfDay,
   convertToStartOfDay,
 } from "@/lib/utils/timezone";
-import { useEffect, useState } from "react";
+import {
+  formatNumber,
+  formatNumberWithoutMinFraction,
+} from "@/lib/utils/number";
 
 import { ApiGetMerchantRequestedWithdrawals } from "@/lib/apis/txn-merchant-requested-withdrawals/get";
 import { ApplicationError } from "@/lib/error/applicationError";
@@ -38,9 +41,9 @@ import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.e
 import { classNames } from "@/lib/utils/classname-utils";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
 import { flattenOrganizations } from "../common/flattenOrganizations";
-import { formatNumberWithoutMinFraction } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useOrganizationWithChildren } from "@/lib/hooks/swr/organization";
+import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
 const findOrganizationById = (organizations: Organization[], id: string) => {
@@ -115,7 +118,7 @@ export function MerchantWithdrawalRequestList() {
 
       const response = await ApiGetMerchantRequestedWithdrawals({
         merchantId: merchantId || undefined,
-        merchantOrderId,
+        merchantOrderId: merchantOrderId || undefined,
         paymentMethod: paymentMethodQuery,
         status: transactionStatusQuery,
         internalStatus: transactionInternalStatusQuery,
@@ -129,11 +132,11 @@ export function MerchantWithdrawalRequestList() {
       const data = await response.json();
 
       if (response.ok) {
-        const newTransactions = data?.data?.merchantRequestedWithdrawals || [];
+        const newTransactions = data?.data || [];
         setTransactions((prev) =>
           isLoadMore ? [...(prev || []), ...newTransactions] : newTransactions
         );
-        setNextCursor(data?.data?.pagination?.nextCursor || null);
+        setNextCursor(data?.pagination?.nextCursor || null);
       } else {
         throw new ApplicationError(data);
       }
@@ -162,9 +165,7 @@ export function MerchantWithdrawalRequestList() {
     setMerchantId("");
     setMerchantOrderId("");
     setPaymentMethod("all");
-    setTransactionStatus(
-      TransactionStatus.MERCHANT_REQUESTED_WITHDRAWAL_PENDING
-    );
+    setTransactionStatus("all");
     setTransactionInternalStatus("all");
     setStartDate(undefined);
     setEndDate(undefined);
@@ -197,10 +198,6 @@ export function MerchantWithdrawalRequestList() {
   const isIndeterminate =
     selectedTransactionIds.size > 0 &&
     selectedTransactionIds.size < (transactions?.length || 0);
-
-  useEffect(() => {
-    handleSearch();
-  }, []);
 
   return (
     <div className="flex flex-col gap-4">
@@ -500,10 +497,10 @@ export function MerchantWithdrawalRequestList() {
                         </Button>
                       </td>
                       <td className="px-1 py-2 text-center">
-                        {formatNumberWithoutMinFraction(transaction.amount)}
+                        {formatNumber(transaction.amount)}
                       </td>
                       <td className="px-1 py-2 text-center">
-                        {formatNumberWithoutMinFraction(transaction.totalFee)}
+                        {formatNumber(transaction.totalFee)}
                       </td>
                       <td
                         className={classNames(

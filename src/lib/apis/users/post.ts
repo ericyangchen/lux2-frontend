@@ -1,7 +1,6 @@
 import { OrgType } from "@/lib/enums/organizations/org-type.enum";
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
-
+import { getBackendUrl } from "@/lib/constants/common";
 export const ApiCreateUser = async ({
   organizationId,
   name,
@@ -19,7 +18,7 @@ export const ApiCreateUser = async ({
   orgType: OrgType;
   accessToken: string;
 }) => {
-  return fetch(`${backendUrl}/users`, {
+  return fetch(`${getBackendUrl()}/users`, {
     method: "POST",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
     body: JSON.stringify({

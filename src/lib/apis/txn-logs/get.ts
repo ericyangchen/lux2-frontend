@@ -1,6 +1,5 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
-
+import { getBackendUrl } from "@/lib/constants/common";
 export const ApiGetTransactionLogsByTransactionId = async ({
   transactionId,
   accessToken,
@@ -8,8 +7,11 @@ export const ApiGetTransactionLogsByTransactionId = async ({
   transactionId: string;
   accessToken: string;
 }) => {
-  return fetch(`${backendUrl}/transaction-logs/transactions/${transactionId}`, {
-    method: "GET",
-    headers: SMPayWebHeaderWithAccessToken(accessToken),
-  });
+  return fetch(
+    `${getBackendUrl()}/transaction-logs/transactions/${transactionId}`,
+    {
+      method: "GET",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
 };

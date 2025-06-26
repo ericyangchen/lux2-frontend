@@ -18,12 +18,14 @@ import {
 import { ApiDirectModifySubtractBalance } from "@/lib/apis/balance-modifications/post";
 import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
+import { Calculator } from "@/lib/utils/calculator";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { OrganizationSearchBar } from "../common/OrganizationSearchBar";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { PaymentMethodDisplayNames } from "@/lib/constants/transaction";
 import { Textarea } from "@/components/shadcn/ui/textarea";
+import { formatNumber } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
@@ -65,7 +67,9 @@ export function DirectSubtractBalance() {
         const data = await response.json();
         toast({
           title: "餘額扣除成功",
-          description: `已為組織 ${organizationId} 扣除 ${amount} ${paymentMethod}`,
+          description: `已為組織 ${organizationId} 扣除 ${formatNumber(
+            amount
+          )} ${paymentMethod}`,
           variant: "success",
         });
 
@@ -161,7 +165,7 @@ export function DirectSubtractBalance() {
                 type="number"
                 step="0.01"
                 min="0"
-                placeholder="0.00"
+                placeholder="0.000"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
               />

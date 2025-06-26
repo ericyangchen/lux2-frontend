@@ -9,18 +9,26 @@ import {
 
 import { ApiCreateMerchantRequestedWithdrawal } from "@/lib/apis/txn-merchant-requested-withdrawals/post";
 import { ApplicationError } from "@/lib/error/applicationError";
+import { BANK_NAMES_MAPPING } from "@/lib/constants/bank-names";
 import { Button } from "@/components/shadcn/ui/button";
+import { Calculator } from "@/lib/utils/calculator";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
+import { MerchantRequestedWithdrawalTab } from "./MerchantRequestedWithdrawalView";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { PaymentMethodDisplayNames } from "@/lib/constants/transaction";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
-import { WithdrawalToAccountType } from "@/lib/enums/transactions/withdrawal-to-account-type.enum";
 import { getApplicationCookies } from "@/lib/utils/cookie";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
-export function MerchantRequestedWithdrawalCreate() {
+export function MerchantRequestedWithdrawalCreate({
+  setActiveTab,
+}: {
+  setActiveTab: (tab: MerchantRequestedWithdrawalTab) => void;
+}) {
+  const router = useRouter();
   const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -31,21 +39,23 @@ export function MerchantRequestedWithdrawalCreate() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">("");
   const [notifyUrl, setNotifyUrl] = useState("");
 
-  // Payment method specific fields for Maya
-  const [accountType, setAccountType] = useState<WithdrawalToAccountType | "">(
-    ""
-  );
-  const [accountName, setAccountName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  // Payment method specific fields
+  const [bankName, setBankName] = useState<string>("");
+  const [bankAccount, setBankAccount] = useState("");
+  const [receiverName, setReceiverName] = useState("");
+  const [receiverEmail, setReceiverEmail] = useState("");
+  const [receiverPhoneNumber, setReceiverPhoneNumber] = useState("");
 
   const resetForm = () => {
     setMerchantOrderId("");
     setAmount("");
     setPaymentMethod("");
     setNotifyUrl("");
-    setAccountType("");
-    setAccountName("");
-    setPhoneNumber("");
+    setBankName("");
+    setBankAccount("");
+    setReceiverName("");
+    setReceiverEmail("");
+    setReceiverPhoneNumber("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,20 +82,20 @@ export function MerchantRequestedWithdrawalCreate() {
     }
 
     // Validate amount format
-    if (!/^\d+(\.\d{1,2})?$/.test(amount)) {
+    if (!/^\d+(\.\d{1,3})?$/.test(amount)) {
       toast({
         title: "金額格式錯誤",
-        description: "金額必須是有效的數字，最多兩位小數",
+        description: "金額必須是有效的數字，最多三位小數",
         variant: "destructive",
       });
       return;
     }
 
     // Validate phone number if provided
-    if (phoneNumber && !/^(\+63|0)?9\d{9}$/.test(phoneNumber)) {
+    if (receiverPhoneNumber && !/^09\d{9}$/.test(receiverPhoneNumber)) {
       toast({
         title: "電話號碼格式錯誤",
-        description: "請使用 +639XXXXXXXXX 或 09XXXXXXXXX 格式",
+        description: "請使用 09XXXXXXXXX 格式",
         variant: "destructive",
       });
       return;
@@ -101,9 +111,11 @@ export function MerchantRequestedWithdrawalCreate() {
         merchantOrderId,
         amount,
         notifyUrl: notifyUrl || undefined,
-        accountType: accountType || undefined,
-        accountName: accountName || undefined,
-        phoneNumber: phoneNumber || undefined,
+        bankName: bankName || undefined,
+        bankAccount: bankAccount || undefined,
+        receiverName: receiverName || undefined,
+        receiverEmail: receiverEmail || undefined,
+        receiverPhoneNumber: receiverPhoneNumber || undefined,
         accessToken,
       });
 
@@ -113,9 +125,12 @@ export function MerchantRequestedWithdrawalCreate() {
         toast({
           title: "提領請求建立成功",
           description: `商戶訂單號: ${merchantOrderId}`,
-          variant: "default",
+          variant: "success",
         });
         resetForm();
+
+        // switch tab to pending withdrawals
+        setActiveTab(MerchantRequestedWithdrawalTab.LIST);
       } else {
         throw new ApplicationError(data);
       }
@@ -137,8 +152,6 @@ export function MerchantRequestedWithdrawalCreate() {
       setIsLoading(false);
     }
   };
-
-  const isMayaPayment = paymentMethod === PaymentMethod.MAYA;
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -178,13 +191,13 @@ export function MerchantRequestedWithdrawalCreate() {
                 type="text"
               />
               <p className="text-xs text-gray-500">
-                支援最多兩位小數，例如: 120, 120.00, 120.50
+                支援最多三位小數，例如: 120, 120.00, 120.500
               </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="paymentMethod">
-                支付類型 <span className="text-red-500">*</span>
+                支付錢包 <span className="text-red-500">*</span>
               </Label>
               <Select
                 value={paymentMethod}
@@ -193,7 +206,7 @@ export function MerchantRequestedWithdrawalCreate() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="選擇支付類型" />
+                  <SelectValue placeholder="選擇支付錢包" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -209,7 +222,7 @@ export function MerchantRequestedWithdrawalCreate() {
           </div>
 
           {/* Optional Fields */}
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label htmlFor="notifyUrl">回調 URL (選填)</Label>
             <Input
               id="notifyUrl"
@@ -218,66 +231,79 @@ export function MerchantRequestedWithdrawalCreate() {
               placeholder="https://your-domain.com/notify"
               type="url"
             />
-          </div>
+          </div> */}
 
-          {/* Maya Specific Fields */}
-          {isMayaPayment && (
-            <div className="border-t pt-6">
-              <Label className="text-md font-semibold mb-4 block">
-                Maya 支付專用欄位
-              </Label>
+          <div className="border-t pt-6">
+            <Label className="text-md font-semibold mb-4 block">支付欄位</Label>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="accountType">帳戶類型</Label>
-                  <Select
-                    value={accountType}
-                    onValueChange={(value) =>
-                      setAccountType(value as WithdrawalToAccountType)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="選擇帳戶類型" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {Object.values(WithdrawalToAccountType).map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="bankName">銀行名稱</Label>
+                <Select
+                  value={bankName}
+                  onValueChange={(value) => setBankName(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="選擇銀行名稱" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {Object.entries(BANK_NAMES_MAPPING).map(
+                        ([code, name]) => (
+                          <SelectItem key={code} value={code}>
+                            {name}
                           </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
+                        )
+                      )}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="accountName">帳戶名稱</Label>
-                  <Input
-                    id="accountName"
-                    value={accountName}
-                    onChange={(e) => setAccountName(e.target.value)}
-                    placeholder="帳戶持有人姓名"
-                    maxLength={50}
-                  />
-                  <p className="text-xs text-gray-500">最多 50 個字元</p>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="bankAccount">銀行帳號</Label>
+                <Input
+                  id="bankAccount"
+                  value={bankAccount}
+                  onChange={(e) => setBankAccount(e.target.value)}
+                  placeholder="銀行帳號"
+                />
+              </div>
 
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="phoneNumber">電話號碼</Label>
-                  <Input
-                    id="phoneNumber"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="+639XXXXXXXXX 或 09XXXXXXXXX"
-                  />
-                  <p className="text-xs text-gray-500">
-                    使用菲律賓手機號碼格式
-                  </p>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="receiverName">收款人姓名</Label>
+                <Input
+                  id="receiverName"
+                  value={receiverName}
+                  onChange={(e) => setReceiverName(e.target.value)}
+                  placeholder="收款人姓名"
+                  maxLength={50}
+                />
+                <p className="text-xs text-gray-500">最多 50 個字元</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="receiverEmail">收款人電郵</Label>
+                <Input
+                  id="receiverEmail"
+                  value={receiverEmail}
+                  onChange={(e) => setReceiverEmail(e.target.value)}
+                  placeholder="收款人電郵"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="receiverPhoneNumber">收款人電話</Label>
+                <Input
+                  id="receiverPhoneNumber"
+                  value={receiverPhoneNumber}
+                  onChange={(e) => setReceiverPhoneNumber(e.target.value)}
+                  placeholder="收款人電話"
+                />
+                <p className="text-xs text-gray-500">使用菲律賓手機號碼格式</p>
               </div>
             </div>
-          )}
+          </div>
 
           {/* Submit Button */}
           <div className="flex justify-end gap-4 pt-6 border-t">

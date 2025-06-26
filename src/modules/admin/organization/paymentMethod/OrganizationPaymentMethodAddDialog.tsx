@@ -1,9 +1,10 @@
 import {
   DepositAccountTypeDisplayNames,
-  PaymentChannelCategories,
+  DepositPaymentChannelCategories,
   PaymentChannelDisplayNames,
   PaymentMethodDisplayNames,
   WithdrawalAccountTypeDisplayNames,
+  WithdrawalPaymentChannelCategories,
 } from "@/lib/constants/transaction";
 import {
   Dialog,
@@ -38,6 +39,7 @@ import { WithdrawalToAccountType } from "@/lib/enums/transactions/withdrawal-to-
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { convertStringNumberToPercentageNumber } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
+import { useOrganization } from "@/lib/hooks/swr/organization";
 import { useOrganizationTransactionFeeSettings } from "@/lib/hooks/swr/transaction-fee-setting";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
@@ -76,6 +78,8 @@ export function OrganizationPaymentMethodAddDialog({
       organizationId,
       type,
     });
+
+  const { organization } = useOrganization({ organizationId });
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
   const [channelSettings, setChannelSettings] = useState<ChannelSettings[]>([]);
@@ -120,8 +124,13 @@ export function OrganizationPaymentMethodAddDialog({
         )
     );
 
+  const paymentChannelCategories =
+    type === TransactionType.API_DEPOSIT
+      ? DepositPaymentChannelCategories
+      : WithdrawalPaymentChannelCategories;
+
   const remainingChannel = paymentMethod
-    ? PaymentChannelCategories[paymentMethod]?.filter(
+    ? paymentChannelCategories[paymentMethod]?.filter(
         (paymentChannel) =>
           !channelSettings.some(
             (channel) => channel.paymentChannel === paymentChannel
@@ -182,7 +191,14 @@ export function OrganizationPaymentMethodAddDialog({
   const handleAddPaymentMethod = async () => {
     const { accessToken } = getApplicationCookies();
 
-    if (!type || !paymentMethod || disableButton || !accessToken) return;
+    if (
+      !type ||
+      !paymentMethod ||
+      disableButton ||
+      !accessToken ||
+      !organization
+    )
+      return;
 
     try {
       setIsLoading(true);
@@ -211,7 +227,7 @@ export function OrganizationPaymentMethodAddDialog({
 
         const response = await ApiCreateTransactionFeeSetting({
           organizationId,
-          orgType: OrgType.MERCHANT,
+          orgType: organization.type,
           type,
           paymentMethod,
           paymentChannel: channelSetting.paymentChannel as any,
@@ -335,7 +351,7 @@ export function OrganizationPaymentMethodAddDialog({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
-                              {PaymentChannelCategories[paymentMethod]?.map(
+                              {paymentChannelCategories[paymentMethod]?.map(
                                 (paymentChannel) => {
                                   return (
                                     <SelectItem

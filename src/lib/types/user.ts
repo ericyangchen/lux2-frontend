@@ -9,6 +9,7 @@ export interface User {
   password?: string;
   orgType: OrgType;
   role: UserRole;
+  isOtpEnabled: boolean;
   totpSecret?: string;
   createdAt: string;
   updatedAt?: string;

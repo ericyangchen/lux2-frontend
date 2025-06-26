@@ -1,5 +1,5 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
+import { getBackendUrl } from "@/lib/constants/common";
 
 export const ApiGetOrganizationBalanceModifications = async ({
   organizationId,
@@ -16,7 +16,7 @@ export const ApiGetOrganizationBalanceModifications = async ({
   }
 
   const queryString = queryParams.toString();
-  const url = `${backendUrl}/organizations/${encodeURIComponent(
+  const url = `${getBackendUrl}/organizations/${encodeURIComponent(
     organizationId
   )}/balance-modifications${queryString ? `?${queryString}` : ""}`;
 

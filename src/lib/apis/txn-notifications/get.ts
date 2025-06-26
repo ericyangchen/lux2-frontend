@@ -1,7 +1,7 @@
 import { NotificationStatus } from "@/lib/enums/txn-notifications/notification-status.enum";
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
-import { backendUrl } from "@/lib/constants/common";
 import { buildQueryString } from "@/lib/utils/build-query-string";
+import { getBackendUrl } from "@/lib/constants/common";
 
 export const ApiGetTransactionNotifications = async ({
   limit,
@@ -23,7 +23,7 @@ export const ApiGetTransactionNotifications = async ({
     status,
   });
 
-  return fetch(`${backendUrl}/transaction-notifications?${queryString}`, {
+  return fetch(`${getBackendUrl()}/transaction-notifications?${queryString}`, {
     method: "GET",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
   });
@@ -37,7 +37,7 @@ export const ApiGetTransactionNotificationByTransactionId = async ({
   accessToken: string;
 }) => {
   return fetch(
-    `${backendUrl}/transaction-notifications/by-transaction/${transactionId}`,
+    `${getBackendUrl()}/transaction-notifications/by-transaction/${transactionId}`,
     {
       method: "GET",
       headers: SMPayWebHeaderWithAccessToken(accessToken),
@@ -56,8 +56,11 @@ export const ApiGetTransactionNotificationCount = async ({
     status,
   });
 
-  return fetch(`${backendUrl}/transaction-notifications/count?${queryString}`, {
-    method: "GET",
-    headers: SMPayWebHeaderWithAccessToken(accessToken),
-  });
+  return fetch(
+    `${getBackendUrl()}/transaction-notifications/count?${queryString}`,
+    {
+      method: "GET",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
 };

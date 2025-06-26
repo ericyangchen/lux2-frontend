@@ -6,6 +6,7 @@ import {
   WithdrawalAccountTypeDisplayNames,
 } from "@/lib/constants/transaction";
 import { formatNumber, formatNumberInPercentage } from "@/lib/utils/number";
+import { useMemo, useState } from "react";
 
 import { Calculator } from "@/lib/utils/calculator";
 import { DepositToAccountType } from "@/lib/enums/transactions/deposit-to-account-type.enum";
@@ -14,15 +15,27 @@ import { OrganizationTransactionFeeSetting } from "@/lib/types/organization-tran
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { WithdrawalToAccountType } from "@/lib/enums/transactions/withdrawal-to-account-type.enum";
+import { classNames } from "@/lib/utils/classname-utils";
 import { useBalances } from "@/lib/hooks/swr/balance";
-import { useMemo } from "react";
 import { useOrganizationTransactionFeeSettings } from "@/lib/hooks/swr/transaction-fee-setting";
+
+enum Tab {
+  API_DEPOSIT = "API_Deposit",
+  API_WITHDRAWAL = "API_Withdrawal",
+}
+
+const tabDisplayNames = {
+  [Tab.API_DEPOSIT]: TransactionTypeDisplayNames[TransactionType.API_DEPOSIT],
+  [Tab.API_WITHDRAWAL]:
+    TransactionTypeDisplayNames[TransactionType.API_WITHDRAWAL],
+};
 
 export default function MerchantPaymentMethodInfo({
   organizationId,
 }: {
   organizationId?: string;
 }) {
+  const [selectedTab, setSelectedTab] = useState<string>(Tab.API_DEPOSIT);
   const { balances } = useBalances({ organizationId });
 
   const { transactionFeeSettings: depositSettings } =
@@ -175,291 +188,159 @@ export default function MerchantPaymentMethodInfo({
     };
   };
 
+  const renderPaymentMethodSection = (type: TransactionType) => {
+    return (
+      <div className="space-y-4">
+        {availablePaymentMethods.map((paymentMethod) => {
+          const config = getPaymentMethodConfiguration(paymentMethod, type);
+
+          // Get consolidated fee settings from the first enabled channel
+          // (assuming all channels for same payment method have same fees)
+          const consolidatedFeeSettings =
+            config.channels.length > 0 ? config.channels[0].feeSettings : [];
+
+          const isEnabled = config.channels.some((channel) => channel.enabled);
+
+          return (
+            <div
+              key={`${type}-${paymentMethod}`}
+              className="bg-white border border-gray-200 rounded-lg shadow-sm"
+            >
+              {/* Payment Method Header */}
+              <div className="p-4 border-b border-gray-200 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {PaymentMethodDisplayNames[paymentMethod]}
+                    </h3>
+                    <div className="text-sm text-gray-600">
+                      <span>最小金額: </span>
+                      <span className="font-medium">
+                        {config.minAmount
+                          ? formatNumber(config.minAmount)
+                          : "無限制"}
+                      </span>
+                      <span className="mx-2">|</span>
+                      <span>最大金額: </span>
+                      <span className="font-medium">
+                        {config.maxAmount
+                          ? formatNumber(config.maxAmount)
+                          : "無限制"}
+                      </span>
+                    </div>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        isEnabled
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {isEnabled ? "啟用" : "停用"}
+                    </span>
+                  </div>
+                  {config.balance && (
+                    <div className="text-right text-sm">
+                      <div className="text-gray-600">可用餘額</div>
+                      <div className="font-semibold text-lg">
+                        {formatNumber(config.balance.availableAmount)}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Fee Settings */}
+              <div className="p-4">
+                {isEnabled && consolidatedFeeSettings.length > 0 ? (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">
+                      手續費資訊
+                    </h4>
+                    {consolidatedFeeSettings.map((feeSetting, feeIdx) => (
+                      <div
+                        key={feeIdx}
+                        className="flex justify-between items-center p-3 bg-gray-50 rounded-md"
+                      >
+                        <span className="text-sm font-medium text-gray-700">
+                          {feeSetting.accountTypeDisplay}
+                        </span>
+                        <div className="text-sm text-gray-600 space-x-4">
+                          <span>
+                            費率:{" "}
+                            <span className="font-medium">
+                              {formatNumberInPercentage(feeSetting.percentage)}
+                            </span>
+                          </span>
+                          <span>
+                            固定費:{" "}
+                            <span className="font-medium">
+                              {formatNumber(feeSetting.fixed)}
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500 text-center py-4">
+                    {isEnabled ? "無手續費資訊" : "此支付類型未啟用"}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const currentType =
+    selectedTab === Tab.API_DEPOSIT
+      ? TransactionType.API_DEPOSIT
+      : TransactionType.API_WITHDRAWAL;
+
   return (
-    <div className="space-y-6">
-      {/* Deposit Settings */}
-      <div>
-        <Label className="text-lg font-semibold mb-4 block">
-          {TransactionTypeDisplayNames[TransactionType.API_DEPOSIT]}
-        </Label>
-        <div className="space-y-4">
-          {availablePaymentMethods.map((paymentMethod) => {
-            const config = getPaymentMethodConfiguration(
-              paymentMethod,
-              TransactionType.API_DEPOSIT
-            );
+    <div className="">
+      <Label className="text-xl font-bold">支付類型資訊</Label>
 
-            return (
-              <div
-                key={`deposit-${paymentMethod}`}
-                className="bg-white border border-gray-200 rounded-lg shadow-sm"
+      <div className="px-0 sm:px-4 py-4">
+        <div className="sm:hidden">
+          <label className="sr-only">Select a tab</label>
+          <select
+            id="paymentMethod-tabs"
+            name="tabs"
+            defaultValue={selectedTab}
+            onChange={(e) => setSelectedTab(e.target.value)}
+            className="block w-full rounded-md border border-gray-300 px-4 py-2"
+          >
+            {Object.values(Tab).map((tab) => (
+              <option key={tab} value={tab}>
+                {tabDisplayNames[tab]}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="hidden sm:block">
+          <nav className="flex space-x-4">
+            {Object.values(Tab).map((tab) => (
+              <button
+                key={tab}
+                className={classNames(
+                  tab === selectedTab
+                    ? "bg-gray-200 text-gray-900"
+                    : "text-gray-500 hover:text-gray-700",
+                  "rounded-md px-3 py-2 text-sm font-medium"
+                )}
+                onClick={() => setSelectedTab(tab)}
               >
-                {/* Payment Method Header */}
-                <div className="p-4 border-b border-gray-200 bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {PaymentMethodDisplayNames[paymentMethod]}
-                      </h3>
-                      <div className="text-sm text-gray-600">
-                        <span>最小金額: </span>
-                        <span className="font-medium">
-                          {config.minAmount
-                            ? formatNumber(config.minAmount)
-                            : "無限制"}
-                        </span>
-                        <span className="mx-2">|</span>
-                        <span>最大金額: </span>
-                        <span className="font-medium">
-                          {config.maxAmount
-                            ? formatNumber(config.maxAmount)
-                            : "無限制"}
-                        </span>
-                      </div>
-                    </div>
-                    {config.balance && (
-                      <div className="text-right text-sm">
-                        <div className="text-gray-600">可用餘額</div>
-                        <div className="font-semibold text-lg">
-                          {formatNumber(config.balance.availableAmount)}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Payment Channels List */}
-                <div className="p-4">
-                  {config.channels.length > 0 ? (
-                    <div className="space-y-4">
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">
-                        上游渠道
-                      </h4>
-                      {config.channels.map((channel, channelIdx) => (
-                        <div
-                          key={channelIdx}
-                          className="border border-gray-200 rounded-md p-3"
-                        >
-                          {/* Channel Header */}
-                          <div className="flex justify-between items-center mb-3">
-                            <div className="font-medium text-gray-900">
-                              {PaymentChannelDisplayNames[
-                                channel.paymentChannel
-                              ] || channel.paymentChannel}
-                            </div>
-                            <div className="flex items-center space-x-3">
-                              {channel.minAmount && (
-                                <span className="text-xs text-gray-500">
-                                  最小: {formatNumber(channel.minAmount)}
-                                </span>
-                              )}
-                              {channel.maxAmount && (
-                                <span className="text-xs text-gray-500">
-                                  最大: {formatNumber(channel.maxAmount)}
-                                </span>
-                              )}
-                              {channel.settlementInterval && (
-                                <span className="text-xs text-gray-500">
-                                  結算: {channel.settlementInterval}
-                                </span>
-                              )}
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                  channel.enabled
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-red-100 text-red-800"
-                                }`}
-                              >
-                                {channel.enabled ? "啟用" : "停用"}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Fee Settings */}
-                          <div className="space-y-2">
-                            {channel.feeSettings.map((feeSetting, feeIdx) => (
-                              <div
-                                key={feeIdx}
-                                className="flex justify-between items-center p-2 bg-gray-50 rounded"
-                              >
-                                <span className="text-sm font-medium text-gray-700">
-                                  {feeSetting.accountTypeDisplay}
-                                </span>
-                                <div className="text-sm text-gray-600 space-x-3">
-                                  <span>
-                                    費率:{" "}
-                                    <span className="font-medium">
-                                      {formatNumberInPercentage(
-                                        feeSetting.percentage
-                                      )}
-                                    </span>
-                                  </span>
-                                  <span>
-                                    固定費:{" "}
-                                    <span className="font-medium">
-                                      {formatNumber(feeSetting.fixed)}
-                                    </span>
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-sm text-gray-500 text-center py-4">
-                      沒有啟用的上游通道
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+                {tabDisplayNames[tab]}
+              </button>
+            ))}
+          </nav>
         </div>
       </div>
 
-      {/* Withdrawal Settings */}
-      <div>
-        <Label className="text-lg font-semibold mb-4 block">
-          {TransactionTypeDisplayNames[TransactionType.API_WITHDRAWAL]}
-        </Label>
-        <div className="space-y-4">
-          {availablePaymentMethods.map((paymentMethod) => {
-            const config = getPaymentMethodConfiguration(
-              paymentMethod,
-              TransactionType.API_WITHDRAWAL
-            );
-
-            return (
-              <div
-                key={`withdrawal-${paymentMethod}`}
-                className="bg-white border border-gray-200 rounded-lg shadow-sm"
-              >
-                {/* Payment Method Header */}
-                <div className="p-4 border-b border-gray-200 bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {PaymentMethodDisplayNames[paymentMethod]}
-                      </h3>
-                      <div className="text-sm text-gray-600">
-                        <span>最小金額: </span>
-                        <span className="font-medium">
-                          {config.minAmount
-                            ? formatNumber(config.minAmount)
-                            : "無限制"}
-                        </span>
-                        <span className="mx-2">|</span>
-                        <span>最大金額: </span>
-                        <span className="font-medium">
-                          {config.maxAmount
-                            ? formatNumber(config.maxAmount)
-                            : "無限制"}
-                        </span>
-                      </div>
-                    </div>
-                    {config.balance && (
-                      <div className="text-right text-sm">
-                        <div className="text-gray-600">可用餘額</div>
-                        <div className="font-semibold text-lg">
-                          {formatNumber(config.balance.availableAmount)}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Payment Channels List */}
-                <div className="p-4">
-                  {config.channels.length > 0 ? (
-                    <div className="space-y-4">
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">
-                        上游渠道
-                      </h4>
-                      {config.channels.map((channel, channelIdx) => (
-                        <div
-                          key={channelIdx}
-                          className="border border-gray-200 rounded-md p-3"
-                        >
-                          {/* Channel Header */}
-                          <div className="flex justify-between items-center mb-3">
-                            <div className="font-medium text-gray-900">
-                              {PaymentChannelDisplayNames[
-                                channel.paymentChannel
-                              ] || channel.paymentChannel}
-                            </div>
-                            <div className="flex items-center space-x-3">
-                              {channel.minAmount && (
-                                <span className="text-xs text-gray-500">
-                                  最小: {formatNumber(channel.minAmount)}
-                                </span>
-                              )}
-                              {channel.maxAmount && (
-                                <span className="text-xs text-gray-500">
-                                  最大: {formatNumber(channel.maxAmount)}
-                                </span>
-                              )}
-                              {channel.settlementInterval && (
-                                <span className="text-xs text-gray-500">
-                                  結算: {channel.settlementInterval}
-                                </span>
-                              )}
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                  channel.enabled
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-red-100 text-red-800"
-                                }`}
-                              >
-                                {channel.enabled ? "啟用" : "停用"}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Fee Settings */}
-                          <div className="space-y-2">
-                            {channel.feeSettings.map((feeSetting, feeIdx) => (
-                              <div
-                                key={feeIdx}
-                                className="flex justify-between items-center p-2 bg-gray-50 rounded"
-                              >
-                                <span className="text-sm font-medium text-gray-700">
-                                  {feeSetting.accountTypeDisplay}
-                                </span>
-                                <div className="text-sm text-gray-600 space-x-3">
-                                  <span>
-                                    費率:{" "}
-                                    <span className="font-medium">
-                                      {formatNumberInPercentage(
-                                        feeSetting.percentage
-                                      )}
-                                    </span>
-                                  </span>
-                                  <span>
-                                    固定費:{" "}
-                                    <span className="font-medium">
-                                      {formatNumber(feeSetting.fixed)}
-                                    </span>
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-sm text-gray-500 text-center py-4">
-                      沒有啟用的上游通道
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      {renderPaymentMethodSection(currentType)}
     </div>
   );
 }

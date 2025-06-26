@@ -7,11 +7,21 @@ export const formatNumberInInteger = (number: string) => {
   });
 };
 
-export const formatNumber = (number: string) => {
-  return parseFloat(number).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+export const formatNumber = (number?: string) => {
+  if (!number) return "0.000";
+
+  console.log("Input:", number);
+  const parsed = parseFloat(number);
+  console.log("After parseFloat:", parsed);
+  console.log("After toString:", parsed.toString());
+  if (isNaN(parsed)) return "0.000";
+
+  const result = parsed.toLocaleString("en-US", {
+    minimumFractionDigits: 3,
+    maximumFractionDigits: 3,
   });
+  console.log("Final result:", result);
+  return result;
 };
 
 export const formatNumberWithoutMinFraction = (number: string) => {

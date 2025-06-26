@@ -10,7 +10,7 @@ import { PaymentChannel } from "@/lib/enums/transactions/payment-channel.enum";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { getApplicationCookies } from "@/lib/utils/cookie";
-import useSWR from "swr";
+import { useSwrWithAuth } from "../useSwrWithAuth";
 
 const fetchOrganizationTransactionFeeSettings = async ({
   organizationId,
@@ -59,7 +59,7 @@ export const useOrganizationTransactionFeeSettings = ({
 
   const shouldFetch = accessToken && organizationId;
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch
       ? {
           key: "organization-transaction-fee-settings",
@@ -133,7 +133,7 @@ export const useTransactionFeeSettings = ({
 
   const shouldFetch = accessToken;
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch
       ? {
           key: "transaction-fee-settings",

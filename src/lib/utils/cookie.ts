@@ -1,4 +1,5 @@
 import Cookies from "js-cookie";
+import { getEnvironment } from "../constants/common";
 
 export const APPLICATION_USER_ID_COOKIE = "userId";
 export const APPLICATION_ORGANIZATION_ID_COOKIE = "organizationId";
@@ -19,7 +20,7 @@ export const setApplicationCookies = ({
   Cookies.set(APPLICATION_TOKEN_COOKIE, accessToken, {
     path: "/",
     // expires: 1, // 1 day expiration
-    secure: process.env.NODE_ENV === "production",
+    secure: getEnvironment() === "production",
     sameSite: "Strict",
   });
 };

@@ -2,7 +2,7 @@ import { ApiGetTransactionLogsByTransactionId } from "@/lib/apis/txn-logs/get";
 import { ApplicationError } from "@/lib/error/applicationError";
 import { TransactionLog } from "@/lib/types/transaction-log";
 import { getApplicationCookies } from "@/lib/utils/cookie";
-import useSWR from "swr";
+import { useSwrWithAuth } from "../useSwrWithAuth";
 
 const fetchTransactionLogsByTransactionId = async ({
   transactionId,
@@ -36,7 +36,7 @@ export const useTransactionLogs = ({
 
   const shouldFetch = accessToken && transactionId;
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch
       ? { key: "transaction-logs", transactionId, accessToken }
       : null,
