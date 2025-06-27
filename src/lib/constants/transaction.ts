@@ -79,10 +79,13 @@ export const TransactionInternalStatusDisplayNames = {
 
 export const DepositPaymentChannelCategories = {
   [PaymentMethod.NATIVE_GCASH]: [
+    // BIFU
     PaymentChannel.NATIVE_GCASH_DIRECT_BIFU,
     PaymentChannel.NATIVE_GCASH_QR_BIFU,
     PaymentChannel.NATIVE_GCASH_AWAKEN_BIFU,
     PaymentChannel.NATIVE_GCASH_AWAKEN_REVISION_BIFU,
+    // SMX
+    PaymentChannel.NATIVE_GCASH_SMX_DEPOSIT,
   ],
   [PaymentMethod.MAYA]: [PaymentChannel.MAYA_BIFU_DEPOSIT],
   [PaymentMethod.QRPH]: [PaymentChannel.QRPH_BIFU_DEPOSIT],
@@ -116,6 +119,7 @@ export const PaymentMethodDisplayNames = {
 };
 
 export const PaymentChannelDisplayNames = {
+  // BIFU deposit
   [PaymentChannel.NATIVE_GCASH_DIRECT_BIFU]:
     "Native GCash: Bifu Direct (deposit)",
   [PaymentChannel.NATIVE_GCASH_QR_BIFU]: "Native GCash: Bifu QR (deposit)",
@@ -125,10 +129,13 @@ export const PaymentChannelDisplayNames = {
     "Native GCash: Bifu Awaken Revision (deposit)",
   [PaymentChannel.NATIVE_GCASH_BIFU_BANK]:
     "Native GCash: Bifu Bank (withdrawal)",
+  // BIFU withdrawal
   [PaymentChannel.MAYA_BIFU_DEPOSIT]: "Maya: Bifu (deposit)",
   [PaymentChannel.QRPH_BIFU_DEPOSIT]: "QRPH: Bifu (deposit)",
   [PaymentChannel.MAYA_BIFU_BANK_WITHDRAWAL]: "Maya: Bifu (withdrawal)",
   [PaymentChannel.QRPH_BIFU_BANK_WITHDRAWAL]: "QRPH: Bifu (withdrawal)",
+  // SMX deposit
+  [PaymentChannel.NATIVE_GCASH_SMX_DEPOSIT]: "Native GCash: SMX (deposit)",
 };
 
 export const DepositAccountTypeDisplayNames = {
