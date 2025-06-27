@@ -271,7 +271,14 @@ export function OrganizationPaymentMethodEditDialog({
       }
     };
 
-    const newChannelName = remainingChannel[0];
+    // Sort remaining channels to ensure consistent order
+    const sortedChannels = [...remainingChannel].sort((a, b) =>
+      (PaymentChannelDisplayNames[a] || a).localeCompare(
+        PaymentChannelDisplayNames[b] || b
+      )
+    );
+    const newChannelName = sortedChannels[0];
+
     const newSetting: OrganizationTransactionFeeSetting = {
       id: "", // No ID needed for new settings
       organizationId,
@@ -319,7 +326,7 @@ export function OrganizationPaymentMethodEditDialog({
         newChannels.has(setting.paymentChannel)
       );
       const existingSettings = editableSettings.filter(
-        (setting) => !newChannels.has(setting.paymentChannel)
+        (setting) => !newChannels.has(setting.paymentChannel) && setting.id
       );
 
       // Create new settings using the API
@@ -461,13 +468,25 @@ export function OrganizationPaymentMethodEditDialog({
                         <Select
                           value={setting.paymentChannel}
                           disabled={!newChannels.has(setting.paymentChannel)}
-                          onValueChange={(value) =>
+                          onValueChange={(value) => {
+                            // Update the newChannels set with the new value
+                            setNewChannels((prev) => {
+                              const newSet = new Set<string>();
+                              prev.forEach((item) => {
+                                if (item !== setting.paymentChannel) {
+                                  newSet.add(item);
+                                }
+                              });
+                              newSet.add(value);
+                              return newSet;
+                            });
+                            // Update the setting's payment channel
                             updateSettingProperty(
                               settingIdx,
                               "paymentChannel",
                               value
-                            )
-                          }
+                            );
+                          }}
                         >
                           <SelectTrigger className="w-58">
                             <SelectValue />

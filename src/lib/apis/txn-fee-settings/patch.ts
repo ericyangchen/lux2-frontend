@@ -1,6 +1,7 @@
 import { FeeSettingList } from "@/lib/interfaces/txn-fee-settings.interface";
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
 import { getBackendUrl } from "@/lib/constants/common";
+
 export const ApiUpdateTransactionFeeSetting = async ({
   id,
   feeSettingList,
