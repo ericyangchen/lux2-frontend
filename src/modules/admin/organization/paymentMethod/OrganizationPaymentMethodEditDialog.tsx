@@ -122,7 +122,6 @@ export function OrganizationPaymentMethodEditDialog({
 
   const disableButton =
     !paymentMethod ||
-    editableSettings?.length === 0 ||
     editableSettings?.some((setting) => {
       const feeEntries = getFeeEntries(setting.feeSettingList);
       return (
@@ -462,6 +461,13 @@ export function OrganizationPaymentMethodEditDialog({
                         <Select
                           value={setting.paymentChannel}
                           disabled={!newChannels.has(setting.paymentChannel)}
+                          onValueChange={(value) =>
+                            updateSettingProperty(
+                              settingIdx,
+                              "paymentChannel",
+                              value
+                            )
+                          }
                         >
                           <SelectTrigger className="w-58">
                             <SelectValue />
