@@ -21,8 +21,9 @@ export const useAuthGuard = () => {
   const isPublicRoute = isPublicRoutes(router.pathname);
   const isLoginRoute = isLoginRoutes(router.pathname);
 
+  // Don't fetch organization for public routes
   const { organization, isLoading: isOrganizationLoading } = useOrganization({
-    organizationId,
+    organizationId: isPublicRoute ? undefined : organizationId,
   });
 
   const organizationPrefixUrl = getOrganizationPrefixUrl(organization?.type);

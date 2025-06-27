@@ -115,9 +115,9 @@ export const allNavigation = [
   ...developerNavigation,
 ];
 
-export const routesWithoutLayout = ["/login", "/"];
+export const routesWithoutLayout = ["/login", "/", "/redirect"];
 
-const publicRoutes = ["/"];
+const publicRoutes = ["/", "/redirect"];
 
 const loginRoutes = ["/login"];
 
