@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useSearchParams } from "next/navigation";
 
-export default function RedirectPage() {
+export default function CashierPage() {
   const searchParams = useSearchParams();
   const [isBlocked, setIsBlocked] = useState(false);
   const hasTriedRef = useRef(false);

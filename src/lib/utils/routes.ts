@@ -115,9 +115,14 @@ export const allNavigation = [
   ...developerNavigation,
 ];
 
-export const routesWithoutLayout = ["/login", "/", "/cashier"];
+export const routesWithoutLayout = [
+  "/login",
+  "/",
+  "/cashier",
+  "/gcash-cashier",
+];
 
-const publicRoutes = ["/", "/cashier"];
+const publicRoutes = ["/", "/cashier", "/gcash-cashier"];
 
 const loginRoutes = ["/login"];
 
