@@ -96,7 +96,7 @@ export default function GCashCashierPage() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Blue Section */}
-      <div className="bg-[#0057E6] pt-6 pb-[6.75rem]">
+      <div className="bg-[#0057E6] pt-16 pb-[6.75rem]">
         {/* GCash Logo */}
         <div className="w-full flex justify-center">
           <Image
