@@ -8,8 +8,7 @@ import {
 import {
   PHILIPPINES_TIMEZONE,
   convertDatabaseTimeToReadablePhilippinesTime,
-  convertToEndOfDay,
-  convertToStartOfDay,
+  convertToPhilippinesTimezone,
 } from "@/lib/utils/timezone";
 import {
   PaymentMethodDisplayNames,
@@ -154,14 +153,16 @@ export function MerchantTransactionList() {
             ? transactionStatus
             : undefined;
         const startDateQuery = startDate
-          ? convertToStartOfDay(startDate)
+          ? convertToPhilippinesTimezone(startDate.toISOString())
           : undefined;
-        const endDateQuery = endDate ? convertToEndOfDay(endDate) : undefined;
+        const endDateQuery = endDate
+          ? convertToPhilippinesTimezone(endDate.toISOString())
+          : undefined;
         const successStartDateQuery = successStartDate
-          ? convertToStartOfDay(successStartDate)
+          ? convertToPhilippinesTimezone(successStartDate.toISOString())
           : undefined;
         const successEndDateQuery = successEndDate
-          ? convertToEndOfDay(successEndDate)
+          ? convertToPhilippinesTimezone(successEndDate.toISOString())
           : undefined;
 
         const query = {
