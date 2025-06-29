@@ -34,24 +34,26 @@ export const ApiGetTransactionByMerchantIdAndMerchantOrderId = async ({
 };
 
 export const ApiGetTransactionsByMerchantId = async ({
-  merchantId,
   type,
+  merchantId,
   merchantOrderId,
   paymentMethod,
   paymentChannel,
   internalStatus,
   revenueDistributed,
   status,
+  amount,
   createdAtStart,
   createdAtEnd,
+  successAtStart,
+  successAtEnd,
   limit,
   cursorCreatedAt,
   cursorId,
-  amount,
   accessToken,
 }: {
-  merchantId: string;
   type?: string;
+  merchantId?: string;
   merchantOrderId?: string;
   paymentMethod?: string;
   paymentChannel?: string;
@@ -60,14 +62,17 @@ export const ApiGetTransactionsByMerchantId = async ({
   status?: string;
   createdAtStart?: string;
   createdAtEnd?: string;
+  successAtStart?: string;
+  successAtEnd?: string;
+  amount?: string;
   limit?: number;
   cursorCreatedAt?: string;
   cursorId?: string;
-  amount?: string;
   accessToken: string;
 }) => {
   const queryString = buildQueryString({
     type,
+    merchantId,
     merchantOrderId,
     paymentMethod,
     paymentChannel,
@@ -76,6 +81,8 @@ export const ApiGetTransactionsByMerchantId = async ({
     status,
     createdAtStart,
     createdAtEnd,
+    successAtStart,
+    successAtEnd,
     limit,
     cursorCreatedAt,
     cursorId,
