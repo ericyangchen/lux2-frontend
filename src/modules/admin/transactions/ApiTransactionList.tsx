@@ -398,19 +398,19 @@ export function ApiTransactionList() {
     switch (type) {
       case TransactionType.API_DEPOSIT:
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-gray-900 border border-gray-300">
+          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-gray-900 border border-gray-300 whitespace-nowrap">
             {TransactionTypeDisplayNames[type]}
           </span>
         );
       case TransactionType.API_WITHDRAWAL:
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-900 text-white">
+          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-900 text-white whitespace-nowrap">
             {TransactionTypeDisplayNames[type]}
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-gray-900">
+          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-gray-900 whitespace-nowrap">
             {TransactionTypeDisplayNames[type] || type}
           </span>
         );
@@ -787,7 +787,7 @@ export function ApiTransactionList() {
                   </div>
                 )}
             </div>
-            <div className="bg-white rounded-lg shadow-sm border overflow-x-auto">
+            <div className="bg-white rounded-lg shadow-sm border overflow-x-auto whitespace-nowrap">
               <table className="w-full min-w-[1800px]">
                 <thead className="bg-gray-50 border-b">
                   <tr>
@@ -829,7 +829,7 @@ export function ApiTransactionList() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-100 whitespace-nowrap">
                   {transactions?.map((transaction) => (
                     <tr
                       key={transaction.id}
@@ -838,7 +838,7 @@ export function ApiTransactionList() {
                       {/* System Transaction ID */}
                       <td className="px-4 py-3">
                         <div
-                          className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800"
+                          className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800 whitespace-nowrap"
                           title={`點擊複製: ${transaction.id}`}
                           onClick={() => handleCopyToClipboard(transaction.id)}
                         >
@@ -849,7 +849,7 @@ export function ApiTransactionList() {
                       {/* Merchant Order ID */}
                       <td className="px-4 py-3">
                         <div
-                          className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800"
+                          className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800 whitespace-nowrap"
                           title={`點擊複製: ${
                             transaction.merchantOrderId || "N/A"
                           }`}
@@ -865,7 +865,7 @@ export function ApiTransactionList() {
                       {/* Merchant/Organization */}
                       <td className="px-4 py-3">
                         <div
-                          className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800"
+                          className="font-mono text-sm text-gray-600 cursor-pointer hover:text-gray-800 whitespace-nowrap"
                           title={`點擊複製: ${transaction.merchantId}`}
                           onClick={() =>
                             handleCopyToClipboard(transaction.merchantId)
@@ -880,14 +880,14 @@ export function ApiTransactionList() {
 
                       {/* Transaction Type */}
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 whitespace-nowrap">
                           {getTransactionTypeBadge(transaction.type)}
                         </div>
                       </td>
 
                       {/* Payment Method */}
                       <td className="px-4 py-3">
-                        <div className="text-sm text-gray-900">
+                        <div className="text-sm text-gray-900 whitespace-nowrap">
                           {PaymentMethodDisplayNames[
                             transaction.paymentMethod
                           ] || transaction.paymentMethod}
@@ -896,7 +896,7 @@ export function ApiTransactionList() {
 
                       {/* Payment Channel */}
                       <td className="px-4 py-3">
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-gray-600 whitespace-nowrap">
                           {PaymentChannelDisplayNames[
                             transaction.paymentChannel
                           ] || transaction.paymentChannel}
@@ -905,21 +905,21 @@ export function ApiTransactionList() {
 
                       {/* Amount */}
                       <td className="px-4 py-3 text-right">
-                        <div className="font-mono text-gray-900">
+                        <div className="font-mono text-gray-900 whitespace-nowrap">
                           ₱ {formatNumber(transaction.amount)}
                         </div>
                       </td>
 
                       {/* Total Fee */}
                       <td className="px-4 py-3 text-right">
-                        <div className="font-mono text-gray-400 text-sm">
+                        <div className="font-mono text-gray-400 text-sm whitespace-nowrap">
                           ₱ {formatNumber(transaction.totalFee)}
                         </div>
                       </td>
 
                       {/* Status */}
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 whitespace-nowrap">
                           <div
                             className={`w-2 h-2 rounded-full ${getStatusIndicatorColor(
                               transaction.status
@@ -952,7 +952,7 @@ export function ApiTransactionList() {
 
                       {/* Created Time */}
                       <td className="px-4 py-3">
-                        <div className="font-mono text-sm text-gray-600">
+                        <div className="font-mono text-sm text-gray-600 whitespace-nowrap">
                           {formatDateTime(transaction.createdAt)}
                         </div>
                       </td>

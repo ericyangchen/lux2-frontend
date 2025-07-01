@@ -644,7 +644,7 @@ export function MerchantTransactionList() {
                   scrollableTarget="scrollableDiv"
                   className="!overflow-visible"
                 >
-                  <table className="w-full min-w-[1400px]">
+                  <table className="w-full min-w-[1400px] whitespace-nowrap">
                     <thead className="bg-gray-50 border-b">
                       <tr>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
