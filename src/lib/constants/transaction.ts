@@ -83,6 +83,7 @@ export const DepositPaymentChannelCategories = {
     PaymentChannel.NATIVE_GCASH_DIRECT_BIFU,
     PaymentChannel.NATIVE_GCASH_QR_BIFU,
     PaymentChannel.NATIVE_GCASH_AWAKEN_BIFU,
+    PaymentChannel.NATIVE_GCASH_AWAKEN_CASHIER_BIFU,
     PaymentChannel.NATIVE_GCASH_AWAKEN_REVISION_BIFU,
     // IPay
     PaymentChannel.NATIVE_GCASH_IPAY_DEPOSIT,
@@ -145,6 +146,8 @@ export const PaymentChannelDisplayNames = {
   [PaymentChannel.NATIVE_GCASH_QR_BIFU]: "Native GCash: Bifu QR (deposit)",
   [PaymentChannel.NATIVE_GCASH_AWAKEN_BIFU]:
     "Native GCash: Bifu Awaken (deposit)",
+  [PaymentChannel.NATIVE_GCASH_AWAKEN_CASHIER_BIFU]:
+    "Native GCash: Bifu Awaken 包收銀台 (deposit)",
   [PaymentChannel.NATIVE_GCASH_AWAKEN_REVISION_BIFU]:
     "Native GCash: Bifu Awaken Revision (deposit)",
   /* NATIVE_GCASH Withdrawal */
