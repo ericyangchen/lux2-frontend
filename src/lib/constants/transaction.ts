@@ -87,6 +87,7 @@ export const DepositPaymentChannelCategories = {
     PaymentChannel.NATIVE_GCASH_AWAKEN_REVISION_BIFU,
     // IPay
     PaymentChannel.NATIVE_GCASH_IPAY_DEPOSIT,
+    PaymentChannel.NATIVE_GCASH_IPAY_CASHIER_DEPOSIT,
   ],
   [PaymentMethod.MAYA]: [
     // BIFU
@@ -169,6 +170,8 @@ export const PaymentChannelDisplayNames = {
    */
   /* NATIVE_GCASH Deposit */
   [PaymentChannel.NATIVE_GCASH_IPAY_DEPOSIT]: "Native GCash: IPay (deposit)",
+  [PaymentChannel.NATIVE_GCASH_IPAY_CASHIER_DEPOSIT]:
+    "Native GCash: IPay 包收銀台 (deposit)",
   /* NATIVE_GCASH Withdrawal */
   [PaymentChannel.NATIVE_GCASH_IPAY_WITHDRAWAL]:
     "Native GCash: IPay (withdrawal)",
