@@ -85,6 +85,7 @@ export const DepositPaymentChannelCategories = {
     PaymentChannel.NATIVE_GCASH_AWAKEN_BIFU,
     PaymentChannel.NATIVE_GCASH_AWAKEN_CASHIER_BIFU,
     PaymentChannel.NATIVE_GCASH_AWAKEN_REVISION_BIFU,
+
     // IPay
     PaymentChannel.NATIVE_GCASH_IPAY_DEPOSIT,
     PaymentChannel.NATIVE_GCASH_IPAY_CASHIER_DEPOSIT,
@@ -96,6 +97,9 @@ export const DepositPaymentChannelCategories = {
   [PaymentMethod.QRPH]: [
     // BIFU
     PaymentChannel.QRPH_BIFU_DEPOSIT,
+
+    // IPay
+    PaymentChannel.QRPH_IPAY_DEPOSIT,
   ],
 };
 
@@ -103,6 +107,7 @@ export const WithdrawalPaymentChannelCategories = {
   [PaymentMethod.NATIVE_GCASH]: [
     // BIFU
     PaymentChannel.NATIVE_GCASH_BIFU_BANK,
+
     // IPay
     PaymentChannel.NATIVE_GCASH_IPAY_WITHDRAWAL,
   ],
@@ -113,6 +118,9 @@ export const WithdrawalPaymentChannelCategories = {
   [PaymentMethod.QRPH]: [
     // BIFU
     PaymentChannel.QRPH_BIFU_BANK_WITHDRAWAL,
+
+    // IPay
+    PaymentChannel.QRPH_IPAY_WITHDRAWAL,
   ],
 };
 
@@ -175,6 +183,11 @@ export const PaymentChannelDisplayNames = {
   /* NATIVE_GCASH Withdrawal */
   [PaymentChannel.NATIVE_GCASH_IPAY_WITHDRAWAL]:
     "Native GCash: IPay (withdrawal)",
+
+  /* QRPH Deposit */
+  [PaymentChannel.QRPH_IPAY_DEPOSIT]: "QRPH: IPay (deposit)",
+  /* QRPH Withdrawal */
+  [PaymentChannel.QRPH_IPAY_WITHDRAWAL]: "QRPH: IPay (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
