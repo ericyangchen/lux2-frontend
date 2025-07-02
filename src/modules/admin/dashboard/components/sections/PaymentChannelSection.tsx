@@ -108,9 +108,8 @@ export const PaymentChannelSection = ({
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(systemChannelPerformance?.channelPerformanceData || [])
-                .slice(0, 4)
-                .map((channel, index) => (
+              {(systemChannelPerformance?.channelPerformanceData || []).map(
+                (channel, index) => (
                   <div
                     key={channel.channel}
                     className="p-4 bg-gray-50 rounded-lg border"
@@ -178,7 +177,8 @@ export const PaymentChannelSection = ({
                       </div>
                     </div>
                   </div>
-                ))}
+                )
+              )}
             </div>
           </CardContent>
         </Card>
