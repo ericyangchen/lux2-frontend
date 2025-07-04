@@ -55,7 +55,7 @@ const UserInfo = ({ user }: { user?: User }) => {
       </div>
       <Badge variant="outline" className="bg-none border-none pl-0">
         <EnvelopeIcon className="h-4 w-4 mr-2" />
-        <span className="max-w-[216px] truncate">{user.email}</span>
+        <span className="max-w-[228px] truncate">{user.email}</span>
       </Badge>
       <Badge
         variant="outline"
@@ -69,7 +69,7 @@ const UserInfo = ({ user }: { user?: User }) => {
         }
       >
         <IdentificationIcon className="h-4 w-4 mr-2" />
-        <span className="max-w-[216px]">{user.id}</span>
+        <span>{user.id}</span>
       </Badge>
     </div>
   );
