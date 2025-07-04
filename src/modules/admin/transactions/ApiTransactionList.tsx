@@ -325,6 +325,7 @@ export function ApiTransactionList() {
     setEndDate(moment.tz(today, PHILIPPINES_TIMEZONE).endOf("day").toDate());
     setSuccessStartDate(undefined);
     setSuccessEndDate(undefined);
+    setAmount("");
     setTransactionCountAndSumOfAmountAndFee(undefined);
   };
 
@@ -568,7 +569,6 @@ export function ApiTransactionList() {
               <Label className="whitespace-nowrap">金額</Label>
               <Input
                 type="text"
-                placeholder="輸入金額"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
               />
