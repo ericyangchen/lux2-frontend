@@ -69,7 +69,7 @@ const UserInfo = ({ user }: { user?: User }) => {
         }
       >
         <IdentificationIcon className="h-4 w-4 mr-2" />
-        <span className="max-w-[216px] truncate">{user.id}</span>
+        <span className="max-w-[216px]">{user.id}</span>
       </Badge>
     </div>
   );
@@ -254,7 +254,7 @@ export default function ApplicationLayout({
             </nav>
           </div>
 
-          <div className="flex flex-col gap-4 overflow-y-auto border-r border-gray-200 bg-white px-4 py-4">
+          <div className="flex flex-col gap-2 overflow-y-auto border-r border-gray-200 bg-white px-2 py-4">
             <div
               className="text-gray-700 hover:bg-gray-100 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full cursor-pointer border"
               onClick={handleLogout}
@@ -302,7 +302,7 @@ export default function ApplicationLayout({
                 </div>
               </TransitionChild>
 
-              <div className="flex grow flex-col gap-y-2 overflow-y-auto bg-white px-6 pb-2">
+              <div className="flex grow flex-col gap-y-2 overflow-y-auto bg-white px-4 py-4">
                 <div className="flex h-14 shrink-0 items-center justify-center">
                   <div className="px-4 py-1 bg-blue-900 text-white rounded-lg">
                     <span className="font-bold text-xl">
@@ -429,7 +429,7 @@ export default function ApplicationLayout({
                   </ul>
                 </nav>
 
-                <div className="flex flex-col gap-4 overflow-y-auto bg-white py-4">
+                <div className="flex flex-col gap-2 overflow-y-auto bg-white py-2">
                   <div
                     className="text-gray-700 hover:bg-gray-100 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full cursor-pointer border"
                     onClick={handleLogout}
