@@ -43,41 +43,41 @@ export default function AdminTelegramBroadcastPage() {
 
   // Load groups on mount
   useEffect(() => {
-    loadGroups();
-  }, []);
-
-  const loadGroups = async () => {
-    if (!accessToken) {
-      toast({
-        title: "Error",
-        description: "No access token available",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const response = await ApiGetAvailableGroups({ accessToken });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApplicationError(errorData);
+    const loadGroups = async () => {
+      if (!accessToken) {
+        toast({
+          title: "Error",
+          description: "No access token available",
+          variant: "destructive",
+        });
+        return;
       }
 
-      const groupsData = await response.json();
-      setGroups(groupsData);
-    } catch (error) {
-      console.error("Error loading groups:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load telegram groups",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      try {
+        setIsLoading(true);
+        const response = await ApiGetAvailableGroups({ accessToken });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new ApplicationError(errorData);
+        }
+
+        const groupsData = await response.json();
+        setGroups(groupsData);
+      } catch (error) {
+        console.error("Error loading groups:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load telegram groups",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadGroups();
+  }, [accessToken, toast]);
 
   const handleGroupToggle = (groupId: string) => {
     const newSelected = new Set(selectedGroupIds);
