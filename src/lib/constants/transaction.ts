@@ -151,27 +151,28 @@ export const PaymentChannelDisplayNames = {
    */
   /* NATIVE_GCASH Deposit */
   [PaymentChannel.NATIVE_GCASH_DIRECT_BIFU]:
-    "Native GCash: Bifu Direct (deposit)",
-  [PaymentChannel.NATIVE_GCASH_QR_BIFU]: "Native GCash: Bifu QR (deposit)",
-  [PaymentChannel.NATIVE_GCASH_AWAKEN_BIFU]:
-    "Native GCash: Bifu Awaken (deposit)",
+    "Native GCash: Bifu 110 Direct (deposit)",
+  [PaymentChannel.NATIVE_GCASH_QR_BIFU]: "Native GCash: Bifu 111 QR (deposit)",
+  [PaymentChannel.NATIVE_GCASH_AWAKEN_BIFU]: "Native GCash: Bifu 113 (deposit)",
   [PaymentChannel.NATIVE_GCASH_AWAKEN_CASHIER_BIFU]:
-    "Native GCash: Bifu Awaken 包收銀台 (deposit)",
+    "Native GCash: Bifu 113 包收銀台 (deposit)",
   [PaymentChannel.NATIVE_GCASH_AWAKEN_REVISION_BIFU]:
-    "Native GCash: Bifu Awaken Revision (deposit)",
+    "Native GCash: Bifu 114 (deposit)",
   /* NATIVE_GCASH Withdrawal */
   [PaymentChannel.NATIVE_GCASH_BIFU_BANK]:
-    "Native GCash: Bifu Bank (withdrawal)",
+    "Native GCash: Bifu 100 Bank (withdrawal)",
 
   /* MAYA Deposit */
-  [PaymentChannel.MAYA_BIFU_DEPOSIT]: "Maya: Bifu (deposit)",
+  [PaymentChannel.MAYA_BIFU_DEPOSIT]: "Maya: Bifu 107 (deposit)",
   /* MAYA Withdrawal */
-  [PaymentChannel.MAYA_BIFU_BANK_WITHDRAWAL]: "Maya: Bifu Bank (withdrawal)",
+  [PaymentChannel.MAYA_BIFU_BANK_WITHDRAWAL]:
+    "Maya: Bifu 100 Bank (withdrawal)",
 
   /* QRPH Deposit */
-  [PaymentChannel.QRPH_BIFU_DEPOSIT]: "QRPH: Bifu (deposit)",
+  [PaymentChannel.QRPH_BIFU_DEPOSIT]: "QRPH: Bifu 112 (deposit)",
   /* QRPH Withdrawal */
-  [PaymentChannel.QRPH_BIFU_BANK_WITHDRAWAL]: "QRPH: Bifu Bank (withdrawal)",
+  [PaymentChannel.QRPH_BIFU_BANK_WITHDRAWAL]:
+    "QRPH: Bifu 100 Bank (withdrawal)",
 
   /**
    * IPay
