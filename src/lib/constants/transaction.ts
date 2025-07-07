@@ -117,6 +117,9 @@ export const WithdrawalPaymentChannelCategories = {
   [PaymentMethod.MAYA]: [
     // BIFU
     PaymentChannel.MAYA_BIFU_BANK_WITHDRAWAL,
+
+    // WorldPay
+    PaymentChannel.MAYA_WORLDPAY_WITHDRAWAL,
   ],
   [PaymentMethod.QRPH]: [
     // BIFU
@@ -124,6 +127,9 @@ export const WithdrawalPaymentChannelCategories = {
 
     // IPay
     PaymentChannel.QRPH_IPAY_WITHDRAWAL,
+
+    // WorldPay
+    PaymentChannel.QRPH_WORLDPAY_WITHDRAWAL,
   ],
 };
 
@@ -195,6 +201,8 @@ export const PaymentChannelDisplayNames = {
   /* WorldPay */
   [PaymentChannel.NATIVE_GCASH_WORLDPAY_WITHDRAWAL]:
     "N-GCash: WorldPay (withdrawal)",
+  [PaymentChannel.QRPH_WORLDPAY_WITHDRAWAL]: "QRPH: WorldPay (withdrawal)",
+  [PaymentChannel.MAYA_WORLDPAY_WITHDRAWAL]: "Maya: WorldPay (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
