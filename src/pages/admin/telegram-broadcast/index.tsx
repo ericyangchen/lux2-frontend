@@ -211,7 +211,7 @@ export default function AdminTelegramBroadcastPage() {
             />
           </div>
 
-          <div className="border rounded-lg max-h-96 overflow-y-auto">
+          <div className="border rounded-lg max-h-96 lg:max-h-[calc(100vh-252px)] overflow-y-auto">
             {isLoading ? (
               <div className="p-4 text-center text-gray-500">
                 Loading groups...
