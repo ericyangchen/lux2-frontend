@@ -90,6 +90,11 @@ export const adminNavigation = [
     icon: ClipboardDocumentListIcon,
   },
   {
+    name: "代收開單",
+    href: "/admin/deposit-create",
+    icon: CurrencyDollarIcon,
+  },
+  {
     name: "Telegram 群發",
     href: "/admin/telegram-broadcast",
     icon: HandRaisedIcon,
