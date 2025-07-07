@@ -42,11 +42,6 @@ export const merchantNavigation = [
     icon: ClipboardDocumentListIcon,
   },
   // {
-  //   name: "手動提單",
-  //   href: "/merchant/manual-actions",
-  //   icon: HandRaisedIcon,
-  // },
-  // {
   //   name: "歷史紀錄",
   //   href: "/merchant/history",
   //   icon: DocumentChartBarIcon,
@@ -93,6 +88,11 @@ export const adminNavigation = [
     name: "操作紀錄",
     href: "/admin/user-activity-logs",
     icon: ClipboardDocumentListIcon,
+  },
+  {
+    name: "Telegram 群發",
+    href: "/admin/telegram-broadcast",
+    icon: HandRaisedIcon,
   },
   // {
   //   name: "報表",
