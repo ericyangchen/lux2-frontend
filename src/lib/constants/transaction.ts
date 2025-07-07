@@ -110,6 +110,9 @@ export const WithdrawalPaymentChannelCategories = {
 
     // IPay
     PaymentChannel.NATIVE_GCASH_IPAY_WITHDRAWAL,
+
+    // WorldPay
+    PaymentChannel.NATIVE_GCASH_WORLDPAY_WITHDRAWAL,
   ],
   [PaymentMethod.MAYA]: [
     // BIFU
@@ -151,16 +154,16 @@ export const PaymentChannelDisplayNames = {
    */
   /* NATIVE_GCASH Deposit */
   [PaymentChannel.NATIVE_GCASH_DIRECT_BIFU]:
-    "Native GCash: Bifu 110 Direct (deposit)",
-  [PaymentChannel.NATIVE_GCASH_QR_BIFU]: "Native GCash: Bifu 111 QR (deposit)",
-  [PaymentChannel.NATIVE_GCASH_AWAKEN_BIFU]: "Native GCash: Bifu 113 (deposit)",
+    "N-GCash: Bifu 110 Direct (deposit)",
+  [PaymentChannel.NATIVE_GCASH_QR_BIFU]: "N-GCash: Bifu 111 QR (deposit)",
+  [PaymentChannel.NATIVE_GCASH_AWAKEN_BIFU]: "N-GCash: Bifu 113 (deposit)",
   [PaymentChannel.NATIVE_GCASH_AWAKEN_CASHIER_BIFU]:
-    "Native GCash: Bifu 113 包收銀台 (deposit)",
+    "N-GCash: Bifu 113 包收銀台 (deposit)",
   [PaymentChannel.NATIVE_GCASH_AWAKEN_REVISION_BIFU]:
-    "Native GCash: Bifu 114 (deposit)",
+    "N-GCash: Bifu 114 (deposit)",
   /* NATIVE_GCASH Withdrawal */
   [PaymentChannel.NATIVE_GCASH_BIFU_BANK]:
-    "Native GCash: Bifu 100 Bank (withdrawal)",
+    "N-GCash: Bifu 100 Bank (withdrawal)",
 
   /* MAYA Deposit */
   [PaymentChannel.MAYA_BIFU_DEPOSIT]: "Maya: Bifu 107 (deposit)",
@@ -178,17 +181,20 @@ export const PaymentChannelDisplayNames = {
    * IPay
    */
   /* NATIVE_GCASH Deposit */
-  [PaymentChannel.NATIVE_GCASH_IPAY_DEPOSIT]: "Native GCash: IPay (deposit)",
+  [PaymentChannel.NATIVE_GCASH_IPAY_DEPOSIT]: "N-GCash: IPay (deposit)",
   [PaymentChannel.NATIVE_GCASH_IPAY_CASHIER_DEPOSIT]:
-    "Native GCash: IPay 包收銀台 (deposit)",
+    "N-GCash: IPay 包收銀台 (deposit)",
   /* NATIVE_GCASH Withdrawal */
-  [PaymentChannel.NATIVE_GCASH_IPAY_WITHDRAWAL]:
-    "Native GCash: IPay (withdrawal)",
+  [PaymentChannel.NATIVE_GCASH_IPAY_WITHDRAWAL]: "N-GCash: IPay (withdrawal)",
 
   /* QRPH Deposit */
   [PaymentChannel.QRPH_IPAY_DEPOSIT]: "QRPH: IPay (deposit)",
   /* QRPH Withdrawal */
   [PaymentChannel.QRPH_IPAY_WITHDRAWAL]: "QRPH: IPay (withdrawal)",
+
+  /* WorldPay */
+  [PaymentChannel.NATIVE_GCASH_WORLDPAY_WITHDRAWAL]:
+    "N-GCash: WorldPay (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {

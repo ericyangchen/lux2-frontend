@@ -34,4 +34,10 @@ export enum PaymentChannel {
   QRPH_IPAY_DEPOSIT = "QRPH_IPAY_DEPOSIT",
   /* QRPH Withdrawal */
   QRPH_IPAY_WITHDRAWAL = "QRPH_IPAY_WITHDRAWAL",
+
+  /*
+   * WorldPay
+   */
+  /* NATIVE_GCASH Withdrawal */
+  NATIVE_GCASH_WORLDPAY_WITHDRAWAL = "NATIVE_GCASH_WORLDPAY_WITHDRAWAL",
 }
