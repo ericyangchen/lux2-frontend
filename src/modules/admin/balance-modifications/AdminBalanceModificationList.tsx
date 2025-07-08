@@ -139,7 +139,6 @@ export function AdminBalanceModificationList() {
           <OrganizationSearchBar
             selectedOrganizationId={selectedOrganizationId}
             setSelectedOrganizationId={setSelectedOrganizationId}
-            organizationType={OrgType.MERCHANT}
           />
         </div>
 
