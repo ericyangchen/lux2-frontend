@@ -18,8 +18,8 @@ export const BalanceActionDisplayNames = {
   [BalanceAction.REVENUE_ROLLBACK_DUE_TO_WITHDRAWAL_REFUNDED]: "分潤收回",
 
   // manual operation
-  [BalanceAction.DIRECT_MODIFY_ADD_BALANCE]: "加值餘額",
-  [BalanceAction.DIRECT_MODIFY_SUBTRACT_BALANCE]: "扣除餘額",
-  [BalanceAction.FREEZE_BALANCE]: "凍結餘額",
-  [BalanceAction.UNFREEZE_BALANCE]: "解凍餘額",
+  [BalanceAction.DIRECT_MODIFY_ADD_BALANCE]: "加值",
+  [BalanceAction.DIRECT_MODIFY_SUBTRACT_BALANCE]: "扣除",
+  [BalanceAction.FREEZE_BALANCE]: "凍結",
+  [BalanceAction.UNFREEZE_BALANCE]: "解凍",
 };
