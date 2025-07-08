@@ -95,6 +95,11 @@ export const adminNavigation = [
     icon: CurrencyDollarIcon,
   },
   {
+    name: "測試回調",
+    href: "/admin/test-callback",
+    icon: HandRaisedIcon,
+  },
+  {
     name: "Telegram 群發",
     href: "/admin/telegram-broadcast",
     icon: HandRaisedIcon,
