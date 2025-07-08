@@ -1,5 +1,4 @@
-import { BalanceAction } from '../enums/balances/balance-action.enum';
-
+import { BalanceAction } from "../enums/balances/balance-action.enum";
 /**
  * Balance modifications that are manually performed by users
  */

@@ -9,6 +9,7 @@ import {
   ExclamationTriangleIcon,
   HandRaisedIcon,
   HomeIcon,
+  InboxArrowDownIcon,
   UserCircleIcon,
   WalletIcon,
 } from "@heroicons/react/24/outline";
@@ -32,9 +33,14 @@ export const merchantNavigation = [
     icon: DocumentMagnifyingGlassIcon,
   },
   {
-    name: "提領請求",
+    name: "申請下發",
     href: "/merchant/merchant-requested-withdrawals",
     icon: WalletIcon,
+  },
+  {
+    name: "餘額異動紀錄",
+    href: "/merchant/balance-modification-history",
+    icon: ClipboardDocumentListIcon,
   },
   {
     name: "操作紀錄",
@@ -55,14 +61,14 @@ export const adminNavigation = [
     icon: HomeIcon,
   },
   {
-    name: "單位列表",
-    href: "/admin/organizations",
-    icon: BuildingOffice2Icon,
-  },
-  {
     name: "上游渠道",
     href: "/admin/channel-controls",
     icon: CurrencyDollarIcon,
+  },
+  {
+    name: "單位列表",
+    href: "/admin/organizations",
+    icon: BuildingOffice2Icon,
   },
   {
     name: "訂單查詢",
@@ -70,24 +76,14 @@ export const adminNavigation = [
     icon: DocumentMagnifyingGlassIcon,
   },
   {
-    name: "商戶下發請求",
-    href: "/admin/merchant-requested-withdrawals",
-    icon: CheckCircleIcon,
-  },
-  {
-    name: "餘額操作",
-    href: "/admin/balance-modifications",
-    icon: WalletIcon,
-  },
-  {
     name: "待處理交易",
     href: "/admin/problem-transactions",
     icon: ExclamationTriangleIcon,
   },
   {
-    name: "操作紀錄",
-    href: "/admin/user-activity-logs",
-    icon: ClipboardDocumentListIcon,
+    name: "商戶下發請求",
+    href: "/admin/merchant-requested-withdrawals",
+    icon: CheckCircleIcon,
   },
   {
     name: "代收開單",
@@ -102,7 +98,22 @@ export const adminNavigation = [
   {
     name: "Telegram 群發",
     href: "/admin/telegram-broadcast",
-    icon: HandRaisedIcon,
+    icon: InboxArrowDownIcon,
+  },
+  {
+    name: "餘額操作",
+    href: "/admin/balance-modifications",
+    icon: WalletIcon,
+  },
+  {
+    name: "餘額異動紀錄",
+    href: "/admin/balance-modification-history",
+    icon: ClipboardDocumentListIcon,
+  },
+  {
+    name: "操作紀錄",
+    href: "/admin/user-activity-logs",
+    icon: ClipboardDocumentListIcon,
   },
   // {
   //   name: "報表",
