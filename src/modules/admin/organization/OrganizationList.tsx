@@ -150,7 +150,7 @@ export function OrganizationList({
         </Button>
       </div>
 
-      <ul className="divide-y xl:w-[400px] max-h-[450px] xl:max-h-[calc(100vh-132px)] overflow-y-auto border rounded-lg">
+      <ul className="divide-y xl:w-[400px] max-h-[450px] xl:max-h-full overflow-y-auto border rounded-lg">
         {filteredOrganizations &&
           filteredOrganizations.map((org) => (
             <li
