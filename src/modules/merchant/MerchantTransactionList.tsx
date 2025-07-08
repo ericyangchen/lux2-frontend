@@ -69,6 +69,8 @@ export function MerchantTransactionList() {
     TransactionStatus | "all"
   >("all");
   const [amount, setAmount] = useState<string>("");
+  const [amountMin, setAmountMin] = useState<string>("");
+  const [amountMax, setAmountMax] = useState<string>("");
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
     const today = new Date();
     return moment.tz(today, PHILIPPINES_TIMEZONE).startOf("day").toDate();
@@ -174,6 +176,8 @@ export function MerchantTransactionList() {
           successAtStart: successStartDateQuery,
           successAtEnd: successEndDateQuery,
           amount: amount || undefined,
+          amountMin: amountMin || undefined,
+          amountMax: amountMax || undefined,
         };
 
         // Parse cursor string into components
@@ -224,6 +228,8 @@ export function MerchantTransactionList() {
               successAtStart: successStartDateQuery,
               successAtEnd: successEndDateQuery,
               amount: amount || undefined,
+              amountMin: amountMin || undefined,
+              amountMax: amountMax || undefined,
               accessToken,
             });
 
@@ -276,6 +282,8 @@ export function MerchantTransactionList() {
     setSuccessStartDate(undefined);
     setSuccessEndDate(undefined);
     setAmount("");
+    setAmountMin("");
+    setAmountMax("");
     setTransactionCountAndSumOfAmountAndFee(undefined);
   };
 
@@ -459,15 +467,6 @@ export function MerchantTransactionList() {
                 </Select>
               </div>
             </div>
-            {/* amount */}
-            <div className="flex items-center gap-4">
-              <Label className="whitespace-nowrap">金額</Label>
-              <Input
-                type="text"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-              />
-            </div>
             {/* status */}
             <div className="flex items-center gap-4">
               <Label className="whitespace-nowrap">狀態</Label>
@@ -493,6 +492,37 @@ export function MerchantTransactionList() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+            {/* amount */}
+            <div className="flex items-center gap-4">
+              <Label className="whitespace-nowrap">金額</Label>
+              <Input
+                type="text"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="精確金額"
+              />
+            </div>
+            {/* amount range */}
+            <div className="flex items-center gap-4">
+              <Label className="whitespace-nowrap">金額範圍</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  value={amountMin}
+                  onChange={(e) => setAmountMin(e.target.value)}
+                  placeholder="最小金額"
+                  className="w-[120px]"
+                />
+                <span className="text-gray-500">至</span>
+                <Input
+                  type="text"
+                  value={amountMax}
+                  onChange={(e) => setAmountMax(e.target.value)}
+                  placeholder="最大金額"
+                  className="w-[120px]"
+                />
               </div>
             </div>
             {/* Time Range Sections */}

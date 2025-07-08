@@ -101,6 +101,8 @@ export function ApiTransactionList() {
     TransactionInternalStatus | "all"
   >("all");
   const [amount, setAmount] = useState<string>("");
+  const [amountMin, setAmountMin] = useState<string>("");
+  const [amountMax, setAmountMax] = useState<string>("");
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
     const today = new Date();
     return moment.tz(today, PHILIPPINES_TIMEZONE).startOf("day").toDate();
@@ -227,6 +229,8 @@ export function ApiTransactionList() {
           successAtStart: successStartDateQuery,
           successAtEnd: successEndDateQuery,
           amount: amount || undefined,
+          amountMin: amountMin || undefined,
+          amountMax: amountMax || undefined,
           cursorCreatedAt:
             isLoadMore && nextCursor ? nextCursor.createdAt : undefined,
           cursorId: isLoadMore && nextCursor ? nextCursor.id : undefined,
@@ -271,6 +275,8 @@ export function ApiTransactionList() {
               successAtStart: successStartDateQuery,
               successAtEnd: successEndDateQuery,
               amount: amount || undefined,
+              amountMin: amountMin || undefined,
+              amountMax: amountMax || undefined,
               accessToken,
             });
 
@@ -326,6 +332,8 @@ export function ApiTransactionList() {
     setSuccessStartDate(undefined);
     setSuccessEndDate(undefined);
     setAmount("");
+    setAmountMin("");
+    setAmountMax("");
     setTransactionCountAndSumOfAmountAndFee(undefined);
   };
 
@@ -564,15 +572,6 @@ export function ApiTransactionList() {
                 onChange={(e) => setMerchantOrderId(e.target.value)}
               />
             </div>
-            {/* amount */}
-            <div className="flex items-center gap-4">
-              <Label className="whitespace-nowrap">金額</Label>
-              <Input
-                type="text"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-              />
-            </div>
             {/* status */}
             <div className="flex items-center gap-4">
               <Label className="whitespace-nowrap">狀態</Label>
@@ -646,6 +645,37 @@ export function ApiTransactionList() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+            {/* amount */}
+            <div className="flex items-center gap-4">
+              <Label className="whitespace-nowrap">金額</Label>
+              <Input
+                type="text"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="精確金額"
+              />
+            </div>
+            {/* amount range */}
+            <div className="flex items-center gap-4">
+              <Label className="whitespace-nowrap">金額範圍</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  value={amountMin}
+                  onChange={(e) => setAmountMin(e.target.value)}
+                  placeholder="最小金額"
+                  className="w-[120px]"
+                />
+                <span className="text-gray-500">至</span>
+                <Input
+                  type="text"
+                  value={amountMax}
+                  onChange={(e) => setAmountMax(e.target.value)}
+                  placeholder="最大金額"
+                  className="w-[120px]"
+                />
               </div>
             </div>
             {/* Time Range Sections */}

@@ -43,6 +43,8 @@ export const ApiGetTransactionsByMerchantId = async ({
   revenueDistributed,
   status,
   amount,
+  amountMin,
+  amountMax,
   createdAtStart,
   createdAtEnd,
   successAtStart,
@@ -65,6 +67,8 @@ export const ApiGetTransactionsByMerchantId = async ({
   successAtStart?: string;
   successAtEnd?: string;
   amount?: string;
+  amountMin?: string;
+  amountMax?: string;
   limit?: number;
   cursorCreatedAt?: string;
   cursorId?: string;
@@ -87,6 +91,8 @@ export const ApiGetTransactionsByMerchantId = async ({
     cursorCreatedAt,
     cursorId,
     amount,
+    amountMin,
+    amountMax,
   });
 
   return fetch(
@@ -108,6 +114,8 @@ export const ApiGetTransactions = async ({
   revenueDistributed,
   status,
   amount,
+  amountMin,
+  amountMax,
   createdAtStart,
   createdAtEnd,
   successAtStart,
@@ -130,6 +138,8 @@ export const ApiGetTransactions = async ({
   successAtStart?: string;
   successAtEnd?: string;
   amount?: string;
+  amountMin?: string;
+  amountMax?: string;
   limit?: number;
   cursorCreatedAt?: string;
   cursorId?: string;
@@ -152,6 +162,8 @@ export const ApiGetTransactions = async ({
     cursorCreatedAt,
     cursorId,
     amount,
+    amountMin,
+    amountMax,
   });
 
   return fetch(`${getBackendUrl()}/transactions?${queryString}`, {
@@ -170,6 +182,8 @@ export const ApiGetTransactionCountAndSumOfAmountAndFee = async ({
   revenueDistributed,
   status,
   amount,
+  amountMin,
+  amountMax,
   createdAtStart,
   createdAtEnd,
   successAtStart,
@@ -189,6 +203,8 @@ export const ApiGetTransactionCountAndSumOfAmountAndFee = async ({
   successAtStart?: string;
   successAtEnd?: string;
   amount?: string;
+  amountMin?: string;
+  amountMax?: string;
   accessToken: string;
 }) => {
   const queryString = buildQueryString({
@@ -201,6 +217,8 @@ export const ApiGetTransactionCountAndSumOfAmountAndFee = async ({
     revenueDistributed,
     status,
     amount,
+    amountMin,
+    amountMax,
     createdAtStart,
     createdAtEnd,
     successAtStart,
