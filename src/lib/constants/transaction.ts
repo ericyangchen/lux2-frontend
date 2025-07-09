@@ -89,6 +89,9 @@ export const DepositPaymentChannelCategories = {
     // IPay
     PaymentChannel.NATIVE_GCASH_IPAY_DEPOSIT,
     PaymentChannel.NATIVE_GCASH_IPAY_CASHIER_DEPOSIT,
+
+    // DaliPay
+    PaymentChannel.NATIVE_GCASH_DALIPAY_DEPOSIT,
   ],
   [PaymentMethod.MAYA]: [
     // BIFU
@@ -113,6 +116,9 @@ export const WithdrawalPaymentChannelCategories = {
 
     // WorldPay
     PaymentChannel.NATIVE_GCASH_WORLDPAY_WITHDRAWAL,
+
+    // DaliPay
+    PaymentChannel.NATIVE_GCASH_DALIPAY_WITHDRAWAL,
   ],
   [PaymentMethod.MAYA]: [
     // BIFU
@@ -203,6 +209,11 @@ export const PaymentChannelDisplayNames = {
     "N-GCash: WorldPay (withdrawal)",
   [PaymentChannel.QRPH_WORLDPAY_WITHDRAWAL]: "QRPH: WorldPay (withdrawal)",
   [PaymentChannel.MAYA_WORLDPAY_WITHDRAWAL]: "Maya: WorldPay (withdrawal)",
+
+  /* DaliPay */
+  [PaymentChannel.NATIVE_GCASH_DALIPAY_DEPOSIT]: "N-GCash: DaliPay (deposit)",
+  [PaymentChannel.NATIVE_GCASH_DALIPAY_WITHDRAWAL]:
+    "N-GCash: DaliPay (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
