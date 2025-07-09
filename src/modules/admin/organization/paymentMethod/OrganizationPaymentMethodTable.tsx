@@ -135,7 +135,6 @@ export default function OrganizationPaymentMethodTable({
             minAmount,
             maxAmount,
             channels: transactionFeeSettings
-              .filter((setting) => setting.enabled)
               .map((setting) => {
                 const allFeeSettings = getAllFeeSettings(setting);
                 return {
@@ -329,7 +328,7 @@ export default function OrganizationPaymentMethodTable({
                         </div>
                       ) : (
                         <div className="text-sm text-gray-500 text-center py-4">
-                          沒有啟用的上游通道
+                          沒有上游通道
                         </div>
                       )}
                     </div>
