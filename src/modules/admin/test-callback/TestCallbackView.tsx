@@ -3,6 +3,10 @@ import {
   CreateManualNotificationData,
 } from "@/lib/apis/txn-notifications/post";
 import {
+  CreatorTypeDisplayNames,
+  TransactionLogActionDisplayNames,
+} from "@/lib/constants/transaction-logs";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -21,18 +25,13 @@ import { Label } from "@/components/shadcn/ui/label";
 import { Organization } from "@/lib/types/organization";
 import { Textarea } from "@/components/shadcn/ui/textarea";
 import { Transaction } from "@/lib/types/transaction";
+import { TransactionLog } from "@/lib/types/transaction-log";
 import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
 import { TransactionStatusDisplayNames } from "@/lib/constants/transaction";
+import { classNames } from "@/lib/utils/classname-utils";
+import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/utils/timezone";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
-
-interface TransactionLog {
-  id: string;
-  transactionId: string;
-  action: string;
-  details: any;
-  createdAt: string;
-}
 
 export function TestCallbackView() {
   const { toast } = useToast();
@@ -248,6 +247,11 @@ export function TestCallbackView() {
     }
   };
 
+  // Sort transaction logs by createdAt ascending
+  const sortedLogs = transactionLogs.sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+
   const updateFormData = (
     field: keyof CreateManualNotificationData,
     value: any
@@ -447,26 +451,101 @@ export function TestCallbackView() {
               <div className="p-4 text-center text-gray-500">
                 Loading transaction logs...
               </div>
-            ) : transactionLogs.length === 0 ? (
+            ) : sortedLogs.length === 0 ? (
               <div className="p-4 text-center text-gray-500">
                 No transaction logs available. Submit a notification to see
                 logs.
               </div>
             ) : (
               <div className="space-y-0">
-                {transactionLogs.map((log) => (
-                  <div key={log.id} className="p-4 border-b last:border-b-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="font-medium text-sm">{log.action}</div>
-                      <div className="text-xs text-gray-500">
-                        {new Date(log.createdAt).toLocaleString()}
+                {sortedLogs.map((log, index) => (
+                  <div
+                    key={log.id}
+                    className={classNames(
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50",
+                      "px-4 py-3 border-b last:border-b-0"
+                    )}
+                  >
+                    {/* Line 1: action, creatorType(creatorIdentifier, creatorIp), createdAt */}
+                    <div className="flex items-center gap-4 text-sm mb-1 flex-wrap">
+                      <div className="flex items-center gap-1">
+                        <span className="text-gray-500 text-xs">動作:</span>
+                        <span className="font-medium">
+                          {TransactionLogActionDisplayNames[log.action] ||
+                            log.action}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-gray-500 text-xs">
+                          觸發者類型:
+                        </span>
+                        <span className="text-xs text-gray-700">
+                          {CreatorTypeDisplayNames[log.creatorType] ||
+                            log.creatorType}
+                          {log.creatorIdentifier && (
+                            <span className="text-gray-500">
+                              ({log.creatorIdentifier}
+                              {log.creatorIp && `, ${log.creatorIp}`})
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 ml-auto">
+                        <span className="text-gray-500 text-xs">時間:</span>
+                        <span className="font-mono text-xs text-gray-600">
+                          {convertDatabaseTimeToReadablePhilippinesTime(
+                            log.createdAt
+                          )}
+                        </span>
                       </div>
                     </div>
-                    <div className="text-xs text-gray-600">
-                      <pre className="whitespace-pre-wrap font-mono">
-                        {JSON.stringify(log.details, null, 2)}
-                      </pre>
+
+                    {/* Line 2: method, route */}
+                    {(log.route || log.method) && (
+                      <div className="flex items-center gap-1 text-xs mb-1">
+                        <span className="text-gray-500">請求:</span>
+                        <span className="text-gray-500 font-mono">
+                          {log.method} {log.route}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Line 3: triggeredBy */}
+                    <div className="flex items-center gap-1 text-xs text-gray-600 mb-1">
+                      <span className="text-gray-500">觸發者:</span>
+                      <span className="font-mono">
+                        {log.triggeredBy || "系統"}
+                      </span>
                     </div>
+
+                    {/* Line 4: data */}
+                    {log.data && (
+                      <div className="mt-2">
+                        <details className="cursor-pointer">
+                          <summary className="text-blue-600 hover:text-blue-800 select-none text-sm px-2 py-1 bg-blue-50 rounded inline-block">
+                            📋 查看詳情
+                          </summary>
+                          <div className="mt-2 bg-slate-900 rounded-md overflow-hidden">
+                            <div className="bg-slate-800 px-3 py-1 text-xs text-slate-300 font-mono border-b border-slate-700">
+                              JSON
+                            </div>
+                            <div
+                              className="overflow-x-auto"
+                              style={{ maxWidth: "calc(100vw - 120px)" }}
+                            >
+                              <pre
+                                className="text-xs text-green-400 font-mono p-3 bg-slate-900 whitespace-pre-wrap break-words"
+                                style={{ minWidth: "max-content" }}
+                              >
+                                <code className="language-json">
+                                  {JSON.stringify(log.data, null, 2)}
+                                </code>
+                              </pre>
+                            </div>
+                          </div>
+                        </details>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
