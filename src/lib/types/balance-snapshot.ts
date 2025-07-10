@@ -1,21 +1,25 @@
-export interface BalanceHistoryItem {
+export interface DailyBalanceSnapshotItem {
   date: string; // YYYY-MM-DD
   totalBalance: string;
   availableBalance: string;
   frozenBalance: string;
   unsettledBalance: string;
+  withdrawalPendingBalance?: string;
+  paymentMethod?: string;
 }
 
-export interface SystemBalanceHistory {
+export interface SystemDailyBalanceSnapshots {
   organizationId: "system";
   startDate: string;
   endDate: string;
-  balanceHistory: BalanceHistoryItem[];
+  paymentMethod: string;
+  balanceSnapshots: DailyBalanceSnapshotItem[];
 }
 
-export interface OrganizationBalanceHistory {
+export interface OrganizationDailyBalanceSnapshots {
   organizationId: string;
   startDate: string;
   endDate: string;
-  balanceHistory: BalanceHistoryItem[];
+  paymentMethod: string;
+  balanceSnapshots: DailyBalanceSnapshotItem[];
 }

@@ -1,10 +1,10 @@
 import {
-  ApiGetOrganizationBalanceHistory,
-  ApiGetSystemBalanceHistory,
+  ApiGetOrganizationDailyBalanceSnapshots,
+  ApiGetSystemDailyBalanceSnapshots,
 } from "../../apis/balance-snapshots/get";
 import {
-  OrganizationBalanceHistory,
-  SystemBalanceHistory,
+  OrganizationDailyBalanceSnapshots,
+  SystemDailyBalanceSnapshots,
 } from "../../types/balance-snapshot";
 
 import { ApplicationError } from "@/lib/error/applicationError";
@@ -12,18 +12,24 @@ import { USE_BALANCES_REFRESH_INTERVAL } from "../../constants/swr-refresh-inter
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useSwrWithAuth } from "../useSwrWithAuth";
 
-const fetchSystemBalanceHistory = async ({
+const fetchSystemDailyBalanceSnapshots = async ({
   days,
   endDate,
+  startDate,
+  paymentMethod,
   accessToken,
 }: {
   days?: number; // Default 7 days, max 365
   endDate?: string; // YYYY-MM-DD format
+  startDate?: string; // YYYY-MM-DD format
+  paymentMethod?: string;
   accessToken: string;
 }) => {
-  const response = await ApiGetSystemBalanceHistory({
+  const response = await ApiGetSystemDailyBalanceSnapshots({
     days,
     endDate,
+    startDate,
+    paymentMethod,
     accessToken,
   });
 
@@ -38,28 +44,34 @@ const fetchSystemBalanceHistory = async ({
   return response.json();
 };
 
-export const useSystemBalanceHistory = ({
+export const useSystemDailyBalanceSnapshots = ({
   days,
   endDate,
+  startDate,
+  paymentMethod,
 }: {
   days?: number; // Default 7 days, max 365
   endDate?: string; // YYYY-MM-DD format
+  startDate?: string; // YYYY-MM-DD format
+  paymentMethod?: string;
 }) => {
   const { accessToken } = getApplicationCookies();
 
   const shouldFetch = accessToken;
 
   const { data, error, isLoading, mutate } =
-    useSwrWithAuth<SystemBalanceHistory>(
+    useSwrWithAuth<SystemDailyBalanceSnapshots>(
       shouldFetch
         ? {
-            key: "system-balance-history",
+            key: "system-daily-balance-snapshots",
             days,
             endDate,
+            startDate,
+            paymentMethod,
             accessToken,
           }
         : null,
-      fetchSystemBalanceHistory,
+      fetchSystemDailyBalanceSnapshots,
       {
         refreshInterval: USE_BALANCES_REFRESH_INTERVAL,
         revalidateOnFocus: false,
@@ -68,27 +80,33 @@ export const useSystemBalanceHistory = ({
     );
 
   return {
-    systemBalanceHistory: data as SystemBalanceHistory,
+    systemDailyBalanceSnapshots: data as SystemDailyBalanceSnapshots,
     isLoading,
     isError: error,
     mutate,
   };
 };
 
-const fetchOrganizationBalanceHistory = async ({
+const fetchOrganizationDailyBalanceSnapshots = async ({
   days,
   endDate,
+  startDate,
+  paymentMethod,
   organizationId,
   accessToken,
 }: {
   days?: number; // Default 7 days, max 365
   endDate?: string; // YYYY-MM-DD format
+  startDate?: string; // YYYY-MM-DD format
+  paymentMethod?: string;
   organizationId: string;
   accessToken: string;
 }) => {
-  const response = await ApiGetOrganizationBalanceHistory({
+  const response = await ApiGetOrganizationDailyBalanceSnapshots({
     days,
     endDate,
+    startDate,
+    paymentMethod,
     organizationId,
     accessToken,
   });
@@ -104,13 +122,17 @@ const fetchOrganizationBalanceHistory = async ({
   return response.json();
 };
 
-export const useOrganizationBalanceHistory = ({
+export const useOrganizationDailyBalanceSnapshots = ({
   days,
   endDate,
+  startDate,
+  paymentMethod,
   organizationId,
 }: {
   days?: number;
   endDate?: string;
+  startDate?: string;
+  paymentMethod?: string;
   organizationId?: string;
 }) => {
   const { accessToken } = getApplicationCookies();
@@ -120,14 +142,16 @@ export const useOrganizationBalanceHistory = ({
   const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch
       ? {
-          key: "organization-balance-history",
+          key: "organization-daily-balance-snapshots",
           days,
           endDate,
+          startDate,
+          paymentMethod,
           organizationId,
           accessToken,
         }
       : null,
-    fetchOrganizationBalanceHistory,
+    fetchOrganizationDailyBalanceSnapshots,
     {
       refreshInterval: USE_BALANCES_REFRESH_INTERVAL,
       revalidateOnFocus: false,
@@ -136,9 +160,62 @@ export const useOrganizationBalanceHistory = ({
   );
 
   return {
-    organizationBalanceHistory: data as OrganizationBalanceHistory,
+    organizationDailyBalanceSnapshots:
+      data as OrganizationDailyBalanceSnapshots,
     isLoading,
     isError: error,
     mutate,
+  };
+};
+
+// Backward compatibility exports for existing usage
+export const useSystemBalanceHistory = ({
+  days,
+  endDate,
+}: {
+  days?: number;
+  endDate?: string;
+}) => {
+  const result = useSystemDailyBalanceSnapshots({ days, endDate });
+
+  return {
+    systemBalanceHistory: result.systemDailyBalanceSnapshots
+      ? {
+          ...result.systemDailyBalanceSnapshots,
+          balanceHistory: result.systemDailyBalanceSnapshots.balanceSnapshots,
+        }
+      : undefined,
+    isLoading: result.isLoading,
+    isError: result.isError,
+    mutate: result.mutate,
+  };
+};
+
+export const useOrganizationBalanceHistory = ({
+  days,
+  endDate,
+  organizationId,
+}: {
+  days?: number;
+  endDate?: string;
+  organizationId?: string;
+}) => {
+  const result = useOrganizationDailyBalanceSnapshots({
+    days,
+    endDate,
+    organizationId,
+  });
+
+  return {
+    organizationBalanceHistory: result.organizationDailyBalanceSnapshots
+      ? {
+          ...result.organizationDailyBalanceSnapshots,
+          balanceHistory:
+            result.organizationDailyBalanceSnapshots.balanceSnapshots,
+        }
+      : undefined,
+    isLoading: result.isLoading,
+    isError: result.isError,
+    mutate: result.mutate,
   };
 };
