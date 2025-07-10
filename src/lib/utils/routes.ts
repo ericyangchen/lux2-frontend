@@ -141,9 +141,10 @@ export const routesWithoutLayout = [
   "/",
   "/cashier",
   "/gcash-cashier",
+  "/test-signature",
 ];
 
-const publicRoutes = ["/", "/cashier", "/gcash-cashier"];
+const publicRoutes = ["/", "/cashier", "/gcash-cashier", "/test-signature"];
 
 const loginRoutes = ["/login"];
 
