@@ -130,9 +130,12 @@ export function TestCallbackView() {
         totalFee: transactionData.totalFee,
         balanceChanged: transactionData.balanceChanged,
         status: transactionData.status,
-        message: transactionData.message || "",
-        successAt: transactionData.successAt || "",
-        notifyUrl: transactionData.notifyUrl || "",
+        message: transactionData.message || null,
+        successAt:
+          transactionData.status === TransactionStatus.SUCCESS
+            ? transactionData.successAt
+            : undefined,
+        notifyUrl: transactionData.notifyUrl || undefined,
         maxAttempts: 30,
       });
 
