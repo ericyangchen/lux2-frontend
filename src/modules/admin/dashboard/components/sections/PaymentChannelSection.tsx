@@ -159,20 +159,7 @@ export const PaymentChannelSection = ({
                       <div className="flex justify-between pt-1 border-t border-gray-200">
                         <span className="text-gray-600">成功率:</span>
                         <span className="font-medium text-gray-900">
-                          {channel.successRate}%
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">真實成功率:</span>
-                        <span className="font-medium text-gray-900">
-                          {channel.success + channel.failed > 0
-                            ? Math.round(
-                                (channel.success /
-                                  (channel.success + channel.failed)) *
-                                  10000
-                              ) / 100
-                            : 0}
-                          %
+                          {channel.successRate.toFixed(2)}%
                         </span>
                       </div>
                     </div>
