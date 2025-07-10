@@ -7,6 +7,7 @@ interface TransactionStatCardProps {
   value: string;
   successCount?: string;
   failedCount?: string;
+  pendingCount?: string;
   icon?: React.ReactNode;
 }
 
@@ -15,6 +16,7 @@ export const TransactionStatCard = ({
   value,
   successCount,
   failedCount,
+  pendingCount,
   icon,
 }: TransactionStatCardProps) => {
   return (
@@ -26,22 +28,37 @@ export const TransactionStatCard = ({
             <p className="text-2xl font-bold text-gray-900 mb-3">
               {formatNumberInInteger(value)}
             </p>
-            {successCount !== undefined && failedCount !== undefined && (
-              <div className="flex space-x-4 text-sm">
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  <span className="text-gray-600">成功:</span>
-                  <span className="font-medium text-green-600 ml-1">
-                    {formatNumberInInteger(successCount)}
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
-                  <span className="text-gray-600">失敗:</span>
-                  <span className="font-medium text-red-600 ml-1">
-                    {formatNumberInInteger(failedCount)}
-                  </span>
-                </div>
+            {(successCount !== undefined ||
+              failedCount !== undefined ||
+              pendingCount !== undefined) && (
+              <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                {successCount !== undefined && (
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    <span className="text-gray-600">成功:</span>
+                    <span className="font-medium text-green-600 ml-1">
+                      {formatNumberInInteger(successCount)}
+                    </span>
+                  </div>
+                )}
+                {pendingCount !== undefined && (
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full mr-2"></div>
+                    <span className="text-gray-600">處理中:</span>
+                    <span className="font-medium text-amber-600 ml-1">
+                      {formatNumberInInteger(pendingCount)}
+                    </span>
+                  </div>
+                )}
+                {failedCount !== undefined && (
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                    <span className="text-gray-600">失敗:</span>
+                    <span className="font-medium text-red-600 ml-1">
+                      {formatNumberInInteger(failedCount)}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>

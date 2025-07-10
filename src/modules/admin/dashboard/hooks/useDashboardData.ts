@@ -7,7 +7,7 @@ import {
 
 import { Calculator } from "@/lib/utils/calculator";
 import { useSystemBalance } from "@/lib/hooks/swr/balance";
-import { useSystemBalanceHistory } from "@/lib/hooks/swr/balance-snapshots";
+import { useSystemDailyBalanceSnapshots } from "@/lib/hooks/swr/balance-snapshots";
 
 export const useDashboardData = () => {
   const { systemBalance } = useSystemBalance();
@@ -16,7 +16,9 @@ export const useDashboardData = () => {
   const { systemPaymentMethodDistribution } =
     useSystemPaymentMethodDistribution();
   const { systemChannelPerformance } = useSystemChannelPerformance();
-  const { systemBalanceHistory } = useSystemBalanceHistory({ days: 7 });
+  const { systemDailyBalanceSnapshots } = useSystemDailyBalanceSnapshots({
+    days: 7,
+  });
 
   const totalBalance = systemBalance
     ? Calculator.plus(
@@ -32,6 +34,6 @@ export const useDashboardData = () => {
     systemWeeklyTransactionTrends,
     systemPaymentMethodDistribution,
     systemChannelPerformance,
-    systemBalanceHistory,
+    systemDailyBalanceSnapshots,
   };
 };

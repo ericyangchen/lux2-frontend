@@ -19,25 +19,25 @@ import {
   COLORS,
   createSuccessRateData,
   createTransactionTypeData,
-  transformBalanceHistoryData,
+  transformDailyBalanceData,
 } from "../../utils/chartDataTransformers";
 
 import { ChartCard } from "../cards/ChartCard";
-import { SystemBalanceHistory } from "@/lib/types/balance-snapshot";
+import { SystemDailyBalanceSnapshots } from "@/lib/types/balance-snapshot";
 import { SystemDailyTransactionCount } from "@/lib/types/transaction";
 import { SystemWeeklyTransactionTrends } from "@/lib/types/transaction";
 
 export const AnalyticsSection = ({
   systemWeeklyTransactionTrends,
   systemDailyTransactionCount,
-  systemBalanceHistory,
+  systemDailyBalanceSnapshots,
 }: {
   systemWeeklyTransactionTrends: SystemWeeklyTransactionTrends;
   systemDailyTransactionCount: SystemDailyTransactionCount;
-  systemBalanceHistory: SystemBalanceHistory;
+  systemDailyBalanceSnapshots: SystemDailyBalanceSnapshots;
 }) => {
-  const balanceHistoryData = transformBalanceHistoryData(
-    systemBalanceHistory?.balanceHistory || []
+  const dailyBalanceData = transformDailyBalanceData(
+    systemDailyBalanceSnapshots?.balanceSnapshots || []
   );
   const successRateData = createSuccessRateData(systemDailyTransactionCount);
   const transactionTypeData = createTransactionTypeData(
@@ -94,7 +94,7 @@ export const AnalyticsSection = ({
         </ChartCard>
 
         {/* Success Rate Pie Chart */}
-        <ChartCard title="今日成功率" subtitle="交易成功與失敗比例">
+        <ChartCard title="今日交易狀態" subtitle="交易成功、處理中與失敗比例">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -127,7 +127,7 @@ export const AnalyticsSection = ({
         {/* Balance History */}
         <ChartCard title="餘額變化趨勢" subtitle="近期餘額與凍結金額變化">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={balanceHistoryData}>
+            <LineChart data={dailyBalanceData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
               <XAxis dataKey="name" stroke="#6b7280" fontSize={12} />
               <YAxis stroke="#6b7280" fontSize={12} />
@@ -178,6 +178,12 @@ export const AnalyticsSection = ({
                 dataKey="success"
                 fill={COLORS.success}
                 name="成功"
+                radius={[4, 4, 0, 0]}
+              />
+              <Bar
+                dataKey="pending"
+                fill={COLORS.warning}
+                name="處理中"
                 radius={[4, 4, 0, 0]}
               />
               <Bar

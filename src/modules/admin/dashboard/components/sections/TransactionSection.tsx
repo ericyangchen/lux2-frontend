@@ -16,7 +16,7 @@ export const TransactionSection = ({
     <div>
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">今日交易概況</h2>
-        <p className="text-gray-600">今日交易統計與成功率</p>
+        <p className="text-gray-600">今日交易統計與狀態分析</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -29,9 +29,11 @@ export const TransactionSection = ({
           title="代收訂單"
           value={(
             parseInt(systemDailyTransactionCount?.depositSuccessTotal || "0") +
+            parseInt(systemDailyTransactionCount?.depositPendingTotal || "0") +
             parseInt(systemDailyTransactionCount?.depositFailedTotal || "0")
           ).toString()}
           successCount={systemDailyTransactionCount?.depositSuccessTotal || "0"}
+          pendingCount={systemDailyTransactionCount?.depositPendingTotal || "0"}
           failedCount={systemDailyTransactionCount?.depositFailedTotal || "0"}
           icon={TrendingUpIcon}
         />
@@ -41,10 +43,16 @@ export const TransactionSection = ({
             parseInt(
               systemDailyTransactionCount?.withdrawalSuccessTotal || "0"
             ) +
+            parseInt(
+              systemDailyTransactionCount?.withdrawalPendingTotal || "0"
+            ) +
             parseInt(systemDailyTransactionCount?.withdrawalFailedTotal || "0")
           ).toString()}
           successCount={
             systemDailyTransactionCount?.withdrawalSuccessTotal || "0"
+          }
+          pendingCount={
+            systemDailyTransactionCount?.withdrawalPendingTotal || "0"
           }
           failedCount={
             systemDailyTransactionCount?.withdrawalFailedTotal || "0"

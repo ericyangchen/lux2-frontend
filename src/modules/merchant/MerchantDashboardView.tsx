@@ -33,7 +33,7 @@ import { currencySymbol } from "@/lib/constants/common";
 import { format } from "date-fns";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useBalances } from "@/lib/hooks/swr/balance";
-import { useOrganizationBalanceHistory } from "@/lib/hooks/swr/balance-snapshots";
+import { useOrganizationDailyBalanceSnapshots } from "@/lib/hooks/swr/balance-snapshots";
 
 // Mock data for merchant charts - replaced with real API data below
 
@@ -85,12 +85,14 @@ const TransactionStatCard = ({
   value,
   successCount,
   failedCount,
+  pendingCount,
   icon,
 }: {
   title: string;
   value: string;
   successCount?: string;
   failedCount?: string;
+  pendingCount?: string;
   icon?: React.ReactNode;
 }) => {
   return (
@@ -102,22 +104,37 @@ const TransactionStatCard = ({
             <p className="text-2xl font-bold text-gray-900 mb-3">
               {formatNumberInInteger(value)}
             </p>
-            {successCount !== undefined && failedCount !== undefined && (
-              <div className="flex space-x-4 text-sm">
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  <span className="text-gray-600">成功:</span>
-                  <span className="font-medium text-green-600 ml-1">
-                    {formatNumberInInteger(successCount)}
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
-                  <span className="text-gray-600">失敗:</span>
-                  <span className="font-medium text-red-600 ml-1">
-                    {formatNumberInInteger(failedCount)}
-                  </span>
-                </div>
+            {(successCount !== undefined ||
+              failedCount !== undefined ||
+              pendingCount !== undefined) && (
+              <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                {successCount !== undefined && (
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    <span className="text-gray-600">成功:</span>
+                    <span className="font-medium text-green-600 ml-1">
+                      {formatNumberInInteger(successCount)}
+                    </span>
+                  </div>
+                )}
+                {pendingCount !== undefined && (
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full mr-2"></div>
+                    <span className="text-gray-600">處理中:</span>
+                    <span className="font-medium text-amber-600 ml-1">
+                      {formatNumberInInteger(pendingCount)}
+                    </span>
+                  </div>
+                )}
+                {failedCount !== undefined && (
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                    <span className="text-gray-600">失敗:</span>
+                    <span className="font-medium text-red-600 ml-1">
+                      {formatNumberInInteger(failedCount)}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -157,16 +174,17 @@ export default function MerchantDashboardView() {
 
   const { balances } = useBalances({ organizationId });
 
-  // Get balance history for the chart (last 7 days)
-  const { organizationBalanceHistory } = useOrganizationBalanceHistory({
-    organizationId,
-    days: 7,
-  });
+  // Get daily balance snapshots for the chart (last 7 days)
+  const { organizationDailyBalanceSnapshots } =
+    useOrganizationDailyBalanceSnapshots({
+      organizationId,
+      days: 7,
+    });
 
-  // Transform balance history data for the chart
-  const balanceHistoryData = (
-    organizationBalanceHistory?.balanceHistory || []
-  ).map((item) => ({
+  // Transform daily balance data for the chart
+  const dailyBalanceData = (
+    organizationDailyBalanceSnapshots?.balanceSnapshots || []
+  ).map((item: any) => ({
     name: format(new Date(item.date), "MM/dd"),
     balance: formatNumber(item.totalBalance),
     available: formatNumber(item.availableBalance),
@@ -200,28 +218,43 @@ export default function MerchantDashboardView() {
   const { weeklyTransactionTrendsByOrganizationId } =
     useWeeklyTransactionTrendsByOrganizationId({ organizationId });
 
-  // Success rate data for pie chart
+  // Transaction status data for pie chart
+  const successCount =
+    parseInt(
+      dailyTransactionCountByOrganizationId?.depositSuccessTotal || "0"
+    ) +
+    parseInt(
+      dailyTransactionCountByOrganizationId?.withdrawalSuccessTotal || "0"
+    );
+
+  const pendingCount =
+    parseInt(
+      dailyTransactionCountByOrganizationId?.depositPendingTotal || "0"
+    ) +
+    parseInt(
+      dailyTransactionCountByOrganizationId?.withdrawalPendingTotal || "0"
+    );
+
+  const failedCount =
+    parseInt(dailyTransactionCountByOrganizationId?.depositFailedTotal || "0") +
+    parseInt(
+      dailyTransactionCountByOrganizationId?.withdrawalFailedTotal || "0"
+    );
+
   const successRateData = [
     {
       name: "成功",
-      value:
-        parseInt(
-          dailyTransactionCountByOrganizationId?.depositSuccessTotal || "0"
-        ) +
-        parseInt(
-          dailyTransactionCountByOrganizationId?.withdrawalSuccessTotal || "0"
-        ),
+      value: successCount,
       color: COLORS.success,
     },
     {
+      name: "處理中",
+      value: pendingCount,
+      color: COLORS.warning,
+    },
+    {
       name: "失敗",
-      value:
-        parseInt(
-          dailyTransactionCountByOrganizationId?.depositFailedTotal || "0"
-        ) +
-        parseInt(
-          dailyTransactionCountByOrganizationId?.withdrawalFailedTotal || "0"
-        ),
+      value: failedCount,
       color: COLORS.danger,
     },
   ];
@@ -233,6 +266,9 @@ export default function MerchantDashboardView() {
       success: parseInt(
         dailyTransactionCountByOrganizationId?.depositSuccessTotal || "0"
       ),
+      pending: parseInt(
+        dailyTransactionCountByOrganizationId?.depositPendingTotal || "0"
+      ),
       failed: parseInt(
         dailyTransactionCountByOrganizationId?.depositFailedTotal || "0"
       ),
@@ -241,6 +277,9 @@ export default function MerchantDashboardView() {
       name: "代付",
       success: parseInt(
         dailyTransactionCountByOrganizationId?.withdrawalSuccessTotal || "0"
+      ),
+      pending: parseInt(
+        dailyTransactionCountByOrganizationId?.withdrawalPendingTotal || "0"
       ),
       failed: parseInt(
         dailyTransactionCountByOrganizationId?.withdrawalFailedTotal || "0"
@@ -360,7 +399,7 @@ export default function MerchantDashboardView() {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             今日交易概況
           </h2>
-          <p className="text-gray-600">今日交易統計與成功率</p>
+          <p className="text-gray-600">今日交易統計與狀態分析</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -377,11 +416,18 @@ export default function MerchantDashboardView() {
                   "0"
               ) +
               parseInt(
+                dailyTransactionCountByOrganizationId?.depositPendingTotal ||
+                  "0"
+              ) +
+              parseInt(
                 dailyTransactionCountByOrganizationId?.depositFailedTotal || "0"
               )
             ).toString()}
             successCount={
               dailyTransactionCountByOrganizationId?.depositSuccessTotal || "0"
+            }
+            pendingCount={
+              dailyTransactionCountByOrganizationId?.depositPendingTotal || "0"
             }
             failedCount={
               dailyTransactionCountByOrganizationId?.depositFailedTotal || "0"
@@ -396,12 +442,20 @@ export default function MerchantDashboardView() {
                   "0"
               ) +
               parseInt(
+                dailyTransactionCountByOrganizationId?.withdrawalPendingTotal ||
+                  "0"
+              ) +
+              parseInt(
                 dailyTransactionCountByOrganizationId?.withdrawalFailedTotal ||
                   "0"
               )
             ).toString()}
             successCount={
               dailyTransactionCountByOrganizationId?.withdrawalSuccessTotal ||
+              "0"
+            }
+            pendingCount={
+              dailyTransactionCountByOrganizationId?.withdrawalPendingTotal ||
               "0"
             }
             failedCount={
@@ -464,8 +518,8 @@ export default function MerchantDashboardView() {
             </ResponsiveContainer>
           </ChartCard>
 
-          {/* Success Rate Pie Chart */}
-          <ChartCard title="今日成功率" subtitle="交易成功與失敗比例">
+          {/* Transaction Status Pie Chart */}
+          <ChartCard title="今日交易狀態" subtitle="交易成功、處理中與失敗比例">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -501,7 +555,7 @@ export default function MerchantDashboardView() {
           {/* Balance History */}
           <ChartCard title="餘額變化趨勢" subtitle="近期餘額與凍結金額變化">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={balanceHistoryData}>
+              <LineChart data={dailyBalanceData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
                 <XAxis dataKey="name" stroke="#6b7280" fontSize={12} />
                 <YAxis stroke="#6b7280" fontSize={12} />
@@ -534,7 +588,7 @@ export default function MerchantDashboardView() {
           </ChartCard>
 
           {/* Transaction Type Breakdown */}
-          <ChartCard title="交易類型分析" subtitle="代收與代付交易成功失敗對比">
+          <ChartCard title="交易類型分析" subtitle="代收與代付交易狀態對比">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={transactionTypeData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
@@ -552,6 +606,12 @@ export default function MerchantDashboardView() {
                   dataKey="success"
                   fill={COLORS.success}
                   name="成功"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  dataKey="pending"
+                  fill={COLORS.warning}
+                  name="處理中"
                   radius={[4, 4, 0, 0]}
                 />
                 <Bar

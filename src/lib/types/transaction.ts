@@ -76,8 +76,10 @@ export interface SystemDailyTransactionCount {
   total: string;
   depositSuccessTotal: string;
   depositFailedTotal: string;
+  depositPendingTotal: string;
   withdrawalSuccessTotal: string;
   withdrawalFailedTotal: string;
+  withdrawalPendingTotal: string;
   withdrawalFailedRefundedTotal: string;
 }
 
@@ -88,8 +90,10 @@ export interface DailyTransactionCountByOrganizationId {
   total: string;
   depositSuccessTotal: string;
   depositFailedTotal: string;
+  depositPendingTotal: string;
   withdrawalSuccessTotal: string;
   withdrawalFailedTotal: string;
+  withdrawalPendingTotal: string;
   withdrawalFailedRefundedTotal: string;
 }
 

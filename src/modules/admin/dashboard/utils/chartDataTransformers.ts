@@ -8,8 +8,8 @@ export const COLORS = {
   secondary: "#6b7280", // gray-500
 };
 
-export const transformBalanceHistoryData = (balanceHistory: any[]) => {
-  return balanceHistory.map((item) => ({
+export const transformDailyBalanceData = (dailyBalances: any[]) => {
+  return dailyBalances.map((item) => ({
     name: format(new Date(item.date), "MM/dd"),
     balance: item.totalBalance,
     available: item.availableBalance,
@@ -32,19 +32,32 @@ export const transformPaymentMethodData = (paymentMethodData: any[]) => {
 };
 
 export const createSuccessRateData = (systemDailyTransactionCount: any) => {
+  const successCount =
+    parseInt(systemDailyTransactionCount?.depositSuccessTotal || "0") +
+    parseInt(systemDailyTransactionCount?.withdrawalSuccessTotal || "0");
+
+  const pendingCount =
+    parseInt(systemDailyTransactionCount?.depositPendingTotal || "0") +
+    parseInt(systemDailyTransactionCount?.withdrawalPendingTotal || "0");
+
+  const failedCount =
+    parseInt(systemDailyTransactionCount?.depositFailedTotal || "0") +
+    parseInt(systemDailyTransactionCount?.withdrawalFailedTotal || "0");
+
   return [
     {
       name: "成功",
-      value:
-        parseInt(systemDailyTransactionCount?.depositSuccessTotal || "0") +
-        parseInt(systemDailyTransactionCount?.withdrawalSuccessTotal || "0"),
+      value: successCount,
       color: COLORS.success,
     },
     {
+      name: "處理中",
+      value: pendingCount,
+      color: COLORS.warning,
+    },
+    {
       name: "失敗",
-      value:
-        parseInt(systemDailyTransactionCount?.depositFailedTotal || "0") +
-        parseInt(systemDailyTransactionCount?.withdrawalFailedTotal || "0"),
+      value: failedCount,
       color: COLORS.danger,
     },
   ];
@@ -57,12 +70,18 @@ export const createTransactionTypeData = (systemDailyTransactionCount: any) => {
       success: parseInt(
         systemDailyTransactionCount?.depositSuccessTotal || "0"
       ),
+      pending: parseInt(
+        systemDailyTransactionCount?.depositPendingTotal || "0"
+      ),
       failed: parseInt(systemDailyTransactionCount?.depositFailedTotal || "0"),
     },
     {
       name: "代付",
       success: parseInt(
         systemDailyTransactionCount?.withdrawalSuccessTotal || "0"
+      ),
+      pending: parseInt(
+        systemDailyTransactionCount?.withdrawalPendingTotal || "0"
       ),
       failed: parseInt(
         systemDailyTransactionCount?.withdrawalFailedTotal || "0"

@@ -12,7 +12,7 @@ export default function DashboardView() {
     systemWeeklyTransactionTrends,
     systemPaymentMethodDistribution,
     systemChannelPerformance,
-    systemBalanceHistory,
+    systemDailyBalanceSnapshots,
   } = useDashboardData();
 
   return (
@@ -29,7 +29,7 @@ export default function DashboardView() {
       <AnalyticsSection
         systemWeeklyTransactionTrends={systemWeeklyTransactionTrends}
         systemDailyTransactionCount={systemDailyTransactionCount}
-        systemBalanceHistory={systemBalanceHistory}
+        systemDailyBalanceSnapshots={systemDailyBalanceSnapshots}
       />
 
       <PaymentChannelSection
