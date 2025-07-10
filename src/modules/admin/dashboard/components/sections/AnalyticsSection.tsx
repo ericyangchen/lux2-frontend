@@ -44,6 +44,29 @@ export const AnalyticsSection = ({
     systemDailyTransactionCount
   );
 
+  // Calculate total for percentage calculation
+  const totalTransactions = successRateData.reduce(
+    (sum, item) => sum + item.value,
+    0
+  );
+
+  // Custom tooltip formatter for pie chart
+  const formatPieTooltip = (value: number, name: string) => {
+    const percentage =
+      totalTransactions > 0
+        ? ((value / totalTransactions) * 100).toFixed(2)
+        : "0.00";
+    return [`${value} (${percentage}%)`, name];
+  };
+
+  // Custom tooltip formatter for bar chart
+  const formatBarTooltip = (value: number, name: string, props: any) => {
+    const data = props.payload;
+    const total = data.success + data.pending + data.failed;
+    const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : "0.00";
+    return [`${value} (${percentage}%)`, name];
+  };
+
   return (
     <div>
       <div className="mb-6">
@@ -116,6 +139,7 @@ export const AnalyticsSection = ({
                   border: "1px solid #e5e7eb",
                   borderRadius: "8px",
                 }}
+                formatter={formatPieTooltip}
               />
               <Legend wrapperStyle={{ paddingTop: "20px" }} iconType="circle" />
             </PieChart>
@@ -172,6 +196,7 @@ export const AnalyticsSection = ({
                   border: "1px solid #e5e7eb",
                   borderRadius: "8px",
                 }}
+                formatter={formatBarTooltip}
               />
               <Legend />
               <Bar

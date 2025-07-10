@@ -287,6 +287,29 @@ export default function MerchantDashboardView() {
     },
   ];
 
+  // Calculate total for percentage calculation
+  const totalTransactions = successRateData.reduce(
+    (sum, item) => sum + item.value,
+    0
+  );
+
+  // Custom tooltip formatter for pie chart
+  const formatPieTooltip = (value: number, name: string) => {
+    const percentage =
+      totalTransactions > 0
+        ? ((value / totalTransactions) * 100).toFixed(2)
+        : "0.00";
+    return [`${value} (${percentage}%)`, name];
+  };
+
+  // Custom tooltip formatter for bar chart
+  const formatBarTooltip = (value: number, name: string, props: any) => {
+    const data = props.payload;
+    const total = data.success + data.pending + data.failed;
+    const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : "0.00";
+    return [`${value} (${percentage}%)`, name];
+  };
+
   // SVG Icons
   const WalletIcon = (
     <svg
@@ -541,6 +564,7 @@ export default function MerchantDashboardView() {
                     border: "1px solid #e5e7eb",
                     borderRadius: "8px",
                   }}
+                  formatter={formatPieTooltip}
                 />
                 <Legend
                   wrapperStyle={{ paddingTop: "20px" }}
@@ -600,6 +624,7 @@ export default function MerchantDashboardView() {
                     border: "1px solid #e5e7eb",
                     borderRadius: "8px",
                   }}
+                  formatter={formatBarTooltip}
                 />
                 <Legend />
                 <Bar
@@ -612,12 +637,14 @@ export default function MerchantDashboardView() {
                   dataKey="pending"
                   fill={COLORS.warning}
                   name="處理中"
-                  radius={[4, 4, 0, 0]}
+                  stackId="issues"
+                  radius={[0, 0, 0, 0]}
                 />
                 <Bar
                   dataKey="failed"
                   fill={COLORS.danger}
                   name="失敗"
+                  stackId="issues"
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
