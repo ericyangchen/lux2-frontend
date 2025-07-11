@@ -466,7 +466,7 @@ export default function ApplicationLayout({
 
         {/* Main */}
         <main className="py-4 lg:pl-72 min-h-[calc(100vh-56px)] sm:min-h-full overflow-y-scroll">
-          <div className="px-4 h-full lg:w-[calc(100vw-288px)] overflow-x-hidden">
+          <div className="px-2 lg:px-4 h-full w-full overflow-x-hidden">
             {children}
           </div>
         </main>

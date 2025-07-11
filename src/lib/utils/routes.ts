@@ -43,6 +43,11 @@ export const merchantNavigation = [
     icon: ClipboardDocumentListIcon,
   },
   {
+    name: "交易報表",
+    href: "/merchant/reports/balance",
+    icon: ChartBarSquareIcon,
+  },
+  {
     name: "操作紀錄",
     href: "/merchant/user-activity-logs",
     icon: ClipboardDocumentListIcon,
@@ -111,15 +116,15 @@ export const adminNavigation = [
     icon: ClipboardDocumentListIcon,
   },
   {
+    name: "交易報表",
+    href: "/admin/reports/balance",
+    icon: ChartBarSquareIcon,
+  },
+  {
     name: "操作紀錄",
     href: "/admin/user-activity-logs",
     icon: ClipboardDocumentListIcon,
   },
-  // {
-  //   name: "報表",
-  //   href: "/admin/history",
-  //   icon: ChartBarSquareIcon,
-  // },
 ];
 
 export const developerNavigation = [
