@@ -72,6 +72,22 @@ export const ApiRetryTransactionNotification = async ({
   );
 };
 
+export const ApiRetryNotificationByTransactionId = async ({
+  transactionId,
+  accessToken,
+}: {
+  transactionId: string;
+  accessToken: string;
+}) => {
+  return fetch(
+    `${getBackendUrl()}/transaction-notifications/retry-by-transaction/${transactionId}`,
+    {
+      method: "POST",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
+};
+
 export const ApiBatchResendNotifications = async ({
   data,
   accessToken,

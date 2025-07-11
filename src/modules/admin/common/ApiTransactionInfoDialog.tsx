@@ -2,14 +2,16 @@ import {
   CreatorTypeDisplayNames,
   TransactionLogActionDisplayNames,
 } from "@/lib/constants/transaction-logs";
-import { Dialog, DialogContent } from "@/components/shadcn/ui/dialog";
 import {
+  DepositAccountTypeDisplayNames,
   PaymentChannelDisplayNames,
   PaymentMethodDisplayNames,
   TransactionInternalStatusDisplayNames,
   TransactionStatusDisplayNames,
   TransactionTypeDisplayNames,
+  WithdrawalAccountTypeDisplayNames,
 } from "@/lib/constants/transaction";
+import { Dialog, DialogContent } from "@/components/shadcn/ui/dialog";
 import {
   formatNumber,
   formatNumberInPercentage,
@@ -17,7 +19,9 @@ import {
 } from "@/lib/utils/number";
 import { useEffect, useState } from "react";
 
+import { ApiRetryNotificationByTransactionId } from "@/lib/apis/txn-notifications/post";
 import { ApplicationError } from "@/lib/error/applicationError";
+import { BANK_NAMES_MAPPING } from "@/lib/constants/bank-names";
 import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
@@ -26,6 +30,7 @@ import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.e
 import { classNames } from "@/lib/utils/classname-utils";
 import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/utils/timezone";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
+import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 import { useTransaction } from "@/lib/hooks/swr/transaction";
 import { useTransactionLogs } from "@/lib/hooks/swr/transaction-logs";
@@ -49,6 +54,8 @@ export function ApiTransactionInfoDialog({
     transactionId,
   });
 
+  const [isRetryingNotification, setIsRetryingNotification] = useState(false);
+
   const handleCloseDialog = () => {
     closeDialog();
   };
@@ -57,6 +64,55 @@ export function ApiTransactionInfoDialog({
   const sortedLogs = transactionLogs.sort(
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
   );
+
+  // Check if retry button should be shown
+  const shouldShowRetryButton =
+    transaction &&
+    transaction.notifyUrl &&
+    [
+      TransactionStatus.SUCCESS,
+      TransactionStatus.FAILED,
+      TransactionStatus.FAILED_WITHDRAWAL_REFUNDED,
+      TransactionStatus.FAILED_MERCHANT_REQUESTED_WITHDRAWAL_REJECTED,
+    ].includes(transaction.status);
+
+  const handleRetryNotification = async () => {
+    if (!transaction) return;
+
+    setIsRetryingNotification(true);
+    try {
+      const { accessToken } = getApplicationCookies();
+      if (!accessToken) {
+        throw new Error("Access token not found");
+      }
+
+      const response = await ApiRetryNotificationByTransactionId({
+        transactionId: transaction.id,
+        accessToken,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to retry notification");
+      }
+
+      const data = await response.json();
+
+      toast({
+        title: "重送回調成功",
+        description: `通知已重新排隊發送 (通知 ID: ${data.data.notificationId})`,
+      });
+    } catch (error) {
+      console.error("Failed to retry notification:", error);
+      toast({
+        title: "重送回調失敗",
+        description: error instanceof Error ? error.message : "未知錯誤",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRetryingNotification(false);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCloseDialog}>
@@ -286,6 +342,116 @@ export function ApiTransactionInfoDialog({
               </div>
             </div>
 
+            {/* Additional Transaction Info */}
+            <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 text-gray-500">
+              <Label className="whitespace-nowrap min-w-[100px] font-normal">
+                帳戶類型:
+              </Label>
+              <div className="font-mono">
+                {transaction.accountType ? (
+                  transaction.accountType in DepositAccountTypeDisplayNames ? (
+                    DepositAccountTypeDisplayNames[
+                      transaction.accountType as keyof typeof DepositAccountTypeDisplayNames
+                    ]
+                  ) : (
+                    WithdrawalAccountTypeDisplayNames[
+                      transaction.accountType as keyof typeof WithdrawalAccountTypeDisplayNames
+                    ]
+                  )
+                ) : (
+                  <span className="text-sm text-gray-600">-</span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 text-gray-500 text-sm">
+              <Label className="whitespace-nowrap min-w-[100px] font-normal">
+                發送方姓名:
+              </Label>
+              <div className="font-mono">
+                {transaction.senderName || (
+                  <span className="text-sm text-gray-600">-</span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 text-gray-500 text-sm">
+              <Label className="whitespace-nowrap min-w-[100px] font-normal">
+                發送方電子郵件:
+              </Label>
+              <div className="font-mono">
+                {transaction.senderEmail || (
+                  <span className="text-sm text-gray-600">-</span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 text-gray-500 text-sm">
+              <Label className="whitespace-nowrap min-w-[100px] font-normal">
+                發送方電話:
+              </Label>
+              <div className="font-mono">
+                {transaction.senderPhoneNumber || (
+                  <span className="text-sm text-gray-600">-</span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 text-gray-500 text-sm">
+              <Label className="whitespace-nowrap min-w-[100px] font-normal">
+                銀行名稱:
+              </Label>
+              <div className="font-mono">
+                {transaction.bankName ? (
+                  transaction.bankName in BANK_NAMES_MAPPING ? (
+                    BANK_NAMES_MAPPING[
+                      transaction.bankName as keyof typeof BANK_NAMES_MAPPING
+                    ]
+                  ) : (
+                    transaction.bankName
+                  )
+                ) : (
+                  <span className="text-sm text-gray-600">-</span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 text-gray-500 text-sm">
+              <Label className="whitespace-nowrap min-w-[100px] font-normal">
+                銀行帳戶:
+              </Label>
+              <div className="font-mono">
+                {transaction.bankAccount || (
+                  <span className="text-sm text-gray-600">-</span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 text-gray-500 text-sm">
+              <Label className="whitespace-nowrap min-w-[100px] font-normal">
+                接收方姓名:
+              </Label>
+              <div className="font-mono">
+                {transaction.receiverName || (
+                  <span className="text-sm text-gray-600">-</span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 text-gray-500 text-sm">
+              <Label className="whitespace-nowrap min-w-[100px] font-normal">
+                接收方電子郵件:
+              </Label>
+              <div className="font-mono">
+                {transaction.receiverEmail || (
+                  <span className="text-sm text-gray-600">-</span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-4 w-full lg:w-fit min-h-6 text-gray-500 text-sm">
+              <Label className="whitespace-nowrap min-w-[100px] font-normal">
+                接收方電話:
+              </Label>
+              <div className="font-mono">
+                {transaction.receiverPhoneNumber || (
+                  <span className="text-sm text-gray-600">-</span>
+                )}
+              </div>
+            </div>
+
             {/* 交易日誌 */}
             <Label className="whitespace-nowrap font-bold text-md mt-8">
               交易日誌
@@ -392,6 +558,20 @@ export function ApiTransactionInfoDialog({
             ) : (
               <div className="text-center py-4">
                 <span className="text-sm text-gray-600">-</span>
+              </div>
+            )}
+
+            {/* Retry Notification Button */}
+            {shouldShowRetryButton && (
+              <div className="mt-4">
+                <Button
+                  onClick={handleRetryNotification}
+                  disabled={isRetryingNotification}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  size="sm"
+                >
+                  {isRetryingNotification ? "重送中..." : "重送回調"}
+                </Button>
               </div>
             )}
 

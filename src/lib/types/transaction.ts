@@ -33,10 +33,14 @@ export interface Transaction {
   deletedAt?: string;
   // nullable params
   accountType?: DepositToAccountType | WithdrawalToAccountType;
+  senderName?: string;
+  senderEmail?: string;
+  senderPhoneNumber?: string;
   bankName?: string;
   bankAccount?: string;
-  senderName?: string;
   receiverName?: string;
+  receiverEmail?: string;
+  receiverPhoneNumber?: string;
 }
 
 interface AgentRevenue {
