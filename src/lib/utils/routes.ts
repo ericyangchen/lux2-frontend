@@ -38,14 +38,14 @@ export const merchantNavigation = [
     icon: WalletIcon,
   },
   {
-    name: "餘額異動紀錄",
-    href: "/merchant/balance-modification-history",
-    icon: ClipboardDocumentListIcon,
-  },
-  {
     name: "交易報表",
     href: "/merchant/reports/balance",
     icon: ChartBarSquareIcon,
+  },
+  {
+    name: "餘額異動紀錄",
+    href: "/merchant/balance-modification-history",
+    icon: ClipboardDocumentListIcon,
   },
   {
     name: "操作紀錄",
@@ -86,6 +86,16 @@ export const adminNavigation = [
     icon: ExclamationTriangleIcon,
   },
   {
+    name: "批量重送回調",
+    href: "/admin/batch-resend-notifications",
+    icon: DocumentDuplicateIcon,
+  },
+  {
+    name: "測試回調",
+    href: "/admin/test-callback",
+    icon: HandRaisedIcon,
+  },
+  {
     name: "商戶下發請求",
     href: "/admin/merchant-requested-withdrawals",
     icon: CheckCircleIcon,
@@ -94,16 +104,6 @@ export const adminNavigation = [
     name: "代收開單",
     href: "/admin/deposit-create",
     icon: CurrencyDollarIcon,
-  },
-  {
-    name: "測試回調",
-    href: "/admin/test-callback",
-    icon: HandRaisedIcon,
-  },
-  {
-    name: "批量重送回調",
-    href: "/admin/batch-resend-notifications",
-    icon: DocumentDuplicateIcon,
   },
   {
     name: "Telegram 群發",
@@ -121,14 +121,14 @@ export const adminNavigation = [
     icon: ClipboardDocumentListIcon,
   },
   {
-    name: "交易報表",
-    href: "/admin/reports/balance",
-    icon: ChartBarSquareIcon,
-  },
-  {
     name: "操作紀錄",
     href: "/admin/user-activity-logs",
     icon: ClipboardDocumentListIcon,
+  },
+  {
+    name: "交易報表",
+    href: "/admin/reports/balance",
+    icon: ChartBarSquareIcon,
   },
 ];
 

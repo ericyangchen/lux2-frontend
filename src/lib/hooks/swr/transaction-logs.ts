@@ -1,6 +1,7 @@
 import { ApiGetTransactionLogsByTransactionId } from "@/lib/apis/txn-logs/get";
 import { ApplicationError } from "@/lib/error/applicationError";
 import { TransactionLog } from "@/lib/types/transaction-log";
+import { USE_TRANSACTION_LOGS_REFRESH_INTERVAL } from "@/lib/constants/swr-refresh-interval";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useSwrWithAuth } from "../useSwrWithAuth";
 
@@ -41,7 +42,7 @@ export const useTransactionLogs = ({
       ? { key: "transaction-logs", transactionId, accessToken }
       : null,
     fetchTransactionLogsByTransactionId,
-    { refreshInterval: 0 } // No auto-refresh for logs
+    { refreshInterval: USE_TRANSACTION_LOGS_REFRESH_INTERVAL }
   );
 
   return {
