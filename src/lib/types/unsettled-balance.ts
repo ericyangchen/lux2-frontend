@@ -11,7 +11,6 @@ export interface UnsettledBalance {
   fromTransactionId: string;
   willBeSettledAt: string;
   status: UnsettledBalanceStatus;
-  cloudTaskName?: string;
   lastError?: string;
   settledAt?: string;
   createdAt: string;
