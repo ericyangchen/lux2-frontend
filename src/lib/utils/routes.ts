@@ -101,6 +101,11 @@ export const adminNavigation = [
     icon: HandRaisedIcon,
   },
   {
+    name: "批量重送回調",
+    href: "/admin/batch-resend-notifications",
+    icon: DocumentDuplicateIcon,
+  },
+  {
     name: "Telegram 群發",
     href: "/admin/telegram-broadcast",
     icon: InboxArrowDownIcon,

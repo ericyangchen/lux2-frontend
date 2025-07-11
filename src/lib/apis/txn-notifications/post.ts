@@ -18,6 +18,30 @@ export interface CreateManualNotificationData {
   maxAttempts?: number;
 }
 
+export interface BatchResendNotificationsData {
+  organizationId: string;
+  successAtStart: string;
+  successAtEnd: string;
+}
+
+export interface BatchResendNotificationsResponse {
+  success: boolean;
+  data: {
+    totalTransactionsFound: number;
+    notificationsResent: number;
+    errors: Array<{
+      transactionId: string;
+      error: string;
+    }>;
+    details: Array<{
+      transactionId: string;
+      notificationId: string;
+      status: "resent" | "error";
+      message?: string;
+    }>;
+  };
+}
+
 export const ApiCreateManualNotification = async ({
   data,
   accessToken,
@@ -46,4 +70,18 @@ export const ApiRetryTransactionNotification = async ({
       headers: SMPayWebHeaderWithAccessToken(accessToken),
     }
   );
+};
+
+export const ApiBatchResendNotifications = async ({
+  data,
+  accessToken,
+}: {
+  data: BatchResendNotificationsData;
+  accessToken: string;
+}) => {
+  return fetch(`${getBackendUrl()}/transaction-notifications/batch-resend`, {
+    method: "POST",
+    headers: SMPayWebHeaderWithAccessToken(accessToken),
+    body: JSON.stringify(data),
+  });
 };
