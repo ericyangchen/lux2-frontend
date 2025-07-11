@@ -22,7 +22,7 @@ export default function AdminOrganizationListPage() {
           selectedOrganizationId={selectedOrganizationId}
           setSelectedOrganizationId={setSelectedOrganizationId}
         />
-        <div className="xl:w-[calc(100vw-288px-400px-48px)]">
+        <div className="xl:w-[calc(100vw-288px-400px-48px)]  xl:max-h-[calc(100vh-84px)] overflow-y-auto">
           <OrganizationDetail organizationId={selectedOrganizationId} />
         </div>
       </div>
