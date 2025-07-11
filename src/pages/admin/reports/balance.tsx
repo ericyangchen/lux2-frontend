@@ -243,6 +243,12 @@ export default function AdminBalanceReportsPage() {
     }
   };
 
+  const handlePrevPage = async () => {
+    if (currentPage > 1) {
+      await handlePageChange(currentPage - 1);
+    }
+  };
+
   const handleNextPage = async () => {
     if (
       !organizationId ||
@@ -336,6 +342,7 @@ export default function AdminBalanceReportsPage() {
             visitedPages={visitedPages}
             onPageChange={handlePageChange}
             onNextPage={handleNextPage}
+            onPrevPage={handlePrevPage}
             isLoadingPagination={isLoadingPagination}
           />
         )}

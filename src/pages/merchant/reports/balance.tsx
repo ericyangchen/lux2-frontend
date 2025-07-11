@@ -253,6 +253,12 @@ export default function MerchantBalanceReportsPage() {
     }
   };
 
+  const handlePrevPage = async () => {
+    if (currentPage > 1) {
+      await handlePageChange(currentPage - 1);
+    }
+  };
+
   const handleNextPage = async () => {
     if (
       !paymentMethod ||
@@ -347,6 +353,7 @@ export default function MerchantBalanceReportsPage() {
             visitedPages={visitedPages}
             onPageChange={handlePageChange}
             onNextPage={handleNextPage}
+            onPrevPage={handlePrevPage}
             isLoadingPagination={isLoadingPagination}
           />
         )}

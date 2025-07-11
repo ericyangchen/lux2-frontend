@@ -52,6 +52,7 @@ interface BalanceReportDisplayProps {
   visitedPages: PageCursor[]; // Cursors for pages we've visited (index 0 = page 1)
   onPageChange?: (page: number) => void;
   onNextPage?: () => void;
+  onPrevPage?: () => void;
   isLoadingPagination?: boolean;
 }
 
@@ -61,6 +62,7 @@ export function BalanceReportDisplay({
   visitedPages,
   onPageChange,
   onNextPage,
+  onPrevPage,
   isLoadingPagination = false,
 }: BalanceReportDisplayProps) {
   const { toast } = useToast();
@@ -219,99 +221,100 @@ export function BalanceReportDisplay({
         )}
 
         {/* Pagination Controls */}
-        {(onPageChange || onNextPage) &&
+        {(onPageChange || onNextPage || onPrevPage) &&
           report.transactionsPagination.total >
             report.transactionsPagination.limit && (
             <div className="mt-4">
               <div className="flex justify-between items-center">
+                {/* Left side: Previous button */}
+                <div className="flex justify-start">
+                  {onPrevPage && currentPage > 1 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={isLoadingPagination}
+                      onClick={onPrevPage}
+                    >
+                      {isLoadingPagination ? "載入中..." : "上一頁"}
+                    </Button>
+                  )}
+                </div>
+
                 {/* Center: Page buttons */}
                 <div className="flex-1 flex justify-center">
                   <div className="flex items-center gap-2">
-                    {/* Previous pages - show buttons for pages we've already visited */}
+                    {/* Dynamic page buttons based on current position */}
                     {(() => {
                       const totalVisitedPages = visitedPages.length;
-                      const maxVisiblePages = 7; // Show up to 7 page buttons
+                      const lastTraversedPage = totalVisitedPages;
 
-                      if (totalVisitedPages <= maxVisiblePages) {
-                        // Show all visited pages
-                        return visitedPages.map((_, index) => {
-                          const pageNumber = index + 1;
-                          return (
-                            <Button
-                              key={pageNumber}
-                              variant={
-                                pageNumber === currentPage
-                                  ? "default"
-                                  : "outline"
-                              }
-                              size="sm"
-                              disabled={isLoadingPagination}
-                              onClick={() => onPageChange?.(pageNumber)}
-                            >
-                              {pageNumber}
-                            </Button>
-                          );
-                        });
-                      }
+                      // Define which pages we want to show
+                      const pagesToShow = new Set<number>();
 
-                      // Too many pages - show with ellipsis
-                      const pageButtons = [];
-                      const firstPages = 3; // Always show first 3 pages
-                      const lastPages = 2; // Always show last 2 pages
+                      // Always show first page
+                      pagesToShow.add(1);
 
-                      // First pages
-                      for (
-                        let i = 1;
-                        i <= Math.min(firstPages, totalVisitedPages);
-                        i++
+                      // Show previous to current page (if exists and visited)
+                      if (
+                        currentPage > 1 &&
+                        currentPage - 1 <= totalVisitedPages
                       ) {
-                        pageButtons.push(
-                          <Button
-                            key={i}
-                            variant={i === currentPage ? "default" : "outline"}
-                            size="sm"
-                            disabled={isLoadingPagination}
-                            onClick={() => onPageChange?.(i)}
-                          >
-                            {i}
-                          </Button>
-                        );
+                        pagesToShow.add(currentPage - 1);
                       }
 
-                      // Ellipsis if needed
-                      if (totalVisitedPages > firstPages + lastPages) {
-                        pageButtons.push(
-                          <span key="ellipsis" className="px-2 text-gray-400">
-                            ...
-                          </span>
-                        );
+                      // Always show current page
+                      pagesToShow.add(currentPage);
+
+                      // Show next to current page (if visited)
+                      if (currentPage + 1 <= totalVisitedPages) {
+                        pagesToShow.add(currentPage + 1);
                       }
 
-                      // Last pages
-                      if (totalVisitedPages > firstPages) {
-                        const startLastPages = Math.max(
-                          firstPages + 1,
-                          totalVisitedPages - lastPages + 1
-                        );
-                        for (
-                          let i = startLastPages;
-                          i <= totalVisitedPages;
-                          i++
-                        ) {
+                      // Always show last traversed page (if different from others)
+                      if (lastTraversedPage > 1) {
+                        pagesToShow.add(lastTraversedPage);
+                      }
+
+                      // Convert to sorted array
+                      const sortedPages = Array.from(pagesToShow).sort(
+                        (a, b) => a - b
+                      );
+
+                      const pageButtons = [];
+
+                      for (let i = 0; i < sortedPages.length; i++) {
+                        const pageNumber = sortedPages[i];
+                        const prevPageNumber = i > 0 ? sortedPages[i - 1] : 0;
+
+                        // Add ellipsis if there's a gap
+                        if (i > 0 && pageNumber > prevPageNumber + 1) {
                           pageButtons.push(
-                            <Button
-                              key={i}
-                              variant={
-                                i === currentPage ? "default" : "outline"
-                              }
-                              size="sm"
-                              disabled={isLoadingPagination}
-                              onClick={() => onPageChange?.(i)}
+                            <span
+                              key={`ellipsis-${i}`}
+                              className="px-2 text-gray-400"
                             >
-                              {i}
-                            </Button>
+                              ...
+                            </span>
                           );
                         }
+
+                        // Add page button
+                        pageButtons.push(
+                          <Button
+                            key={pageNumber}
+                            variant={
+                              pageNumber === currentPage ? "default" : "outline"
+                            }
+                            size="sm"
+                            disabled={
+                              isLoadingPagination ||
+                              pageNumber > totalVisitedPages
+                            }
+                            onClick={() => onPageChange?.(pageNumber)}
+                          >
+                            {pageNumber}
+                          </Button>
+                        );
                       }
 
                       return pageButtons;
@@ -320,16 +323,18 @@ export function BalanceReportDisplay({
                 </div>
 
                 {/* Right side: Next button */}
-                {onNextPage && report.transactionsPagination.hasMore && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={isLoadingPagination}
-                    onClick={onNextPage}
-                  >
-                    {isLoadingPagination ? "載入中..." : "下一頁"}
-                  </Button>
-                )}
+                <div className="flex justify-end">
+                  {onNextPage && report.transactionsPagination.hasMore && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={isLoadingPagination}
+                      onClick={onNextPage}
+                    >
+                      {isLoadingPagination ? "載入中..." : "下一頁"}
+                    </Button>
+                  )}
+                </div>
               </div>
 
               {/* Page info - centered below */}
