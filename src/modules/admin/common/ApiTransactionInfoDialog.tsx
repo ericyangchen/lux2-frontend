@@ -482,15 +482,18 @@ export function ApiTransactionInfoDialog({
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="text-gray-500 text-xs">
-                            觸發者類型:
+                            請求來源:
                           </span>
                           <span className="text-xs text-gray-700">
                             {CreatorTypeDisplayNames[log.creatorType] ||
                               log.creatorType}
-                            {log.creatorIdentifier && (
-                              <span className="text-gray-500">
-                                ({log.creatorIdentifier}
-                                {log.creatorIp && `, ${log.creatorIp}`})
+                            {log.creatorIp && (
+                              <span className="text-xs text-gray-700 ml-4">
+                                (IP 地址:{" "}
+                                <span className="text-xs text-gray-700 font-mono">
+                                  {log.creatorIp}
+                                </span>
+                                )
                               </span>
                             )}
                           </span>
@@ -505,6 +508,16 @@ export function ApiTransactionInfoDialog({
                         </div>
                       </div>
 
+                      {/* Creator Identifier & Creator Ip */}
+                      {log.creatorIdentifier && (
+                        <div className="flex items-center gap-1 text-xs mb-1">
+                          <span className="text-gray-500">請求者:</span>
+                          <span className="text-gray-500 font-mono">
+                            {log.creatorIdentifier}
+                          </span>
+                        </div>
+                      )}
+
                       {/* Line 2: method, route */}
                       {(log.route || log.method) && (
                         <div className="flex items-center gap-1 text-xs mb-1">
@@ -517,7 +530,7 @@ export function ApiTransactionInfoDialog({
 
                       {/* Line 3: triggeredBy */}
                       <div className="flex items-center gap-1 text-xs text-gray-600 mb-1">
-                        <span className="text-gray-500">觸發者:</span>
+                        <span className="text-gray-500">觸發系統資源:</span>
                         <span className="font-mono">
                           {log.triggeredBy || "系統"}
                         </span>

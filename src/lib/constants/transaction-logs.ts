@@ -11,6 +11,7 @@ export const TransactionLogActionDisplayNames = {
 
   // Admin actions
   [TransactionLogAction.SET_TO_FAILED_BY_ADMIN]: "管理員設為失敗",
+  [TransactionLogAction.ADMIN_FORCE_MODIFIED]: "管理員強制修改交易",
   [TransactionLogAction.RESUBMISSION_TRIGGERED]: "觸發重送",
   [TransactionLogAction.APPROVED_MERCHANT_REQUESTED_WITHDRAWAL]: "批准下發",
   [TransactionLogAction.REJECTED_MERCHANT_REQUESTED_WITHDRAWAL]: "拒絕下發",

@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/ui/select";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ApiGetTransactionById } from "@/lib/apis/transactions/get";
 import { ApplicationError } from "@/lib/error/applicationError";
@@ -29,6 +29,7 @@ import { Textarea } from "@/components/shadcn/ui/textarea";
 import { Transaction } from "@/lib/types/transaction";
 import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
 import { TransactionStatusDisplayNames } from "@/lib/constants/transaction";
+import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/utils/timezone";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
@@ -50,6 +51,18 @@ export function ForceModifyTransactionView() {
   // Dialog state
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const availableModifyStatuses = useMemo(() => {
+    if (transaction?.type === TransactionType.API_DEPOSIT) {
+      return [TransactionStatus.SUCCESS, TransactionStatus.FAILED];
+    } else if (
+      transaction?.type === TransactionType.API_WITHDRAWAL ||
+      transaction?.type === TransactionType.MERCHANT_REQUESTED_WITHDRAWAL
+    ) {
+      return [TransactionStatus.FAILED, TransactionStatus.SUCCESS];
+    }
+    return [];
+  }, [transaction]);
 
   const handleQueryTransaction = async () => {
     if (!accessToken) {
@@ -239,7 +252,11 @@ export function ForceModifyTransactionView() {
                 <Label className="text-sm font-medium text-gray-500">
                   Current Message
                 </Label>
-                <p className="text-sm">{transaction.message || "No message"}</p>
+                <p className="text-sm">
+                  {transaction.message || (
+                    <span className="text-gray-500">無</span>
+                  )}
+                </p>
               </div>
             </div>
           </div>
@@ -262,7 +279,7 @@ export function ForceModifyTransactionView() {
                     <SelectValue placeholder="Select new status" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.values(TransactionStatus).map((status) => (
+                    {availableModifyStatuses.map((status) => (
                       <SelectItem key={status} value={status}>
                         {TransactionStatusDisplayNames[status]}
                       </SelectItem>
@@ -272,7 +289,7 @@ export function ForceModifyTransactionView() {
               </div>
 
               <div>
-                <Label htmlFor="message">Message (Optional)</Label>
+                <Label htmlFor="message">訊息: (Optional 會回傳下游)</Label>
                 <Textarea
                   id="message"
                   value={message}
@@ -284,7 +301,7 @@ export function ForceModifyTransactionView() {
 
               <div>
                 <Label htmlFor="reason">
-                  Reason for Modification (Optional)
+                  修改原因: (Optional 不會回傳下游)
                 </Label>
                 <Textarea
                   id="reason"
