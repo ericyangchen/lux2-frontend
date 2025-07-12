@@ -91,8 +91,8 @@ export const adminNavigation = [
     icon: DocumentDuplicateIcon,
   },
   {
-    name: "測試回調",
-    href: "/admin/test-callback",
+    name: "強制修改訂單",
+    href: "/admin/force-modify-transaction",
     icon: HandRaisedIcon,
   },
   {

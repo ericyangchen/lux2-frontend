@@ -38,9 +38,13 @@ export const TransactionInternalStatusDisplayNames = {
   [TransactionInternalStatus.DEPOSIT_UPSTREAM_CONNECTION_ERROR]:
     "代收-上游連接錯誤",
 
-  [TransactionInternalStatus.DEPOSIT_UPSTREAM_SUCCESS_RESPONSE]:
-    "代收-上游成功",
-  [TransactionInternalStatus.DEPOSIT_UPSTREAM_FAILED_RESPONSE]: "代收-上游失敗",
+  [TransactionInternalStatus.DEPOSIT_UPSTREAM_SUCCESS_RESPONSE]: "代收-成功",
+  [TransactionInternalStatus.DEPOSIT_UPSTREAM_FAILED_RESPONSE]: "代收-失敗",
+
+  [TransactionInternalStatus.DEPOSIT_UPSTREAM_SUCCESS_MANUALLY_SET_TO_SUCCESS]:
+    "代收-成功(手動設定)",
+  [TransactionInternalStatus.DEPOSIT_UPSTREAM_FAILED_MANUALLY_SET_TO_FAILED]:
+    "代收-失敗(手動設定)",
 
   // WITHDRAWAL
   [TransactionInternalStatus.WITHDRAWAL_CREATED]: "代付-創建成功",
@@ -56,12 +60,12 @@ export const TransactionInternalStatusDisplayNames = {
     "代付-上游餘額不足",
   [TransactionInternalStatus.WITHDRAWAL_RESUBMISSION_IN_PROGRESS]:
     "代付-重新提交中",
-  [TransactionInternalStatus.WITHDRAWAL_UPSTREAM_SUCCESS_RESPONSE]:
-    "代付-上游成功",
-  [TransactionInternalStatus.WITHDRAWAL_UPSTREAM_FAILED_RESPONSE]:
-    "代付-上游失敗",
+  [TransactionInternalStatus.WITHDRAWAL_UPSTREAM_SUCCESS_RESPONSE]: "代付-成功",
+  [TransactionInternalStatus.WITHDRAWAL_UPSTREAM_FAILED_RESPONSE]: "代付-失敗",
+  [TransactionInternalStatus.WITHDRAWAL_UPSTREAM_SUCCESS_MANUALLY_SET_TO_SUCCESS]:
+    "代付-成功(手動設定)",
   [TransactionInternalStatus.WITHDRAWAL_UPSTREAM_FAILED_MANUALLY_SET_TO_FAILED]:
-    "代付-上游失敗(手動設定)",
+    "代付-失敗(手動設定)",
 
   [TransactionInternalStatus.WITHDRAWAL_UPSTREAM_FAILED_REFUNDED_RESPONSE]:
     "代付-上游失敗(沖回)",
