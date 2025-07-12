@@ -1,4 +1,11 @@
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/shadcn/ui/dialog";
+import {
   PaymentMethodDisplayNames,
   TransactionStatusDisplayNames,
 } from "@/lib/constants/transaction";
@@ -61,6 +68,11 @@ export function MerchantRequestedWithdrawalList({
     id: string;
   } | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+
+  // Dialog state
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<Transaction | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleSearch = async (isLoadMore: boolean = false) => {
     const { accessToken } = getApplicationCookies();
@@ -140,6 +152,11 @@ export function MerchantRequestedWithdrawalList({
     setStartDate(undefined);
     setEndDate(undefined);
     setTransactions(undefined);
+  };
+
+  const handleShowDetails = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setIsDialogOpen(true);
   };
 
   return (
@@ -328,6 +345,9 @@ export function MerchantRequestedWithdrawalList({
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
                       創建時間
                     </th>
+                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+                      詳細資訊
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -376,6 +396,15 @@ export function MerchantRequestedWithdrawalList({
                           transaction.createdAt
                         )}
                       </td>
+                      <td className="px-1 py-2 text-center">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleShowDetails(transaction)}
+                        >
+                          更多
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -384,6 +413,123 @@ export function MerchantRequestedWithdrawalList({
           </InfiniteScroll>
         </div>
       )}
+
+      {/* Transaction Details Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>交易詳細資訊</DialogTitle>
+          </DialogHeader>
+          {selectedTransaction && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-3">
+                <div className="border-b pb-2">
+                  <h4 className="font-semibold text-sm text-gray-700">
+                    基本資訊
+                  </h4>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">商戶訂單號:</span>
+                    <span className="text-sm font-mono">
+                      {selectedTransaction.merchantOrderId}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">支付類型:</span>
+                    <span className="text-sm">
+                      {
+                        PaymentMethodDisplayNames[
+                          selectedTransaction.paymentMethod
+                        ]
+                      }
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">金額:</span>
+                    <span className="text-sm">
+                      {formatNumber(selectedTransaction.amount)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">狀態:</span>
+                    <span className="text-sm">
+                      {
+                        TransactionStatusDisplayNames[
+                          selectedTransaction.status
+                        ]
+                      }
+                    </span>
+                  </div>
+                </div>
+
+                <div className="border-b pb-2 mt-4">
+                  <h4 className="font-semibold text-sm text-gray-700">
+                    提領資訊
+                  </h4>
+                </div>
+                <div className="space-y-2">
+                  {selectedTransaction.bankName && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">銀行名稱:</span>
+                      <span className="text-sm">
+                        {selectedTransaction.bankName}
+                      </span>
+                    </div>
+                  )}
+                  {selectedTransaction.bankAccount && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">銀行帳戶:</span>
+                      <span className="text-sm font-mono">
+                        {selectedTransaction.bankAccount}
+                      </span>
+                    </div>
+                  )}
+                  {selectedTransaction.receiverName && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">收款人姓名:</span>
+                      <span className="text-sm">
+                        {selectedTransaction.receiverName}
+                      </span>
+                    </div>
+                  )}
+                  {selectedTransaction.receiverEmail && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">
+                        收款人Email:
+                      </span>
+                      <span className="text-sm">
+                        {selectedTransaction.receiverEmail}
+                      </span>
+                    </div>
+                  )}
+                  {selectedTransaction.receiverPhoneNumber && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">收款人電話:</span>
+                      <span className="text-sm">
+                        {selectedTransaction.receiverPhoneNumber}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {selectedTransaction.note && (
+                  <>
+                    <div className="border-b pb-2 mt-4">
+                      <h4 className="font-semibold text-sm text-gray-700">
+                        備註
+                      </h4>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {selectedTransaction.note}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
