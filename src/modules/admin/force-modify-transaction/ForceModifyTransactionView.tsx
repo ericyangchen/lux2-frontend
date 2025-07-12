@@ -12,6 +12,12 @@ import {
   DialogTrigger,
 } from "@/components/shadcn/ui/dialog";
 import {
+  PaymentMethodDisplayNames,
+  TransactionInternalStatusDisplayNames,
+  TransactionStatusDisplayNames,
+  TransactionTypeDisplayNames,
+} from "@/lib/constants/transaction";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -20,15 +26,18 @@ import {
 } from "@/components/shadcn/ui/select";
 import { useEffect, useMemo, useState } from "react";
 
+import { ApiGetOrganizationById } from "@/lib/apis/organizations/get";
 import { ApiGetTransactionById } from "@/lib/apis/transactions/get";
 import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
+import { Organization } from "@/lib/types/organization";
+import { PROBLEM_WITHDRAWAL_INTERNAL_STATUSES } from "@/lib/constants/problem-withdrawal-statuses";
 import { Textarea } from "@/components/shadcn/ui/textarea";
 import { Transaction } from "@/lib/types/transaction";
+import { TransactionInternalStatus } from "@/lib/enums/transactions/transaction-internal-status.enum";
 import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
-import { TransactionStatusDisplayNames } from "@/lib/constants/transaction";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/utils/timezone";
 import { getApplicationCookies } from "@/lib/utils/cookie";
@@ -41,6 +50,8 @@ export function ForceModifyTransactionView() {
   // Query transaction state
   const [transactionId, setTransactionId] = useState("");
   const [transaction, setTransaction] = useState<Transaction | null>(null);
+  const [merchantOrganization, setMerchantOrganization] =
+    useState<Organization | null>(null);
   const [isLoadingTransaction, setIsLoadingTransaction] = useState(false);
 
   // Force modify form state
@@ -67,8 +78,8 @@ export function ForceModifyTransactionView() {
   const handleQueryTransaction = async () => {
     if (!accessToken) {
       toast({
-        title: "Error",
-        description: "No access token available",
+        title: "錯誤",
+        description: "無法取得存取權杖",
         variant: "destructive",
       });
       return;
@@ -76,8 +87,8 @@ export function ForceModifyTransactionView() {
 
     if (!transactionId.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter a transaction ID",
+        title: "錯誤",
+        description: "請輸入交易 ID",
         variant: "destructive",
       });
       return;
@@ -98,19 +109,35 @@ export function ForceModifyTransactionView() {
       const transactionData = await response.json();
       setTransaction(transactionData);
 
+      // Fetch merchant organization data
+      try {
+        const orgResponse = await ApiGetOrganizationById({
+          organizationId: transactionData.merchantId,
+          accessToken,
+        });
+
+        if (orgResponse.ok) {
+          const orgData = await orgResponse.json();
+          setMerchantOrganization(orgData);
+        }
+      } catch (error) {
+        console.error("Error loading merchant organization:", error);
+        // Don't show error toast for organization fetch failure
+      }
+
       // Pre-fill current status
       setSelectedStatus(transactionData.status);
       setMessage(transactionData.message || "");
 
       toast({
-        title: "Success",
-        description: "Transaction loaded successfully",
+        title: "成功",
+        description: "交易資料已載入",
       });
     } catch (error) {
       console.error("Error loading transaction:", error);
       toast({
-        title: "Error",
-        description: "Failed to load transaction",
+        title: "錯誤",
+        description: "載入交易失敗",
         variant: "destructive",
       });
     } finally {
@@ -121,8 +148,8 @@ export function ForceModifyTransactionView() {
   const handleForceModify = async () => {
     if (!accessToken || !transaction || !selectedStatus) {
       toast({
-        title: "Error",
-        description: "Missing required data",
+        title: "錯誤",
+        description: "缺少必要資料",
         variant: "destructive",
       });
       return;
@@ -151,8 +178,8 @@ export function ForceModifyTransactionView() {
       const result = await response.json();
 
       toast({
-        title: "Success",
-        description: "Transaction modified successfully",
+        title: "成功",
+        description: "交易已修改成功",
       });
 
       // Refresh transaction data
@@ -161,8 +188,8 @@ export function ForceModifyTransactionView() {
     } catch (error) {
       console.error("Error force modifying transaction:", error);
       toast({
-        title: "Error",
-        description: "Failed to modify transaction",
+        title: "錯誤",
+        description: "修改交易失敗",
         variant: "destructive",
       });
     } finally {
@@ -173,6 +200,40 @@ export function ForceModifyTransactionView() {
   const canForceModify =
     transaction && selectedStatus && selectedStatus !== transaction.status;
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "SUCCESS":
+        return "text-green-600";
+      case "FAILED":
+        return "text-red-600";
+      case "PENDING":
+        return "text-yellow-600";
+      default:
+        return "text-gray-600";
+    }
+  };
+
+  const getStatusIndicatorColor = (status: string) => {
+    switch (status) {
+      case "SUCCESS":
+        return "bg-green-500";
+      case "FAILED":
+        return "bg-red-500";
+      case "PENDING":
+        return "bg-yellow-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
+  const getInternalStatusColor = (
+    internalStatus: TransactionInternalStatus
+  ) => {
+    return PROBLEM_WITHDRAWAL_INTERNAL_STATUSES.includes(internalStatus)
+      ? "text-orange-500"
+      : "text-gray-700";
+  };
+
   return (
     <div className="w-full p-6">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -181,10 +242,10 @@ export function ForceModifyTransactionView() {
           <h3 className="text-lg font-medium">查詢交易</h3>
           <div className="flex gap-2">
             <div className="flex-1">
-              <Label htmlFor="transactionId">Transaction ID</Label>
+              <Label htmlFor="transactionId">交易 ID</Label>
               <Input
                 id="transactionId"
-                placeholder="Enter transaction ID"
+                placeholder="請輸入交易 ID"
                 value={transactionId}
                 onChange={(e) => setTransactionId(e.target.value)}
               />
@@ -195,7 +256,7 @@ export function ForceModifyTransactionView() {
                 disabled={isLoadingTransaction}
                 className="whitespace-nowrap"
               >
-                {isLoadingTransaction ? "Loading..." : "Query"}
+                {isLoadingTransaction ? "載入中..." : "查詢"}
               </Button>
             </div>
           </div>
@@ -208,39 +269,107 @@ export function ForceModifyTransactionView() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
               <div>
                 <Label className="text-sm font-medium text-gray-500">
-                  Transaction ID
+                  類別
+                </Label>
+                <p>{TransactionTypeDisplayNames[transaction.type]}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-500">
+                  系統訂單號
                 </Label>
                 <p className="font-mono text-sm">{transaction.id}</p>
               </div>
               <div>
                 <Label className="text-sm font-medium text-gray-500">
-                  Type
+                  商戶
                 </Label>
-                <p>{transaction.type}</p>
+                <p className="font-mono text-sm">
+                  {merchantOrganization?.name || "載入中..."} (
+                  {transaction.merchantId})
+                </p>
               </div>
               <div>
                 <Label className="text-sm font-medium text-gray-500">
-                  Merchant ID
+                  商戶訂單號
                 </Label>
-                <p className="font-mono text-sm">{transaction.merchantId}</p>
+                <p className="font-mono text-sm">
+                  {transaction.merchantOrderId}
+                </p>
               </div>
               <div>
                 <Label className="text-sm font-medium text-gray-500">
-                  Amount
+                  支付類型
+                </Label>
+                <p>{PaymentMethodDisplayNames[transaction.paymentMethod]}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-500">
+                  金額
                 </Label>
                 <p>{transaction.amount}</p>
               </div>
               <div>
                 <Label className="text-sm font-medium text-gray-500">
-                  Current Status
+                  狀態
                 </Label>
-                <p className="font-semibold">
-                  {TransactionStatusDisplayNames[transaction.status]}
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <div
+                    className={`w-2 h-2 rounded-full ${getStatusIndicatorColor(
+                      transaction.status
+                    )}`}
+                  ></div>
+                  <span
+                    className={`text-sm whitespace-nowrap ${getStatusColor(
+                      transaction.status
+                    )}`}
+                  >
+                    {TransactionStatusDisplayNames[transaction.status]}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-500">
+                  詳細狀態
+                </Label>
+                <p
+                  className={`font-semibold text-sm ${getInternalStatusColor(
+                    transaction.internalStatus
+                  )}`}
+                >
+                  {
+                    TransactionInternalStatusDisplayNames[
+                      transaction.internalStatus
+                    ]
+                  }
                 </p>
               </div>
               <div>
                 <Label className="text-sm font-medium text-gray-500">
-                  Created At
+                  手續費率
+                </Label>
+                <p>{transaction.feePercentage}%</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-500">
+                  固定手續費
+                </Label>
+                <p>{transaction.feeFixed}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-500">
+                  總手續費
+                </Label>
+                <p>{transaction.totalFee}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-500">
+                  餘額變動
+                </Label>
+                <p>{transaction.balanceChanged}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-500">
+                  系統創建時間
                 </Label>
                 <p>
                   {convertDatabaseTimeToReadablePhilippinesTime(
@@ -248,9 +377,139 @@ export function ForceModifyTransactionView() {
                   )}
                 </p>
               </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-500">
+                  系統更新時間
+                </Label>
+                <p>
+                  {convertDatabaseTimeToReadablePhilippinesTime(
+                    transaction.updatedAt
+                  )}
+                </p>
+              </div>
+              {transaction.successAt && (
+                <div>
+                  <Label className="text-sm font-medium text-gray-500">
+                    成功時間
+                  </Label>
+                  <p>
+                    {convertDatabaseTimeToReadablePhilippinesTime(
+                      transaction.successAt
+                    )}
+                  </p>
+                </div>
+              )}
+              {transaction.notifyUrl && (
+                <div className="md:col-span-2">
+                  <Label className="text-sm font-medium text-gray-500">
+                    通知網址
+                  </Label>
+                  <p className="text-sm font-mono break-all">
+                    {transaction.notifyUrl}
+                  </p>
+                </div>
+              )}
+              {transaction.note && (
+                <div className="md:col-span-2">
+                  <Label className="text-sm font-medium text-gray-500">
+                    備註
+                  </Label>
+                  <p className="text-sm">{transaction.note}</p>
+                </div>
+              )}
+              {(transaction.bankName ||
+                transaction.bankAccount ||
+                transaction.receiverName) && (
+                <>
+                  <div className="md:col-span-2">
+                    <Label className="text-sm font-medium text-gray-500">
+                      銀行資訊
+                    </Label>
+                  </div>
+                  {transaction.bankName && (
+                    <div>
+                      <Label className="text-sm font-medium text-gray-500">
+                        銀行名稱
+                      </Label>
+                      <p className="text-sm">{transaction.bankName}</p>
+                    </div>
+                  )}
+                  {transaction.bankAccount && (
+                    <div>
+                      <Label className="text-sm font-medium text-gray-500">
+                        銀行帳戶
+                      </Label>
+                      <p className="text-sm font-mono">
+                        {transaction.bankAccount}
+                      </p>
+                    </div>
+                  )}
+                  {transaction.receiverName && (
+                    <div>
+                      <Label className="text-sm font-medium text-gray-500">
+                        接收方姓名
+                      </Label>
+                      <p className="text-sm">{transaction.receiverName}</p>
+                    </div>
+                  )}
+                  {transaction.receiverEmail && (
+                    <div>
+                      <Label className="text-sm font-medium text-gray-500">
+                        接收方電子郵件
+                      </Label>
+                      <p className="text-sm">{transaction.receiverEmail}</p>
+                    </div>
+                  )}
+                  {transaction.receiverPhoneNumber && (
+                    <div>
+                      <Label className="text-sm font-medium text-gray-500">
+                        接收方電話
+                      </Label>
+                      <p className="text-sm">
+                        {transaction.receiverPhoneNumber}
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
+              {(transaction.senderName ||
+                transaction.senderEmail ||
+                transaction.senderPhoneNumber) && (
+                <>
+                  <div className="md:col-span-2">
+                    <Label className="text-sm font-medium text-gray-500">
+                      發送方資訊
+                    </Label>
+                  </div>
+                  {transaction.senderName && (
+                    <div>
+                      <Label className="text-sm font-medium text-gray-500">
+                        發送方姓名
+                      </Label>
+                      <p className="text-sm">{transaction.senderName}</p>
+                    </div>
+                  )}
+                  {transaction.senderEmail && (
+                    <div>
+                      <Label className="text-sm font-medium text-gray-500">
+                        發送方電子郵件
+                      </Label>
+                      <p className="text-sm">{transaction.senderEmail}</p>
+                    </div>
+                  )}
+                  {transaction.senderPhoneNumber && (
+                    <div>
+                      <Label className="text-sm font-medium text-gray-500">
+                        發送方電話
+                      </Label>
+                      <p className="text-sm">{transaction.senderPhoneNumber}</p>
+                    </div>
+                  )}
+                </>
+              )}
               <div className="md:col-span-2">
                 <Label className="text-sm font-medium text-gray-500">
-                  Current Message
+                  訊息
                 </Label>
                 <p className="text-sm">
                   {transaction.message || (
@@ -268,7 +527,7 @@ export function ForceModifyTransactionView() {
             <h3 className="text-lg font-medium">強制修改</h3>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="status">New Status</Label>
+                <Label htmlFor="status">新狀態</Label>
                 <Select
                   value={selectedStatus}
                   onValueChange={(value) =>
@@ -276,7 +535,7 @@ export function ForceModifyTransactionView() {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select new status" />
+                    <SelectValue placeholder="選擇新狀態" />
                   </SelectTrigger>
                   <SelectContent>
                     {availableModifyStatuses.map((status) => (
@@ -289,26 +548,24 @@ export function ForceModifyTransactionView() {
               </div>
 
               <div>
-                <Label htmlFor="message">訊息: (Optional 會回傳下游)</Label>
+                <Label htmlFor="message">訊息: (可選擇性回傳下游)</Label>
                 <Textarea
                   id="message"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={3}
-                  placeholder="Enter transaction message..."
+                  placeholder="請輸入交易訊息..."
                 />
               </div>
 
               <div>
-                <Label htmlFor="reason">
-                  修改原因: (Optional 不會回傳下游)
-                </Label>
+                <Label htmlFor="reason">修改原因: (可選擇性不回傳下游)</Label>
                 <Textarea
                   id="reason"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   rows={2}
-                  placeholder="Enter reason for this modification..."
+                  placeholder="請輸入修改原因..."
                 />
               </div>
 
@@ -328,31 +585,30 @@ export function ForceModifyTransactionView() {
                   <DialogHeader>
                     <DialogTitle>確認強制修改</DialogTitle>
                     <DialogDescription>
-                      This action is irreversible. Are you sure you want to
-                      force modify this transaction?
+                      此操作不可逆。您確定要強制修改此交易嗎？
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-2">
                     <p>
-                      <strong>Transaction ID:</strong> {transaction.id}
+                      <strong>交易 ID:</strong> {transaction.id}
                     </p>
                     <p>
-                      <strong>Current Status:</strong>{" "}
+                      <strong>當前狀態:</strong>{" "}
                       {TransactionStatusDisplayNames[transaction.status]}
                     </p>
                     <p>
-                      <strong>New Status:</strong>{" "}
+                      <strong>新狀態:</strong>{" "}
                       {selectedStatus &&
                         TransactionStatusDisplayNames[selectedStatus]}
                     </p>
                     {message && (
                       <p>
-                        <strong>New Message:</strong> {message}
+                        <strong>新訊息:</strong> {message}
                       </p>
                     )}
                     {reason && (
                       <p>
-                        <strong>Reason:</strong> {reason}
+                        <strong>原因:</strong> {reason}
                       </p>
                     )}
                   </div>
@@ -362,14 +618,14 @@ export function ForceModifyTransactionView() {
                       onClick={() => setIsConfirmDialogOpen(false)}
                       disabled={isSubmitting}
                     >
-                      Cancel
+                      取消
                     </Button>
                     <Button
                       onClick={handleForceModify}
                       disabled={isSubmitting}
                       className="bg-red-600 hover:bg-red-700"
                     >
-                      {isSubmitting ? "Modifying..." : "Confirm Modify"}
+                      {isSubmitting ? "修改中..." : "確認修改"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
