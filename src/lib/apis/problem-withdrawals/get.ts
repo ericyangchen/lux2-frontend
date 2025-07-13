@@ -9,6 +9,9 @@ export const ApiGetProblemWithdrawals = async ({
   organizationId,
   paymentMethod,
   internalStatus,
+  amount,
+  amountMin,
+  amountMax,
   createdAtStart,
   createdAtEnd,
   accessToken,
@@ -19,6 +22,9 @@ export const ApiGetProblemWithdrawals = async ({
   organizationId?: string;
   paymentMethod?: string;
   internalStatus?: string;
+  amount?: string;
+  amountMin?: string;
+  amountMax?: string;
   createdAtStart?: string;
   createdAtEnd?: string;
   accessToken: string;
@@ -30,6 +36,9 @@ export const ApiGetProblemWithdrawals = async ({
     organizationId,
     paymentMethod,
     internalStatus,
+    amount,
+    amountMin,
+    amountMax,
     createdAtStart,
     createdAtEnd,
   });

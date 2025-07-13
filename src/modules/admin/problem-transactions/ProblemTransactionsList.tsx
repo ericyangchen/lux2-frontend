@@ -27,6 +27,7 @@ import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { DatePicker } from "@/components/DatePicker";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { OrgType } from "@/lib/enums/organizations/org-type.enum";
 import { Organization } from "@/lib/types/organization";
@@ -67,6 +68,9 @@ export function ProblemTransactionsList() {
   >("all");
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
+  const [amount, setAmount] = useState<string>("");
+  const [amountMin, setAmountMin] = useState<string>("");
+  const [amountMax, setAmountMax] = useState<string>("");
 
   const [isLoading, setIsLoading] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>();
@@ -111,6 +115,9 @@ export function ProblemTransactionsList() {
         internalStatus: internalStatusQuery,
         createdAtStart: startDateQuery,
         createdAtEnd: endDateQuery,
+        amount: amount || undefined,
+        amountMin: amountMin || undefined,
+        amountMax: amountMax || undefined,
         cursorCreatedAt:
           isLoadMore && nextCursor ? nextCursor.cursorCreatedAt : undefined,
         cursorId: isLoadMore && nextCursor ? nextCursor.cursorId : undefined,
@@ -155,6 +162,9 @@ export function ProblemTransactionsList() {
     setInternalStatus("all");
     setStartDate(undefined);
     setEndDate(undefined);
+    setAmount("");
+    setAmountMin("");
+    setAmountMax("");
     setTransactions(undefined);
     setSelectedTransactionIds(new Set());
   };
@@ -262,6 +272,45 @@ export function ProblemTransactionsList() {
                   </SelectGroup>
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          {/* amount */}
+          <div className="flex items-center gap-4">
+            <Label className="whitespace-nowrap">金額</Label>
+            <div className="w-fit min-w-[150px]">
+              <Input
+                type="text"
+                placeholder="輸入金額"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* amountMin */}
+          <div className="flex items-center gap-4">
+            <Label className="whitespace-nowrap">最小金額</Label>
+            <div className="w-fit min-w-[150px]">
+              <Input
+                type="text"
+                placeholder="輸入最小金額"
+                value={amountMin}
+                onChange={(e) => setAmountMin(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* amountMax */}
+          <div className="flex items-center gap-4">
+            <Label className="whitespace-nowrap">最大金額</Label>
+            <div className="w-fit min-w-[150px]">
+              <Input
+                type="text"
+                placeholder="輸入最大金額"
+                value={amountMax}
+                onChange={(e) => setAmountMax(e.target.value)}
+              />
             </div>
           </div>
 
