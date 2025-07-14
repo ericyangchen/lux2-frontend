@@ -458,7 +458,7 @@ function SummaryCard({ title, data, color }: SummaryCardProps) {
             <div className="flex items-center justify-center gap-2">
               <div className="w-2 h-2 bg-green-600 rounded-full"></div>
               <span className="text-xs text-green-600">成功</span>
-              <span className="text-sm font-mono font-medium text-green-700">
+              <span className="text-sm font-medium text-green-700">
                 {data.success.toLocaleString()}
               </span>
             </div>
@@ -468,7 +468,7 @@ function SummaryCard({ title, data, color }: SummaryCardProps) {
             <div className="flex items-center justify-center gap-2">
               <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
               <span className="text-xs text-yellow-600">處理中</span>
-              <span className="text-sm font-mono font-medium text-yellow-700">
+              <span className="text-sm font-medium text-yellow-700">
                 {data.pending.toLocaleString()}
               </span>
             </div>
@@ -478,7 +478,7 @@ function SummaryCard({ title, data, color }: SummaryCardProps) {
             <div className="flex items-center justify-center gap-2">
               <div className="w-2 h-2 bg-red-600 rounded-full"></div>
               <span className="text-xs text-red-600">失敗</span>
-              <span className="text-sm font-mono font-medium text-red-700">
+              <span className="text-sm font-medium text-red-700">
                 {data.fail.toLocaleString()}
               </span>
             </div>
@@ -585,7 +585,7 @@ function PaymentMethodSection({
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-2 h-2 bg-green-600 rounded-full"></div>
                   <span className="text-xs text-green-600">成功</span>
-                  <span className="text-xs font-mono font-medium text-green-700">
+                  <span className="text-xs font-medium text-green-700">
                     {depositTotals.success.toLocaleString()}
                   </span>
                 </div>
@@ -595,7 +595,7 @@ function PaymentMethodSection({
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
                   <span className="text-xs text-yellow-600">處理中</span>
-                  <span className="text-xs font-mono font-medium text-yellow-700">
+                  <span className="text-xs font-medium text-yellow-700">
                     {depositTotals.pending.toLocaleString()}
                   </span>
                 </div>
@@ -605,7 +605,7 @@ function PaymentMethodSection({
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-2 h-2 bg-red-600 rounded-full"></div>
                   <span className="text-xs text-red-600">失敗</span>
-                  <span className="text-xs font-mono font-medium text-red-700">
+                  <span className="text-xs font-medium text-red-700">
                     {depositTotals.fail.toLocaleString()}
                   </span>
                 </div>
@@ -664,7 +664,7 @@ function PaymentMethodSection({
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-2 h-2 bg-green-600 rounded-full"></div>
                   <span className="text-xs text-green-600">成功</span>
-                  <span className="text-xs font-mono font-medium text-green-700">
+                  <span className="text-xs font-medium text-green-700">
                     {withdrawalTotals.success.toLocaleString()}
                   </span>
                 </div>
@@ -674,7 +674,7 @@ function PaymentMethodSection({
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
                   <span className="text-xs text-yellow-600">處理中</span>
-                  <span className="text-xs font-mono font-medium text-yellow-700">
+                  <span className="text-xs font-medium text-yellow-700">
                     {withdrawalTotals.pending.toLocaleString()}
                   </span>
                 </div>
@@ -684,7 +684,7 @@ function PaymentMethodSection({
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-2 h-2 bg-red-600 rounded-full"></div>
                   <span className="text-xs text-red-600">失敗</span>
-                  <span className="text-xs font-mono font-medium text-red-700">
+                  <span className="text-xs font-medium text-red-700">
                     {withdrawalTotals.fail.toLocaleString()}
                   </span>
                 </div>
@@ -757,7 +757,7 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
           <span className="text-xs text-gray-600">總比數</span>
-          <span className="text-xs font-mono font-medium text-gray-900">
+          <span className="text-xs font-medium text-gray-900">
             {data.total.toLocaleString()}
           </span>
         </div>
@@ -765,7 +765,7 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 bg-green-600 rounded-full"></div>
           <span className="text-xs text-green-600">成功</span>
-          <span className="text-xs font-mono font-medium text-green-700">
+          <span className="text-xs font-medium text-green-700">
             {data.success.toLocaleString()}
           </span>
         </div>
@@ -773,7 +773,7 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
           <span className="text-xs text-yellow-600">處理中</span>
-          <span className="text-xs font-mono font-medium text-yellow-700">
+          <span className="text-xs font-medium text-yellow-700">
             {data.pending.toLocaleString()}
           </span>
         </div>
@@ -781,7 +781,7 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 bg-red-600 rounded-full"></div>
           <span className="text-xs text-red-600">失敗</span>
-          <span className="text-xs font-mono font-medium text-red-700">
+          <span className="text-xs font-medium text-red-700">
             {data.fail.toLocaleString()}
           </span>
         </div>
@@ -791,7 +791,7 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
       <div className="text-center min-w-[140px] mx-2">
         <div className="text-xs text-gray-600">總金額</div>
         <div
-          className="text-sm font-mono font-bold text-gray-900 truncate"
+          className="text-sm font-bold text-gray-900 truncate"
           title={`₱${formatNumber(data.amountSum.toString())}`}
         >
           ₱{formatNumber(data.amountSum.toString())}
@@ -801,9 +801,7 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
       {/* Success Rate */}
       <div className="text-center min-w-[80px]">
         <div className="text-xs text-gray-600">成功率</div>
-        <div className="text-sm font-mono font-bold text-gray-900">
-          {successRate}
-        </div>
+        <div className="text-sm font-bold text-gray-900">{successRate}</div>
       </div>
     </div>
   );
