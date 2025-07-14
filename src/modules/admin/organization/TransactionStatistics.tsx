@@ -407,75 +407,81 @@ interface SummaryCardProps {
 }
 
 function SummaryCard({ title, data, color }: SummaryCardProps) {
-  const colorClasses = {
-    blue: "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200",
-    green: "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200",
-  };
-
-  const textColor = {
-    blue: "text-blue-900",
-    green: "text-green-900",
-  };
-
   const successRate =
     data.total > 0
       ? `${((data.success / data.total) * 100).toFixed(2)}%`
-      : "無法計算";
+      : "None";
 
   return (
-    <Card
-      className={`hover:shadow-md transition-shadow ${colorClasses[color]}`}
-    >
+    <Card className="hover:shadow-sm transition-shadow border border-gray-200">
       <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className={`text-xl font-bold ${textColor[color]}`}>{title}</h3>
-          <div className="text-right">
-            <span className="text-sm text-gray-600">成功率</span>
-            <div className={`font-mono font-medium ${textColor[color]}`}>
-              {successRate}
+        {/* Header */}
+        <div className="mb-6">
+          <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+        </div>
+
+        {/* Key Metrics - 重點強調的三個指標 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          {/* 成功率 */}
+          <div className="text-center p-3 border border-gray-200 rounded-lg">
+            <div className="text-xs text-gray-600 mb-1">成功率</div>
+            <div className="text-xl font-bold text-gray-900">{successRate}</div>
+            <div className="text-xs text-gray-500 mt-1">
+              {data.success} / {data.total}
             </div>
+          </div>
+
+          {/* 總比數 */}
+          <div className="text-center p-3 border border-gray-200 rounded-lg">
+            <div className="text-xs text-gray-600 mb-1">總比數</div>
+            <div className="text-xl font-bold text-gray-900">
+              {data.total.toLocaleString()}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">筆交易</div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">成功</span>
-              <span className="text-sm font-mono">
+        {/* 總金額 - 獨立行 */}
+        <div className="mb-4">
+          <div className="text-center p-4 border border-gray-200 rounded-lg bg-gray-50">
+            <div className="text-xs text-gray-600 mb-1">總金額</div>
+            <div className="text-2xl font-bold text-gray-900">
+              ₱{data.amountSum.toLocaleString()}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">菲律賓披索</div>
+          </div>
+        </div>
+
+        {/* Detailed Breakdown */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2">
+              <CheckCircleIcon className="h-4 w-4 text-green-600" />
+              <span className="text-xs text-green-600">成功</span>
+              <span className="text-sm font-mono font-medium text-green-700">
                 {data.success.toLocaleString()}
               </span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">處理中</span>
-              <span className="text-sm font-mono">
+          </div>
+
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2">
+              <ClockIcon className="h-4 w-4 text-yellow-600" />
+              <span className="text-xs text-yellow-600">處理中</span>
+              <span className="text-sm font-mono font-medium text-yellow-700">
                 {data.pending.toLocaleString()}
               </span>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">失敗</span>
-              <span className="text-sm font-mono">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2">
+              <XCircleIcon className="h-4 w-4 text-red-600" />
+              <span className="text-xs text-red-600">失敗</span>
+              <span className="text-sm font-mono font-medium text-red-700">
                 {data.fail.toLocaleString()}
               </span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700">總計</span>
-              <span className="text-sm font-mono font-medium">
-                {data.total.toLocaleString()}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Amount Sum */}
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">總金額</span>
-            <span className="text-sm font-mono font-medium">
-              ₱{data.amountSum.toLocaleString()}
-            </span>
           </div>
         </div>
       </CardContent>
@@ -519,147 +525,189 @@ function PaymentMethodSection({
   );
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold text-gray-900">
+    <Card className="hover:shadow-sm transition-shadow border border-gray-200">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-xl font-bold text-gray-900">
           {PaymentMethodDisplayNames[paymentMethod]}
         </CardTitle>
       </CardHeader>
-      <CardContent className="px-6">
+      <CardContent className="px-6 pt-0">
         {/* Upper Section: Deposit and Withdrawal Summary */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Deposit Summary - Always show if payment method has any data */}
-          <div className="border rounded-lg p-4 bg-blue-50">
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="font-medium text-blue-900">代收統計</h4>
-              <div className="text-right">
-                <span className="text-sm text-gray-600">成功率</span>
-                <div className="font-mono font-medium text-blue-900">
+          {/* Deposit Summary */}
+          <div className="border border-gray-200 rounded-lg p-4">
+            <div className="mb-4">
+              <h4 className="text-lg font-semibold text-gray-900">代收統計</h4>
+            </div>
+
+            {/* Key Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+              {/* 成功率 */}
+              <div className="text-center p-2 border border-gray-200 rounded-lg">
+                <div className="text-xs text-gray-600 mb-1">成功率</div>
+                <div className="text-lg font-bold text-gray-900">
                   {depositTotals.total > 0
                     ? `${(
                         (depositTotals.success / depositTotals.total) *
                         100
                       ).toFixed(2)}%`
-                    : "無法計算"}
+                    : "None"}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {depositTotals.success} / {depositTotals.total}
                 </div>
               </div>
+
+              {/* 總比數 */}
+              <div className="text-center p-2 border border-gray-200 rounded-lg">
+                <div className="text-xs text-gray-600 mb-1">總比數</div>
+                <div className="text-lg font-bold text-gray-900">
+                  {depositTotals.total.toLocaleString()}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">筆交易</div>
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">成功</span>
-                  <span className="text-sm font-mono">
+
+            {/* 總金額 - 獨立行 */}
+            <div className="mb-4">
+              <div className="text-center p-3 border border-gray-200 rounded-lg bg-gray-50">
+                <div className="text-xs text-gray-600 mb-1">總金額</div>
+                <div className="text-xl font-bold text-gray-900">
+                  ₱{depositTotals.amountSum.toLocaleString()}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">菲律賓披索</div>
+              </div>
+            </div>
+
+            {/* Detailed Breakdown */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <CheckCircleIcon className="h-3 w-3 text-green-600" />
+                  <span className="text-xs text-green-600">成功</span>
+                  <span className="text-xs font-mono font-medium text-green-700">
                     {depositTotals.success.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">處理中</span>
-                  <span className="text-sm font-mono">
+              </div>
+
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <ClockIcon className="h-3 w-3 text-yellow-600" />
+                  <span className="text-xs text-yellow-600">處理中</span>
+                  <span className="text-xs font-mono font-medium text-yellow-700">
                     {depositTotals.pending.toLocaleString()}
                   </span>
                 </div>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">失敗</span>
-                  <span className="text-sm font-mono">
+
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <XCircleIcon className="h-3 w-3 text-red-600" />
+                  <span className="text-xs text-red-600">失敗</span>
+                  <span className="text-xs font-mono font-medium text-red-700">
                     {depositTotals.fail.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">
-                    總計
-                  </span>
-                  <span className="text-sm font-mono font-medium">
-                    {depositTotals.total.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Amount Sum */}
-            <div className="mt-3 pt-3 border-t border-gray-200">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">
-                  總金額
-                </span>
-                <span className="text-sm font-mono font-medium">
-                  ₱{depositTotals.amountSum.toLocaleString()}
-                </span>
               </div>
             </div>
           </div>
 
-          {/* Withdrawal Summary - Always show if payment method has any data */}
-          <div className="border rounded-lg p-4 bg-green-50">
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="font-medium text-green-900">代付統計</h4>
-              <div className="text-right">
-                <span className="text-sm text-gray-600">成功率</span>
-                <div className="font-mono font-medium text-green-900">
+          {/* Withdrawal Summary */}
+          <div className="border border-gray-200 rounded-lg p-4">
+            <div className="mb-4">
+              <h4 className="text-lg font-semibold text-gray-900">代付統計</h4>
+            </div>
+
+            {/* Key Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+              {/* 成功率 */}
+              <div className="text-center p-2 border border-gray-200 rounded-lg">
+                <div className="text-xs text-gray-600 mb-1">成功率</div>
+                <div className="text-lg font-bold text-gray-900">
                   {withdrawalTotals.total > 0
                     ? `${(
                         (withdrawalTotals.success / withdrawalTotals.total) *
                         100
                       ).toFixed(2)}%`
-                    : "無法計算"}
+                    : "None"}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {withdrawalTotals.success} / {withdrawalTotals.total}
                 </div>
               </div>
+
+              {/* 總比數 */}
+              <div className="text-center p-2 border border-gray-200 rounded-lg">
+                <div className="text-xs text-gray-600 mb-1">總比數</div>
+                <div className="text-lg font-bold text-gray-900">
+                  {withdrawalTotals.total.toLocaleString()}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">筆交易</div>
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">成功</span>
-                  <span className="text-sm font-mono">
+
+            {/* 總金額 - 獨立行 */}
+            <div className="mb-4">
+              <div className="text-center p-3 border border-gray-200 rounded-lg bg-gray-50">
+                <div className="text-xs text-gray-600 mb-1">總金額</div>
+                <div className="text-xl font-bold text-gray-900">
+                  ₱{withdrawalTotals.amountSum.toLocaleString()}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">菲律賓披索</div>
+              </div>
+            </div>
+
+            {/* Detailed Breakdown */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <CheckCircleIcon className="h-3 w-3 text-green-600" />
+                  <span className="text-xs text-green-600">成功</span>
+                  <span className="text-xs font-mono font-medium text-green-700">
                     {withdrawalTotals.success.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">處理中</span>
-                  <span className="text-sm font-mono">
+              </div>
+
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <ClockIcon className="h-3 w-3 text-yellow-600" />
+                  <span className="text-xs text-yellow-600">處理中</span>
+                  <span className="text-xs font-mono font-medium text-yellow-700">
                     {withdrawalTotals.pending.toLocaleString()}
                   </span>
                 </div>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">失敗</span>
-                  <span className="text-sm font-mono">
+
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <XCircleIcon className="h-3 w-3 text-red-600" />
+                  <span className="text-xs text-red-600">失敗</span>
+                  <span className="text-xs font-mono font-medium text-red-700">
                     {withdrawalTotals.fail.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">
-                    總計
-                  </span>
-                  <span className="text-sm font-mono font-medium">
-                    {withdrawalTotals.total.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Amount Sum */}
-            <div className="mt-3 pt-3 border-t border-gray-200">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">
-                  總金額
-                </span>
-                <span className="text-sm font-mono font-medium">
-                  ₱{withdrawalTotals.amountSum.toLocaleString()}
-                </span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Lower Section: Channel Details */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Deposit Channels */}
           {data.deposit.length > 0 && (
             <div>
-              <h5 className="font-medium text-gray-900 mb-3">代收渠道詳情</h5>
-              <div className="space-y-2">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
+                <h5 className="text-lg font-semibold text-gray-900">
+                  代收渠道詳情
+                </h5>
+                <Badge variant="outline" className="ml-2">
+                  {data.deposit.length} 個渠道
+                </Badge>
+              </div>
+              <div className="space-y-3">
                 {data.deposit.map((item) => (
                   <ChannelDetailRow key={item.paymentChannel} data={item} />
                 ))}
@@ -670,8 +718,12 @@ function PaymentMethodSection({
           {/* Withdrawal Channels */}
           {data.withdrawal.length > 0 && (
             <div>
-              <h5 className="font-medium text-gray-900 mb-3">代付渠道詳情</h5>
-              <div className="space-y-2">
+              <div className="flex items-center gap-2 mb-4">
+                <h5 className="text-lg font-semibold text-gray-900">
+                  代付渠道詳情
+                </h5>
+              </div>
+              <div className="space-y-3">
                 {data.withdrawal.map((item) => (
                   <ChannelDetailRow key={item.paymentChannel} data={item} />
                 ))}
@@ -695,65 +747,76 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
       : "無法計算";
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-semibold text-gray-900">
-            {PaymentChannelDisplayNames[data.paymentChannel] ||
-              data.paymentChannel}
-          </span>
-          <Badge variant="secondary" className="text-xs">
-            成功率: {successRate}
-          </Badge>
+    <div className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+      {/* Header with Channel Name */}
+      <div className="mb-4">
+        <h4 className="text-base font-semibold text-gray-900">
+          {PaymentChannelDisplayNames[data.paymentChannel] ||
+            data.paymentChannel}
+        </h4>
+      </div>
+
+      {/* Key Metrics - 重點強調的三個指標 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        {/* 成功率 */}
+        <div className="text-center p-3 border border-gray-200 rounded-lg">
+          <div className="text-xs text-gray-600 mb-1">成功率</div>
+          <div className="text-xl font-bold text-gray-900">{successRate}</div>
+          <div className="text-xs text-gray-500 mt-1">
+            {data.success} / {data.total}
+          </div>
         </div>
-        <div className="text-right">
-          <div className="text-sm font-medium text-gray-700">總計</div>
-          <div className="text-lg font-mono font-bold text-gray-900">
+
+        {/* 總比數 */}
+        <div className="text-center p-3 border border-gray-200 rounded-lg">
+          <div className="text-xs text-gray-600 mb-1">總比數</div>
+          <div className="text-xl font-bold text-gray-900">
             {data.total.toLocaleString()}
           </div>
+          <div className="text-xs text-gray-500 mt-1">筆交易</div>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
-        <div className="flex items-center gap-2 p-2 bg-green-50 rounded-md">
-          <CheckCircleIcon className="h-4 w-4 text-green-600 flex-shrink-0" />
-          <div>
-            <div className="text-xs text-gray-600">成功</div>
-            <div className="text-sm font-mono font-medium text-green-900">
+      {/* 總金額 - 獨立行 */}
+      <div className="mb-4">
+        <div className="text-center p-4 border border-gray-200 rounded-lg bg-gray-50">
+          <div className="text-xs text-gray-600 mb-1">總金額</div>
+          <div className="text-2xl font-bold text-gray-900">
+            ₱{data.amountSum.toLocaleString()}
+          </div>
+          <div className="text-xs text-gray-500 mt-1">菲律賓披索</div>
+        </div>
+      </div>
+
+      {/* Detailed Breakdown */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-2">
+            <CheckCircleIcon className="h-4 w-4 text-green-600" />
+            <span className="text-xs text-green-600">成功</span>
+            <span className="text-sm font-mono font-medium text-green-700">
               {data.success.toLocaleString()}
-            </div>
+            </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 p-2 bg-yellow-50 rounded-md">
-          <ClockIcon className="h-4 w-4 text-yellow-600 flex-shrink-0" />
-          <div>
-            <div className="text-xs text-gray-600">處理中</div>
-            <div className="text-sm font-mono font-medium text-yellow-900">
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-2">
+            <ClockIcon className="h-4 w-4 text-yellow-600" />
+            <span className="text-xs text-yellow-600">處理中</span>
+            <span className="text-sm font-mono font-medium text-yellow-700">
               {data.pending.toLocaleString()}
-            </div>
+            </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 p-2 bg-red-50 rounded-md">
-          <XCircleIcon className="h-4 w-4 text-red-600 flex-shrink-0" />
-          <div>
-            <div className="text-xs text-gray-600">失敗</div>
-            <div className="text-sm font-mono font-medium text-red-900">
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-2">
+            <XCircleIcon className="h-4 w-4 text-red-600" />
+            <span className="text-xs text-red-600">失敗</span>
+            <span className="text-sm font-mono font-medium text-red-700">
               {data.fail.toLocaleString()}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-md">
-          <ExclamationTriangleIcon className="h-4 w-4 text-blue-600 flex-shrink-0" />
-          <div>
-            <div className="text-xs text-gray-600">總金額</div>
-            <div className="text-sm font-mono font-medium text-blue-900">
-              ₱{data.amountSum.toLocaleString()}
-            </div>
+            </span>
           </div>
         </div>
       </div>
