@@ -752,19 +752,16 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
         </div>
       </div>
 
-      {/* Total Amount - 改善長金額顯示 */}
-      <div className="text-center min-w-[140px] mx-2">
-        <div className="text-xs text-gray-600">總金額</div>
-        <div
-          className="text-sm font-mono font-bold text-gray-900 truncate"
-          title={`₱${formatNumber(data.amountSum.toString())}`}
-        >
-          ₱{formatNumber(data.amountSum.toString())}
-        </div>
-      </div>
-
       {/* Status Breakdown */}
       <div className="flex items-center gap-3 mx-2">
+        <div className="flex items-center gap-1">
+          <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
+          <span className="text-xs text-gray-600">總比數</span>
+          <span className="text-xs font-mono font-medium text-gray-900">
+            {data.total.toLocaleString()}
+          </span>
+        </div>
+
         <div className="flex items-center gap-1">
           <CheckCircleIcon className="h-3 w-3 text-green-600" />
           <span className="text-xs text-green-600">成功</span>
@@ -788,17 +785,20 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
             {data.fail.toLocaleString()}
           </span>
         </div>
+      </div>
 
-        <div className="flex items-center gap-1">
-          <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
-          <span className="text-xs text-gray-600">總比數</span>
-          <span className="text-xs font-mono font-medium text-gray-900">
-            {data.total.toLocaleString()}
-          </span>
+      {/* Total Amount */}
+      <div className="text-center min-w-[140px] mx-2">
+        <div className="text-xs text-gray-600">總金額</div>
+        <div
+          className="text-sm font-mono font-bold text-gray-900 truncate"
+          title={`₱${formatNumber(data.amountSum.toString())}`}
+        >
+          ₱{formatNumber(data.amountSum.toString())}
         </div>
       </div>
 
-      {/* Success Rate - 移動到最右邊 */}
+      {/* Success Rate */}
       <div className="text-center min-w-[80px]">
         <div className="text-xs text-gray-600">成功率</div>
         <div className="text-sm font-mono font-bold text-gray-900">
