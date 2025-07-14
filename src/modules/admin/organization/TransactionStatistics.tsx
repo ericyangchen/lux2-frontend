@@ -422,15 +422,6 @@ function SummaryCard({ title, data, color }: SummaryCardProps) {
 
         {/* Key Metrics - 重點強調的三個指標 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          {/* 成功率 */}
-          <div className="text-center p-3 border border-gray-200 rounded-lg">
-            <div className="text-xs text-gray-600 mb-1">成功率</div>
-            <div className="text-xl font-bold text-gray-900">{successRate}</div>
-            <div className="text-xs text-gray-500 mt-1">
-              {data.success} / {data.total}
-            </div>
-          </div>
-
           {/* 總比數 */}
           <div className="text-center p-3 border border-gray-200 rounded-lg">
             <div className="text-xs text-gray-600 mb-1">總比數</div>
@@ -438,6 +429,15 @@ function SummaryCard({ title, data, color }: SummaryCardProps) {
               {data.total.toLocaleString()}
             </div>
             <div className="text-xs text-gray-500 mt-1">筆交易</div>
+          </div>
+
+          {/* 成功率 */}
+          <div className="text-center p-3 border border-gray-200 rounded-lg">
+            <div className="text-xs text-gray-600 mb-1">成功率</div>
+            <div className="text-xl font-bold text-gray-900">{successRate}</div>
+            <div className="text-xs text-gray-500 mt-1">
+              {data.success} / {data.total}
+            </div>
           </div>
         </div>
 
@@ -542,6 +542,15 @@ function PaymentMethodSection({
 
             {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+              {/* 總比數 */}
+              <div className="text-center p-2 border border-gray-200 rounded-lg">
+                <div className="text-xs text-gray-600 mb-1">總比數</div>
+                <div className="text-lg font-bold text-gray-900">
+                  {depositTotals.total.toLocaleString()}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">筆交易</div>
+              </div>
+
               {/* 成功率 */}
               <div className="text-center p-2 border border-gray-200 rounded-lg">
                 <div className="text-xs text-gray-600 mb-1">成功率</div>
@@ -556,15 +565,6 @@ function PaymentMethodSection({
                 <div className="text-xs text-gray-500 mt-1">
                   {depositTotals.success} / {depositTotals.total}
                 </div>
-              </div>
-
-              {/* 總比數 */}
-              <div className="text-center p-2 border border-gray-200 rounded-lg">
-                <div className="text-xs text-gray-600 mb-1">總比數</div>
-                <div className="text-lg font-bold text-gray-900">
-                  {depositTotals.total.toLocaleString()}
-                </div>
-                <div className="text-xs text-gray-500 mt-1">筆交易</div>
               </div>
             </div>
 
@@ -621,6 +621,15 @@ function PaymentMethodSection({
 
             {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+              {/* 總比數 */}
+              <div className="text-center p-2 border border-gray-200 rounded-lg">
+                <div className="text-xs text-gray-600 mb-1">總比數</div>
+                <div className="text-lg font-bold text-gray-900">
+                  {withdrawalTotals.total.toLocaleString()}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">筆交易</div>
+              </div>
+
               {/* 成功率 */}
               <div className="text-center p-2 border border-gray-200 rounded-lg">
                 <div className="text-xs text-gray-600 mb-1">成功率</div>
@@ -635,15 +644,6 @@ function PaymentMethodSection({
                 <div className="text-xs text-gray-500 mt-1">
                   {withdrawalTotals.success} / {withdrawalTotals.total}
                 </div>
-              </div>
-
-              {/* 總比數 */}
-              <div className="text-center p-2 border border-gray-200 rounded-lg">
-                <div className="text-xs text-gray-600 mb-1">總比數</div>
-                <div className="text-lg font-bold text-gray-900">
-                  {withdrawalTotals.total.toLocaleString()}
-                </div>
-                <div className="text-xs text-gray-500 mt-1">筆交易</div>
               </div>
             </div>
 
@@ -752,14 +752,6 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
         </div>
       </div>
 
-      {/* Total Count */}
-      <div className="text-center min-w-[80px] mx-2">
-        <div className="text-xs text-gray-600">總比數</div>
-        <div className="text-sm font-mono font-bold text-gray-900">
-          {data.total.toLocaleString()}
-        </div>
-      </div>
-
       {/* Total Amount - 改善長金額顯示 */}
       <div className="text-center min-w-[140px] mx-2">
         <div className="text-xs text-gray-600">總金額</div>
@@ -794,6 +786,14 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
           <span className="text-xs text-red-600">失敗</span>
           <span className="text-xs font-mono font-medium text-red-700">
             {data.fail.toLocaleString()}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
+          <span className="text-xs text-gray-600">總比數</span>
+          <span className="text-xs font-mono font-medium text-gray-900">
+            {data.total.toLocaleString()}
           </span>
         </div>
       </div>
