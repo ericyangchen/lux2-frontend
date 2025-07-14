@@ -3,6 +3,7 @@ import {
   TransactionInternalStatusDisplayNames,
   TransactionStatusDisplayNames,
   TransactionTypeDisplayNames,
+  WithdrawalAccountTypeDisplayNames,
 } from "@/lib/constants/transaction";
 import {
   Select,
@@ -38,6 +39,7 @@ import { ProblemTransactionResubmitDialog } from "./ProblemTransactionResubmitDi
 import { Transaction } from "@/lib/types/transaction";
 import { TransactionInternalStatus } from "@/lib/enums/transactions/transaction-internal-status.enum";
 import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
+import { WithdrawalToAccountType } from "@/lib/enums/transactions/withdrawal-to-account-type.enum";
 import { classNames } from "@/lib/utils/classname-utils";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
 import { flattenOrganizations } from "../common/flattenOrganizations";
@@ -65,6 +67,9 @@ export function ProblemTransactionsList() {
   );
   const [internalStatus, setInternalStatus] = useState<
     TransactionInternalStatus | "all"
+  >("all");
+  const [accountType, setAccountType] = useState<
+    WithdrawalToAccountType | "all"
   >("all");
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
@@ -104,6 +109,8 @@ export function ProblemTransactionsList() {
         paymentMethod && paymentMethod !== "all" ? paymentMethod : undefined;
       const internalStatusQuery =
         internalStatus && internalStatus !== "all" ? internalStatus : undefined;
+      const accountTypeQuery =
+        accountType && accountType !== "all" ? accountType : undefined;
       const startDateQuery = startDate
         ? convertToStartOfDay(startDate)
         : undefined;
@@ -113,6 +120,7 @@ export function ProblemTransactionsList() {
         organizationId: merchantId || undefined,
         paymentMethod: paymentMethodQuery,
         internalStatus: internalStatusQuery,
+        accountType: accountTypeQuery,
         createdAtStart: startDateQuery,
         createdAtEnd: endDateQuery,
         amount: amount || undefined,
@@ -160,6 +168,7 @@ export function ProblemTransactionsList() {
     setMerchantId("");
     setPaymentMethod("all");
     setInternalStatus("all");
+    setAccountType("all");
     setStartDate(undefined);
     setEndDate(undefined);
     setAmount("");
@@ -267,6 +276,35 @@ export function ProblemTransactionsList() {
                     {PROBLEM_WITHDRAWAL_INTERNAL_STATUSES.map((status) => (
                       <SelectItem key={status} value={status}>
                         {TransactionInternalStatusDisplayNames[status]}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* accountType */}
+          <div className="flex items-center gap-4">
+            <Label className="whitespace-nowrap">代付到</Label>
+            <div className="w-fit min-w-[200px]">
+              <Select
+                value={accountType}
+                onValueChange={(value) =>
+                  setAccountType(value as WithdrawalToAccountType)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="all" className="h-8">
+                      全部
+                    </SelectItem>
+                    {Object.values(WithdrawalToAccountType).map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {WithdrawalAccountTypeDisplayNames[type]}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -413,6 +451,9 @@ export function ProblemTransactionsList() {
                       支付類型
                     </th>
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
+                      代付到
+                    </th>
+                    <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
                       商戶
                     </th>
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
@@ -471,6 +512,13 @@ export function ProblemTransactionsList() {
                       </td>
                       <td className="px-1 py-2 text-center">
                         {PaymentMethodDisplayNames[transaction.paymentMethod]}
+                      </td>
+                      <td className="px-1 py-2 text-center">
+                        {transaction.accountType
+                          ? WithdrawalAccountTypeDisplayNames[
+                              transaction.accountType as WithdrawalToAccountType
+                            ]
+                          : "-"}
                       </td>
                       <td className="px-1 py-2 text-center">
                         <Button

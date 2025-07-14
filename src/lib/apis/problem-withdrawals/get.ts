@@ -9,6 +9,7 @@ export const ApiGetProblemWithdrawals = async ({
   organizationId,
   paymentMethod,
   internalStatus,
+  accountType,
   amount,
   amountMin,
   amountMax,
@@ -22,6 +23,7 @@ export const ApiGetProblemWithdrawals = async ({
   organizationId?: string;
   paymentMethod?: string;
   internalStatus?: string;
+  accountType?: string;
   amount?: string;
   amountMin?: string;
   amountMax?: string;
@@ -36,6 +38,7 @@ export const ApiGetProblemWithdrawals = async ({
     organizationId,
     paymentMethod,
     internalStatus,
+    accountType,
     amount,
     amountMin,
     amountMax,
