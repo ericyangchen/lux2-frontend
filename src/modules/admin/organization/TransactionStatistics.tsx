@@ -456,7 +456,7 @@ function SummaryCard({ title, data, color }: SummaryCardProps) {
         <div className="grid grid-cols-3 gap-3">
           <div className="text-center">
             <div className="flex items-center justify-center gap-2">
-              <CheckCircleIcon className="h-4 w-4 text-green-600" />
+              <div className="w-2 h-2 bg-green-600 rounded-full"></div>
               <span className="text-xs text-green-600">成功</span>
               <span className="text-sm font-mono font-medium text-green-700">
                 {data.success.toLocaleString()}
@@ -466,7 +466,7 @@ function SummaryCard({ title, data, color }: SummaryCardProps) {
 
           <div className="text-center">
             <div className="flex items-center justify-center gap-2">
-              <ClockIcon className="h-4 w-4 text-yellow-600" />
+              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
               <span className="text-xs text-yellow-600">處理中</span>
               <span className="text-sm font-mono font-medium text-yellow-700">
                 {data.pending.toLocaleString()}
@@ -476,7 +476,7 @@ function SummaryCard({ title, data, color }: SummaryCardProps) {
 
           <div className="text-center">
             <div className="flex items-center justify-center gap-2">
-              <XCircleIcon className="h-4 w-4 text-red-600" />
+              <div className="w-2 h-2 bg-red-600 rounded-full"></div>
               <span className="text-xs text-red-600">失敗</span>
               <span className="text-sm font-mono font-medium text-red-700">
                 {data.fail.toLocaleString()}
@@ -583,7 +583,7 @@ function PaymentMethodSection({
             <div className="grid grid-cols-3 gap-2">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2">
-                  <CheckCircleIcon className="h-3 w-3 text-green-600" />
+                  <div className="w-2 h-2 bg-green-600 rounded-full"></div>
                   <span className="text-xs text-green-600">成功</span>
                   <span className="text-xs font-mono font-medium text-green-700">
                     {depositTotals.success.toLocaleString()}
@@ -593,7 +593,7 @@ function PaymentMethodSection({
 
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2">
-                  <ClockIcon className="h-3 w-3 text-yellow-600" />
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
                   <span className="text-xs text-yellow-600">處理中</span>
                   <span className="text-xs font-mono font-medium text-yellow-700">
                     {depositTotals.pending.toLocaleString()}
@@ -603,7 +603,7 @@ function PaymentMethodSection({
 
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2">
-                  <XCircleIcon className="h-3 w-3 text-red-600" />
+                  <div className="w-2 h-2 bg-red-600 rounded-full"></div>
                   <span className="text-xs text-red-600">失敗</span>
                   <span className="text-xs font-mono font-medium text-red-700">
                     {depositTotals.fail.toLocaleString()}
@@ -662,7 +662,7 @@ function PaymentMethodSection({
             <div className="grid grid-cols-3 gap-2">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2">
-                  <CheckCircleIcon className="h-3 w-3 text-green-600" />
+                  <div className="w-2 h-2 bg-green-600 rounded-full"></div>
                   <span className="text-xs text-green-600">成功</span>
                   <span className="text-xs font-mono font-medium text-green-700">
                     {withdrawalTotals.success.toLocaleString()}
@@ -672,7 +672,7 @@ function PaymentMethodSection({
 
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2">
-                  <ClockIcon className="h-3 w-3 text-yellow-600" />
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
                   <span className="text-xs text-yellow-600">處理中</span>
                   <span className="text-xs font-mono font-medium text-yellow-700">
                     {withdrawalTotals.pending.toLocaleString()}
@@ -682,7 +682,7 @@ function PaymentMethodSection({
 
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2">
-                  <XCircleIcon className="h-3 w-3 text-red-600" />
+                  <div className="w-2 h-2 bg-red-600 rounded-full"></div>
                   <span className="text-xs text-red-600">失敗</span>
                   <span className="text-xs font-mono font-medium text-red-700">
                     {withdrawalTotals.fail.toLocaleString()}
@@ -763,7 +763,7 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
         </div>
 
         <div className="flex items-center gap-1">
-          <CheckCircleIcon className="h-3 w-3 text-green-600" />
+          <div className="w-2 h-2 bg-green-600 rounded-full"></div>
           <span className="text-xs text-green-600">成功</span>
           <span className="text-xs font-mono font-medium text-green-700">
             {data.success.toLocaleString()}
@@ -771,7 +771,7 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
         </div>
 
         <div className="flex items-center gap-1">
-          <ClockIcon className="h-3 w-3 text-yellow-600" />
+          <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
           <span className="text-xs text-yellow-600">處理中</span>
           <span className="text-xs font-mono font-medium text-yellow-700">
             {data.pending.toLocaleString()}
@@ -779,7 +779,7 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
         </div>
 
         <div className="flex items-center gap-1">
-          <XCircleIcon className="h-3 w-3 text-red-600" />
+          <div className="w-2 h-2 bg-red-600 rounded-full"></div>
           <span className="text-xs text-red-600">失敗</span>
           <span className="text-xs font-mono font-medium text-red-700">
             {data.fail.toLocaleString()}
