@@ -150,7 +150,6 @@ export default function LoginPage() {
       return;
     } catch (error) {
       const errorData = error as ApplicationError;
-
       // store unauthorized IP
       if (
         errorData.statusCode === 401 &&
