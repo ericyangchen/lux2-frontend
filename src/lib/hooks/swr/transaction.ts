@@ -8,6 +8,7 @@ import {
   ApiGetTransactions,
   ApiGetTransactionsByMerchantId,
   ApiGetWeeklyTransactionTrendsByOrganizationId,
+  ApiGetTransactionStatisticsCounts,
 } from "@/lib/apis/transactions/get";
 import {
   DailyTransactionCountByOrganizationId,
@@ -17,6 +18,7 @@ import {
   SystemWeeklyTransactionTrends,
   Transaction,
   WeeklyTransactionTrendsByOrganizationId,
+  TransactionStatisticsCounts,
 } from "@/lib/types/transaction";
 import {
   USE_DAILY_TRANSACTION_COUNT_BY_ORGANIZATION_ID_REFRESH_INTERVAL,
@@ -612,6 +614,69 @@ export const useSystemChannelPerformance = (date?: string) => {
 
   return {
     systemChannelPerformance: data as SystemChannelPerformance,
+    isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
+const fetchTransactionStatisticsCounts = async ({
+  merchantId,
+  startOfCreatedAt,
+  endOfCreatedAt,
+  accessToken,
+}: {
+  merchantId: string;
+  startOfCreatedAt: string;
+  endOfCreatedAt: string;
+  accessToken: string;
+}) => {
+  const response = await ApiGetTransactionStatisticsCounts({
+    merchantId,
+    startOfCreatedAt,
+    endOfCreatedAt,
+    accessToken,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    const error = new ApplicationError(errorData);
+    throw error;
+  }
+
+  return response.json();
+};
+
+export const useTransactionStatisticsCounts = ({
+  merchantId,
+  startOfCreatedAt,
+  endOfCreatedAt,
+}: {
+  merchantId?: string;
+  startOfCreatedAt?: string;
+  endOfCreatedAt?: string;
+}) => {
+  const { accessToken } = getApplicationCookies();
+
+  const shouldFetch =
+    accessToken && merchantId && startOfCreatedAt && endOfCreatedAt;
+
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
+    shouldFetch
+      ? {
+          key: "transaction-statistics-counts",
+          merchantId,
+          startOfCreatedAt,
+          endOfCreatedAt,
+          accessToken,
+        }
+      : null,
+    fetchTransactionStatisticsCounts,
+    { refreshInterval: 0 }
+  );
+
+  return {
+    statistics: data as TransactionStatisticsCounts,
     isLoading,
     isError: error,
     mutate,

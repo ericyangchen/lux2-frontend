@@ -363,3 +363,29 @@ export const ApiGetSystemChannelPerformance = async ({
     }
   );
 };
+
+export const ApiGetTransactionStatisticsCounts = async ({
+  merchantId,
+  startOfCreatedAt,
+  endOfCreatedAt,
+  accessToken,
+}: {
+  merchantId: string;
+  startOfCreatedAt: string;
+  endOfCreatedAt: string;
+  accessToken: string;
+}) => {
+  const queryString = buildQueryString({
+    merchantId,
+    startOfCreatedAt,
+    endOfCreatedAt,
+  });
+
+  return fetch(
+    `${getBackendUrl()}/transaction-statistics/counts?${queryString}`,
+    {
+      method: "GET",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
+};

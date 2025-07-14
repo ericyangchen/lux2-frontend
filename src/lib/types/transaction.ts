@@ -147,3 +147,13 @@ export interface SystemChannelPerformance {
   referenceDate: string;
   channelPerformanceData: ChannelPerformanceItem[];
 }
+
+export interface TransactionStatisticsCounts {
+  data: Array<{
+    paymentChannel: PaymentChannel;
+    total: number;
+    success: number;
+    pending: number;
+    fail: number;
+  }>;
+}

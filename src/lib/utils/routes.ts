@@ -12,6 +12,7 @@ import {
   InboxArrowDownIcon,
   UserCircleIcon,
   WalletIcon,
+  ChartPieIcon,
 } from "@heroicons/react/24/outline";
 
 import { OrgType } from "../enums/organizations/org-type.enum";
@@ -74,6 +75,11 @@ export const adminNavigation = [
     name: "單位列表",
     href: "/admin/organizations",
     icon: BuildingOffice2Icon,
+  },
+  {
+    name: "交易統計",
+    href: "/admin/transaction-statistics",
+    icon: ChartPieIcon,
   },
   {
     name: "訂單查詢",
