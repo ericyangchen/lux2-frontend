@@ -370,13 +370,13 @@ export const ApiGetTransactionStatisticsCounts = async ({
   endOfCreatedAt,
   accessToken,
 }: {
-  merchantId: string;
+  merchantId?: string;
   startOfCreatedAt: string;
   endOfCreatedAt: string;
   accessToken: string;
 }) => {
   const queryString = buildQueryString({
-    merchantId,
+    ...(merchantId && { merchantId }),
     startOfCreatedAt,
     endOfCreatedAt,
   });

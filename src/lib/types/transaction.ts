@@ -155,5 +155,6 @@ export interface TransactionStatisticsCounts {
     success: number;
     pending: number;
     fail: number;
+    amountSum: number;
   }>;
 }

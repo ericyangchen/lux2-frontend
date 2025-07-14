@@ -626,7 +626,7 @@ const fetchTransactionStatisticsCounts = async ({
   endOfCreatedAt,
   accessToken,
 }: {
-  merchantId: string;
+  merchantId?: string;
   startOfCreatedAt: string;
   endOfCreatedAt: string;
   accessToken: string;
@@ -658,8 +658,7 @@ export const useTransactionStatisticsCounts = ({
 }) => {
   const { accessToken } = getApplicationCookies();
 
-  const shouldFetch =
-    accessToken && merchantId && startOfCreatedAt && endOfCreatedAt;
+  const shouldFetch = accessToken && startOfCreatedAt && endOfCreatedAt;
 
   const { data, error, isLoading, mutate } = useSwrWithAuth(
     shouldFetch

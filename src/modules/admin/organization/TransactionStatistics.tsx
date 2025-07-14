@@ -15,10 +15,11 @@ import {
 } from "@/lib/constants/transaction";
 import { PaymentChannel } from "@/lib/enums/transactions/payment-channel.enum";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
+import { OrgType } from "@/lib/enums/organizations/org-type.enum";
 import { useTransactionStatisticsCounts } from "@/lib/hooks/swr/transaction";
 import { useOrganization } from "@/lib/hooks/swr/organization";
 import { formatNumber } from "@/lib/utils/number";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { Badge } from "@/components/shadcn/ui/badge";
 import {
   CheckCircleIcon,
@@ -27,7 +28,7 @@ import {
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 
-// 顏色常數
+// Color constants
 const COLORS = {
   success: "#10b981", // green-500
   warning: "#f59e0b", // amber-500
@@ -46,6 +47,7 @@ interface StatisticsData {
   success: number;
   pending: number;
   fail: number;
+  amountSum: number;
 }
 
 export function TransactionStatistics({
@@ -65,14 +67,21 @@ export function TransactionStatistics({
     return today;
   });
 
-  // Query state - only query when this is true
+  // Query state - auto query when organization is selected, manual query for date changes
   const [shouldQuery, setShouldQuery] = useState(false);
 
-  // Format dates for API - only when shouldQuery is true
+  // Auto-query when organization is selected
+  const shouldAutoQuery = organizationId && !shouldQuery;
+
+  // Format dates for API - query when auto-query is triggered or manual query is requested
   const startOfCreatedAt =
-    shouldQuery && startDate ? startDate.toISOString() : undefined;
+    (shouldAutoQuery || shouldQuery) && startDate
+      ? startDate.toISOString()
+      : undefined;
   const endOfCreatedAt =
-    shouldQuery && endDate ? endDate.toISOString() : undefined;
+    (shouldAutoQuery || shouldQuery) && endDate
+      ? endDate.toISOString()
+      : undefined;
 
   // Quick time range functions
   const setToday = () => {
@@ -85,7 +94,7 @@ export function TransactionStatistics({
 
     setStartDate(startOfToday);
     setEndDate(endOfToday);
-    setShouldQuery(false); // Reset query state
+    setShouldQuery(true); // Auto query when quick selection is used
   };
 
   const setLastHour = () => {
@@ -93,7 +102,7 @@ export function TransactionStatistics({
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
     setStartDate(oneHourAgo);
     setEndDate(now);
-    setShouldQuery(false); // Reset query state
+    setShouldQuery(true); // Auto query when quick selection is used
   };
 
   const setYesterday = () => {
@@ -107,7 +116,7 @@ export function TransactionStatistics({
 
     setStartDate(yesterday);
     setEndDate(yesterdayEnd);
-    setShouldQuery(false); // Reset query state
+    setShouldQuery(true); // Auto query when quick selection is used
   };
 
   const setLastMonth = () => {
@@ -125,16 +134,26 @@ export function TransactionStatistics({
 
     setStartDate(lastMonth);
     setEndDate(lastMonthEnd);
-    setShouldQuery(false); // Reset query state
+    setShouldQuery(true); // Auto query when quick selection is used
   };
 
   const handleQuery = () => {
     setShouldQuery(true);
   };
 
+  // Reset query state when organization changes
+  const prevOrganizationId = useRef(organizationId);
+  useEffect(() => {
+    if (prevOrganizationId.current !== organizationId) {
+      setShouldQuery(false);
+      prevOrganizationId.current = organizationId;
+    }
+  }, [organizationId]);
+
   // Get statistics data
   const { statistics, isLoading, isError } = useTransactionStatisticsCounts({
-    merchantId: organizationId,
+    merchantId:
+      organization?.type === OrgType.ADMIN ? undefined : organizationId,
     startOfCreatedAt,
     endOfCreatedAt,
   });
@@ -170,8 +189,9 @@ export function TransactionStatistics({
         success: acc.success + item.success,
         pending: acc.pending + item.pending,
         fail: acc.fail + item.fail,
+        amountSum: acc.amountSum + item.amountSum,
       }),
-      { total: 0, success: 0, pending: 0, fail: 0 }
+      { total: 0, success: 0, pending: 0, fail: 0, amountSum: 0 }
     );
 
     const withdrawal = processedData.withdrawal.reduce(
@@ -180,8 +200,9 @@ export function TransactionStatistics({
         success: acc.success + item.success,
         pending: acc.pending + item.pending,
         fail: acc.fail + item.fail,
+        amountSum: acc.amountSum + item.amountSum,
       }),
-      { total: 0, success: 0, pending: 0, fail: 0 }
+      { total: 0, success: 0, pending: 0, fail: 0, amountSum: 0 }
     );
 
     return { deposit, withdrawal };
@@ -269,8 +290,8 @@ export function TransactionStatistics({
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <Label className="whitespace-nowrap">快速選擇</Label>
+            <div className="flex gap-4 items-center">
+              <Label className="whitespace-nowrap">快速查詢</Label>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
@@ -375,7 +396,13 @@ export function TransactionStatistics({
 
 interface SummaryCardProps {
   title: string;
-  data: { total: number; success: number; pending: number; fail: number };
+  data: {
+    total: number;
+    success: number;
+    pending: number;
+    fail: number;
+    amountSum: number;
+  };
   color: "blue" | "green";
 }
 
@@ -414,34 +441,41 @@ function SummaryCard({ title, data, color }: SummaryCardProps) {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">成功</span>
-              <Badge variant="outline" className="bg-green-100 text-green-800">
+              <span className="text-sm font-mono">
                 {data.success.toLocaleString()}
-              </Badge>
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">處理中</span>
-              <Badge
-                variant="outline"
-                className="bg-yellow-100 text-yellow-800"
-              >
+              <span className="text-sm font-mono">
                 {data.pending.toLocaleString()}
-              </Badge>
+              </span>
             </div>
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">失敗</span>
-              <Badge variant="outline" className="bg-red-100 text-red-800">
+              <span className="text-sm font-mono">
                 {data.fail.toLocaleString()}
-              </Badge>
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-700">總計</span>
-              <Badge variant="default" className="font-mono">
+              <span className="text-sm font-mono font-medium">
                 {data.total.toLocaleString()}
-              </Badge>
+              </span>
             </div>
+          </div>
+        </div>
+
+        {/* Amount Sum */}
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-700">總金額</span>
+            <span className="text-sm font-mono font-medium">
+              ₱{data.amountSum.toLocaleString()}
+            </span>
           </div>
         </div>
       </CardContent>
@@ -468,8 +502,9 @@ function PaymentMethodSection({
       success: acc.success + item.success,
       pending: acc.pending + item.pending,
       fail: acc.fail + item.fail,
+      amountSum: acc.amountSum + item.amountSum,
     }),
-    { total: 0, success: 0, pending: 0, fail: 0 }
+    { total: 0, success: 0, pending: 0, fail: 0, amountSum: 0 }
   );
 
   const withdrawalTotals = data.withdrawal.reduce(
@@ -478,8 +513,9 @@ function PaymentMethodSection({
       success: acc.success + item.success,
       pending: acc.pending + item.pending,
       fail: acc.fail + item.fail,
+      amountSum: acc.amountSum + item.amountSum,
     }),
-    { total: 0, success: 0, pending: 0, fail: 0 }
+    { total: 0, success: 0, pending: 0, fail: 0, amountSum: 0 }
   );
 
   return (
@@ -512,38 +548,44 @@ function PaymentMethodSection({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">成功</span>
-                  <Badge
-                    variant="outline"
-                    className="bg-green-100 text-green-800"
-                  >
+                  <span className="text-sm font-mono">
                     {depositTotals.success.toLocaleString()}
-                  </Badge>
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">處理中</span>
-                  <Badge
-                    variant="outline"
-                    className="bg-yellow-100 text-yellow-800"
-                  >
+                  <span className="text-sm font-mono">
                     {depositTotals.pending.toLocaleString()}
-                  </Badge>
+                  </span>
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">失敗</span>
-                  <Badge variant="outline" className="bg-red-100 text-red-800">
+                  <span className="text-sm font-mono">
                     {depositTotals.fail.toLocaleString()}
-                  </Badge>
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700">
                     總計
                   </span>
-                  <Badge variant="default" className="font-mono">
+                  <span className="text-sm font-mono font-medium">
                     {depositTotals.total.toLocaleString()}
-                  </Badge>
+                  </span>
                 </div>
+              </div>
+            </div>
+
+            {/* Amount Sum */}
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">
+                  總金額
+                </span>
+                <span className="text-sm font-mono font-medium">
+                  ₱{depositTotals.amountSum.toLocaleString()}
+                </span>
               </div>
             </div>
           </div>
@@ -568,38 +610,44 @@ function PaymentMethodSection({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">成功</span>
-                  <Badge
-                    variant="outline"
-                    className="bg-green-100 text-green-800"
-                  >
+                  <span className="text-sm font-mono">
                     {withdrawalTotals.success.toLocaleString()}
-                  </Badge>
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">處理中</span>
-                  <Badge
-                    variant="outline"
-                    className="bg-yellow-100 text-yellow-800"
-                  >
+                  <span className="text-sm font-mono">
                     {withdrawalTotals.pending.toLocaleString()}
-                  </Badge>
+                  </span>
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">失敗</span>
-                  <Badge variant="outline" className="bg-red-100 text-red-800">
+                  <span className="text-sm font-mono">
                     {withdrawalTotals.fail.toLocaleString()}
-                  </Badge>
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700">
                     總計
                   </span>
-                  <Badge variant="default" className="font-mono">
+                  <span className="text-sm font-mono font-medium">
                     {withdrawalTotals.total.toLocaleString()}
-                  </Badge>
+                  </span>
                 </div>
+              </div>
+            </div>
+
+            {/* Amount Sum */}
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">
+                  總金額
+                </span>
+                <span className="text-sm font-mono font-medium">
+                  ₱{withdrawalTotals.amountSum.toLocaleString()}
+                </span>
               </div>
             </div>
           </div>
@@ -641,38 +689,72 @@ interface ChannelDetailRowProps {
 }
 
 function ChannelDetailRow({ data }: ChannelDetailRowProps) {
+  const successRate =
+    data.total > 0
+      ? `${((data.success / data.total) * 100).toFixed(2)}%`
+      : "無法計算";
+
   return (
-    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-      <div className="flex-1">
-        <span className="text-sm font-medium text-gray-900">
-          {PaymentChannelDisplayNames[data.paymentChannel] ||
-            data.paymentChannel}
-        </span>
-      </div>
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <CheckCircleIcon className="h-4 w-4 text-green-500" />
-          <span className="text-sm font-mono">
-            {data.success.toLocaleString()}
+    <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-semibold text-gray-900">
+            {PaymentChannelDisplayNames[data.paymentChannel] ||
+              data.paymentChannel}
           </span>
+          <Badge variant="secondary" className="text-xs">
+            成功率: {successRate}
+          </Badge>
         </div>
-        <div className="flex items-center gap-2">
-          <ClockIcon className="h-4 w-4 text-yellow-500" />
-          <span className="text-sm font-mono">
-            {data.pending.toLocaleString()}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <XCircleIcon className="h-4 w-4 text-red-500" />
-          <span className="text-sm font-mono">
-            {data.fail.toLocaleString()}
-          </span>
-        </div>
-        <div className="flex items-center gap-2 ml-4">
-          <span className="text-sm font-medium text-gray-700">總計:</span>
-          <span className="text-sm font-mono font-medium">
+        <div className="text-right">
+          <div className="text-sm font-medium text-gray-700">總計</div>
+          <div className="text-lg font-mono font-bold text-gray-900">
             {data.total.toLocaleString()}
-          </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
+        <div className="flex items-center gap-2 p-2 bg-green-50 rounded-md">
+          <CheckCircleIcon className="h-4 w-4 text-green-600 flex-shrink-0" />
+          <div>
+            <div className="text-xs text-gray-600">成功</div>
+            <div className="text-sm font-mono font-medium text-green-900">
+              {data.success.toLocaleString()}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 p-2 bg-yellow-50 rounded-md">
+          <ClockIcon className="h-4 w-4 text-yellow-600 flex-shrink-0" />
+          <div>
+            <div className="text-xs text-gray-600">處理中</div>
+            <div className="text-sm font-mono font-medium text-yellow-900">
+              {data.pending.toLocaleString()}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 p-2 bg-red-50 rounded-md">
+          <XCircleIcon className="h-4 w-4 text-red-600 flex-shrink-0" />
+          <div>
+            <div className="text-xs text-gray-600">失敗</div>
+            <div className="text-sm font-mono font-medium text-red-900">
+              {data.fail.toLocaleString()}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-md">
+          <ExclamationTriangleIcon className="h-4 w-4 text-blue-600 flex-shrink-0" />
+          <div>
+            <div className="text-xs text-gray-600">總金額</div>
+            <div className="text-sm font-mono font-medium text-blue-900">
+              ₱{data.amountSum.toLocaleString()}
+            </div>
+          </div>
         </div>
       </div>
     </div>
