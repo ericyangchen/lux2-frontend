@@ -67,6 +67,11 @@ export const adminNavigation = [
     icon: HomeIcon,
   },
   {
+    name: "交易統計",
+    href: "/admin/transaction-statistics",
+    icon: ChartPieIcon,
+  },
+  {
     name: "上游渠道",
     href: "/admin/channel-controls",
     icon: CurrencyDollarIcon,
@@ -75,11 +80,6 @@ export const adminNavigation = [
     name: "單位列表",
     href: "/admin/organizations",
     icon: BuildingOffice2Icon,
-  },
-  {
-    name: "交易統計",
-    href: "/admin/transaction-statistics",
-    icon: ChartPieIcon,
   },
   {
     name: "訂單查詢",
