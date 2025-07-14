@@ -446,7 +446,7 @@ function SummaryCard({ title, data, color }: SummaryCardProps) {
           <div className="text-center p-4 border border-gray-200 rounded-lg bg-gray-50">
             <div className="text-xs text-gray-600 mb-1">總金額</div>
             <div className="text-2xl font-bold text-gray-900">
-              ₱{data.amountSum.toLocaleString()}
+              ₱{formatNumber(data.amountSum.toString())}
             </div>
             <div className="text-xs text-gray-500 mt-1">菲律賓披索</div>
           </div>
@@ -573,7 +573,7 @@ function PaymentMethodSection({
               <div className="text-center p-3 border border-gray-200 rounded-lg bg-gray-50">
                 <div className="text-xs text-gray-600 mb-1">總金額</div>
                 <div className="text-xl font-bold text-gray-900">
-                  ₱{depositTotals.amountSum.toLocaleString()}
+                  ₱{formatNumber(depositTotals.amountSum.toString())}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">菲律賓披索</div>
               </div>
@@ -652,7 +652,7 @@ function PaymentMethodSection({
               <div className="text-center p-3 border border-gray-200 rounded-lg bg-gray-50">
                 <div className="text-xs text-gray-600 mb-1">總金額</div>
                 <div className="text-xl font-bold text-gray-900">
-                  ₱{withdrawalTotals.amountSum.toLocaleString()}
+                  ₱{formatNumber(withdrawalTotals.amountSum.toString())}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">菲律賓披索</div>
               </div>
@@ -744,80 +744,66 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
   const successRate =
     data.total > 0
       ? `${((data.success / data.total) * 100).toFixed(2)}%`
-      : "無法計算";
+      : "None";
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
-      {/* Header with Channel Name */}
-      <div className="mb-4">
-        <h4 className="text-base font-semibold text-gray-900">
+    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
+      {/* Channel Name */}
+      <div className="flex-1">
+        <div className="text-sm font-semibold text-gray-900">
           {PaymentChannelDisplayNames[data.paymentChannel] ||
             data.paymentChannel}
-        </h4>
-      </div>
-
-      {/* Key Metrics - 重點強調的三個指標 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        {/* 成功率 */}
-        <div className="text-center p-3 border border-gray-200 rounded-lg">
-          <div className="text-xs text-gray-600 mb-1">成功率</div>
-          <div className="text-xl font-bold text-gray-900">{successRate}</div>
-          <div className="text-xs text-gray-500 mt-1">
-            {data.success} / {data.total}
-          </div>
-        </div>
-
-        {/* 總比數 */}
-        <div className="text-center p-3 border border-gray-200 rounded-lg">
-          <div className="text-xs text-gray-600 mb-1">總比數</div>
-          <div className="text-xl font-bold text-gray-900">
-            {data.total.toLocaleString()}
-          </div>
-          <div className="text-xs text-gray-500 mt-1">筆交易</div>
         </div>
       </div>
 
-      {/* 總金額 - 獨立行 */}
-      <div className="mb-4">
-        <div className="text-center p-4 border border-gray-200 rounded-lg bg-gray-50">
-          <div className="text-xs text-gray-600 mb-1">總金額</div>
-          <div className="text-2xl font-bold text-gray-900">
-            ₱{data.amountSum.toLocaleString()}
-          </div>
-          <div className="text-xs text-gray-500 mt-1">菲律賓披索</div>
+      {/* Success Rate */}
+      <div className="text-center min-w-[80px]">
+        <div className="text-xs text-gray-600">成功率</div>
+        <div className="text-sm font-mono font-bold text-gray-900">
+          {successRate}
         </div>
       </div>
 
-      {/* Detailed Breakdown */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-2">
-            <CheckCircleIcon className="h-4 w-4 text-green-600" />
-            <span className="text-xs text-green-600">成功</span>
-            <span className="text-sm font-mono font-medium text-green-700">
-              {data.success.toLocaleString()}
-            </span>
-          </div>
+      {/* Total Count */}
+      <div className="text-center min-w-[80px]">
+        <div className="text-xs text-gray-600">總比數</div>
+        <div className="text-sm font-mono font-bold text-gray-900">
+          {data.total.toLocaleString()}
+        </div>
+      </div>
+
+      {/* Total Amount */}
+      <div className="text-center min-w-[120px]">
+        <div className="text-xs text-gray-600">總金額</div>
+        <div className="text-sm font-mono font-bold text-gray-900">
+          ₱{formatNumber(data.amountSum.toString())}
+        </div>
+      </div>
+
+      {/* Status Breakdown */}
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1">
+          <CheckCircleIcon className="h-3 w-3 text-green-600" />
+          <span className="text-xs text-green-600">成功</span>
+          <span className="text-xs font-mono font-medium text-green-700">
+            {data.success.toLocaleString()}
+          </span>
         </div>
 
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-2">
-            <ClockIcon className="h-4 w-4 text-yellow-600" />
-            <span className="text-xs text-yellow-600">處理中</span>
-            <span className="text-sm font-mono font-medium text-yellow-700">
-              {data.pending.toLocaleString()}
-            </span>
-          </div>
+        <div className="flex items-center gap-1">
+          <ClockIcon className="h-3 w-3 text-yellow-600" />
+          <span className="text-xs text-yellow-600">處理中</span>
+          <span className="text-xs font-mono font-medium text-yellow-700">
+            {data.pending.toLocaleString()}
+          </span>
         </div>
 
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-2">
-            <XCircleIcon className="h-4 w-4 text-red-600" />
-            <span className="text-xs text-red-600">失敗</span>
-            <span className="text-sm font-mono font-medium text-red-700">
-              {data.fail.toLocaleString()}
-            </span>
-          </div>
+        <div className="flex items-center gap-1">
+          <XCircleIcon className="h-3 w-3 text-red-600" />
+          <span className="text-xs text-red-600">失敗</span>
+          <span className="text-xs font-mono font-medium text-red-700">
+            {data.fail.toLocaleString()}
+          </span>
         </div>
       </div>
     </div>
