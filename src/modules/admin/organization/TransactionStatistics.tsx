@@ -699,13 +699,9 @@ function PaymentMethodSection({
           {data.deposit.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
                 <h5 className="text-lg font-semibold text-gray-900">
                   代收渠道詳情
                 </h5>
-                <Badge variant="outline" className="ml-2">
-                  {data.deposit.length} 個渠道
-                </Badge>
               </div>
               <div className="space-y-3">
                 {data.deposit.map((item) => (
@@ -749,39 +745,34 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
   return (
     <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
       {/* Channel Name */}
-      <div className="flex-1">
-        <div className="text-sm font-semibold text-gray-900">
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-semibold text-gray-900 truncate">
           {PaymentChannelDisplayNames[data.paymentChannel] ||
             data.paymentChannel}
         </div>
       </div>
 
-      {/* Success Rate */}
-      <div className="text-center min-w-[80px]">
-        <div className="text-xs text-gray-600">成功率</div>
-        <div className="text-sm font-mono font-bold text-gray-900">
-          {successRate}
-        </div>
-      </div>
-
       {/* Total Count */}
-      <div className="text-center min-w-[80px]">
+      <div className="text-center min-w-[80px] mx-2">
         <div className="text-xs text-gray-600">總比數</div>
         <div className="text-sm font-mono font-bold text-gray-900">
           {data.total.toLocaleString()}
         </div>
       </div>
 
-      {/* Total Amount */}
-      <div className="text-center min-w-[120px]">
+      {/* Total Amount - 改善長金額顯示 */}
+      <div className="text-center min-w-[140px] mx-2">
         <div className="text-xs text-gray-600">總金額</div>
-        <div className="text-sm font-mono font-bold text-gray-900">
+        <div
+          className="text-sm font-mono font-bold text-gray-900 truncate"
+          title={`₱${formatNumber(data.amountSum.toString())}`}
+        >
           ₱{formatNumber(data.amountSum.toString())}
         </div>
       </div>
 
       {/* Status Breakdown */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 mx-2">
         <div className="flex items-center gap-1">
           <CheckCircleIcon className="h-3 w-3 text-green-600" />
           <span className="text-xs text-green-600">成功</span>
@@ -804,6 +795,14 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
           <span className="text-xs font-mono font-medium text-red-700">
             {data.fail.toLocaleString()}
           </span>
+        </div>
+      </div>
+
+      {/* Success Rate - 移動到最右邊 */}
+      <div className="text-center min-w-[80px]">
+        <div className="text-xs text-gray-600">成功率</div>
+        <div className="text-sm font-mono font-bold text-gray-900">
+          {successRate}
         </div>
       </div>
     </div>
