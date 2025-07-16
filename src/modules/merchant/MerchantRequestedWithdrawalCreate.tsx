@@ -1,4 +1,10 @@
 import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/shadcn/ui/dialog";
+import {
   Select,
   SelectContent,
   SelectGroup,
@@ -32,6 +38,7 @@ export function MerchantRequestedWithdrawalCreate({
   const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   // Form fields
   const [merchantOrderId, setMerchantOrderId] = useState("");
@@ -127,10 +134,8 @@ export function MerchantRequestedWithdrawalCreate({
           description: `商戶訂單號: ${merchantOrderId}`,
           variant: "success",
         });
-        resetForm();
-
-        // switch tab to pending withdrawals
-        setActiveTab(MerchantRequestedWithdrawalTab.LIST);
+        setShowSuccessDialog(true); // show dialog
+        // do not resetForm or setActiveTab here
       } else {
         throw new ApplicationError(data);
       }
@@ -321,6 +326,33 @@ export function MerchantRequestedWithdrawalCreate({
           </div>
         </form>
       </div>
+      {/* Success Dialog */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent>
+          <DialogTitle>提領請求已建立</DialogTitle>
+          <div className="mb-4">你想要？</div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowSuccessDialog(false);
+                // stay on page, preserve info
+              }}
+            >
+              繼續建立新請求
+            </Button>
+            <Button
+              onClick={() => {
+                setShowSuccessDialog(false);
+                resetForm();
+                setActiveTab(MerchantRequestedWithdrawalTab.LIST);
+              }}
+            >
+              查看已建立之請求
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
