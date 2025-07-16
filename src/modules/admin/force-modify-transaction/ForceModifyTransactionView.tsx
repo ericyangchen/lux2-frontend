@@ -40,6 +40,7 @@ import { TransactionInternalStatus } from "@/lib/enums/transactions/transaction-
 import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/utils/timezone";
+import { formatNumberInPercentage } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
@@ -347,7 +348,7 @@ export function ForceModifyTransactionView() {
                 <Label className="text-sm font-medium text-gray-500">
                   手續費率
                 </Label>
-                <p>{transaction.feePercentage}%</p>
+                <p>{formatNumberInPercentage(transaction.feePercentage)}%</p>
               </div>
               <div>
                 <Label className="text-sm font-medium text-gray-500">
