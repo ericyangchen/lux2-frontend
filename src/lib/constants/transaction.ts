@@ -96,6 +96,9 @@ export const DepositPaymentChannelCategories = {
 
     // DaliPay
     PaymentChannel.NATIVE_GCASH_DALIPAY_DEPOSIT,
+
+    // HFPay
+    PaymentChannel.NATIVE_GCASH_HFPAY_DEPOSIT,
   ],
   [PaymentMethod.MAYA]: [
     // BIFU
@@ -126,6 +129,9 @@ export const WithdrawalPaymentChannelCategories = {
 
     // OdPay
     PaymentChannel.NATIVE_GCASH_ODPAY_WITHDRAWAL,
+
+    // HFPay
+    PaymentChannel.NATIVE_GCASH_HFPAY_WITHDRAWAL,
   ],
   [PaymentMethod.MAYA]: [
     // BIFU
@@ -224,6 +230,10 @@ export const PaymentChannelDisplayNames = {
 
   /* OdPay */
   [PaymentChannel.NATIVE_GCASH_ODPAY_WITHDRAWAL]: "N-GCash: OdPay (withdrawal)",
+
+  /* HFPay */
+  [PaymentChannel.NATIVE_GCASH_HFPAY_DEPOSIT]: "N-GCash: HFPay (deposit)",
+  [PaymentChannel.NATIVE_GCASH_HFPAY_WITHDRAWAL]: "N-GCash: HFPay (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
