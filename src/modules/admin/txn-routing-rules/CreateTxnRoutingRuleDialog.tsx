@@ -20,6 +20,8 @@ import {
 import { Badge } from "@/components/shadcn/ui/badge";
 import { XMarkIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { PaymentChannel } from "@/lib/enums/transactions/payment-channel.enum";
+import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
+import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { DepositToAccountType } from "@/lib/enums/transactions/deposit-to-account-type.enum";
 import { WithdrawalToAccountType } from "@/lib/enums/transactions/withdrawal-to-account-type.enum";
 import {
@@ -32,6 +34,7 @@ import {
   WithdrawalAccountTypeDisplayNames,
   DepositPaymentChannelCategories,
   WithdrawalPaymentChannelCategories,
+  PaymentMethodDisplayNames,
 } from "@/lib/constants/transaction";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
@@ -50,14 +53,19 @@ export const CreateTxnRoutingRuleDialog = ({
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [accountTypeCategory, setAccountTypeCategory] = useState<
-    "deposit" | "withdrawal" | "none"
-  >("none");
+    "deposit" | "withdrawal"
+  >("deposit");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
+    PaymentMethod | ""
+  >("");
   const [formData, setFormData] = useState<CreateTxnRoutingRuleRequest>({
     title: "",
     description: "",
     minValue: undefined,
     maxValue: undefined,
     accountType: undefined,
+    paymentMethod: PaymentMethod.NATIVE_GCASH,
+    transactionType: TransactionType.API_DEPOSIT,
     routingRule: [
       {
         priority: 100,
@@ -89,12 +97,22 @@ export const CreateTxnRoutingRuleDialog = ({
     return [];
   };
 
-  // 根據帳戶類型類別獲取可用的支付渠道
+  // 根據帳戶類型類別和支付方式獲取可用的支付渠道
   const getAvailablePaymentChannels = () => {
+    if (!selectedPaymentMethod) return [];
+
     if (accountTypeCategory === "deposit") {
-      return Object.values(DepositPaymentChannelCategories).flat();
+      return (
+        DepositPaymentChannelCategories[
+          selectedPaymentMethod as PaymentMethod
+        ] || []
+      );
     } else if (accountTypeCategory === "withdrawal") {
-      return Object.values(WithdrawalPaymentChannelCategories).flat();
+      return (
+        WithdrawalPaymentChannelCategories[
+          selectedPaymentMethod as PaymentMethod
+        ] || []
+      );
     }
     return [];
   };
@@ -107,19 +125,29 @@ export const CreateTxnRoutingRuleDialog = ({
       newErrors.title = "規則標題為必填項";
     }
 
-    // 驗證金額範圍
-    if (formData.minValue !== undefined && formData.minValue < 0) {
-      newErrors.minValue = "最小金額不能小於0";
+    if (!selectedPaymentMethod) {
+      newErrors.paymentMethod = "請選擇支付方式";
     }
-    if (formData.maxValue !== undefined && formData.maxValue < 0) {
-      newErrors.maxValue = "最大金額不能小於0";
-    }
+
+    // 驗證金額範圍 - 必須同時設置或都不設置
     if (
-      formData.minValue !== undefined &&
-      formData.maxValue !== undefined &&
-      formData.minValue >= formData.maxValue
+      (formData.minValue !== undefined && formData.maxValue === undefined) ||
+      (formData.minValue === undefined && formData.maxValue !== undefined)
     ) {
-      newErrors.maxValue = "最大金額必須大於最小金額";
+      newErrors.minValue = "最小金額和最大金額必須同時設置或都不設置";
+      newErrors.maxValue = "最小金額和最大金額必須同時設置或都不設置";
+    }
+
+    if (formData.minValue !== undefined && formData.maxValue !== undefined) {
+      if (formData.minValue < 0) {
+        newErrors.minValue = "最小金額不能小於0";
+      }
+      if (formData.maxValue < 0) {
+        newErrors.maxValue = "最大金額不能小於0";
+      }
+      if (formData.minValue >= formData.maxValue) {
+        newErrors.maxValue = "最大金額必須大於最小金額";
+      }
     }
 
     // 驗證路由規則
@@ -181,13 +209,16 @@ export const CreateTxnRoutingRuleDialog = ({
   };
 
   const handleClose = () => {
-    setAccountTypeCategory("none");
+    setAccountTypeCategory("deposit");
+    setSelectedPaymentMethod("");
     setFormData({
       title: "",
       description: "",
       minValue: undefined,
       maxValue: undefined,
       accountType: undefined,
+      paymentMethod: PaymentMethod.NATIVE_GCASH,
+      transactionType: TransactionType.API_DEPOSIT,
       routingRule: [
         {
           priority: 100,
@@ -275,11 +306,35 @@ export const CreateTxnRoutingRuleDialog = ({
 
   // 當帳戶類型類別改變時，重置帳戶類型和路由規則
   const handleAccountTypeCategoryChange = (value: string) => {
-    const category = value as "deposit" | "withdrawal" | "none";
+    const category = value as "deposit" | "withdrawal";
     setAccountTypeCategory(category);
+
+    // 設置對應的交易類型
+    const transactionType =
+      category === "deposit"
+        ? TransactionType.API_DEPOSIT
+        : TransactionType.API_WITHDRAWAL;
+
     setFormData((prev) => ({
       ...prev,
       accountType: undefined,
+      transactionType,
+      routingRule: [
+        {
+          priority: 100,
+          percentage: {} as Record<PaymentChannel, number>,
+        },
+      ],
+    }));
+  };
+
+  // 當支付方式改變時，重置路由規則
+  const handlePaymentMethodChange = (value: string) => {
+    const paymentMethod = value as PaymentMethod;
+    setSelectedPaymentMethod(paymentMethod);
+    setFormData((prev) => ({
+      ...prev,
+      paymentMethod,
       routingRule: [
         {
           priority: 100,
@@ -302,20 +357,42 @@ export const CreateTxnRoutingRuleDialog = ({
         <div className="space-y-6">
           {/* 帳戶類型類別選擇 */}
           <div className="space-y-2">
-            <Label htmlFor="accountTypeCategory">帳戶類型類別</Label>
+            <Label htmlFor="accountTypeCategory">帳戶類別</Label>
             <Select
               value={accountTypeCategory}
               onValueChange={handleAccountTypeCategoryChange}
             >
               <SelectTrigger>
-                <SelectValue placeholder="選擇帳戶類型類別" />
+                <SelectValue placeholder="選擇帳戶類別" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">無</SelectItem>
                 <SelectItem value="deposit">代收</SelectItem>
                 <SelectItem value="withdrawal">代付</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          {/* 支付方式選擇 */}
+          <div className="space-y-2">
+            <Label htmlFor="paymentMethod">支付方式 *</Label>
+            <Select
+              value={selectedPaymentMethod}
+              onValueChange={handlePaymentMethodChange}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="選擇支付方式" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(PaymentMethod).map((method) => (
+                  <SelectItem key={method} value={method}>
+                    {PaymentMethodDisplayNames[method]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.paymentMethod && (
+              <p className="text-sm text-red-500">{errors.paymentMethod}</p>
+            )}
           </div>
 
           {/* 基本信息 */}
@@ -359,7 +436,7 @@ export const CreateTxnRoutingRuleDialog = ({
               <Label htmlFor="minValue">最小金額</Label>
               <Input
                 id="minValue"
-                type="text"
+                type="number"
                 value={
                   formData.minValue !== undefined
                     ? formData.minValue.toString()
@@ -380,7 +457,9 @@ export const CreateTxnRoutingRuleDialog = ({
                   }
                 }}
                 placeholder="輸入最小金額"
-                className={errors.minValue ? "border-red-500" : ""}
+                className={`${
+                  errors.minValue ? "border-red-500" : ""
+                } [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
               />
               {errors.minValue && (
                 <p className="text-sm text-red-500">{errors.minValue}</p>
@@ -391,7 +470,7 @@ export const CreateTxnRoutingRuleDialog = ({
               <Label htmlFor="maxValue">最大金額</Label>
               <Input
                 id="maxValue"
-                type="text"
+                type="number"
                 value={
                   formData.maxValue !== undefined
                     ? formData.maxValue.toString()
@@ -412,7 +491,9 @@ export const CreateTxnRoutingRuleDialog = ({
                   }
                 }}
                 placeholder="輸入最大金額"
-                className={errors.maxValue ? "border-red-500" : ""}
+                className={`${
+                  errors.maxValue ? "border-red-500" : ""
+                } [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
               />
               {errors.maxValue && (
                 <p className="text-sm text-red-500">{errors.maxValue}</p>
@@ -434,13 +515,12 @@ export const CreateTxnRoutingRuleDialog = ({
                             | WithdrawalToAccountType),
                   }))
                 }
-                disabled={accountTypeCategory === "none"}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="選擇帳戶類型" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">無</SelectItem>
+                  <SelectItem value="none">全部</SelectItem>
                   {availableAccountTypes.map((type) => (
                     <SelectItem key={type.value} value={type.value}>
                       {type.label}
@@ -460,7 +540,7 @@ export const CreateTxnRoutingRuleDialog = ({
                 variant="outline"
                 size="sm"
                 onClick={addRoutingRule}
-                disabled={accountTypeCategory === "none"}
+                disabled={!selectedPaymentMethod}
               >
                 <PlusIcon className="h-4 w-4 mr-2" />
                 新增規則
@@ -495,7 +575,7 @@ export const CreateTxnRoutingRuleDialog = ({
                     <div className="space-y-2">
                       <Label>優先級</Label>
                       <Input
-                        type="text"
+                        type="number"
                         value={
                           rule.priority !== undefined
                             ? rule.priority.toString()
@@ -510,11 +590,11 @@ export const CreateTxnRoutingRuleDialog = ({
                           );
                         }}
                         placeholder="輸入優先級"
-                        className={
+                        className={`${
                           errors[`routingRule.${ruleIndex}.priority`]
                             ? "border-red-500"
                             : ""
-                        }
+                        } [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                       />
                       {errors[`routingRule.${ruleIndex}.priority`] && (
                         <p className="text-sm text-red-500">
@@ -539,7 +619,7 @@ export const CreateTxnRoutingRuleDialog = ({
                                 ] || channel}
                               </span>
                               <Input
-                                type="text"
+                                type="number"
                                 placeholder="百分比"
                                 value={percentage || ""}
                                 onChange={(e) => {
@@ -550,7 +630,7 @@ export const CreateTxnRoutingRuleDialog = ({
                                     value === "" ? 0 : Number(value)
                                   );
                                 }}
-                                className="w-20"
+                                className="w-20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                               />
                               <span className="text-sm text-gray-600">%</span>
                               <Button
@@ -573,6 +653,9 @@ export const CreateTxnRoutingRuleDialog = ({
                         {/* 新增支付渠道 */}
                         <div className="flex items-center gap-2">
                           <Select
+                            key={`${ruleIndex}-${
+                              Object.keys(rule.percentage).length
+                            }`}
                             onValueChange={(value) => {
                               if (
                                 value &&
@@ -585,7 +668,7 @@ export const CreateTxnRoutingRuleDialog = ({
                                 );
                               }
                             }}
-                            disabled={accountTypeCategory === "none"}
+                            disabled={!selectedPaymentMethod}
                           >
                             <SelectTrigger className="flex-1">
                               <SelectValue placeholder="選擇支付渠道" />

@@ -11,6 +11,10 @@ import {
 } from "@/components/shadcn/ui/card";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
+import { PaymentMethodDisplayNames } from "@/lib/constants/transaction";
+import { TransactionTypeDisplayNames } from "@/lib/constants/transaction";
+import { PaymentChannelDisplayNames } from "@/lib/constants/transaction";
+import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 
 interface TxnRoutingRuleListProps {
   selectedRule?: TxnRoutingRule;
@@ -115,13 +119,61 @@ export const TxnRoutingRuleList = ({
                       {rule.description}
                     </p>
                   )}
-                  <div className="text-xs text-gray-500">
-                    <span>
-                      金額範圍: {rule.minValue} - {rule.maxValue}
-                    </span>
-                    {rule.accountType && (
-                      <span className="ml-2">帳戶類型: {rule.accountType}</span>
-                    )}
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span>
+                        支付方式:{" "}
+                        {PaymentMethodDisplayNames[rule.paymentMethod]}
+                      </span>
+                      <span>
+                        交易類型:{" "}
+                        {TransactionTypeDisplayNames[rule.transactionType]}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span>
+                        金額範圍:{" "}
+                        {rule.minValue !== null &&
+                        rule.maxValue !== null &&
+                        rule.minValue !== undefined &&
+                        rule.maxValue !== undefined
+                          ? `${rule.minValue} - ${rule.maxValue}`
+                          : rule.minValue === null && rule.maxValue === null
+                          ? "沒有設置"
+                          : "無限制"}
+                      </span>
+                      {rule.accountType && (
+                        <span>帳戶類型: {rule.accountType}</span>
+                      )}
+                    </div>
+                    {/* 顯示所有路由規則 */}
+                    <div className="mt-2 space-y-1">
+                      <span className="font-medium">路由規則:</span>
+                      {rule.routingRule.map((routingRule, index) => (
+                        <div
+                          key={index}
+                          className="ml-2 text-xs bg-gray-50 p-1 rounded"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold">
+                              {routingRule.priority}:
+                            </span>
+                            <div className="flex flex-wrap gap-1">
+                              {Object.entries(routingRule.percentage).map(
+                                ([channel, percentage]) => (
+                                  <Badge key={channel} className="text-xs">
+                                    {PaymentChannelDisplayNames[
+                                      channel as keyof typeof PaymentChannelDisplayNames
+                                    ] || channel}
+                                    : {percentage}%
+                                  </Badge>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

@@ -20,6 +20,9 @@ import { getOrganizationsByTxnRoutingRuleId } from "@/lib/apis/admin/txn-routing
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 import { flattenOrganizations } from "@/modules/admin/common/flattenOrganizations";
+import { PaymentMethodDisplayNames } from "@/lib/constants/transaction";
+import { TransactionTypeDisplayNames } from "@/lib/constants/transaction";
+import { PaymentChannelDisplayNames } from "@/lib/constants/transaction";
 
 interface OrganizationBindingDialogProps {
   open: boolean;
@@ -125,38 +128,31 @@ export const OrganizationBindingDialog = ({
         organizationIds: selectedOrganizations,
         txnRoutingRuleId: selectedRule.id,
       });
+      toast({
+        title: "綁定成功",
+        description: "組織已成功綁定到規則",
+      });
       handleClose();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "未知錯誤";
-
-      // 檢查是否為衝突錯誤
-      if (
-        errorMessage.includes("Conflict detected") ||
-        errorMessage.includes("conflict")
-      ) {
-        toast({
-          title: "綁定失敗",
-          description: "檢測到規則衝突，請檢查組織的現有規則設置",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "綁定失敗",
-          description: errorMessage,
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "綁定失敗",
+        description: error instanceof Error ? error.message : "未知錯誤",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleClose = () => {
-    setSearchQuery("");
     setSelectedOrganizations([]);
-    setExistingOrganizations([]);
+    setSearchQuery("");
     onOpenChange(false);
   };
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -166,31 +162,75 @@ export const OrganizationBindingDialog = ({
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* 規則信息 */}
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-medium mb-2">規則信息</h3>
-            <div className="space-y-1 text-sm">
-              <div>
-                <span className="font-medium">標題：</span>
-                {selectedRule.title}
+          {/* 規則詳情 */}
+          <div className="space-y-4">
+            <Label>規則詳情</Label>
+            <div className="border rounded-lg p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <h3 className="font-medium">{selectedRule.title}</h3>
+                <Badge variant={selectedRule.enable ? "default" : "secondary"}>
+                  {selectedRule.enable ? "啟用" : "停用"}
+                </Badge>
               </div>
-              <div>
-                <span className="font-medium">描述：</span>
-                {selectedRule.description || "無"}
-              </div>
-              <div>
-                <span className="font-medium">金額範圍：</span>
-                {selectedRule.minValue !== undefined
-                  ? selectedRule.minValue
-                  : "0"}{" "}
-                -
-                {selectedRule.maxValue !== undefined
-                  ? selectedRule.maxValue
-                  : "無限制"}
-              </div>
-              <div>
-                <span className="font-medium">帳戶類型：</span>
-                {selectedRule.accountType || "無"}
+              {selectedRule.description && (
+                <p className="text-sm text-gray-600">
+                  {selectedRule.description}
+                </p>
+              )}
+              <div className="text-sm text-gray-500 space-y-1">
+                <div className="flex items-center gap-2">
+                  <span>
+                    支付方式:{" "}
+                    {PaymentMethodDisplayNames[selectedRule.paymentMethod]}
+                  </span>
+                  <span>
+                    交易類型:{" "}
+                    {TransactionTypeDisplayNames[selectedRule.transactionType]}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>
+                    金額範圍:{" "}
+                    {selectedRule.minValue !== undefined &&
+                    selectedRule.maxValue !== undefined
+                      ? `${selectedRule.minValue} - ${selectedRule.maxValue}`
+                      : selectedRule.minValue === undefined &&
+                        selectedRule.maxValue === undefined
+                      ? "沒有設置"
+                      : "無限制"}
+                  </span>
+                  {selectedRule.accountType && (
+                    <span>帳戶類型: {selectedRule.accountType}</span>
+                  )}
+                </div>
+                {/* 顯示所有路由規則 */}
+                <div className="mt-2 space-y-1">
+                  <span className="font-medium">路由規則:</span>
+                  {selectedRule.routingRule.map((routingRule, index) => (
+                    <div
+                      key={index}
+                      className="ml-2 text-xs bg-gray-50 p-1 rounded"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold">
+                          {routingRule.priority}:
+                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          {Object.entries(routingRule.percentage).map(
+                            ([channel, percentage]) => (
+                              <Badge key={channel} className="text-xs">
+                                {PaymentChannelDisplayNames[
+                                  channel as keyof typeof PaymentChannelDisplayNames
+                                ] || channel}
+                                : {percentage}%
+                              </Badge>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

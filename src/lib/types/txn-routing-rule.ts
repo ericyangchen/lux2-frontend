@@ -2,6 +2,7 @@ import { PaymentChannel } from "@/lib/enums/transactions/payment-channel.enum";
 import { DepositToAccountType } from "@/lib/enums/transactions/deposit-to-account-type.enum";
 import { WithdrawalToAccountType } from "@/lib/enums/transactions/withdrawal-to-account-type.enum";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
+import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 
 export interface RoutingRuleItem {
   priority: number;
@@ -13,9 +14,11 @@ export interface TxnRoutingRule {
   title: string;
   description?: string;
   enable: boolean;
-  minValue: number;
-  maxValue: number;
+  minValue?: number;
+  maxValue?: number;
   accountType?: DepositToAccountType | WithdrawalToAccountType;
+  paymentMethod: PaymentMethod;
+  transactionType: TransactionType;
   routingRule: RoutingRuleItem[];
   createdAt: string;
   updatedAt: string;
@@ -27,6 +30,8 @@ export interface CreateTxnRoutingRuleRequest {
   minValue?: number;
   maxValue?: number;
   accountType?: DepositToAccountType | WithdrawalToAccountType;
+  paymentMethod: PaymentMethod;
+  transactionType: TransactionType;
   routingRule: RoutingRuleItem[];
 }
 
