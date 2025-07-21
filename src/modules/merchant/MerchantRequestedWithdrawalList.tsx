@@ -58,8 +58,8 @@ export function MerchantRequestedWithdrawalList({
   const [transactionStatus, setTransactionStatus] = useState<
     TransactionStatus | "all"
   >("all");
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
+  const [startDate, setStartDate] = useState<Date | undefined>(new Date());
+  const [endDate, setEndDate] = useState<Date | undefined>(new Date());
 
   const [isLoading, setIsLoading] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>();
@@ -149,8 +149,8 @@ export function MerchantRequestedWithdrawalList({
     setMerchantOrderId("");
     setPaymentMethod("all");
     setTransactionStatus("all");
-    setStartDate(undefined);
-    setEndDate(undefined);
+    setStartDate(new Date());
+    setEndDate(new Date());
     setTransactions(undefined);
   };
 

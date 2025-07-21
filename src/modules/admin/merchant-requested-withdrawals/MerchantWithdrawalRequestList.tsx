@@ -23,10 +23,6 @@ import {
   convertToEndOfDay,
   convertToStartOfDay,
 } from "@/lib/utils/timezone";
-import {
-  formatNumber,
-  formatNumberWithoutMinFraction,
-} from "@/lib/utils/number";
 
 import { ApiGetMerchantRequestedWithdrawals } from "@/lib/apis/txn-merchant-requested-withdrawals/get";
 import { ApplicationError } from "@/lib/error/applicationError";
@@ -47,6 +43,7 @@ import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.e
 import { classNames } from "@/lib/utils/classname-utils";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
 import { flattenOrganizations } from "../common/flattenOrganizations";
+import { formatNumber } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useOrganizationWithChildren } from "@/lib/hooks/swr/organization";
 import { useState } from "react";
@@ -76,8 +73,8 @@ export function MerchantWithdrawalRequestList() {
   const [transactionInternalStatus, setTransactionInternalStatus] = useState<
     TransactionInternalStatus | "all"
   >("all");
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
+  const [startDate, setStartDate] = useState<Date | undefined>(new Date());
+  const [endDate, setEndDate] = useState<Date | undefined>(new Date());
 
   const [isLoading, setIsLoading] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>();
@@ -178,8 +175,8 @@ export function MerchantWithdrawalRequestList() {
     setPaymentMethod("all");
     setTransactionStatus("all");
     setTransactionInternalStatus("all");
-    setStartDate(undefined);
-    setEndDate(undefined);
+    setStartDate(new Date());
+    setEndDate(new Date());
     setTransactions(undefined);
     setSelectedTransactionIds(new Set());
   };
