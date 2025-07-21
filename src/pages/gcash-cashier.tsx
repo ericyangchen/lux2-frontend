@@ -132,12 +132,12 @@ export default function GCashCashierPage() {
               {/* Login Section */}
               <div className="max-w-[360px] mx-auto w-full">
                 <div className="p-6 space-y-6">
-                  <h2 className="text-[#1A1C21] text-lg font-bold">
+                  {/* <h2 className="text-[#1A1C21] text-lg font-bold">
                     Login to pay with GCash
-                  </h2>
+                  </h2> */}
 
                   {/* Phone Input */}
-                  <div className="border-b border-[#E5E7EB] flex items-center pb-2">
+                  {/* <div className="border-b border-[#E5E7EB] flex items-center pb-2">
                     <span className="text-[#6B7280] pr-2 border-r border-[#E5E7EB]">
                       +63
                     </span>
@@ -148,17 +148,20 @@ export default function GCashCashierPage() {
                       placeholder="Mobile number"
                       className="flex-1 ml-2 outline-none text-base text-[#1A1C21] placeholder:text-[#D1D5DB]"
                     />
-                  </div>
+                  </div> */}
 
                   {/* Next Button */}
                   <button
                     onClick={handleNext}
-                    disabled={!isPhoneValid}
-                    className={`w-full py-3 rounded-full text-base transition-colors ${
-                      isPhoneValid
-                        ? "bg-[#0057E6] text-white hover:bg-[#0046B8] cursor-pointer"
-                        : "bg-[#9EC1FF] text-white cursor-not-allowed"
-                    }`}
+                    // disabled={!isPhoneValid}
+                    // className={`w-full py-3 rounded-full text-base transition-colors ${
+                    //   isPhoneValid
+                    //     ? "bg-[#0057E6] text-white hover:bg-[#0046B8] cursor-pointer"
+                    //     : "bg-[#9EC1FF] text-white cursor-not-allowed"
+                    // }`}
+                    className={
+                      "w-full py-3 rounded-full text-base transition-colors bg-[#0057E6] text-white hover:bg-[#0046B8] cursor-pointer"
+                    }
                   >
                     NEXT
                   </button>
