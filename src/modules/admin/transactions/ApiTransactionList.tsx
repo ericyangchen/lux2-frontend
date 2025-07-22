@@ -478,20 +478,13 @@ export function ApiTransactionList() {
                         value={"all"}
                         className="h-8 whitespace-nowrap"
                       ></SelectItem>
-                      <SelectItem value={TransactionType.API_DEPOSIT}>
-                        {
-                          TransactionTypeDisplayNames[
-                            TransactionType.API_DEPOSIT
-                          ]
-                        }
-                      </SelectItem>
-                      <SelectItem value={TransactionType.API_WITHDRAWAL}>
-                        {
-                          TransactionTypeDisplayNames[
-                            TransactionType.API_WITHDRAWAL
-                          ]
-                        }
-                      </SelectItem>
+                      {Object.values(TransactionType).map((type) => {
+                        return (
+                          <SelectItem key={type} value={type}>
+                            {TransactionTypeDisplayNames[type]}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
