@@ -14,7 +14,10 @@ import { useState, useEffect } from "react";
 import { PaymentMethodDisplayNames } from "@/lib/constants/transaction";
 import { TransactionTypeDisplayNames } from "@/lib/constants/transaction";
 import { PaymentChannelDisplayNames } from "@/lib/constants/transaction";
+import { DepositAccountTypeDisplayNames } from "@/lib/constants/transaction";
+import { WithdrawalAccountTypeDisplayNames } from "@/lib/constants/transaction";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
+import { EnableToggleConfirmDialog } from "./EnableToggleConfirmDialog";
 
 interface TxnRoutingRuleListProps {
   selectedRule?: TxnRoutingRule;
@@ -32,6 +35,11 @@ export const TxnRoutingRuleList = ({
   onToggleRuleEnable,
 }: TxnRoutingRuleListProps) => {
   const [mounted, setMounted] = useState(false);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [pendingToggleRule, setPendingToggleRule] = useState<{
+    rule: TxnRoutingRule;
+    enabled: boolean;
+  } | null>(null);
   const { txnRoutingRules, isLoading, isError } = useTxnRoutingRules();
 
   // 防止 hydration 錯誤
@@ -39,12 +47,25 @@ export const TxnRoutingRuleList = ({
     setMounted(true);
   }, []);
 
+  const handleToggleRuleEnable = (rule: TxnRoutingRule, enabled: boolean) => {
+    setPendingToggleRule({ rule, enabled });
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirmToggle = () => {
+    if (pendingToggleRule) {
+      onToggleRuleEnable(pendingToggleRule.rule, pendingToggleRule.enabled);
+      setConfirmDialogOpen(false);
+      setPendingToggleRule(null);
+    }
+  };
+
   // 在組件未掛載時顯示加載狀態
   if (!mounted) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>優先級規則</CardTitle>
+          <CardTitle>路由規則</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-32">
@@ -59,7 +80,7 @@ export const TxnRoutingRuleList = ({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>優先級規則</CardTitle>
+          <CardTitle>路由規則</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-32">
@@ -74,7 +95,7 @@ export const TxnRoutingRuleList = ({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>優先級規則</CardTitle>
+          <CardTitle>路由規則</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-32">
@@ -88,7 +109,7 @@ export const TxnRoutingRuleList = ({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>優先級規則</CardTitle>
+        <CardTitle>路由規則</CardTitle>
         <Button onClick={onCreateRule} size="sm">
           <PlusIcon className="h-4 w-4 mr-2" />
           新增規則
@@ -142,9 +163,18 @@ export const TxnRoutingRuleList = ({
                           ? "沒有設置"
                           : "無限制"}
                       </span>
-                      {rule.accountType && (
-                        <span>帳戶類型: {rule.accountType}</span>
-                      )}
+                      <span>
+                        帳戶類型:{" "}
+                        {rule.accountType
+                          ? rule.transactionType === TransactionType.API_DEPOSIT
+                            ? DepositAccountTypeDisplayNames[
+                                rule.accountType as keyof typeof DepositAccountTypeDisplayNames
+                              ] || rule.accountType
+                            : WithdrawalAccountTypeDisplayNames[
+                                rule.accountType as keyof typeof WithdrawalAccountTypeDisplayNames
+                              ] || rule.accountType
+                          : "全部"}
+                      </span>
                     </div>
                     {/* 顯示所有路由規則 */}
                     <div className="mt-2 space-y-1">
@@ -180,7 +210,7 @@ export const TxnRoutingRuleList = ({
                   <Switch
                     checked={rule.enable}
                     onCheckedChange={(checked) =>
-                      onToggleRuleEnable(rule, checked)
+                      handleToggleRuleEnable(rule, checked)
                     }
                     onClick={(e) => e.stopPropagation()}
                   />
@@ -199,10 +229,17 @@ export const TxnRoutingRuleList = ({
             </div>
           ))}
           {(!txnRoutingRules || txnRoutingRules.length === 0) && (
-            <div className="text-center py-8 text-gray-500">尚無優先級規則</div>
+            <div className="text-center py-8 text-gray-500">尚無路由規則</div>
           )}
         </div>
       </CardContent>
+      <EnableToggleConfirmDialog
+        open={confirmDialogOpen}
+        onOpenChange={setConfirmDialogOpen}
+        onConfirm={handleConfirmToggle}
+        ruleTitle={pendingToggleRule?.rule.title || ""}
+        enabled={pendingToggleRule?.enabled || false}
+      />
     </Card>
   );
 };

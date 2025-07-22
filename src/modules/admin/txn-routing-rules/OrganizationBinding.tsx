@@ -20,6 +20,7 @@ import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
+import { OrgEnableToggleConfirmDialog } from "./OrgEnableToggleConfirmDialog";
 
 interface OrganizationBindingProps {
   selectedRule?: TxnRoutingRule;
@@ -50,6 +51,11 @@ export const OrganizationBinding = ({
   >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [pendingToggleOrgRule, setPendingToggleOrgRule] = useState<{
+    orgRule: OrgTxnRoutingRuleWithName;
+    enabled: boolean;
+  } | null>(null);
 
   // 防止 hydration 錯誤
   useEffect(() => {
@@ -151,26 +157,38 @@ export const OrganizationBinding = ({
     handleSelectOrgRule(orgRuleId);
   };
 
-  const handleToggleOrgRuleEnable = async (
+  const handleToggleOrgRuleEnable = (
     orgRule: OrgTxnRoutingRuleWithName,
     enabled: boolean
   ) => {
-    // 樂觀更新：立即更新本地狀態
-    setOrgTxnRoutingRules((prev) =>
-      prev.map((rule) =>
-        rule.id === orgRule.id ? { ...rule, enable: enabled } : rule
-      )
-    );
+    setPendingToggleOrgRule({ orgRule, enabled });
+    setConfirmDialogOpen(true);
+  };
 
-    try {
-      await onToggleOrgRuleEnable(orgRule, enabled);
-    } catch (error) {
-      // 如果 API 調用失敗，回滾到原始狀態
+  const handleConfirmToggle = async () => {
+    if (pendingToggleOrgRule) {
+      const { orgRule, enabled } = pendingToggleOrgRule;
+
+      // 樂觀更新：立即更新本地狀態
       setOrgTxnRoutingRules((prev) =>
         prev.map((rule) =>
-          rule.id === orgRule.id ? { ...rule, enable: !enabled } : rule
+          rule.id === orgRule.id ? { ...rule, enable: enabled } : rule
         )
       );
+
+      try {
+        await onToggleOrgRuleEnable(orgRule, enabled);
+      } catch (error) {
+        // 如果 API 調用失敗，回滾到原始狀態
+        setOrgTxnRoutingRules((prev) =>
+          prev.map((rule) =>
+            rule.id === orgRule.id ? { ...rule, enable: !enabled } : rule
+          )
+        );
+      }
+
+      setConfirmDialogOpen(false);
+      setPendingToggleOrgRule(null);
     }
   };
 
@@ -314,6 +332,14 @@ export const OrganizationBinding = ({
           )}
         </div>
       </CardContent>
+      <OrgEnableToggleConfirmDialog
+        open={confirmDialogOpen}
+        onOpenChange={setConfirmDialogOpen}
+        onConfirm={handleConfirmToggle}
+        organizationName={pendingToggleOrgRule?.orgRule.organizationName || ""}
+        ruleTitle={selectedRule?.title || ""}
+        enabled={pendingToggleOrgRule?.enabled || false}
+      />
     </Card>
   );
 };

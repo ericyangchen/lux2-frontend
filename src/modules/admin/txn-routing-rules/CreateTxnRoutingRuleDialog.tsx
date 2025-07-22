@@ -351,7 +351,7 @@ export const CreateTxnRoutingRuleDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>創建優先級規則</DialogTitle>
+          <DialogTitle>創建路由規則</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">

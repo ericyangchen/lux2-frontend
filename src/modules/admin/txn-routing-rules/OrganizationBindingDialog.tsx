@@ -158,7 +158,7 @@ export const OrganizationBindingDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>綁定組織到規則</DialogTitle>
+          <DialogTitle>綁定組織到路由規則</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">

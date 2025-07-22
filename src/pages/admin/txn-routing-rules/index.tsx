@@ -7,7 +7,7 @@ export default function TxnRoutingRulesPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <ApplicationHeader title="優先級規則" />
+      <ApplicationHeader title="路由規則" />
       <TxnRoutingRulesView />
     </div>
   );

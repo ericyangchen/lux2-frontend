@@ -138,7 +138,7 @@ export const adminNavigation = [
     icon: ChartBarSquareIcon,
   },
   {
-    name: "優先級規則",
+    name: "路由規則",
     href: "/admin/txn-routing-rules",
     icon: AdjustmentsHorizontalIcon,
   },

@@ -121,7 +121,7 @@ export const TxnRoutingRulesView = () => {
 
       toast({
         title: "刪除成功",
-        description: `優先級規則已刪除${
+        description: `路由規則已刪除${
           orgRules.length > 0
             ? `，並同步刪除了 ${orgRules.length} 個組織綁定`
             : ""
@@ -166,7 +166,7 @@ export const TxnRoutingRulesView = () => {
     if (!selectedRule) {
       toast({
         title: "請選擇規則",
-        description: "請先選擇一個優先級規則",
+        description: "請先選擇一個路由規則",
         variant: "destructive",
       });
       return;
