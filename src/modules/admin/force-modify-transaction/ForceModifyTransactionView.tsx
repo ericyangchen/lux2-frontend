@@ -526,6 +526,11 @@ export function ForceModifyTransactionView() {
         {transaction && (
           <div className="space-y-4">
             <h3 className="text-lg font-medium">強制修改</h3>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+              <p className="text-sm text-yellow-800">
+                <strong>注意：</strong> 無法修改已成功或失敗的盯單
+              </p>
+            </div>
             <div className="space-y-4">
               <div>
                 <Label htmlFor="status">新狀態</Label>
@@ -549,7 +554,7 @@ export function ForceModifyTransactionView() {
               </div>
 
               <div>
-                <Label htmlFor="message">訊息: (可選擇性回傳下游)</Label>
+                <Label htmlFor="message">訊息: (可選填，會回傳下游)</Label>
                 <Textarea
                   id="message"
                   value={message}
@@ -560,7 +565,7 @@ export function ForceModifyTransactionView() {
               </div>
 
               <div>
-                <Label htmlFor="reason">修改原因: (可選擇性不回傳下游)</Label>
+                <Label htmlFor="reason">修改原因: (可選填，不會回傳下游)</Label>
                 <Textarea
                   id="reason"
                   value={reason}
