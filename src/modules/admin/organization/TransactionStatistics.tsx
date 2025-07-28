@@ -1,32 +1,33 @@
-import { Button } from "@/components/shadcn/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/shadcn/ui/card";
-import { DateTimePicker } from "@/components/DateTimePicker";
-import { Label } from "@/components/shadcn/ui/label";
+import {
+  CheckCircleIcon,
+  ClockIcon,
+  ExclamationTriangleIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/outline";
 import {
   DepositPaymentChannelCategories,
   PaymentChannelDisplayNames,
   PaymentMethodDisplayNames,
   WithdrawalPaymentChannelCategories,
 } from "@/lib/constants/transaction";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { Badge } from "@/components/shadcn/ui/badge";
+import { Button } from "@/components/shadcn/ui/button";
+import { DateTimePicker } from "@/components/DateTimePicker";
+import { Label } from "@/components/shadcn/ui/label";
+import { OrgType } from "@/lib/enums/organizations/org-type.enum";
 import { PaymentChannel } from "@/lib/enums/transactions/payment-channel.enum";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
-import { OrgType } from "@/lib/enums/organizations/org-type.enum";
-import { useTransactionStatisticsCounts } from "@/lib/hooks/swr/transaction";
-import { useOrganization } from "@/lib/hooks/swr/organization";
 import { formatNumber } from "@/lib/utils/number";
-import { useState, useMemo, useRef, useEffect } from "react";
-import { Badge } from "@/components/shadcn/ui/badge";
-import {
-  CheckCircleIcon,
-  ClockIcon,
-  XCircleIcon,
-  ExclamationTriangleIcon,
-} from "@heroicons/react/24/outline";
+import { useOrganization } from "@/lib/hooks/swr/organization";
+import { useTransactionStatisticsCounts } from "@/lib/hooks/swr/transaction";
 
 // Color constants
 const COLORS = {
@@ -448,7 +449,6 @@ function SummaryCard({ title, data, color }: SummaryCardProps) {
             <div className="text-2xl font-bold text-gray-900">
               ₱{formatNumber(data.amountSum.toString())}
             </div>
-            <div className="text-xs text-gray-500 mt-1">菲律賓披索</div>
           </div>
         </div>
 
@@ -575,7 +575,6 @@ function PaymentMethodSection({
                 <div className="text-xl font-bold text-gray-900">
                   ₱{formatNumber(depositTotals.amountSum.toString())}
                 </div>
-                <div className="text-xs text-gray-500 mt-1">菲律賓披索</div>
               </div>
             </div>
 
@@ -654,7 +653,6 @@ function PaymentMethodSection({
                 <div className="text-xl font-bold text-gray-900">
                   ₱{formatNumber(withdrawalTotals.amountSum.toString())}
                 </div>
-                <div className="text-xs text-gray-500 mt-1">菲律賓披索</div>
               </div>
             </div>
 
