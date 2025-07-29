@@ -12,6 +12,7 @@ import {
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import { EnableToggleConfirmDialog } from "./EnableToggleConfirmDialog";
+import { DeleteConfirmDialog } from "./EnableToggleConfirmDialog";
 
 interface TxnRoutingRuleListProps {
   selectedRule?: TxnRoutingRule;
@@ -34,7 +35,19 @@ export const TxnRoutingRuleList = ({
     rule: TxnRoutingRule;
     enabled: boolean;
   } | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [pendingDeleteRule, setPendingDeleteRule] =
+    useState<TxnRoutingRule | null>(null);
   const { txnRoutingRules, isLoading, isError } = useTxnRoutingRules();
+
+  // 按照 createdAt 排序路由規則
+  const sortedTxnRoutingRules = txnRoutingRules
+    ? [...txnRoutingRules].sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateA - dateB; // 升序排列，最早的在前
+      })
+    : undefined;
 
   // 防止 hydration 錯誤
   useEffect(() => {
@@ -111,7 +124,7 @@ export const TxnRoutingRuleList = ({
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {txnRoutingRules?.map((rule) => (
+          {sortedTxnRoutingRules?.map((rule) => (
             <div
               key={rule.id}
               className={`p-3 border rounded-lg cursor-pointer transition-colors ${
@@ -145,7 +158,8 @@ export const TxnRoutingRuleList = ({
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onDeleteRule(rule);
+                      setPendingDeleteRule(rule);
+                      setDeleteDialogOpen(true);
                     }}
                   >
                     <TrashIcon className="h-4 w-4" />
@@ -154,7 +168,7 @@ export const TxnRoutingRuleList = ({
               </div>
             </div>
           ))}
-          {(!txnRoutingRules || txnRoutingRules.length === 0) && (
+          {(!sortedTxnRoutingRules || sortedTxnRoutingRules.length === 0) && (
             <div className="text-center py-8 text-gray-500">尚無路由規則</div>
           )}
         </div>
@@ -165,6 +179,23 @@ export const TxnRoutingRuleList = ({
         onConfirm={handleConfirmToggle}
         ruleTitle={pendingToggleRule?.rule.title || ""}
         enabled={pendingToggleRule?.enabled || false}
+      />
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={() => {
+          if (pendingDeleteRule) {
+            onDeleteRule(pendingDeleteRule);
+            setDeleteDialogOpen(false);
+            setPendingDeleteRule(null);
+          }
+        }}
+        title="確認刪除規則"
+        description={`確定要刪除路由規則「${
+          pendingDeleteRule?.title || ""
+        }」嗎？此操作不可逆。`}
+        confirmText="刪除"
+        cancelText="取消"
       />
     </Card>
   );

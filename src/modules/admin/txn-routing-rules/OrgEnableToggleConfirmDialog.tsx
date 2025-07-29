@@ -43,7 +43,10 @@ export const OrgEnableToggleConfirmDialog = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>取消</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>
+          <AlertDialogAction
+            onClick={onConfirm}
+            className={enabled ? "" : "bg-red-600 hover:bg-red-700 text-white"}
+          >
             {enabled ? "啟用" : "停用"}
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -68,7 +68,7 @@ export const CreateTxnRoutingRuleDialog = ({
     transactionType: TransactionType.API_DEPOSIT,
     routingRule: [
       {
-        priority: 100,
+        priority: undefined,
         percentage: {} as Record<PaymentChannel, number>,
       },
     ],
@@ -155,7 +155,7 @@ export const CreateTxnRoutingRuleDialog = ({
       newErrors.routingRule = "至少需要一個路由規則";
     } else {
       formData.routingRule.forEach((rule, index) => {
-        if (rule.priority < 1) {
+        if (rule.priority !== undefined && rule.priority < 1) {
           newErrors[`routingRule.${index}.priority`] = "優先級必須大於0";
         }
 
@@ -221,7 +221,7 @@ export const CreateTxnRoutingRuleDialog = ({
       transactionType: TransactionType.API_DEPOSIT,
       routingRule: [
         {
-          priority: 100,
+          priority: undefined,
           percentage: {} as Record<PaymentChannel, number>,
         },
       ],
@@ -236,7 +236,7 @@ export const CreateTxnRoutingRuleDialog = ({
       routingRule: [
         ...prev.routingRule,
         {
-          priority: prev.routingRule.length + 1,
+          priority: undefined,
           percentage: {} as Record<PaymentChannel, number>,
         },
       ],
@@ -321,7 +321,7 @@ export const CreateTxnRoutingRuleDialog = ({
       transactionType,
       routingRule: [
         {
-          priority: 100,
+          priority: undefined,
           percentage: {} as Record<PaymentChannel, number>,
         },
       ],
@@ -337,7 +337,7 @@ export const CreateTxnRoutingRuleDialog = ({
       paymentMethod,
       routingRule: [
         {
-          priority: 100,
+          priority: undefined,
           percentage: {} as Record<PaymentChannel, number>,
         },
       ],

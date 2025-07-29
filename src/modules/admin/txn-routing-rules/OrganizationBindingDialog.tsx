@@ -84,9 +84,11 @@ export const OrganizationBindingDialog = ({
     }
   }, [open, selectedRule, accessToken, mounted]);
 
-  // 過濾組織（排除已綁定的組織）
+  // 過濾組織（只顯示 MERCHANT 類型且排除已綁定的組織）
   const availableOrganizations = allOrganizations.filter(
-    (org) => !existingOrganizations.some((existing) => existing.id === org.id)
+    (org) =>
+      org.type === "MERCHANT" &&
+      !existingOrganizations.some((existing) => existing.id === org.id)
   );
 
   // 根據搜索查詢過濾組織
@@ -204,30 +206,56 @@ export const OrganizationBindingDialog = ({
                   )}
                 </div>
                 {/* 顯示所有路由規則 */}
-                <div className="mt-2 space-y-1">
+                <div className="mt-2 space-y-2">
                   <span className="font-medium">路由規則:</span>
                   {selectedRule.routingRule.map((routingRule, index) => (
                     <div
                       key={index}
-                      className="ml-2 text-xs bg-gray-50 p-1 rounded"
+                      className="ml-2 text-xs bg-gray-50 p-2 rounded"
                     >
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold">
-                          {routingRule.priority}:
-                        </span>
-                        <div className="flex flex-wrap gap-1">
-                          {Object.entries(routingRule.percentage).map(
-                            ([channel, percentage]) => (
-                              <Badge key={channel} className="text-xs">
-                                {PaymentChannelDisplayNames[
-                                  channel as keyof typeof PaymentChannelDisplayNames
-                                ] || channel}
-                                : {percentage}%
-                              </Badge>
-                            )
-                          )}
-                        </div>
+                      <div className="font-bold mb-1">
+                        優先級{" "}
+                        {routingRule.priority !== undefined
+                          ? routingRule.priority
+                          : "未設定"}
                       </div>
+                      {Object.entries(routingRule.percentage).length > 0 ? (
+                        <table className="w-full text-xs">
+                          <thead>
+                            <tr className="border-b border-gray-200">
+                              <th className="text-left py-1 px-1 font-medium text-gray-700">
+                                渠道
+                              </th>
+                              <th className="text-right py-1 px-1 font-medium text-gray-700">
+                                百分比
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {Object.entries(routingRule.percentage).map(
+                              ([channel, percentage]) => (
+                                <tr
+                                  key={channel}
+                                  className="border-b border-gray-100"
+                                >
+                                  <td className="py-1 px-1">
+                                    {PaymentChannelDisplayNames[
+                                      channel as keyof typeof PaymentChannelDisplayNames
+                                    ] || channel}
+                                  </td>
+                                  <td className="py-1 px-1 text-right font-medium">
+                                    {percentage}%
+                                  </td>
+                                </tr>
+                              )
+                            )}
+                          </tbody>
+                        </table>
+                      ) : (
+                        <div className="text-gray-500 text-xs py-1">
+                          暫無支付渠道配置
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

@@ -5,7 +5,7 @@ import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum"
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 
 export interface RoutingRuleItem {
-  priority: number;
+  priority?: number;
   percentage: Record<PaymentChannel, number>;
 }
 

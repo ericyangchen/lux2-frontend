@@ -27,6 +27,7 @@ import { PaymentChannelDisplayNames } from "@/lib/constants/transaction";
 import { DepositAccountTypeDisplayNames } from "@/lib/constants/transaction";
 import { WithdrawalAccountTypeDisplayNames } from "@/lib/constants/transaction";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
+import { DeleteConfirmDialog } from "./EnableToggleConfirmDialog";
 
 interface OrganizationBindingProps {
   selectedRule?: TxnRoutingRule;
@@ -62,6 +63,8 @@ export const OrganizationBinding = ({
     orgRule: OrgTxnRoutingRuleWithName;
     enabled: boolean;
   } | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [pendingDeleteOrgIds, setPendingDeleteOrgIds] = useState<string[]>([]);
 
   // 防止 hydration 錯誤
   useEffect(() => {
@@ -289,30 +292,56 @@ export const OrganizationBinding = ({
           {/* 路由規則 */}
           <div className="mt-4">
             <span className="font-medium text-gray-700 text-sm">路由規則:</span>
-            <div className="mt-2 space-y-2">
+            <div className="mt-2 space-y-3">
               {selectedRule.routingRule.map((routingRule, index) => (
                 <div key={index} className="bg-gray-50 p-3 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-3">
                     <span className="font-bold text-sm">
-                      優先級 {routingRule.priority}:
+                      優先級{" "}
+                      {routingRule.priority !== undefined
+                        ? routingRule.priority
+                        : "未設定"}
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    {Object.entries(routingRule.percentage).map(
-                      ([channel, percentage]) => (
-                        <Badge
-                          key={channel}
-                          variant="outline"
-                          className="text-xs"
-                        >
-                          {PaymentChannelDisplayNames[
-                            channel as keyof typeof PaymentChannelDisplayNames
-                          ] || channel}
-                          : {percentage}%
-                        </Badge>
-                      )
-                    )}
-                  </div>
+                  {Object.entries(routingRule.percentage).length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-gray-200">
+                            <th className="text-left py-2 px-3 font-medium text-gray-700">
+                              支付渠道
+                            </th>
+                            <th className="text-right py-2 px-3 font-medium text-gray-700">
+                              百分比
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {Object.entries(routingRule.percentage).map(
+                            ([channel, percentage]) => (
+                              <tr
+                                key={channel}
+                                className="border-b border-gray-100 hover:bg-gray-100/50"
+                              >
+                                <td className="py-2 px-3">
+                                  {PaymentChannelDisplayNames[
+                                    channel as keyof typeof PaymentChannelDisplayNames
+                                  ] || channel}
+                                </td>
+                                <td className="py-2 px-3 text-right font-medium">
+                                  {percentage}%
+                                </td>
+                              </tr>
+                            )
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="text-gray-500 text-sm py-2">
+                      暫無支付渠道配置
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -333,7 +362,10 @@ export const OrganizationBinding = ({
               )}
               {selectedOrgRuleIds.length > 0 && (
                 <Button
-                  onClick={handleRemoveSelected}
+                  onClick={() => {
+                    setPendingDeleteOrgIds(selectedOrgRuleIds);
+                    setDeleteDialogOpen(true);
+                  }}
                   variant="destructive"
                   size="sm"
                 >
@@ -419,6 +451,22 @@ export const OrganizationBinding = ({
         organizationName={pendingToggleOrgRule?.orgRule.organizationName || ""}
         ruleTitle={selectedRule?.title || ""}
         enabled={pendingToggleOrgRule?.enabled || false}
+      />
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={() => {
+          if (pendingDeleteOrgIds.length > 0) {
+            onRemoveOrganizations(pendingDeleteOrgIds);
+            setDeleteDialogOpen(false);
+            setPendingDeleteOrgIds([]);
+            setSelectedOrgRuleIds([]);
+          }
+        }}
+        title="確認刪除組織綁定"
+        description={`確定要刪除選中的 ${pendingDeleteOrgIds.length} 個組織綁定嗎？此操作不可逆。`}
+        confirmText="刪除"
+        cancelText="取消"
       />
     </Card>
   );
