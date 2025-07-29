@@ -62,7 +62,7 @@ export const getOrgTxnRoutingRulesByTxnRoutingRuleId = async ({
   txnRoutingRuleId: string;
 }): Promise<OrgTxnRoutingRule[]> => {
   const response = await fetch(
-    `${getBackendUrl()}/txnRoutingRules/org/${txnRoutingRuleId}`,
+    `${getBackendUrl()}/txnRoutingRules/org/rule/${txnRoutingRuleId}`,
     {
       method: "GET",
       headers: SMPayWebHeaderWithAccessToken(accessToken),

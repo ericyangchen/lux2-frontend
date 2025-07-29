@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/shadcn/ui/card";
-import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import { EnableToggleConfirmDialog } from "./EnableToggleConfirmDialog";
 import { DeleteConfirmDialog } from "./EnableToggleConfirmDialog";
@@ -17,7 +17,6 @@ import { DeleteConfirmDialog } from "./EnableToggleConfirmDialog";
 interface TxnRoutingRuleListProps {
   selectedRule?: TxnRoutingRule;
   onSelectRule: (rule: TxnRoutingRule) => void;
-  onCreateRule: () => void;
   onDeleteRule: (rule: TxnRoutingRule) => void;
   onToggleRuleEnable: (rule: TxnRoutingRule, enabled: boolean) => void;
 }
@@ -25,7 +24,6 @@ interface TxnRoutingRuleListProps {
 export const TxnRoutingRuleList = ({
   selectedRule,
   onSelectRule,
-  onCreateRule,
   onDeleteRule,
   onToggleRuleEnable,
 }: TxnRoutingRuleListProps) => {
@@ -114,16 +112,12 @@ export const TxnRoutingRuleList = ({
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="h-full flex flex-col">
+      <CardHeader>
         <CardTitle>路由規則</CardTitle>
-        <Button onClick={onCreateRule} size="sm">
-          <PlusIcon className="h-4 w-4 mr-2" />
-          新增規則
-        </Button>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
+      <CardContent className="flex-1 overflow-hidden">
+        <div className="h-full overflow-y-auto space-y-2">
           {sortedTxnRoutingRules?.map((rule) => (
             <div
               key={rule.id}

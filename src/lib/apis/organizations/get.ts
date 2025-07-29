@@ -1,5 +1,17 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
 import { getBackendUrl } from "@/lib/constants/common";
+
+export const ApiGetAllOrganizations = async ({
+  accessToken,
+}: {
+  accessToken: string;
+}) => {
+  return fetch(`${getBackendUrl()}/organizations`, {
+    method: "GET",
+    headers: SMPayWebHeaderWithAccessToken(accessToken),
+  });
+};
+
 export const ApiGetOrganizationById = async ({
   organizationId,
   accessToken,

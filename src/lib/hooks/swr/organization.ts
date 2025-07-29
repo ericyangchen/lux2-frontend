@@ -1,6 +1,7 @@
 import {
   ApiGetOrganizationById,
   ApiGetOrganizationWithChildren,
+  ApiGetAllOrganizations,
 } from "@/lib/apis/organizations/get";
 import {
   USE_ORGANIZATION_REFRESH_INTERVAL,
@@ -102,6 +103,47 @@ export const useOrganization = ({
 
   return {
     organization: data as Organization,
+    isLoading: isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
+const fetchAllOrganizations = async ({
+  accessToken,
+}: {
+  accessToken: string;
+}) => {
+  const response = await ApiGetAllOrganizations({
+    accessToken,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+
+    const error = new ApplicationError(errorData);
+
+    throw error;
+  }
+
+  return response.json();
+};
+
+export const useAllOrganizations = () => {
+  const { accessToken } = getApplicationCookies();
+
+  const shouldFetch = accessToken;
+
+  const { data, error, isLoading, mutate } = useSwrWithAuth(
+    shouldFetch ? { key: "allOrganizations", accessToken } : null,
+    fetchAllOrganizations,
+    {
+      refreshInterval: USE_ORGANIZATION_REFRESH_INTERVAL,
+    }
+  );
+
+  return {
+    organizations: data as Organization[],
     isLoading: isLoading,
     isError: error,
     mutate,
