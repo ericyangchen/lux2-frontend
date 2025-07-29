@@ -287,17 +287,6 @@ export const OrganizationRoutingRules = ({
                             <h3 className="font-medium text-base">
                               {rule.title}
                             </h3>
-                            <Badge
-                              variant={
-                                rule.orgRuleEnable ?? rule.enable
-                                  ? "default"
-                                  : "secondary"
-                              }
-                            >
-                              {rule.orgRuleEnable ?? rule.enable
-                                ? "啟用"
-                                : "停用"}
-                            </Badge>
                           </div>
                           {rule.description && (
                             <p className="text-xs text-gray-600 mt-1">
