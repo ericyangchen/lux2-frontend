@@ -99,6 +99,9 @@ export const DepositPaymentChannelCategories = {
 
     // HFPay
     PaymentChannel.NATIVE_GCASH_HFPAY_DEPOSIT,
+
+    // QRPAY
+    PaymentChannel.NATIVE_GCASH_QRPAY_DEPOSIT,
   ],
   [PaymentMethod.MAYA]: [
     // BIFU
@@ -132,6 +135,9 @@ export const WithdrawalPaymentChannelCategories = {
 
     // HFPay
     PaymentChannel.NATIVE_GCASH_HFPAY_WITHDRAWAL,
+
+    // QRPAY
+    PaymentChannel.NATIVE_GCASH_QRPAY_WITHDRAWAL,
   ],
   [PaymentMethod.MAYA]: [
     // BIFU
@@ -234,6 +240,10 @@ export const PaymentChannelDisplayNames = {
   /* HFPay */
   [PaymentChannel.NATIVE_GCASH_HFPAY_DEPOSIT]: "N-GCash: HFPay (deposit)",
   [PaymentChannel.NATIVE_GCASH_HFPAY_WITHDRAWAL]: "N-GCash: HFPay (withdrawal)",
+
+  /* QRPAY */
+  [PaymentChannel.NATIVE_GCASH_QRPAY_DEPOSIT]: "N-GCash: QRPAY (deposit)",
+  [PaymentChannel.NATIVE_GCASH_QRPAY_WITHDRAWAL]: "N-GCash: QRPAY (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
