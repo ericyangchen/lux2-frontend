@@ -17,7 +17,7 @@ import {
   formatNumberWithoutMinFraction,
 } from "@/lib/utils/number";
 
-import { BalanceAction } from "@/lib/enums/balances/balance-action.enum";
+import { BalanceActionDisplayNames } from "@/lib/constants/balance-record";
 import { BalanceRecord } from "@/lib/types/balance-record";
 import { Button } from "@/components/shadcn/ui/button";
 import { Card } from "@/components/shadcn/ui/card";
@@ -384,7 +384,9 @@ export function BalanceReportDisplay({
                     >
                       {modification.id}
                     </td>
-                    <td className="p-2">{modification.action}</td>
+                    <td className="p-2">
+                      {BalanceActionDisplayNames[modification.action]}
+                    </td>
                     <td className="p-2 font-mono">
                       {formatNumber(modification.availableAmountChanged || "0")}
                     </td>
