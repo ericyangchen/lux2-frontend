@@ -13,6 +13,7 @@ import {
   UserCircleIcon,
   WalletIcon,
   ChartPieIcon,
+  AdjustmentsHorizontalIcon,
 } from "@heroicons/react/24/outline";
 
 import { OrgType } from "../enums/organizations/org-type.enum";
@@ -135,6 +136,11 @@ export const adminNavigation = [
     name: "交易報表",
     href: "/admin/reports/balance",
     icon: ChartBarSquareIcon,
+  },
+  {
+    name: "路由規則",
+    href: "/admin/txn-routing-rules",
+    icon: AdjustmentsHorizontalIcon,
   },
 ];
 
