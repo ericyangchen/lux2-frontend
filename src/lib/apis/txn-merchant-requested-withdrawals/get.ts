@@ -48,3 +48,44 @@ export const ApiGetMerchantRequestedWithdrawals = async ({
     }
   );
 };
+
+export const ApiGetMerchantRequestedWithdrawalsSummary = async ({
+  merchantId,
+  merchantOrderId,
+  paymentMethod,
+  status,
+  internalStatus,
+  createdAtStart,
+  createdAtEnd,
+  amount,
+  accessToken,
+}: {
+  merchantId?: string;
+  merchantOrderId?: string;
+  paymentMethod?: string;
+  internalStatus?: string;
+  status?: string;
+  createdAtStart?: string;
+  createdAtEnd?: string;
+  amount?: string;
+  accessToken: string;
+}) => {
+  const queryString = buildQueryString({
+    merchantId,
+    merchantOrderId,
+    paymentMethod,
+    internalStatus,
+    status,
+    createdAtStart,
+    createdAtEnd,
+    amount,
+  });
+
+  return fetch(
+    `${getBackendUrl()}/merchant-requested-withdrawal/summary?${queryString}`,
+    {
+      method: "GET",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
+};

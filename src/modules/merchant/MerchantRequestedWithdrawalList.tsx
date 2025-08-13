@@ -1,4 +1,8 @@
 import {
+  ApiGetMerchantRequestedWithdrawals,
+  ApiGetMerchantRequestedWithdrawalsSummary,
+} from "@/lib/apis/txn-merchant-requested-withdrawals/get";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -23,7 +27,6 @@ import {
   convertToStartOfDay,
 } from "@/lib/utils/timezone";
 
-import { ApiGetMerchantRequestedWithdrawals } from "@/lib/apis/txn-merchant-requested-withdrawals/get";
 import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { DatePicker } from "@/components/DatePicker";
@@ -68,6 +71,12 @@ export function MerchantRequestedWithdrawalList({
     id: string;
   } | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+
+  // Summary state
+  const [summary, setSummary] = useState<{
+    count: string;
+    amountSum: string;
+  }>();
 
   // Dialog state
   const [selectedTransaction, setSelectedTransaction] =
@@ -124,6 +133,35 @@ export function MerchantRequestedWithdrawalList({
       } else {
         throw new ApplicationError(data);
       }
+
+      // Get summary (only for new search, not load more)
+      if (!isLoadMore) {
+        try {
+          const summaryResponse =
+            await ApiGetMerchantRequestedWithdrawalsSummary({
+              merchantId: organizationId,
+              merchantOrderId: merchantOrderId || undefined,
+              paymentMethod: paymentMethodQuery,
+              status: transactionStatusQuery,
+              createdAtStart: startDateQuery,
+              createdAtEnd: endDateQuery,
+              accessToken,
+            });
+
+          const summaryData = await summaryResponse.json();
+
+          if (summaryResponse.ok) {
+            setSummary(summaryData);
+          } else {
+            // If summary fails, we don't want to break the main search
+            console.error("Failed to fetch summary:", summaryData);
+            setSummary(undefined);
+          }
+        } catch (summaryError) {
+          console.error("Failed to fetch summary:", summaryError);
+          setSummary(undefined);
+        }
+      }
     } catch (error) {
       if (error instanceof ApplicationError) {
         toast({
@@ -152,6 +190,8 @@ export function MerchantRequestedWithdrawalList({
     setStartDate(new Date());
     setEndDate(new Date());
     setTransactions(undefined);
+    setNextCursor(null);
+    setSummary(undefined);
   };
 
   const handleShowDetails = (transaction: Transaction) => {
@@ -299,9 +339,31 @@ export function MerchantRequestedWithdrawalList({
       {/* Results */}
       {transactions && (
         <div className="flex flex-col gap-4">
-          <Label className="font-bold text-md">
-            共找到 {transactions.length} 筆提領請求
-          </Label>
+          <div className="pb-2 flex justify-between flex-wrap gap-4">
+            <Label className="whitespace-nowrap font-bold text-md">
+              查詢結果
+            </Label>
+            {summary && (
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-500 whitespace-nowrap">
+                    總筆數:
+                  </span>
+                  <span className="font-mono whitespace-nowrap">
+                    {summary.count || 0}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-500 whitespace-nowrap">
+                    總金額:
+                  </span>
+                  <span className="font-mono whitespace-nowrap">
+                    PHP {formatNumber(summary.amountSum || "0")}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
 
           <InfiniteScroll
             dataLength={transactions.length}
