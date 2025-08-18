@@ -761,7 +761,11 @@ export function ApiTransactionList() {
             endMessage={
               <div className="h-16 text-center pt-6 pb-4">
                 <Label className="text-gray-400">
-                  {transactions?.length ? "沒有更多訂單紀錄" : "沒有訂單紀錄"}
+                  {isLoading
+                    ? "查詢中..."
+                    : transactions?.length
+                    ? "沒有更多訂單紀錄"
+                    : "沒有訂單紀錄"}
                 </Label>
               </div>
             }
