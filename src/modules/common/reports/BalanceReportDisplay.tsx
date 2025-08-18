@@ -166,6 +166,8 @@ export function BalanceReportDisplay({
                   <th className="text-left p-2">金額</th>
                   <th className="text-left p-2">手續費</th>
                   <th className="text-left p-2">餘額變動</th>
+                  <th className="text-left p-2">交易前餘額</th>
+                  <th className="text-left p-2">交易後餘額</th>
                   <th className="text-left p-2">成功時間</th>
                 </tr>
               </thead>
@@ -203,6 +205,12 @@ export function BalanceReportDisplay({
                     </td>
                     <td className="p-2 font-mono">
                       {formatNumber(transaction.balanceChanged || "0")}
+                    </td>
+                    <td className="p-2 font-mono">
+                      {formatNumber(transaction?.beforeBalance || "0")}
+                    </td>
+                    <td className="p-2 font-mono">
+                      {formatNumber(transaction?.afterBalance || "0")}
                     </td>
                     <td className="p-2">
                       {transaction.successAt

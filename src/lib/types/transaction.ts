@@ -31,6 +31,9 @@ export interface Transaction {
   createdAt: string;
   updatedAt: string;
   deletedAt?: string;
+  // balance calculation fields (for balance reports)
+  beforeBalance?: string;
+  afterBalance?: string;
   // nullable params
   accountType?: DepositToAccountType | WithdrawalToAccountType;
   senderName?: string;
