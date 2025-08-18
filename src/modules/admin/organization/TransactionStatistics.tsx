@@ -1,3 +1,5 @@
+import * as moment from "moment-timezone";
+
 import {
   Card,
   CardContent,
@@ -16,6 +18,10 @@ import {
   PaymentMethodDisplayNames,
   WithdrawalPaymentChannelCategories,
 } from "@/lib/constants/transaction";
+import {
+  PHILIPPINES_TIMEZONE,
+  convertToPhilippinesTimezone,
+} from "@/lib/utils/timezone";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/shadcn/ui/badge";
@@ -59,13 +65,11 @@ export function TransactionStatistics({
   // Date range state
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Default to start of today
-    return today;
+    return moment.tz(today, PHILIPPINES_TIMEZONE).startOf("day").toDate();
   });
   const [endDate, setEndDate] = useState<Date | undefined>(() => {
     const today = new Date();
-    today.setHours(23, 59, 59, 999); // Default to end of today
-    return today;
+    return moment.tz(today, PHILIPPINES_TIMEZONE).endOf("day").toDate();
   });
 
   // Query state - auto query when organization is selected, manual query for date changes
@@ -74,67 +78,86 @@ export function TransactionStatistics({
   // Auto-query when organization is selected
   const shouldAutoQuery = organizationId && !shouldQuery;
 
-  // Format dates for API - query when auto-query is triggered or manual query is requested
-  const startOfCreatedAt =
-    (shouldAutoQuery || shouldQuery) && startDate
-      ? startDate.toISOString()
-      : undefined;
-  const endOfCreatedAt =
-    (shouldAutoQuery || shouldQuery) && endDate
-      ? endDate.toISOString()
-      : undefined;
-
   // Quick time range functions
   const setToday = () => {
-    const today = new Date();
-    const startOfToday = new Date(today);
-    startOfToday.setHours(0, 0, 0, 0);
-
-    const endOfToday = new Date(today);
-    endOfToday.setHours(23, 59, 59, 999);
-
-    setStartDate(startOfToday);
-    setEndDate(endOfToday);
+    setStartDate(moment.tz(PHILIPPINES_TIMEZONE).startOf("day").toDate());
+    setEndDate(moment.tz(PHILIPPINES_TIMEZONE).endOf("day").toDate());
     setShouldQuery(true); // Auto query when quick selection is used
   };
 
   const setLastHour = () => {
-    const now = new Date();
-    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-    setStartDate(oneHourAgo);
-    setEndDate(now);
+    setStartDate(moment.tz(PHILIPPINES_TIMEZONE).subtract(1, "hour").toDate());
+    setEndDate(moment.tz(PHILIPPINES_TIMEZONE).toDate());
+    setShouldQuery(true); // Auto query when quick selection is used
+  };
+  const setLastTwoHours = () => {
+    setStartDate(moment.tz(PHILIPPINES_TIMEZONE).subtract(2, "hour").toDate());
+    setEndDate(moment.tz(PHILIPPINES_TIMEZONE).toDate());
     setShouldQuery(true); // Auto query when quick selection is used
   };
 
   const setYesterday = () => {
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    yesterday.setHours(0, 0, 0, 0);
+    setStartDate(
+      moment.tz(PHILIPPINES_TIMEZONE).subtract(1, "day").startOf("day").toDate()
+    );
+    setEndDate(
+      moment.tz(PHILIPPINES_TIMEZONE).subtract(1, "day").endOf("day").toDate()
+    );
+    setShouldQuery(true); // Auto query when quick selection is used
+  };
 
-    const yesterdayEnd = new Date(yesterday);
-    yesterdayEnd.setHours(23, 59, 59, 999);
+  const setTheDayBeforeYesterday = () => {
+    setStartDate(
+      moment.tz(PHILIPPINES_TIMEZONE).subtract(2, "day").startOf("day").toDate()
+    );
+    setEndDate(
+      moment.tz(PHILIPPINES_TIMEZONE).subtract(2, "day").endOf("day").toDate()
+    );
+    setShouldQuery(true); // Auto query when quick selection is used
+  };
 
-    setStartDate(yesterday);
-    setEndDate(yesterdayEnd);
+  const setThisWeek = () => {
+    setStartDate(moment.tz(PHILIPPINES_TIMEZONE).startOf("week").toDate());
+    setEndDate(moment.tz(PHILIPPINES_TIMEZONE).endOf("week").toDate());
+    setShouldQuery(true); // Auto query when quick selection is used
+  };
+
+  const setLastWeek = () => {
+    setStartDate(
+      moment
+        .tz(PHILIPPINES_TIMEZONE)
+        .subtract(1, "week")
+        .startOf("week")
+        .toDate()
+    );
+    setEndDate(
+      moment.tz(PHILIPPINES_TIMEZONE).subtract(1, "week").endOf("week").toDate()
+    );
+    setShouldQuery(true); // Auto query when quick selection is used
+  };
+
+  const setThisMonth = () => {
+    setStartDate(moment.tz(PHILIPPINES_TIMEZONE).startOf("month").toDate());
+    setEndDate(moment.tz(PHILIPPINES_TIMEZONE).endOf("month").toDate());
     setShouldQuery(true); // Auto query when quick selection is used
   };
 
   const setLastMonth = () => {
-    const today = new Date();
-    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-    const lastMonthEnd = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      0,
-      23,
-      59,
-      59,
-      999
+    setStartDate(
+      moment
+        .tz(PHILIPPINES_TIMEZONE)
+        .subtract(1, "month")
+        .startOf("month")
+        .toDate()
+    );
+    setEndDate(
+      moment
+        .tz(PHILIPPINES_TIMEZONE)
+        .subtract(1, "month")
+        .endOf("month")
+        .toDate()
     );
 
-    setStartDate(lastMonth);
-    setEndDate(lastMonthEnd);
     setShouldQuery(true); // Auto query when quick selection is used
   };
 
@@ -155,8 +178,12 @@ export function TransactionStatistics({
   const { statistics, isLoading, isError } = useTransactionStatisticsCounts({
     merchantId:
       organization?.type === OrgType.ADMIN ? undefined : organizationId,
-    startOfCreatedAt,
-    endOfCreatedAt,
+    startOfCreatedAt: startDate
+      ? convertToPhilippinesTimezone(startDate.toISOString())
+      : undefined,
+    endOfCreatedAt: endDate
+      ? convertToPhilippinesTimezone(endDate.toISOString())
+      : undefined,
   });
 
   // Process statistics data
@@ -293,7 +320,7 @@ export function TransactionStatistics({
             </div>
             <div className="flex gap-4 items-center">
               <Label className="whitespace-nowrap">快速查詢</Label>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Button
                   variant="outline"
                   size="sm"
@@ -301,6 +328,14 @@ export function TransactionStatistics({
                   className="text-xs"
                 >
                   今天
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={setLastTwoHours}
+                  className="text-xs"
+                >
+                  前兩小時
                 </Button>
                 <Button
                   variant="outline"
@@ -321,6 +356,38 @@ export function TransactionStatistics({
                 <Button
                   variant="outline"
                   size="sm"
+                  onClick={setTheDayBeforeYesterday}
+                  className="text-xs"
+                >
+                  前天
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={setThisWeek}
+                  className="text-xs"
+                >
+                  這週
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={setLastWeek}
+                  className="text-xs"
+                >
+                  上週
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={setThisMonth}
+                  className="text-xs"
+                >
+                  這個月
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={setLastMonth}
                   className="text-xs"
                 >
@@ -331,11 +398,11 @@ export function TransactionStatistics({
           </div>
 
           {/* 右半邊：查詢按鈕 */}
-          <div className="flex items-end">
+          {/* <div className="flex items-end flex-wrap">
             <Button onClick={handleQuery} className="w-[120px]">
               查詢
             </Button>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -741,10 +808,10 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
       : "None";
 
   return (
-    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
+    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow flex-wrap">
       {/* Channel Name */}
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold text-gray-900 truncate">
+      <div className="flex">
+        <div className="text-sm font-semibold text-gray-900">
           {PaymentChannelDisplayNames[data.paymentChannel] ||
             data.paymentChannel}
         </div>
