@@ -14,14 +14,14 @@ export const getCompanyName = () => {
   const environment = getEnvironment();
 
   if (environment === "development") {
-    return "SM-Pay (Dev)";
+    return "DX-Pay (Dev)";
   }
 
   if (environment === "staging") {
-    return "SM-Pay (Staging)";
+    return "DX-Pay (Staging)";
   }
 
-  return "SM-Pay";
+  return "DX-Pay";
 };
 
 export const currencySymbol = "₱";
