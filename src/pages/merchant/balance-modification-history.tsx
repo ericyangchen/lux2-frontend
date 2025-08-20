@@ -1,13 +1,15 @@
-import { ApplicationHeader } from "@/modules/common/ApplicationHeader";
 import { MerchantBalanceModificationList } from "@/modules/merchant/MerchantBalanceModificationList";
 
 export default function MerchantBalanceModificationHistoryPage() {
   return (
-    <div className="flex flex-col h-full w-full">
-      <ApplicationHeader title="餘額異動記錄" />
-      <div className="flex-1 overflow-hidden p-6">
-        <MerchantBalanceModificationList />
+    <div className="p-6">
+      <div className="mb-4">
+        <h1 className="text-xl font-semibold text-slate-900 mb-1">
+          餘額異動記錄
+        </h1>
+        <p className="text-sm text-slate-600">查看帳戶餘額的所有變動記錄</p>
       </div>
+      <MerchantBalanceModificationList />
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import {
+  AdjustmentsHorizontalIcon,
   BuildingOffice2Icon,
   ChartBarSquareIcon,
+  ChartPieIcon,
   CheckCircleIcon,
   ClipboardDocumentListIcon,
   CurrencyDollarIcon,
@@ -12,8 +14,6 @@ import {
   InboxArrowDownIcon,
   UserCircleIcon,
   WalletIcon,
-  ChartPieIcon,
-  AdjustmentsHorizontalIcon,
 } from "@heroicons/react/24/outline";
 
 import { OrgType } from "../enums/organizations/org-type.enum";
@@ -166,6 +166,17 @@ export const routesWithoutLayout = [
   "/test-signature",
 ];
 
+export const merchantRoutes = [
+  "/merchant/dashboard",
+  "/merchant/users",
+  "/merchant/transactions",
+  "/merchant/merchant-requested-withdrawals",
+  "/merchant/reports/balance",
+  "/merchant/balance-modification-history",
+  "/merchant/user-activity-logs",
+  "/merchant/manual-actions",
+];
+
 const publicRoutes = ["/", "/cashier", "/gcash-cashier", "/test-signature"];
 
 const loginRoutes = ["/login"];
@@ -176,6 +187,10 @@ export const isPublicRoutes = (pathname: string) => {
 
 export const isLoginRoutes = (pathname: string) => {
   return loginRoutes.includes(pathname);
+};
+
+export const isMerchantRoute = (pathname: string) => {
+  return merchantRoutes.includes(pathname) || pathname.startsWith("/merchant/");
 };
 
 export const getOrganizationBaseUrl = (organizationType: OrgType) => {

@@ -2,14 +2,15 @@ import "@/styles/globals.css";
 
 import App, { AppContext } from "next/app";
 import { initializeConfigWithValues, serverConfig } from "@/lib/config";
+import { isMerchantRoute, routesWithoutLayout } from "@/lib/utils/routes";
 
 import { Analytics } from "@vercel/analytics/next";
 import type { AppProps } from "next/app";
 import ApplicationLayout from "@/modules/common/layout/ApplicationLayout";
 import Head from "next/head";
+import MerchantLayout from "@/modules/common/layout/MerchantLayout";
 import { SWRConfig } from "swr";
 import { Toaster } from "@/components/shadcn/ui/toaster";
-import { routesWithoutLayout } from "@/lib/utils/routes";
 import { useAuthGuard } from "@/lib/hooks/useAuthGuard";
 import { useRouter } from "next/router";
 
@@ -86,16 +87,21 @@ export default function MyApp({ Component, pageProps, config }: MyAppProps) {
     );
   }
 
+  // Use MerchantLayout for merchant pages, ApplicationLayout for admin/developer pages
+  const Layout = isMerchantRoute(router.pathname)
+    ? MerchantLayout
+    : ApplicationLayout;
+
   return (
     <>
       <Head>
         <FaviconConfig />
       </Head>
       <SWRConfig value={swrConfig}>
-        <ApplicationLayout>
+        <Layout>
           <Component {...pageProps} />
           <Toaster />
-        </ApplicationLayout>
+        </Layout>
       </SWRConfig>
       <Analytics />
     </>

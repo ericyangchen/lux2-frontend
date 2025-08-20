@@ -87,17 +87,17 @@ export function MerchantUserListView() {
   const showStaffEditButton = permission.accessingSelfOrg && permission.isOwner;
 
   return (
-    <div className="">
+    <div className="space-y-6">
       {/* Administrator */}
-      <div className="px-0 sm:px-4">
-        <div className="py-2 pb-4">
-          <div className="flex justify-between items-center h-7">
-            <Label className="text-md font-semibold px-2">
+      <div>
+        <div className="mb-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold text-slate-900">
               {UserRoleDisplayNames[UserRole.MERCHANT_OWNER]}
-            </Label>
+            </h2>
             {showOwnerAddButton && (
               <button
-                className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 rounded-md transition-colors duration-200"
+                className="text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 px-3 py-1.5 rounded-md transition-colors duration-150"
                 onClick={() =>
                   openAddDialog({
                     role: UserRole.MERCHANT_OWNER,

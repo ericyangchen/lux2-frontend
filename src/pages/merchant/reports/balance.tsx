@@ -9,7 +9,7 @@ import {
 } from "@/lib/types/balance-report";
 
 import { ApplicationError } from "@/lib/error/applicationError";
-import { ApplicationHeader } from "@/modules/common/ApplicationHeader";
+
 import { BalanceReportDisplay } from "@/modules/common/reports/BalanceReportDisplay";
 import { BalanceReportForm } from "@/modules/common/reports/BalanceReportForm";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
@@ -327,10 +327,12 @@ export default function MerchantBalanceReportsPage() {
   };
 
   return (
-    <div className="w-full min-w-full space-y-6">
-      <ApplicationHeader title="交易報表" />
-
-      <div className="space-y-6 w-full">
+    <div className="p-6">
+      <div className="mb-4">
+        <h1 className="text-xl font-semibold text-slate-900 mb-1">交易報表</h1>
+        <p className="text-sm text-slate-600">生成和查看詳細的交易報表</p>
+      </div>
+      <div className="w-full min-w-full space-y-6">
         <BalanceReportForm
           paymentMethod={paymentMethod}
           setPaymentMethod={setPaymentMethod}
