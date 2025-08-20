@@ -377,8 +377,6 @@ export default function MerchantDashboardView() {
         <BalanceCard
           title="可用餘額"
           value={formatNumber(totalAvailableAmount) || "0.000"}
-          changeType="increase"
-          change="+2.5%"
           icon={CreditCardIcon}
           isVisible={balanceVisibility.available}
           onToggleVisibility={() => toggleBalanceVisibility("available")}
@@ -393,8 +391,6 @@ export default function MerchantDashboardView() {
         <BalanceCard
           title="凍結額度"
           value={formatNumber(totalFrozenAmount) || "0.000"}
-          changeType="decrease"
-          change="-0.8%"
           icon={ArrowUpIcon}
           isVisible={balanceVisibility.frozen}
           onToggleVisibility={() => toggleBalanceVisibility("frozen")}
