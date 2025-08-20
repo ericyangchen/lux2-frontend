@@ -1,12 +1,12 @@
 import {
   ArrowDownTrayIcon,
+  BanknotesIcon,
   CalendarDaysIcon,
   ClockIcon,
   CurrencyDollarIcon,
   FunnelIcon,
-  MagnifyingGlassIcon,
   ListBulletIcon,
-  BanknotesIcon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import { Card, CardContent } from "@/components/shadcn/ui/card";
 import React, { useState } from "react";
@@ -19,8 +19,8 @@ import {
 } from "@/components/shadcn/ui/select";
 
 import { ApiGetTransactionById } from "@/lib/apis/transactions/get";
-import { ApiGetTransactionsByMerchantId } from "@/lib/apis/transactions/get";
 import { ApiGetTransactionCountAndSumOfAmountAndFee } from "@/lib/apis/transactions/get";
+import { ApiGetTransactionsByMerchantId } from "@/lib/apis/transactions/get";
 import { Badge } from "@/components/shadcn/ui/badge";
 import { Button } from "@/components/shadcn/ui/button";
 import { DateTimePicker } from "@/components/DateTimePicker";
@@ -720,7 +720,7 @@ export function MerchantTransactionList() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <Label className="text-base font-semibold text-slate-900">
-              訂單查詢
+              訂單管理
             </Label>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={handleClearAll}>

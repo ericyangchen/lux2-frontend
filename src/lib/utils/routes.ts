@@ -25,17 +25,17 @@ export const merchantNavigation = [
     icon: HomeIcon,
   },
   {
-    name: "用戶",
+    name: "用戶管理",
     href: "/merchant/users",
     icon: UserCircleIcon,
   },
   {
-    name: "訂單查詢",
+    name: "訂單管理",
     href: "/merchant/transactions",
     icon: DocumentMagnifyingGlassIcon,
   },
   {
-    name: "申請下發",
+    name: "下發管理",
     href: "/merchant/merchant-requested-withdrawals",
     icon: WalletIcon,
   },
@@ -45,7 +45,7 @@ export const merchantNavigation = [
     icon: ChartBarSquareIcon,
   },
   {
-    name: "餘額異動紀錄",
+    name: "餘額異動",
     href: "/merchant/balance-modification-history",
     icon: ClipboardDocumentListIcon,
   },

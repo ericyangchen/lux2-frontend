@@ -120,11 +120,6 @@ export function MerchantBalanceModificationList() {
 
   return (
     <div className="w-full space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">餘額異動記錄</h1>
-      </div>
-
       {/* Search Form */}
       <div className="bg-white rounded-lg border p-6 space-y-4">
         <h2 className="text-lg font-semibold">搜尋條件</h2>

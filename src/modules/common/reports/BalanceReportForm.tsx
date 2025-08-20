@@ -47,8 +47,6 @@ export function BalanceReportForm({
 
   return (
     <div className="bg-white rounded-lg border p-6 space-y-4 w-full">
-      <h2 className="text-lg font-semibold">餘額報表設定</h2>
-
       <div className="flex flex-wrap gap-4">
         {/* Organization Selector - Only show for admin */}
         {showOrganizationSelector && setOrganizationId && (

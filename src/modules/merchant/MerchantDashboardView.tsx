@@ -237,7 +237,7 @@ const TransactionSummary = ({ data }: { data: any }) => {
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
               <span className="text-sm text-slate-600">成功</span>
-                  </div>
+            </div>
             <span className="font-medium text-slate-900">
               {formatNumberInInteger(
                 (
@@ -245,8 +245,8 @@ const TransactionSummary = ({ data }: { data: any }) => {
                   parseInt(data.withdrawalSuccessTotal || "0")
                 ).toString()
               )}
-                    </span>
-                  </div>
+            </span>
+          </div>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-red-500 rounded-full"></div>
@@ -259,13 +259,13 @@ const TransactionSummary = ({ data }: { data: any }) => {
                   parseInt(data.withdrawalFailedTotal || "0")
                 ).toString()
               )}
-                    </span>
-                  </div>
+            </span>
+          </div>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
               <span className="text-sm text-slate-600">處理中</span>
-              </div>
+            </div>
             <span className="font-medium text-slate-900">
               {formatNumberInInteger(
                 (
@@ -292,16 +292,16 @@ const ChartContainer = ({
   className?: string;
 }) => (
   <Card className={cn("border-slate-200", className)}>
-      <CardHeader className="pb-4">
+    <CardHeader className="pb-4">
       <CardTitle className="text-lg font-semibold text-slate-900">
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-80">{children}</div>
-      </CardContent>
-    </Card>
-  );
+        {title}
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="h-80">{children}</div>
+    </CardContent>
+  </Card>
+);
 
 export default function MerchantDashboardView() {
   const { organizationId } = getApplicationCookies();
@@ -368,15 +368,15 @@ export default function MerchantDashboardView() {
       {/* Hero Section - Balance Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <BalanceCard
-            title="總餘額"
-            value={formatNumber(totalBalance) || "0.000"}
-            icon={WalletIcon}
+          title="總餘額"
+          value={formatNumber(totalBalance) || "0.000"}
+          icon={WalletIcon}
           isVisible={balanceVisibility.total}
           onToggleVisibility={() => toggleBalanceVisibility("total")}
-          />
+        />
         <BalanceCard
-            title="可用餘額"
-            value={formatNumber(totalAvailableAmount) || "0.000"}
+          title="可用餘額"
+          value={formatNumber(totalAvailableAmount) || "0.000"}
           changeType="increase"
           change="+2.5%"
           icon={CreditCardIcon}
@@ -384,15 +384,15 @@ export default function MerchantDashboardView() {
           onToggleVisibility={() => toggleBalanceVisibility("available")}
         />
         <BalanceCard
-            title="未結算額度"
-            value={formatNumber(totalDepositUnsettledAmount) || "0.000"}
+          title="未結算額度"
+          value={formatNumber(totalDepositUnsettledAmount) || "0.000"}
           icon={ClockIcon}
           isVisible={balanceVisibility.unsettled}
           onToggleVisibility={() => toggleBalanceVisibility("unsettled")}
         />
         <BalanceCard
-            title="凍結額度"
-            value={formatNumber(totalFrozenAmount) || "0.000"}
+          title="凍結額度"
+          value={formatNumber(totalFrozenAmount) || "0.000"}
           changeType="decrease"
           change="-0.8%"
           icon={ArrowUpIcon}
@@ -483,7 +483,7 @@ export default function MerchantDashboardView() {
       </div>
 
       {/* Payment Method Information */}
-            <MerchantPaymentMethodInfo organizationId={organizationId} />
+      <MerchantPaymentMethodInfo organizationId={organizationId} />
     </div>
   );
 }
