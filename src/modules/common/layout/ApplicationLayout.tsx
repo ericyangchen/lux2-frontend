@@ -87,21 +87,11 @@ const CustomerServiceSupportInfo = () => {
           variant="outline"
           className="bg-none border-none cursor-pointer pl-0 flex gap-1"
           onClick={() => {
-            window.open("https://t.me/smpay1688869");
+            window.open("https://t.me/LUXBOSS_1");
           }}
         >
           <Image src="/telegram.png" width={16} height={16} alt="" />
-          <span className="max-w-[216px] truncate">客訴專線 1</span>
-        </Badge>
-        <Badge
-          variant="outline"
-          className="bg-none border-none cursor-pointer pl-0 flex gap-1"
-          onClick={() => {
-            window.open("https://t.me/SM_BOSS01");
-          }}
-        >
-          <Image src="/telegram.png" width={16} height={16} alt="" />
-          <span className="max-w-[216px] truncate">客訴專線 2</span>
+          <span className="max-w-[216px] truncate">客訴專線</span>
         </Badge>
       </div>
     </div>

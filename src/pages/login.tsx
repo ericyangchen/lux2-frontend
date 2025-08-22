@@ -187,8 +187,8 @@ export default function LoginPage() {
               <div className="flex flex-col items-center space-y-6">
                 <div className="w-24 h-24 bg-white rounded-full p-2 shadow-lg">
                   <Image
-                    src="/smpay-logo.jpg"
-                    alt="SMPay Logo"
+                    src="/luxpay-logo.jpg"
+                    alt="LuxPay Logo"
                     width={88}
                     height={88}
                     className="w-full h-full object-contain rounded-full"
