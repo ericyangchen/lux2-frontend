@@ -146,6 +146,9 @@ export const WithdrawalPaymentChannelCategories = {
 
     // APAY
     PaymentChannel.NATIVE_GCASH_APAY_WITHDRAWAL,
+
+    // TKINGPAY
+    PaymentChannel.NATIVE_GCASH_TKINGPAY_WITHDRAWAL,
   ],
   [PaymentMethod.MAYA]: [
     // BIFU
@@ -261,6 +264,10 @@ export const PaymentChannelDisplayNames = {
   /* APAY */
   [PaymentChannel.NATIVE_GCASH_APAY_DEPOSIT]: "N-GCash: APay (deposit)",
   [PaymentChannel.NATIVE_GCASH_APAY_WITHDRAWAL]: "N-GCash: APay (withdrawal)",
+
+  /* TKINGPAY */
+  [PaymentChannel.NATIVE_GCASH_TKINGPAY_WITHDRAWAL]:
+    "N-GCash: TKINGPAY (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
