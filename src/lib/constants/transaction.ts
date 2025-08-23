@@ -185,7 +185,7 @@ export const AllPaymentChannelCategories = {
 };
 
 export const PaymentMethodDisplayNames = {
-  [PaymentMethod.NATIVE_GCASH]: "原生GCash",
+  [PaymentMethod.NATIVE_GCASH]: "GCash",
   [PaymentMethod.MAYA]: "Maya",
   [PaymentMethod.QRPH]: "QRPH",
 };
