@@ -180,26 +180,33 @@ export default function LoginPage() {
           {getCompanyName() ? `Login - ${getCompanyName()}` : "Login"}
         </title>
       </Head>
-      <div className="min-h-screen bg-white flex justify-center items-center p-4">
+      <div
+        className="min-h-screen flex justify-center items-center p-4 relative bg-contain bg-center bg-black"
+        style={{
+          backgroundImage: "url(/luxpay-logo.jpg)",
+        }}
+      >
+        {/* Overlay for better readability */}
+        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
         <div className="w-full max-w-md relative z-10">
           <Card className="shadow-2xl border border-gray-200 rounded-2xl overflow-hidden bg-white">
             <CardHeader className="bg-white text-black pb-8 pt-8">
               <div className="flex flex-col items-center space-y-6">
-                <div className="w-24 h-24 bg-white rounded-full p-2 shadow-lg">
+                <div className="h-24">
                   <Image
-                    src="/luxpay-logo.jpg"
-                    alt="LuxPay Logo"
-                    width={88}
-                    height={88}
-                    className="w-full h-full object-contain rounded-full"
+                    src="/luxpay-logo-horizontal.jpg"
+                    alt="LuxPay"
+                    width={1280}
+                    height={333}
+                    className="w-full h-full object-contain rounded-md"
                   />
                 </div>
-                <CardTitle className="text-2xl font-bold text-center text-black">
+                {/* <CardTitle className="text-2xl font-bold text-center text-black">
                   {getCompanyName()}
-                </CardTitle>
+                </CardTitle> */}
               </div>
             </CardHeader>
-            <CardContent className="p-8">
+            <CardContent>
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label className="text-black font-medium">帳號</Label>
