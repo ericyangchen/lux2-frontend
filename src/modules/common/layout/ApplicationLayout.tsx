@@ -136,7 +136,7 @@ export default function ApplicationLayout({
         <div className="h-full hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
           <div className="flex grow flex-col gap-y-2 overflow-y-auto border-r border-gray-200 bg-white px-6">
             <div className="flex h-14 shrink-0 items-center justify-center">
-              <div className="px-4 py-1 bg-blue-900 text-white rounded-lg">
+              <div className="px-4 py-1 bg-black text-white rounded-lg">
                 <span className="font-bold text-xl">{getCompanyName()}</span>
               </div>
             </div>
@@ -294,7 +294,7 @@ export default function ApplicationLayout({
 
               <div className="flex grow flex-col gap-y-2 overflow-y-auto bg-white px-4 py-4">
                 <div className="flex h-14 shrink-0 items-center justify-center">
-                  <div className="px-4 py-1 bg-blue-900 text-white rounded-lg">
+                  <div className="px-4 py-1 bg-black text-white rounded-lg">
                     <span className="font-bold text-xl">
                       {getCompanyName()}
                     </span>
