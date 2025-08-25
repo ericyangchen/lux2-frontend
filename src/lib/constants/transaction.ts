@@ -251,8 +251,8 @@ export const PaymentChannelDisplayNames = {
   // [PaymentChannel.NATIVE_GCASH_ODPAY_WITHDRAWAL]: "N-GCash: OdPay (withdrawal)",
 
   // /* HFPay */
-  // [PaymentChannel.NATIVE_GCASH_HFPAY_DEPOSIT]: "N-GCash: HFPay (deposit)",
-  // [PaymentChannel.NATIVE_GCASH_HFPAY_WITHDRAWAL]: "N-GCash: HFPay (withdrawal)",
+  [PaymentChannel.NATIVE_GCASH_HFPAY_DEPOSIT]: "N-GCash: HFPay (deposit)",
+  [PaymentChannel.NATIVE_GCASH_HFPAY_WITHDRAWAL]: "N-GCash: HFPay (withdrawal)",
 
   // /* QRPAY */
   // [PaymentChannel.NATIVE_GCASH_QRPAY_C1_DEPOSIT]:
@@ -272,8 +272,8 @@ export const PaymentChannelDisplayNames = {
   //   "N-GCash: TKINGPAY (withdrawal)",
 
   // /* SMPAY */
-  [PaymentChannel.NATIVE_GCASH_SMPAY_DEPOSIT]: "N-GCash: SMPAY (deposit)",
-  [PaymentChannel.NATIVE_GCASH_SMPAY_WITHDRAWAL]: "N-GCash: SMPAY (withdrawal)",
+  [PaymentChannel.NATIVE_GCASH_SMPAY_DEPOSIT]: "N-GCash: SMPay (deposit)",
+  [PaymentChannel.NATIVE_GCASH_SMPAY_WITHDRAWAL]: "N-GCash: SMPay (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
