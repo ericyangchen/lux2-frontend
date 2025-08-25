@@ -109,17 +109,17 @@ export const DepositPaymentChannelCategories = {
 
     // SMPAY
     PaymentChannel.NATIVE_GCASH_SMPAY_DEPOSIT,
-  ],
+  ] as PaymentChannel[],
   [PaymentMethod.MAYA]: [
     // // BIFU
     // PaymentChannel.MAYA_BIFU_DEPOSIT,
-  ],
+  ] as PaymentChannel[],
   [PaymentMethod.QRPH]: [
     // // BIFU
     // PaymentChannel.QRPH_BIFU_DEPOSIT,
     // // IPay
     // PaymentChannel.QRPH_IPAY_DEPOSIT,
-  ],
+  ] as PaymentChannel[],
 };
 
 export const WithdrawalPaymentChannelCategories = {
@@ -154,13 +154,13 @@ export const WithdrawalPaymentChannelCategories = {
 
     // SMPAY
     PaymentChannel.NATIVE_GCASH_SMPAY_WITHDRAWAL,
-  ],
+  ] as PaymentChannel[],
   [PaymentMethod.MAYA]: [
     // // BIFU
     // PaymentChannel.MAYA_BIFU_BANK_WITHDRAWAL,
     // // WorldPay
     // PaymentChannel.MAYA_WORLDPAY_WITHDRAWAL,
-  ],
+  ] as PaymentChannel[],
   [PaymentMethod.QRPH]: [
     // // BIFU
     // PaymentChannel.QRPH_BIFU_BANK_WITHDRAWAL,
@@ -168,7 +168,7 @@ export const WithdrawalPaymentChannelCategories = {
     // PaymentChannel.QRPH_IPAY_WITHDRAWAL,
     // // WorldPay
     // PaymentChannel.QRPH_WORLDPAY_WITHDRAWAL,
-  ],
+  ] as PaymentChannel[],
 };
 
 export const AllPaymentChannelCategories = {
