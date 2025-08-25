@@ -83,89 +83,91 @@ export const TransactionInternalStatusDisplayNames = {
 
 export const DepositPaymentChannelCategories = {
   [PaymentMethod.NATIVE_GCASH]: [
-    // BIFU
-    PaymentChannel.NATIVE_GCASH_DIRECT_BIFU,
-    PaymentChannel.NATIVE_GCASH_QR_BIFU,
-    PaymentChannel.NATIVE_GCASH_AWAKEN_BIFU,
-    PaymentChannel.NATIVE_GCASH_AWAKEN_CASHIER_BIFU,
-    PaymentChannel.NATIVE_GCASH_AWAKEN_REVISION_BIFU,
+    // // BIFU
+    // PaymentChannel.NATIVE_GCASH_DIRECT_BIFU,
+    // PaymentChannel.NATIVE_GCASH_QR_BIFU,
+    // PaymentChannel.NATIVE_GCASH_AWAKEN_BIFU,
+    // PaymentChannel.NATIVE_GCASH_AWAKEN_CASHIER_BIFU,
+    // PaymentChannel.NATIVE_GCASH_AWAKEN_REVISION_BIFU,
 
-    // IPay
-    PaymentChannel.NATIVE_GCASH_IPAY_DEPOSIT,
-    PaymentChannel.NATIVE_GCASH_IPAY_CASHIER_DEPOSIT,
+    // // IPay
+    // PaymentChannel.NATIVE_GCASH_IPAY_DEPOSIT,
+    // PaymentChannel.NATIVE_GCASH_IPAY_CASHIER_DEPOSIT,
 
-    // DaliPay
-    PaymentChannel.NATIVE_GCASH_DALIPAY_DEPOSIT,
+    // // DaliPay
+    // PaymentChannel.NATIVE_GCASH_DALIPAY_DEPOSIT,
 
     // HFPay
     PaymentChannel.NATIVE_GCASH_HFPAY_DEPOSIT,
 
-    // QRPAY
-    PaymentChannel.NATIVE_GCASH_QRPAY_DEPOSIT,
-    PaymentChannel.NATIVE_GCASH_QRPAY_C1_DEPOSIT,
+    // // QRPAY
+    // PaymentChannel.NATIVE_GCASH_QRPAY_DEPOSIT,
+    // PaymentChannel.NATIVE_GCASH_QRPAY_C1_DEPOSIT,
 
-    // APAY
-    PaymentChannel.NATIVE_GCASH_APAY_DEPOSIT,
+    // // APAY
+    // PaymentChannel.NATIVE_GCASH_APAY_DEPOSIT,
+
+    // SMPAY
+    PaymentChannel.NATIVE_GCASH_SMPAY_DEPOSIT,
   ],
   [PaymentMethod.MAYA]: [
-    // BIFU
-    PaymentChannel.MAYA_BIFU_DEPOSIT,
+    // // BIFU
+    // PaymentChannel.MAYA_BIFU_DEPOSIT,
   ],
   [PaymentMethod.QRPH]: [
-    // BIFU
-    PaymentChannel.QRPH_BIFU_DEPOSIT,
-
-    // IPay
-    PaymentChannel.QRPH_IPAY_DEPOSIT,
+    // // BIFU
+    // PaymentChannel.QRPH_BIFU_DEPOSIT,
+    // // IPay
+    // PaymentChannel.QRPH_IPAY_DEPOSIT,
   ],
 };
 
 export const WithdrawalPaymentChannelCategories = {
   [PaymentMethod.NATIVE_GCASH]: [
-    // BIFU
-    PaymentChannel.NATIVE_GCASH_BIFU_BANK,
+    // // BIFU
+    // PaymentChannel.NATIVE_GCASH_BIFU_BANK,
 
-    // IPay
-    PaymentChannel.NATIVE_GCASH_IPAY_WITHDRAWAL,
+    // // IPay
+    // PaymentChannel.NATIVE_GCASH_IPAY_WITHDRAWAL,
 
-    // WorldPay
-    PaymentChannel.NATIVE_GCASH_WORLDPAY_WITHDRAWAL,
+    // // WorldPay
+    // PaymentChannel.NATIVE_GCASH_WORLDPAY_WITHDRAWAL,
 
-    // DaliPay
-    PaymentChannel.NATIVE_GCASH_DALIPAY_WITHDRAWAL,
+    // // DaliPay
+    // PaymentChannel.NATIVE_GCASH_DALIPAY_WITHDRAWAL,
 
-    // OdPay
-    PaymentChannel.NATIVE_GCASH_ODPAY_WITHDRAWAL,
+    // // OdPay
+    // PaymentChannel.NATIVE_GCASH_ODPAY_WITHDRAWAL,
 
     // HFPay
     PaymentChannel.NATIVE_GCASH_HFPAY_WITHDRAWAL,
 
-    // QRPAY
-    PaymentChannel.NATIVE_GCASH_QRPAY_WITHDRAWAL,
-    PaymentChannel.NATIVE_GCASH_QRPAY_C1_WITHDRAWAL,
+    // // QRPAY
+    // PaymentChannel.NATIVE_GCASH_QRPAY_WITHDRAWAL,
+    // PaymentChannel.NATIVE_GCASH_QRPAY_C1_WITHDRAWAL,
 
-    // APAY
-    PaymentChannel.NATIVE_GCASH_APAY_WITHDRAWAL,
+    // // APAY
+    // PaymentChannel.NATIVE_GCASH_APAY_WITHDRAWAL,
 
-    // TKINGPAY
-    PaymentChannel.NATIVE_GCASH_TKINGPAY_WITHDRAWAL,
+    // // TKINGPAY
+    // PaymentChannel.NATIVE_GCASH_TKINGPAY_WITHDRAWAL,
+
+    // SMPAY
+    PaymentChannel.NATIVE_GCASH_SMPAY_WITHDRAWAL,
   ],
   [PaymentMethod.MAYA]: [
-    // BIFU
-    PaymentChannel.MAYA_BIFU_BANK_WITHDRAWAL,
-
-    // WorldPay
-    PaymentChannel.MAYA_WORLDPAY_WITHDRAWAL,
+    // // BIFU
+    // PaymentChannel.MAYA_BIFU_BANK_WITHDRAWAL,
+    // // WorldPay
+    // PaymentChannel.MAYA_WORLDPAY_WITHDRAWAL,
   ],
   [PaymentMethod.QRPH]: [
-    // BIFU
-    PaymentChannel.QRPH_BIFU_BANK_WITHDRAWAL,
-
-    // IPay
-    PaymentChannel.QRPH_IPAY_WITHDRAWAL,
-
-    // WorldPay
-    PaymentChannel.QRPH_WORLDPAY_WITHDRAWAL,
+    // // BIFU
+    // PaymentChannel.QRPH_BIFU_BANK_WITHDRAWAL,
+    // // IPay
+    // PaymentChannel.QRPH_IPAY_WITHDRAWAL,
+    // // WorldPay
+    // PaymentChannel.QRPH_WORLDPAY_WITHDRAWAL,
   ],
 };
 
@@ -191,83 +193,87 @@ export const PaymentMethodDisplayNames = {
 };
 
 export const PaymentChannelDisplayNames = {
-  /**
-   * BIFU
-   */
-  /* NATIVE_GCASH Deposit */
-  [PaymentChannel.NATIVE_GCASH_DIRECT_BIFU]:
-    "N-GCash: Bifu 110 Direct (deposit)",
-  [PaymentChannel.NATIVE_GCASH_QR_BIFU]: "N-GCash: Bifu 111 QR (deposit)",
-  [PaymentChannel.NATIVE_GCASH_AWAKEN_BIFU]: "N-GCash: Bifu 113 (deposit)",
-  [PaymentChannel.NATIVE_GCASH_AWAKEN_CASHIER_BIFU]:
-    "N-GCash: Bifu 113 包收銀台 (deposit)",
-  [PaymentChannel.NATIVE_GCASH_AWAKEN_REVISION_BIFU]:
-    "N-GCash: Bifu 114 (deposit)",
-  /* NATIVE_GCASH Withdrawal */
-  [PaymentChannel.NATIVE_GCASH_BIFU_BANK]:
-    "N-GCash: Bifu 100 Bank (withdrawal)",
+  // /**
+  //  * BIFU
+  //  */
+  // /* NATIVE_GCASH Deposit */
+  // [PaymentChannel.NATIVE_GCASH_DIRECT_BIFU]:
+  //   "N-GCash: Bifu 110 Direct (deposit)",
+  // [PaymentChannel.NATIVE_GCASH_QR_BIFU]: "N-GCash: Bifu 111 QR (deposit)",
+  // [PaymentChannel.NATIVE_GCASH_AWAKEN_BIFU]: "N-GCash: Bifu 113 (deposit)",
+  // [PaymentChannel.NATIVE_GCASH_AWAKEN_CASHIER_BIFU]:
+  //   "N-GCash: Bifu 113 包收銀台 (deposit)",
+  // [PaymentChannel.NATIVE_GCASH_AWAKEN_REVISION_BIFU]:
+  //   "N-GCash: Bifu 114 (deposit)",
+  // /* NATIVE_GCASH Withdrawal */
+  // [PaymentChannel.NATIVE_GCASH_BIFU_BANK]:
+  //   "N-GCash: Bifu 100 Bank (withdrawal)",
 
-  /* MAYA Deposit */
-  [PaymentChannel.MAYA_BIFU_DEPOSIT]: "Maya: Bifu 107 (deposit)",
-  /* MAYA Withdrawal */
-  [PaymentChannel.MAYA_BIFU_BANK_WITHDRAWAL]:
-    "Maya: Bifu 100 Bank (withdrawal)",
+  // /* MAYA Deposit */
+  // [PaymentChannel.MAYA_BIFU_DEPOSIT]: "Maya: Bifu 107 (deposit)",
+  // /* MAYA Withdrawal */
+  // [PaymentChannel.MAYA_BIFU_BANK_WITHDRAWAL]:
+  //   "Maya: Bifu 100 Bank (withdrawal)",
 
-  /* QRPH Deposit */
-  [PaymentChannel.QRPH_BIFU_DEPOSIT]: "QRPH: Bifu 112 (deposit)",
-  /* QRPH Withdrawal */
-  [PaymentChannel.QRPH_BIFU_BANK_WITHDRAWAL]:
-    "QRPH: Bifu 100 Bank (withdrawal)",
+  // /* QRPH Deposit */
+  // [PaymentChannel.QRPH_BIFU_DEPOSIT]: "QRPH: Bifu 112 (deposit)",
+  // /* QRPH Withdrawal */
+  // [PaymentChannel.QRPH_BIFU_BANK_WITHDRAWAL]:
+  //   "QRPH: Bifu 100 Bank (withdrawal)",
 
-  /**
-   * IPay
-   */
-  /* NATIVE_GCASH Deposit */
-  [PaymentChannel.NATIVE_GCASH_IPAY_DEPOSIT]: "N-GCash: IPay (deposit)",
-  [PaymentChannel.NATIVE_GCASH_IPAY_CASHIER_DEPOSIT]:
-    "N-GCash: IPay 包收銀台 (deposit)",
-  /* NATIVE_GCASH Withdrawal */
-  [PaymentChannel.NATIVE_GCASH_IPAY_WITHDRAWAL]: "N-GCash: IPay (withdrawal)",
+  // /**
+  //  * IPay
+  //  */
+  // /* NATIVE_GCASH Deposit */
+  // [PaymentChannel.NATIVE_GCASH_IPAY_DEPOSIT]: "N-GCash: IPay (deposit)",
+  // [PaymentChannel.NATIVE_GCASH_IPAY_CASHIER_DEPOSIT]:
+  //   "N-GCash: IPay 包收銀台 (deposit)",
+  // /* NATIVE_GCASH Withdrawal */
+  // [PaymentChannel.NATIVE_GCASH_IPAY_WITHDRAWAL]: "N-GCash: IPay (withdrawal)",
 
-  /* QRPH Deposit */
-  [PaymentChannel.QRPH_IPAY_DEPOSIT]: "QRPH: IPay (deposit)",
-  /* QRPH Withdrawal */
-  [PaymentChannel.QRPH_IPAY_WITHDRAWAL]: "QRPH: IPay (withdrawal)",
+  // /* QRPH Deposit */
+  // [PaymentChannel.QRPH_IPAY_DEPOSIT]: "QRPH: IPay (deposit)",
+  // /* QRPH Withdrawal */
+  // [PaymentChannel.QRPH_IPAY_WITHDRAWAL]: "QRPH: IPay (withdrawal)",
 
-  /* WorldPay */
-  [PaymentChannel.NATIVE_GCASH_WORLDPAY_WITHDRAWAL]:
-    "N-GCash: WorldPay (withdrawal)",
-  [PaymentChannel.QRPH_WORLDPAY_WITHDRAWAL]: "QRPH: WorldPay (withdrawal)",
-  [PaymentChannel.MAYA_WORLDPAY_WITHDRAWAL]: "Maya: WorldPay (withdrawal)",
+  // /* WorldPay */
+  // [PaymentChannel.NATIVE_GCASH_WORLDPAY_WITHDRAWAL]:
+  //   "N-GCash: WorldPay (withdrawal)",
+  // [PaymentChannel.QRPH_WORLDPAY_WITHDRAWAL]: "QRPH: WorldPay (withdrawal)",
+  // [PaymentChannel.MAYA_WORLDPAY_WITHDRAWAL]: "Maya: WorldPay (withdrawal)",
 
-  /* DaliPay */
-  [PaymentChannel.NATIVE_GCASH_DALIPAY_DEPOSIT]: "N-GCash: DaliPay (deposit)",
-  [PaymentChannel.NATIVE_GCASH_DALIPAY_WITHDRAWAL]:
-    "N-GCash: DaliPay (withdrawal)",
+  // /* DaliPay */
+  // [PaymentChannel.NATIVE_GCASH_DALIPAY_DEPOSIT]: "N-GCash: DaliPay (deposit)",
+  // [PaymentChannel.NATIVE_GCASH_DALIPAY_WITHDRAWAL]:
+  //   "N-GCash: DaliPay (withdrawal)",
 
-  /* OdPay */
-  [PaymentChannel.NATIVE_GCASH_ODPAY_WITHDRAWAL]: "N-GCash: OdPay (withdrawal)",
+  // /* OdPay */
+  // [PaymentChannel.NATIVE_GCASH_ODPAY_WITHDRAWAL]: "N-GCash: OdPay (withdrawal)",
 
-  /* HFPay */
-  [PaymentChannel.NATIVE_GCASH_HFPAY_DEPOSIT]: "N-GCash: HFPay (deposit)",
-  [PaymentChannel.NATIVE_GCASH_HFPAY_WITHDRAWAL]: "N-GCash: HFPay (withdrawal)",
+  // /* HFPay */
+  // [PaymentChannel.NATIVE_GCASH_HFPAY_DEPOSIT]: "N-GCash: HFPay (deposit)",
+  // [PaymentChannel.NATIVE_GCASH_HFPAY_WITHDRAWAL]: "N-GCash: HFPay (withdrawal)",
 
-  /* QRPAY */
-  [PaymentChannel.NATIVE_GCASH_QRPAY_C1_DEPOSIT]:
-    "N-GCash: QRPAY 通道1 (deposit)",
-  [PaymentChannel.NATIVE_GCASH_QRPAY_DEPOSIT]: "N-GCash: QRPAY 通道2 (deposit)",
-  [PaymentChannel.NATIVE_GCASH_QRPAY_C1_WITHDRAWAL]:
-    "N-GCash: QRPAY 通道1 (withdrawal)",
-  [PaymentChannel.NATIVE_GCASH_QRPAY_WITHDRAWAL]:
-    "N-GCash: QRPAY 通道2 (withdrawal)",
+  // /* QRPAY */
+  // [PaymentChannel.NATIVE_GCASH_QRPAY_C1_DEPOSIT]:
+  //   "N-GCash: QRPAY 通道1 (deposit)",
+  // [PaymentChannel.NATIVE_GCASH_QRPAY_DEPOSIT]: "N-GCash: QRPAY 通道2 (deposit)",
+  // [PaymentChannel.NATIVE_GCASH_QRPAY_C1_WITHDRAWAL]:
+  //   "N-GCash: QRPAY 通道1 (withdrawal)",
+  // [PaymentChannel.NATIVE_GCASH_QRPAY_WITHDRAWAL]:
+  //   "N-GCash: QRPAY 通道2 (withdrawal)",
 
-  /* APAY */
-  [PaymentChannel.NATIVE_GCASH_APAY_DEPOSIT]: "N-GCash: APay (deposit)",
-  [PaymentChannel.NATIVE_GCASH_APAY_WITHDRAWAL]: "N-GCash: APay (withdrawal)",
+  // /* APAY */
+  // [PaymentChannel.NATIVE_GCASH_APAY_DEPOSIT]: "N-GCash: APay (deposit)",
+  // [PaymentChannel.NATIVE_GCASH_APAY_WITHDRAWAL]: "N-GCash: APay (withdrawal)",
 
-  /* TKINGPAY */
-  [PaymentChannel.NATIVE_GCASH_TKINGPAY_WITHDRAWAL]:
-    "N-GCash: TKINGPAY (withdrawal)",
+  // /* TKINGPAY */
+  // [PaymentChannel.NATIVE_GCASH_TKINGPAY_WITHDRAWAL]:
+  //   "N-GCash: TKINGPAY (withdrawal)",
+
+  // /* SMPAY */
+  [PaymentChannel.NATIVE_GCASH_SMPAY_DEPOSIT]: "N-GCash: SMPAY (deposit)",
+  [PaymentChannel.NATIVE_GCASH_SMPAY_WITHDRAWAL]: "N-GCash: SMPAY (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
