@@ -1,6 +1,8 @@
 import {
+  AdjustmentsHorizontalIcon,
   BuildingOffice2Icon,
   ChartBarSquareIcon,
+  ChartPieIcon,
   CheckCircleIcon,
   ClipboardDocumentListIcon,
   CurrencyDollarIcon,
@@ -12,8 +14,6 @@ import {
   InboxArrowDownIcon,
   UserCircleIcon,
   WalletIcon,
-  ChartPieIcon,
-  AdjustmentsHorizontalIcon,
 } from "@heroicons/react/24/outline";
 
 import { OrgType } from "../enums/organizations/org-type.enum";
@@ -141,6 +141,11 @@ export const adminNavigation = [
     name: "路由規則",
     href: "/admin/txn-routing-rules",
     icon: AdjustmentsHorizontalIcon,
+  },
+  {
+    name: "API Logging",
+    href: "/admin/request-logs",
+    icon: DocumentMagnifyingGlassIcon,
   },
 ];
 
