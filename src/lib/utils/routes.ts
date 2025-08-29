@@ -142,6 +142,11 @@ export const adminNavigation = [
     href: "/admin/txn-routing-rules",
     icon: AdjustmentsHorizontalIcon,
   },
+  {
+    name: "API Logging",
+    href: "/admin/request-logs",
+    icon: DocumentMagnifyingGlassIcon,
+  },
 ];
 
 export const developerNavigation = [
