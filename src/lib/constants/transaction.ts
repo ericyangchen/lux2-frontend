@@ -248,10 +248,10 @@ export const PaymentChannelDisplayNames = {
   // [PaymentChannel.QRPH_WORLDPAY_WITHDRAWAL]: "QRPH: WorldPay (withdrawal)",
   // [PaymentChannel.MAYA_WORLDPAY_WITHDRAWAL]: "Maya: WorldPay (withdrawal)",
 
-  // /* DaliPay */
-  // [PaymentChannel.NATIVE_GCASH_DALIPAY_DEPOSIT]: "N-GCash: DaliPay (deposit)",
-  // [PaymentChannel.NATIVE_GCASH_DALIPAY_WITHDRAWAL]:
-  //   "N-GCash: DaliPay (withdrawal)",
+  /* DaliPay */
+  [PaymentChannel.NATIVE_GCASH_DALIPAY_DEPOSIT]: "N-GCash: DaliPay (deposit)",
+  [PaymentChannel.NATIVE_GCASH_DALIPAY_WITHDRAWAL]:
+    "N-GCash: DaliPay (withdrawal)",
 
   // /* OdPay */
   // [PaymentChannel.NATIVE_GCASH_ODPAY_WITHDRAWAL]: "N-GCash: OdPay (withdrawal)",
