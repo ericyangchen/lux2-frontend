@@ -94,8 +94,8 @@ export const DepositPaymentChannelCategories = {
     // PaymentChannel.NATIVE_GCASH_IPAY_DEPOSIT,
     // PaymentChannel.NATIVE_GCASH_IPAY_CASHIER_DEPOSIT,
 
-    // // DaliPay
-    // PaymentChannel.NATIVE_GCASH_DALIPAY_DEPOSIT,
+    // DaliPay
+    PaymentChannel.NATIVE_GCASH_DALIPAY_DEPOSIT,
 
     // HFPay
     PaymentChannel.NATIVE_GCASH_HFPAY_DEPOSIT,
@@ -136,8 +136,8 @@ export const WithdrawalPaymentChannelCategories = {
     // // WorldPay
     // PaymentChannel.NATIVE_GCASH_WORLDPAY_WITHDRAWAL,
 
-    // // DaliPay
-    // PaymentChannel.NATIVE_GCASH_DALIPAY_WITHDRAWAL,
+    // DaliPay
+    PaymentChannel.NATIVE_GCASH_DALIPAY_WITHDRAWAL,
 
     // // OdPay
     // PaymentChannel.NATIVE_GCASH_ODPAY_WITHDRAWAL,
