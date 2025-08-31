@@ -109,6 +109,9 @@ export const DepositPaymentChannelCategories = {
 
     // H88PAY
     PaymentChannel.NATIVE_GCASH_H88PAY_DEPOSIT,
+
+    // LUXPAY
+    PaymentChannel.NATIVE_GCASH_LUXPAY_DEPOSIT,
   ],
   [PaymentMethod.MAYA]: [
     // BIFU
@@ -155,6 +158,12 @@ export const WithdrawalPaymentChannelCategories = {
 
     // H88PAY
     PaymentChannel.NATIVE_GCASH_H88PAY_WITHDRAWAL,
+
+    // LUXPAY
+    PaymentChannel.NATIVE_GCASH_LUXPAY_WITHDRAWAL,
+
+    // LUXPAY
+    PaymentChannel.NATIVE_GCASH_LUXPAY_WITHDRAWAL,
   ],
   [PaymentMethod.MAYA]: [
     // BIFU
@@ -279,6 +288,11 @@ export const PaymentChannelDisplayNames = {
   [PaymentChannel.NATIVE_GCASH_H88PAY_DEPOSIT]: "N-GCash: H88PAY (deposit)",
   [PaymentChannel.NATIVE_GCASH_H88PAY_WITHDRAWAL]:
     "N-GCash: H88PAY (withdrawal)",
+
+  /* LUXPAY */
+  [PaymentChannel.NATIVE_GCASH_LUXPAY_DEPOSIT]: "N-GCash: LuxPay (deposit)",
+  [PaymentChannel.NATIVE_GCASH_LUXPAY_WITHDRAWAL]:
+    "N-GCash: LuxPay (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
