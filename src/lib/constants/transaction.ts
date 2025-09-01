@@ -96,6 +96,7 @@ export const DepositPaymentChannelCategories = {
 
     // DaliPay
     PaymentChannel.NATIVE_GCASH_DALIPAY_DEPOSIT,
+    PaymentChannel.NATIVE_GCASH_DALIPAY_4_DEPOSIT,
 
     // HFPay
     PaymentChannel.NATIVE_GCASH_HFPAY_DEPOSIT,
@@ -249,9 +250,12 @@ export const PaymentChannelDisplayNames = {
   // [PaymentChannel.MAYA_WORLDPAY_WITHDRAWAL]: "Maya: WorldPay (withdrawal)",
 
   /* DaliPay */
-  [PaymentChannel.NATIVE_GCASH_DALIPAY_DEPOSIT]: "N-GCash: DaliPay (deposit)",
+  [PaymentChannel.NATIVE_GCASH_DALIPAY_DEPOSIT]:
+    "N-GCash: Dali 200起 (deposit)",
+  [PaymentChannel.NATIVE_GCASH_DALIPAY_4_DEPOSIT]:
+    "N-GCash: Dali 100起 (deposit)",
   [PaymentChannel.NATIVE_GCASH_DALIPAY_WITHDRAWAL]:
-    "N-GCash: DaliPay (withdrawal)",
+    "N-GCash: Dali (withdrawal)",
 
   // /* OdPay */
   // [PaymentChannel.NATIVE_GCASH_ODPAY_WITHDRAWAL]: "N-GCash: OdPay (withdrawal)",
