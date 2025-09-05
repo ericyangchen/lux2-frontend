@@ -4,6 +4,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/shadcn/ui/card";
+import { useUser, useUsersByOrganizationId } from "@/lib/hooks/swr/user";
 
 import { Label } from "@/components/shadcn/ui/label";
 import { MerchantUserAddDialog } from "./MerchantUserAddDialog";
@@ -18,7 +19,6 @@ import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 import { useUserPermission } from "@/lib/hooks/useUserPermission";
-import { useUsersByOrganizationId } from "@/lib/hooks/swr/user";
 
 export function MerchantUserListView() {
   const { toast } = useToast();
@@ -30,6 +30,8 @@ export function MerchantUserListView() {
   const permission = useUserPermission({
     accessingOrganizationId: organizationId,
   });
+
+  const { user: currentUser } = useUser();
 
   const ownerUsers = users?.filter(
     (user) => user.role === UserRole.MERCHANT_OWNER
@@ -323,7 +325,8 @@ export function MerchantUserListView() {
                         </div>
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium">
-                        {showStaffEditButton && (
+                        {(showStaffEditButton ||
+                          staffUser?.id === currentUser?.id) && (
                           <button
                             className="text-gray-900 hover:text-black"
                             onClick={() =>
