@@ -123,14 +123,9 @@ export function AdminBalanceModificationList() {
   };
 
   return (
-    <div className="w-full space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">餘額異動記錄 (管理)</h1>
-      </div>
-
+    <div className="w-full space-y-6 lg:h-[calc(100vh-84px)] lg:overflow-y-scroll">
       {/* Search Form */}
-      <div className="bg-white rounded-lg border p-6 space-y-4">
+      <div className="rounded-lg border p-6 space-y-4">
         <h2 className="text-lg font-semibold">搜尋條件</h2>
 
         {/* Organization Selection */}
