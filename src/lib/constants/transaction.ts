@@ -116,6 +116,9 @@ export const DepositPaymentChannelCategories = {
   [PaymentMethod.MAYA]: [
     // BIFU
     PaymentChannel.MAYA_BIFU_DEPOSIT,
+
+    // MG99PAY
+    PaymentChannel.MAYA_MG99PAY_DEPOSIT,
   ],
   [PaymentMethod.QRPH]: [
     // BIFU
@@ -171,6 +174,9 @@ export const WithdrawalPaymentChannelCategories = {
 
     // WorldPay
     PaymentChannel.MAYA_WORLDPAY_WITHDRAWAL,
+
+    // MG99PAY
+    PaymentChannel.MAYA_MG99PAY_WITHDRAWAL,
   ],
   [PaymentMethod.QRPH]: [
     // BIFU
@@ -293,6 +299,10 @@ export const PaymentChannelDisplayNames = {
   [PaymentChannel.NATIVE_GCASH_LUXPAY_DEPOSIT]: "N-GCash: LuxPay (deposit)",
   [PaymentChannel.NATIVE_GCASH_LUXPAY_WITHDRAWAL]:
     "N-GCash: LuxPay (withdrawal)",
+
+  /* MG99PAY */
+  [PaymentChannel.MAYA_MG99PAY_DEPOSIT]: "Maya: MG99PAY (deposit)",
+  [PaymentChannel.MAYA_MG99PAY_WITHDRAWAL]: "Maya: MG99PAY (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
