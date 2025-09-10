@@ -96,6 +96,7 @@ export const DepositPaymentChannelCategories = {
 
     // DaliPay
     PaymentChannel.NATIVE_GCASH_DALIPAY_DEPOSIT,
+    PaymentChannel.NATIVE_GCASH_DALIPAY_4_DEPOSIT,
 
     // HFPay
     PaymentChannel.NATIVE_GCASH_HFPAY_DEPOSIT,
