@@ -168,6 +168,9 @@ export const WithdrawalPaymentChannelCategories = {
 
     // LUXPAY
     PaymentChannel.NATIVE_GCASH_LUXPAY_WITHDRAWAL,
+
+    // FEIFAN
+    PaymentChannel.NATIVE_GCASH_FEIFAN_WITHDRAWAL,
   ],
   [PaymentMethod.MAYA]: [
     // BIFU
@@ -307,6 +310,10 @@ export const PaymentChannelDisplayNames = {
   /* MG99PAY */
   [PaymentChannel.MAYA_MG99PAY_DEPOSIT]: "Maya: MG99PAY (deposit)",
   [PaymentChannel.MAYA_MG99PAY_WITHDRAWAL]: "Maya: MG99PAY (withdrawal)",
+
+  /* FEIFAN */
+  [PaymentChannel.NATIVE_GCASH_FEIFAN_WITHDRAWAL]:
+    "N-GCash: FEIFAN (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
