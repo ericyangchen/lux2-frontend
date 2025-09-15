@@ -166,9 +166,6 @@ export const WithdrawalPaymentChannelCategories = {
     // LUXPAY
     PaymentChannel.NATIVE_GCASH_LUXPAY_WITHDRAWAL,
 
-    // LUXPAY
-    PaymentChannel.NATIVE_GCASH_LUXPAY_WITHDRAWAL,
-
     // FEIFAN
     PaymentChannel.NATIVE_GCASH_FEIFAN_WITHDRAWAL,
   ],
