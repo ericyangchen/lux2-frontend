@@ -113,6 +113,9 @@ export const DepositPaymentChannelCategories = {
 
     // SMPAY
     PaymentChannel.NATIVE_GCASH_SMPAY_DEPOSIT,
+
+    // PTPay
+    PaymentChannel.NATIVE_GCASH_PTPAY_DEPOSIT,
   ] as PaymentChannel[],
   [PaymentMethod.MAYA]: [
     // // BIFU
@@ -161,6 +164,9 @@ export const WithdrawalPaymentChannelCategories = {
 
     // SMPAY
     PaymentChannel.NATIVE_GCASH_SMPAY_WITHDRAWAL,
+
+    // PTPay
+    PaymentChannel.NATIVE_GCASH_PTPAY_WITHDRAWAL,
   ] as PaymentChannel[],
   [PaymentMethod.MAYA]: [
     // // BIFU
@@ -289,6 +295,10 @@ export const PaymentChannelDisplayNames = {
   // /* SMPAY */
   [PaymentChannel.NATIVE_GCASH_SMPAY_DEPOSIT]: "N-GCash: SMPay (deposit)",
   [PaymentChannel.NATIVE_GCASH_SMPAY_WITHDRAWAL]: "N-GCash: SMPay (withdrawal)",
+
+  /* PTPay */
+  [PaymentChannel.NATIVE_GCASH_PTPAY_DEPOSIT]: "N-GCash: PTPay (deposit)",
+  [PaymentChannel.NATIVE_GCASH_PTPAY_WITHDRAWAL]: "N-GCash: PTPay (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
