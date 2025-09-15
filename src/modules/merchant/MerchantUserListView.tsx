@@ -1,9 +1,3 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/shadcn/ui/card";
 import { useUser, useUsersByOrganizationId } from "@/lib/hooks/swr/user";
 
 import { Label } from "@/components/shadcn/ui/label";
@@ -23,6 +17,8 @@ import { useUserPermission } from "@/lib/hooks/useUserPermission";
 export function MerchantUserListView() {
   const { toast } = useToast();
 
+  const { user: currentUser } = useUser();
+
   const { organizationId } = getApplicationCookies();
 
   const { users } = useUsersByOrganizationId({ organizationId });
@@ -30,8 +26,6 @@ export function MerchantUserListView() {
   const permission = useUserPermission({
     accessingOrganizationId: organizationId,
   });
-
-  const { user: currentUser } = useUser();
 
   const ownerUsers = users?.filter(
     (user) => user.role === UserRole.MERCHANT_OWNER
