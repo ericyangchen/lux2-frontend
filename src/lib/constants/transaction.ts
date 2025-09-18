@@ -113,6 +113,9 @@ export const DepositPaymentChannelCategories = {
 
     // LUXPAY
     PaymentChannel.NATIVE_GCASH_LUXPAY_DEPOSIT,
+
+    // UUPAY
+    PaymentChannel.NATIVE_GCASH_UUPAY_DEPOSIT,
   ],
   [PaymentMethod.MAYA]: [
     // BIFU
@@ -168,6 +171,9 @@ export const WithdrawalPaymentChannelCategories = {
 
     // FEIFAN
     PaymentChannel.NATIVE_GCASH_FEIFAN_WITHDRAWAL,
+
+    // UUPAY
+    PaymentChannel.NATIVE_GCASH_UUPAY_WITHDRAWAL,
   ],
   [PaymentMethod.MAYA]: [
     // BIFU
@@ -311,6 +317,10 @@ export const PaymentChannelDisplayNames = {
   /* FEIFAN */
   [PaymentChannel.NATIVE_GCASH_FEIFAN_WITHDRAWAL]:
     "N-GCash: FEIFAN (withdrawal)",
+
+  /* UUPAY */
+  [PaymentChannel.NATIVE_GCASH_UUPAY_DEPOSIT]: "N-GCash: UUPAY (deposit)",
+  [PaymentChannel.NATIVE_GCASH_UUPAY_WITHDRAWAL]: "N-GCash: UUPAY (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
