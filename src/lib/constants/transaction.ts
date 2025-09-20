@@ -123,6 +123,9 @@ export const DepositPaymentChannelCategories = {
 
     // MG99PAY
     PaymentChannel.MAYA_MG99PAY_DEPOSIT,
+
+    // MyPay
+    PaymentChannel.MAYA_MYPAY_DEPOSIT,
   ],
   [PaymentMethod.QRPH]: [
     // BIFU
@@ -184,6 +187,9 @@ export const WithdrawalPaymentChannelCategories = {
 
     // MG99PAY
     PaymentChannel.MAYA_MG99PAY_WITHDRAWAL,
+
+    // MyPay
+    PaymentChannel.MAYA_MYPAY_WITHDRAWAL,
   ],
   [PaymentMethod.QRPH]: [
     // BIFU
@@ -321,6 +327,10 @@ export const PaymentChannelDisplayNames = {
   /* UUPAY */
   [PaymentChannel.NATIVE_GCASH_UUPAY_DEPOSIT]: "N-GCash: UUPAY (deposit)",
   [PaymentChannel.NATIVE_GCASH_UUPAY_WITHDRAWAL]: "N-GCash: UUPAY (withdrawal)",
+
+  /* MyPay */
+  [PaymentChannel.MAYA_MYPAY_DEPOSIT]: "Maya: MyPay (deposit)",
+  [PaymentChannel.MAYA_MYPAY_WITHDRAWAL]: "Maya: MyPay (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
