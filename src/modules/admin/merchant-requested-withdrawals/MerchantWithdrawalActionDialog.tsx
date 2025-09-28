@@ -43,6 +43,15 @@ export function MerchantWithdrawalActionDialog({
       return;
     }
 
+    if (!adminNote.trim()) {
+      toast({
+        title: "請填寫管理員備註",
+        description: "審核通過商戶提領請求時必須填寫管理員備註",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
 
@@ -169,7 +178,7 @@ export function MerchantWithdrawalActionDialog({
             </Label>
 
             <div className="flex flex-col gap-2">
-              <Label className="text-sm">管理員備註 (選填)</Label>
+              <Label className="text-sm">管理員備註 (必填)</Label>
               <Textarea
                 placeholder="請輸入管理員備註..."
                 value={adminNote}
@@ -181,7 +190,7 @@ export function MerchantWithdrawalActionDialog({
 
             <Button
               onClick={handleApprove}
-              disabled={isLoading}
+              disabled={isLoading || !adminNote.trim()}
               className="bg-green-600 hover:bg-green-700 text-white"
             >
               {isLoading ? "處理中..." : "確認通過"}
