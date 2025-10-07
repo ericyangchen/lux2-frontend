@@ -120,6 +120,8 @@ export const DepositPaymentChannelCategories = {
   [PaymentMethod.MAYA]: [
     // // BIFU
     // PaymentChannel.MAYA_BIFU_DEPOSIT,
+    // PTPay
+    PaymentChannel.MAYA_PTPAY_DEPOSIT,
   ] as PaymentChannel[],
   [PaymentMethod.QRPH]: [
     // // BIFU
@@ -173,6 +175,8 @@ export const WithdrawalPaymentChannelCategories = {
     // PaymentChannel.MAYA_BIFU_BANK_WITHDRAWAL,
     // // WorldPay
     // PaymentChannel.MAYA_WORLDPAY_WITHDRAWAL,
+    // PTPay
+    PaymentChannel.MAYA_PTPAY_WITHDRAWAL,
   ] as PaymentChannel[],
   [PaymentMethod.QRPH]: [
     // // BIFU
@@ -299,6 +303,8 @@ export const PaymentChannelDisplayNames = {
   /* PTPay */
   [PaymentChannel.NATIVE_GCASH_PTPAY_DEPOSIT]: "N-GCash: PTPay (deposit)",
   [PaymentChannel.NATIVE_GCASH_PTPAY_WITHDRAWAL]: "N-GCash: PTPay (withdrawal)",
+  [PaymentChannel.MAYA_PTPAY_DEPOSIT]: "Maya: PTPay (deposit)",
+  [PaymentChannel.MAYA_PTPAY_WITHDRAWAL]: "Maya: PTPay (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
