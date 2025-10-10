@@ -116,6 +116,9 @@ export const DepositPaymentChannelCategories = {
 
     // UUPAY
     PaymentChannel.NATIVE_GCASH_UUPAY_DEPOSIT,
+
+    // 724PAY
+    PaymentChannel.NATIVE_GCASH_724PAY_DEPOSIT,
   ],
   [PaymentMethod.MAYA]: [
     // BIFU
@@ -177,6 +180,9 @@ export const WithdrawalPaymentChannelCategories = {
 
     // UUPAY
     PaymentChannel.NATIVE_GCASH_UUPAY_WITHDRAWAL,
+
+    // 724PAY
+    PaymentChannel.NATIVE_GCASH_724PAY_WITHDRAWAL,
   ],
   [PaymentMethod.MAYA]: [
     // BIFU
@@ -331,6 +337,11 @@ export const PaymentChannelDisplayNames = {
   /* MyPay */
   [PaymentChannel.MAYA_MYPAY_DEPOSIT]: "Maya: MyPay (deposit)",
   [PaymentChannel.MAYA_MYPAY_WITHDRAWAL]: "Maya: MyPay (withdrawal)",
+
+  /* 724PAY */
+  [PaymentChannel.NATIVE_GCASH_724PAY_DEPOSIT]: "N-GCash: 724PAY (deposit)",
+  [PaymentChannel.NATIVE_GCASH_724PAY_WITHDRAWAL]:
+    "N-GCash: 724PAY (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
