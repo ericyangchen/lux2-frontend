@@ -29,3 +29,31 @@ export const ApiVerifyToken = async ({ token }: { token: string }) => {
     body: JSON.stringify({ token }),
   });
 };
+
+// refresh access token
+export const ApiRefreshToken = async ({
+  refreshToken,
+}: {
+  refreshToken: string;
+}) => {
+  return fetch(`${getBackendUrl()}/auth/refresh`, {
+    method: "POST",
+    headers: SMPayWebHeader(),
+    body: JSON.stringify({ refreshToken }),
+  });
+};
+
+// logout
+export const ApiLogout = async ({
+  refreshToken,
+  accessToken,
+}: {
+  refreshToken: string;
+  accessToken: string;
+}) => {
+  return fetch(`${getBackendUrl()}/auth/logout`, {
+    method: "POST",
+    headers: SMPayWebHeaderWithAccessToken(accessToken),
+    body: JSON.stringify({ refreshToken }),
+  });
+};

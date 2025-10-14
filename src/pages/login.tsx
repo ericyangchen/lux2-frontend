@@ -79,15 +79,18 @@ export default function LoginPage() {
 
   const handleLoginRedirect = ({
     accessToken,
+    refreshToken,
     user,
   }: {
     accessToken: string;
+    refreshToken: string;
     user: User;
   }) => {
     setApplicationCookies({
       userId: user.id,
       organizationId: user.organizationId,
       accessToken,
+      refreshToken,
     });
 
     const organizationBaseUrl = getOrganizationBaseUrl(user.orgType);
@@ -131,13 +134,13 @@ export default function LoginPage() {
       // response ok
       const data = await response.json();
 
-      const { accessToken, user, totpRequired } = data;
+      const { accessToken, refreshToken, user, totpRequired } = data;
 
       // Check if the response is valid
-      if (!accessToken || !user) {
+      if (!accessToken || !refreshToken || !user) {
         toast({
           title: "500 - Login failed",
-          description: "No accessToken or user",
+          description: "No accessToken, refreshToken, or user",
           variant: "destructive",
         });
 
@@ -145,7 +148,7 @@ export default function LoginPage() {
       }
 
       // successful login, redirect
-      handleLoginRedirect({ accessToken, user });
+      handleLoginRedirect({ accessToken, refreshToken, user });
 
       return;
     } catch (error) {
