@@ -52,6 +52,15 @@ export function DirectSubtractBalance() {
       return;
     }
 
+    if (!notes.trim()) {
+      toast({
+        title: "請填寫備註",
+        description: "餘額扣除操作必須填寫備註",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
       const response = await ApiDirectModifySubtractBalance({
@@ -106,7 +115,8 @@ export function DirectSubtractBalance() {
     setReferenceId("");
   };
 
-  const disableButton = !organizationId || !paymentMethod || !amount;
+  const disableButton =
+    !organizationId || !paymentMethod || !amount || !notes.trim();
 
   return (
     <>
@@ -186,10 +196,12 @@ export function DirectSubtractBalance() {
 
           {/* notes */}
           <div className="flex items-start gap-4">
-            <Label className="whitespace-nowrap w-[70px] pt-2">備註</Label>
+            <Label className="whitespace-nowrap w-[70px] pt-2">
+              備註 (必填)<span className="text-red-500">*</span>
+            </Label>
             <div className="w-full lg:w-[400px]">
               <Textarea
-                placeholder="輸入備註..."
+                placeholder="請輸入備註..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}

@@ -116,12 +116,22 @@ export const DepositPaymentChannelCategories = {
 
     // PTPay
     PaymentChannel.NATIVE_GCASH_PTPAY_DEPOSIT,
+
+    // // UUPAY
+    // PaymentChannel.NATIVE_GCASH_UUPAY_DEPOSIT,
+
+    // // 724PAY
+    // PaymentChannel.NATIVE_GCASH_724PAY_DEPOSIT,
   ] as PaymentChannel[],
   [PaymentMethod.MAYA]: [
     // // BIFU
     // PaymentChannel.MAYA_BIFU_DEPOSIT,
+
     // PTPay
     PaymentChannel.MAYA_PTPAY_DEPOSIT,
+
+    // // MyPay
+    // PaymentChannel.MAYA_MYPAY_DEPOSIT,
   ] as PaymentChannel[],
   [PaymentMethod.QRPH]: [
     // // BIFU
@@ -169,6 +179,12 @@ export const WithdrawalPaymentChannelCategories = {
 
     // PTPay
     PaymentChannel.NATIVE_GCASH_PTPAY_WITHDRAWAL,
+
+    // // UUPAY
+    // PaymentChannel.NATIVE_GCASH_UUPAY_WITHDRAWAL,
+
+    // // 724PAY
+    // PaymentChannel.NATIVE_GCASH_724PAY_WITHDRAWAL,
   ] as PaymentChannel[],
   [PaymentMethod.MAYA]: [
     // // BIFU
@@ -177,6 +193,9 @@ export const WithdrawalPaymentChannelCategories = {
     // PaymentChannel.MAYA_WORLDPAY_WITHDRAWAL,
     // PTPay
     PaymentChannel.MAYA_PTPAY_WITHDRAWAL,
+
+    // // MyPay
+    // PaymentChannel.MAYA_MYPAY_WITHDRAWAL,
   ] as PaymentChannel[],
   [PaymentMethod.QRPH]: [
     // // BIFU
@@ -305,6 +324,19 @@ export const PaymentChannelDisplayNames = {
   [PaymentChannel.NATIVE_GCASH_PTPAY_WITHDRAWAL]: "N-GCash: PTPay (withdrawal)",
   [PaymentChannel.MAYA_PTPAY_DEPOSIT]: "Maya: PTPay (deposit)",
   [PaymentChannel.MAYA_PTPAY_WITHDRAWAL]: "Maya: PTPay (withdrawal)",
+
+  // /* UUPAY */
+  // [PaymentChannel.NATIVE_GCASH_UUPAY_DEPOSIT]: "N-GCash: UUPAY (deposit)",
+  // [PaymentChannel.NATIVE_GCASH_UUPAY_WITHDRAWAL]: "N-GCash: UUPAY (withdrawal)",
+
+  // /* MyPay */
+  // [PaymentChannel.MAYA_MYPAY_DEPOSIT]: "Maya: MyPay (deposit)",
+  // [PaymentChannel.MAYA_MYPAY_WITHDRAWAL]: "Maya: MyPay (withdrawal)",
+
+  // /* 724PAY */
+  // [PaymentChannel.NATIVE_GCASH_724PAY_DEPOSIT]: "N-GCash: 724PAY (deposit)",
+  // [PaymentChannel.NATIVE_GCASH_724PAY_WITHDRAWAL]:
+  //   "N-GCash: 724PAY (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
