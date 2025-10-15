@@ -5,14 +5,17 @@ import {
   isLoginRoutes,
   isPublicRoutes,
 } from "../utils/routes";
+import { useEffect, useState } from "react";
 
 import { getApplicationCookies } from "../utils/cookie";
 import { handleAuthError } from "../utils/auth";
-import { useEffect } from "react";
+import { isJwtExpired } from "../utils/jwt";
+import { refreshAccessToken } from "../utils/tokenRefresh";
 import { useOrganization } from "./swr/organization";
 
 export const useAuthGuard = () => {
   const router = useRouter();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
 
   const { accessToken, userId, organizationId } = getApplicationCookies();
 
@@ -29,8 +32,36 @@ export const useAuthGuard = () => {
   const organizationPrefixUrl = getOrganizationPrefixUrl(organization?.type);
   const organizationBaseUrl = getOrganizationBaseUrl(organization?.type);
 
+  // Proactively refresh token on page load if expired
   useEffect(() => {
-    if (isPublicRoute) {
+    const checkAndRefreshToken = async () => {
+      if (isPublicRoute || !accessToken) {
+        return;
+      }
+
+      // Check if access token is expired
+      if (isJwtExpired(accessToken)) {
+        console.log("Access token expired, refreshing...");
+        setIsCheckingAuth(true);
+
+        const newToken = await refreshAccessToken();
+
+        setIsCheckingAuth(false);
+
+        if (!newToken) {
+          console.log("Failed to refresh token, logging out");
+          handleAuthError(router);
+        } else {
+          console.log("Token refreshed successfully");
+        }
+      }
+    };
+
+    checkAndRefreshToken();
+  }, [accessToken, isPublicRoute, router]);
+
+  useEffect(() => {
+    if (isPublicRoute || isCheckingAuth) {
       return;
     }
 
@@ -79,5 +110,6 @@ export const useAuthGuard = () => {
     organizationBaseUrl,
     organizationPrefixUrl,
     isOrganizationLoading,
+    isCheckingAuth,
   ]);
 };
