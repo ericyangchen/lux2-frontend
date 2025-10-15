@@ -17,12 +17,25 @@ export const setApplicationCookies = ({
   accessToken: string;
   refreshToken?: string;
 }) => {
-  Cookies.set(APPLICATION_USER_ID_COOKIE, userId);
-  Cookies.set(APPLICATION_ORGANIZATION_ID_COOKIE, organizationId);
+  // Set user info cookies with same expiry as refresh token for consistency
+  Cookies.set(APPLICATION_USER_ID_COOKIE, userId, {
+    path: "/",
+    expires: 7,
+    secure: getEnvironment() === "production",
+    sameSite: "Strict",
+  });
 
+  Cookies.set(APPLICATION_ORGANIZATION_ID_COOKIE, organizationId, {
+    path: "/",
+    expires: 7,
+    secure: getEnvironment() === "production",
+    sameSite: "Strict",
+  });
+
+  // Access token cookie - persist across sessions, will be refreshed automatically
   Cookies.set(APPLICATION_TOKEN_COOKIE, accessToken, {
     path: "/",
-    // expires: 1, // 1 day expiration
+    expires: 7, // Match refresh token expiry
     secure: getEnvironment() === "production",
     sameSite: "Strict",
   });

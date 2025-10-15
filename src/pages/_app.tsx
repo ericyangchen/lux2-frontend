@@ -13,6 +13,7 @@ import { SWRConfig } from "swr";
 import { Toaster } from "@/components/shadcn/ui/toaster";
 import { useAuthGuard } from "@/lib/hooks/useAuthGuard";
 import { useRouter } from "next/router";
+import { useTokenRefresh } from "@/lib/hooks/useTokenRefresh";
 
 const swrConfig = {
   refreshInterval: 0,
@@ -71,6 +72,7 @@ export default function MyApp({ Component, pageProps, config }: MyAppProps) {
   }
 
   useAuthGuard();
+  useTokenRefresh(); // Auto-refresh tokens in background
 
   if (routesWithoutLayout.includes(router.pathname)) {
     return (
