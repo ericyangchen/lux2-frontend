@@ -12,6 +12,7 @@ import {
   HandRaisedIcon,
   HomeIcon,
   InboxArrowDownIcon,
+  ShieldExclamationIcon,
   UserCircleIcon,
   WalletIcon,
 } from "@heroicons/react/24/outline";
@@ -131,6 +132,11 @@ export const adminNavigation = [
     name: "操作紀錄",
     href: "/admin/user-activity-logs",
     icon: ClipboardDocumentListIcon,
+  },
+  {
+    name: "封鎖帳號管理",
+    href: "/admin/blocked-accounts",
+    icon: ShieldExclamationIcon,
   },
   {
     name: "交易報表",
