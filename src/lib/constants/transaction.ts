@@ -122,6 +122,9 @@ export const DepositPaymentChannelCategories = {
 
     // // 724PAY
     // PaymentChannel.NATIVE_GCASH_724PAY_DEPOSIT,
+
+    // SnapPay
+    PaymentChannel.NATIVE_GCASH_SNAPPAY_DEPOSIT,
   ] as PaymentChannel[],
   [PaymentMethod.MAYA]: [
     // // BIFU
@@ -185,6 +188,9 @@ export const WithdrawalPaymentChannelCategories = {
 
     // // 724PAY
     // PaymentChannel.NATIVE_GCASH_724PAY_WITHDRAWAL,
+
+    // SnapPay
+    PaymentChannel.NATIVE_GCASH_SNAPPAY_WITHDRAWAL,
   ] as PaymentChannel[],
   [PaymentMethod.MAYA]: [
     // // BIFU
@@ -337,6 +343,11 @@ export const PaymentChannelDisplayNames = {
   // [PaymentChannel.NATIVE_GCASH_724PAY_DEPOSIT]: "N-GCash: 724PAY (deposit)",
   // [PaymentChannel.NATIVE_GCASH_724PAY_WITHDRAWAL]:
   //   "N-GCash: 724PAY (withdrawal)",
+
+  /* SnapPay */
+  [PaymentChannel.NATIVE_GCASH_SNAPPAY_DEPOSIT]: "N-GCash: Snap (deposit)",
+  [PaymentChannel.NATIVE_GCASH_SNAPPAY_WITHDRAWAL]:
+    "N-GCash: Snap (withdrawal)",
 };
 
 export const DepositAccountTypeDisplayNames = {
