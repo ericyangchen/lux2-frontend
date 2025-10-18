@@ -103,13 +103,12 @@ export default function CashierPage() {
 
                     {/* Error Title */}
                     <h2 className="text-[#1A1C21] text-xl font-bold text-center">
-                      系統繁忙 / System Busy
+                      System Busy
                     </h2>
 
                     {/* Error Message */}
                     <p className="text-[#6B7280] text-base text-center">
-                      請稍後重新提交支付請求 / Please submit payment request
-                      again
+                      Please submit payment request again
                     </p>
                   </div>
                 </div>
