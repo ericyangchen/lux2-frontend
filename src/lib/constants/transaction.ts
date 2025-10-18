@@ -68,6 +68,8 @@ export const TransactionInternalStatusDisplayNames = {
     "代付-成功(手動設定)",
   [TransactionInternalStatus.WITHDRAWAL_UPSTREAM_FAILED_MANUALLY_SET_TO_FAILED]:
     "代付-失敗(手動設定)",
+  [TransactionInternalStatus.WITHDRAWAL_REQUIRE_MANUAL_REVIEW]:
+    "代付-需要人工審核(等待處理中)",
 
   [TransactionInternalStatus.WITHDRAWAL_UPSTREAM_FAILED_REFUNDED_RESPONSE]:
     "代付-上游失敗(沖回)",
