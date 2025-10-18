@@ -33,6 +33,8 @@ export const TransactionInternalStatusDisplayNames = {
   [TransactionInternalStatus.DEPOSIT_CREATED]: "代收-創建成功",
 
   [TransactionInternalStatus.DEPOSIT_SUBMITTED_TO_UPSTREAM]: "代收-已提交上游",
+  [TransactionInternalStatus.DEPOSIT_SUBMITTED_TO_UPSTREAM_FALLBACK_PENDING]:
+    "代收-開單失敗(顯示處理中)",
   [TransactionInternalStatus.DEPOSIT_SUBMIT_TO_UPSTREAM_ERROR]:
     "代收-提交上游錯誤",
   [TransactionInternalStatus.DEPOSIT_UPSTREAM_CONNECTION_ERROR]:
