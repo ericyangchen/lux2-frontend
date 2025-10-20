@@ -29,6 +29,7 @@ import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { Checkbox } from "@/components/shadcn/ui/checkbox";
 import { Input } from "@/components/shadcn/ui/input";
+import { UserRoleDisplayNames } from "@/lib/constants/user";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
@@ -403,7 +404,7 @@ export function BlockedAccountsView() {
                       {user.userEmail}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
-                      {user.userRole}
+                      {UserRoleDisplayNames[user.userRole] || user.userRole}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
                       <div>
