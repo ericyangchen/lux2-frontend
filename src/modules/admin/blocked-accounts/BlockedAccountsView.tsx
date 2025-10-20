@@ -225,15 +225,15 @@ export function BlockedAccountsView() {
       case "block":
         return {
           title: "封鎖使用者",
-          description: "封鎖後使用者將無法登入系統",
+          description: "封鎖後使用者將立即登出並無法再次登入系統，直到解除封鎖",
           button: "確認封鎖",
         };
       case "revoke":
         return {
-          title: "撤銷存取權限",
+          title: "強制登出使用者",
           description:
-            "撤銷後使用者的 JWT 和 Refresh Token 將立即失效，需要重新登入",
-          button: "確認撤銷",
+            "強制登出後使用者的 JWT 和 Refresh Token 將立即失效，使用者可以重新登入",
+          button: "確認強制登出",
         };
       case "unblock":
         return {
@@ -259,7 +259,7 @@ export function BlockedAccountsView() {
           <div>
             <h3 className="text-lg font-medium">使用者管理</h3>
             <p className="text-sm text-gray-500">
-              管理使用者帳號狀態、封鎖登入、撤銷存取權限
+              管理使用者帳號狀態、強制登出、封鎖與解封帳號
             </p>
           </div>
           <Button onClick={fetchUsers} disabled={isLoading} variant="outline">
@@ -289,20 +289,20 @@ export function BlockedAccountsView() {
 
           <div className="flex gap-2">
             <Button
-              onClick={() => handleActionClick("block")}
-              disabled={selectedUserIds.size === 0}
-              variant="destructive"
-              size="sm"
-            >
-              封鎖登入 ({selectedUserIds.size})
-            </Button>
-            <Button
               onClick={() => handleActionClick("revoke")}
               disabled={selectedUserIds.size === 0}
               variant="outline"
               size="sm"
             >
-              撤銷存取 ({selectedUserIds.size})
+              強制登出 ({selectedUserIds.size})
+            </Button>
+            <Button
+              onClick={() => handleActionClick("block")}
+              disabled={selectedUserIds.size === 0}
+              variant="destructive"
+              size="sm"
+            >
+              封鎖 ({selectedUserIds.size})
             </Button>
             <Button
               onClick={() => handleActionClick("unblock")}
@@ -310,7 +310,7 @@ export function BlockedAccountsView() {
               variant="default"
               size="sm"
             >
-              解除封鎖 ({selectedUserIds.size})
+              解封 ({selectedUserIds.size})
             </Button>
           </div>
         </div>
