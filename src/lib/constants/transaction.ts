@@ -120,7 +120,7 @@ export const DepositPaymentChannelCategories = {
 
     // PTPay
     PaymentChannel.NATIVE_GCASH_PTPAY_DEPOSIT,
-
+    PaymentChannel.NATIVE_GCASH_PTPAY_C_DEPOSIT,
     // // UUPAY
     // PaymentChannel.NATIVE_GCASH_UUPAY_DEPOSIT,
 
@@ -186,6 +186,7 @@ export const WithdrawalPaymentChannelCategories = {
 
     // PTPay
     PaymentChannel.NATIVE_GCASH_PTPAY_WITHDRAWAL,
+    PaymentChannel.NATIVE_GCASH_PTPAY_C_WITHDRAWAL,
 
     // // UUPAY
     // PaymentChannel.NATIVE_GCASH_UUPAY_WITHDRAWAL,
@@ -326,14 +327,17 @@ export const PaymentChannelDisplayNames = {
   //   "N-GCash: H88PAY (withdrawal)",
 
   // /* SMPAY */
-  [PaymentChannel.NATIVE_GCASH_SMPAY_DEPOSIT]: "N-GCash: SMPay (deposit)",
-  [PaymentChannel.NATIVE_GCASH_SMPAY_WITHDRAWAL]: "N-GCash: SMPay (withdrawal)",
+  [PaymentChannel.NATIVE_GCASH_SMPAY_DEPOSIT]: "N-GCash: SM (deposit)",
+  [PaymentChannel.NATIVE_GCASH_SMPAY_WITHDRAWAL]: "N-GCash: SM (withdrawal)",
 
   /* PTPay */
-  [PaymentChannel.NATIVE_GCASH_PTPAY_DEPOSIT]: "N-GCash: PTPay (deposit)",
-  [PaymentChannel.NATIVE_GCASH_PTPAY_WITHDRAWAL]: "N-GCash: PTPay (withdrawal)",
-  [PaymentChannel.MAYA_PTPAY_DEPOSIT]: "Maya: PTPay (deposit)",
-  [PaymentChannel.MAYA_PTPAY_WITHDRAWAL]: "Maya: PTPay (withdrawal)",
+  [PaymentChannel.NATIVE_GCASH_PTPAY_DEPOSIT]: "N-GCash: PT (deposit)",
+  [PaymentChannel.NATIVE_GCASH_PTPAY_WITHDRAWAL]: "N-GCash: PT (withdrawal)",
+  [PaymentChannel.NATIVE_GCASH_PTPAY_C_DEPOSIT]: "N-GCash: PT 跑分G (deposit)",
+  [PaymentChannel.NATIVE_GCASH_PTPAY_C_WITHDRAWAL]:
+    "N-GCash: PT 跑分G (withdrawal)",
+  [PaymentChannel.MAYA_PTPAY_DEPOSIT]: "Maya: PT (deposit)",
+  [PaymentChannel.MAYA_PTPAY_WITHDRAWAL]: "Maya: PT (withdrawal)",
 
   // /* UUPAY */
   // [PaymentChannel.NATIVE_GCASH_UUPAY_DEPOSIT]: "N-GCash: UUPAY (deposit)",
