@@ -5,6 +5,7 @@ export interface Organization {
   name: string;
   type: OrgType;
   isTestingAccount: boolean;
+  enabledApiVersions: string[];
   parent?: Organization;
   children: Organization[];
   level: number;
