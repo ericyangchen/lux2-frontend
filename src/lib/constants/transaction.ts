@@ -113,7 +113,7 @@ export const DepositPaymentChannelCategories = {
     // PaymentChannel.NATIVE_GCASH_APAY_DEPOSIT,
 
     // H88PAY
-    // PaymentChannel.NATIVE_GCASH_H88PAY_DEPOSIT,
+    PaymentChannel.NATIVE_GCASH_H88PAY_DEPOSIT,
 
     // SMPAY
     PaymentChannel.NATIVE_GCASH_SMPAY_DEPOSIT,
@@ -179,7 +179,7 @@ export const WithdrawalPaymentChannelCategories = {
     // PaymentChannel.NATIVE_GCASH_TKINGPAY_WITHDRAWAL,
 
     // H88PAY
-    // PaymentChannel.NATIVE_GCASH_H88PAY_WITHDRAWAL,
+    PaymentChannel.NATIVE_GCASH_H88PAY_WITHDRAWAL,
 
     // SMPAY
     PaymentChannel.NATIVE_GCASH_SMPAY_WITHDRAWAL,
@@ -322,9 +322,9 @@ export const PaymentChannelDisplayNames = {
   //   "N-GCash: TKINGPAY (withdrawal)",
 
   // /* H88PAY */
-  // [PaymentChannel.NATIVE_GCASH_H88PAY_DEPOSIT]: "N-GCash: H88PAY (deposit)",
-  // [PaymentChannel.NATIVE_GCASH_H88PAY_WITHDRAWAL]:
-  //   "N-GCash: H88PAY (withdrawal)",
+  [PaymentChannel.NATIVE_GCASH_H88PAY_DEPOSIT]: "N-GCash: H88PAY (deposit)",
+  [PaymentChannel.NATIVE_GCASH_H88PAY_WITHDRAWAL]:
+    "N-GCash: H88PAY (withdrawal)",
 
   // /* SMPAY */
   [PaymentChannel.NATIVE_GCASH_SMPAY_DEPOSIT]: "N-GCash: SM (deposit)",
