@@ -104,6 +104,8 @@ export const DepositPaymentChannelCategories = {
 
     // HFPay
     PaymentChannel.NATIVE_GCASH_HFPAY_DEPOSIT,
+    // HFPayB
+    PaymentChannel.NATIVE_GCASH_HFPAY_B_DEPOSIT,
 
     // QRPAY
     PaymentChannel.NATIVE_GCASH_QRPAY_DEPOSIT,
@@ -114,9 +116,6 @@ export const DepositPaymentChannelCategories = {
 
     // H88PAY
     PaymentChannel.NATIVE_GCASH_H88PAY_DEPOSIT,
-
-    // SMPAY
-    PaymentChannel.NATIVE_GCASH_SMPAY_DEPOSIT,
 
     // PTPay
     PaymentChannel.NATIVE_GCASH_PTPAY_DEPOSIT,
@@ -167,6 +166,8 @@ export const WithdrawalPaymentChannelCategories = {
 
     // HFPay
     PaymentChannel.NATIVE_GCASH_HFPAY_WITHDRAWAL,
+    // HFPayB
+    PaymentChannel.NATIVE_GCASH_HFPAY_B_WITHDRAWAL,
 
     // QRPAY
     PaymentChannel.NATIVE_GCASH_QRPAY_WITHDRAWAL,
@@ -180,9 +181,6 @@ export const WithdrawalPaymentChannelCategories = {
 
     // H88PAY
     PaymentChannel.NATIVE_GCASH_H88PAY_WITHDRAWAL,
-
-    // SMPAY
-    PaymentChannel.NATIVE_GCASH_SMPAY_WITHDRAWAL,
 
     // PTPay
     PaymentChannel.NATIVE_GCASH_PTPAY_WITHDRAWAL,
@@ -302,7 +300,10 @@ export const PaymentChannelDisplayNames = {
 
   // /* HFPay */
   [PaymentChannel.NATIVE_GCASH_HFPAY_DEPOSIT]: "N-GCash: HFPay (deposit)",
+  [PaymentChannel.NATIVE_GCASH_HFPAY_B_DEPOSIT]: "N-GCash: HFPay黑 (deposit)",
   [PaymentChannel.NATIVE_GCASH_HFPAY_WITHDRAWAL]: "N-GCash: HFPay (withdrawal)",
+  [PaymentChannel.NATIVE_GCASH_HFPAY_B_WITHDRAWAL]:
+    "N-GCash: HFPay黑 (withdrawal)",
 
   /* QRPAY */
   [PaymentChannel.NATIVE_GCASH_QRPAY_C1_DEPOSIT]:
@@ -325,10 +326,6 @@ export const PaymentChannelDisplayNames = {
   [PaymentChannel.NATIVE_GCASH_H88PAY_DEPOSIT]: "N-GCash: H88PAY (deposit)",
   [PaymentChannel.NATIVE_GCASH_H88PAY_WITHDRAWAL]:
     "N-GCash: H88PAY (withdrawal)",
-
-  // /* SMPAY */
-  [PaymentChannel.NATIVE_GCASH_SMPAY_DEPOSIT]: "N-GCash: SM (deposit)",
-  [PaymentChannel.NATIVE_GCASH_SMPAY_WITHDRAWAL]: "N-GCash: SM (withdrawal)",
 
   /* PTPay */
   [PaymentChannel.NATIVE_GCASH_PTPAY_DEPOSIT]: "N-GCash: PT (deposit)",
