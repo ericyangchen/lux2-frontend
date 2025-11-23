@@ -99,7 +99,8 @@ const UserDropdown = ({ user }: { user?: User }) => {
                   variant="outline"
                   className="bg-none border-none cursor-pointer pl-0 flex gap-1"
                   onClick={() => {
-                    window.open("https://t.me/LUXBOSS_1");
+                    // TODO: add telegram customer service account
+                    // window.open("https://t.me/LUXBOSS_1");
                   }}
                 >
                   <Image src="/telegram.png" width={16} height={16} alt="" />
@@ -313,7 +314,8 @@ export default function MerchantNavigationHeader() {
                         variant="outline"
                         className="bg-none border-none cursor-pointer pl-0 flex gap-1"
                         onClick={() => {
-                          window.open("https://t.me/LUXBOSS_1");
+                          // TODO: add telegram customer service account
+                          // window.open("https://t.me/LUXBOSS_1");
                         }}
                       >
                         <Image

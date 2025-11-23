@@ -122,7 +122,7 @@ const UnifiedSearchBar = ({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label className="text-sm font-medium text-slate-700">
-          系統訂單號 (luxtx)
+          系統訂單號 (atx)
         </Label>
         <Input
           placeholder="輸入完整的系統訂單號..."

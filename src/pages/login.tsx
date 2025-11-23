@@ -198,7 +198,7 @@ export default function LoginPage() {
                 <div className="h-24">
                   <Image
                     src="/luxpay-logo-horizontal.jpg"
-                    alt="LuxPay"
+                    alt="AApay"
                     width={1280}
                     height={333}
                     className="w-full h-full object-contain rounded-md"

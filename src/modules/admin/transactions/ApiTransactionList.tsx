@@ -441,7 +441,7 @@ export function ApiTransactionList() {
           {/* transactionId */}
           <div className="flex items-center gap-4 w-full lg:w-fit px-4">
             <Label className="whitespace-nowrap">
-              系統訂單號(luxtx)<span className="text-red-500">*</span>
+              系統訂單號(atx)<span className="text-red-500">*</span>
             </Label>
             <Input
               id="transactionId"
