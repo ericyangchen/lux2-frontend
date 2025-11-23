@@ -23,7 +23,7 @@ export function OrganizationSettings({
 
   return (
     <div className="pt-8">
-      <Label className="text-xl font-bold">其他設定</Label>
+      <Label className="text-sm font-semibold text-gray-900 uppercase tracking-wide">其他設定</Label>
 
       <div className="px-0 sm:px-4 py-4">
         <div className="sm:hidden">
@@ -33,7 +33,7 @@ export function OrganizationSettings({
             name="tabs"
             defaultValue={selectedTab}
             onChange={(e) => setSelectedTab(e.target.value)}
-            className="block w-full rounded-md border border-gray-300 px-4 py-2"
+            className="block w-full border border-gray-200 px-4 py-2 bg-white text-gray-900"
           >
             {Object.values(Tab).map((tab) => (
               <option key={tab} value={tab}>
@@ -43,15 +43,15 @@ export function OrganizationSettings({
           </select>
         </div>
         <div className="hidden sm:block">
-          <nav className="flex space-x-4">
+          <nav className="flex space-x-0 border-b border-gray-200">
             {Object.values(Tab).map((tab) => (
               <button
                 key={tab}
                 className={classNames(
                   tab === selectedTab
-                    ? "bg-gray-200 text-gray-900"
-                    : "text-gray-500 hover:text-gray-700",
-                  "rounded-md px-3 py-2 text-sm font-medium"
+                    ? "bg-gray-900 text-white border-b-2 border-gray-900"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50",
+                  "px-4 py-2 text-sm font-medium border-b-2 border-transparent"
                 )}
                 onClick={() => setSelectedTab(tab)}
               >

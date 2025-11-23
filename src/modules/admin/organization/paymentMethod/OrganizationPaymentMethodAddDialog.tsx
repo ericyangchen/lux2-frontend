@@ -307,7 +307,7 @@ export function OrganizationPaymentMethodAddDialog({
                           (method): method is PaymentMethod =>
                             Object.values(PaymentMethod).includes(
                               method as PaymentMethod
-                            ) && availablePaymentMethods.includes(method)
+                            ) && availablePaymentMethods.includes(method as PaymentMethod)
                         );
                         if (validMethods.length === 0) return null;
                         return (
@@ -330,7 +330,7 @@ export function OrganizationPaymentMethodAddDialog({
                     )
                   ) : (
                     <SelectGroup>
-                      <SelectItem value="" disabled>
+                      <SelectItem value="__no_available__" disabled>
                         所有通道都已配置
                       </SelectItem>
                     </SelectGroup>
@@ -355,7 +355,7 @@ export function OrganizationPaymentMethodAddDialog({
             {paymentMethod && (
               <div className="space-y-4">
                 {channelSettings.map((channelSetting, channelIdx) => (
-                  <div key={channelIdx} className="border p-4 rounded-md">
+                  <div key={channelIdx} className="border border-gray-200 p-4">
                     {/* Channel Header */}
                     <div className="flex justify-between items-center mb-4">
                       <div className="flex items-center space-x-4">
@@ -473,7 +473,7 @@ export function OrganizationPaymentMethodAddDialog({
                       {channelSetting.feeSettings.map((feeSetting, feeIdx) => (
                         <div
                           key={feeIdx}
-                          className="flex items-center space-x-4 p-3 bg-gray-50 rounded"
+                          className="flex items-center space-x-4 p-3 bg-gray-50"
                         >
                           <div className="w-24">
                             <span className="text-sm font-medium">

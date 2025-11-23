@@ -1,22 +1,17 @@
-import {
-  ChartIcon,
-  CreditCardIcon,
-  TrendingUpIcon,
-  WalletIcon,
-} from "../icons/DashboardIcons";
-
-import { StatCard } from "../cards/StatCard";
-import { SystemBalance } from "@/lib/types/balance";
+import { formatNumber } from "@/lib/utils/number";
+import { getCurrencySymbol } from "@/lib/utils/currency";
 
 interface BalanceSectionProps {
-  totalBalance: string;
-  systemBalance: SystemBalance;
+  currencyBalances: Array<{
+    currency: string;
+    totalBalance: string;
+    totalAvailableAmount: string;
+    totalDepositUnsettledAmount: string;
+    totalFrozenAmount: string;
+  }>;
 }
 
-export const BalanceSection = ({
-  totalBalance,
-  systemBalance,
-}: BalanceSectionProps) => {
+export const BalanceSection = ({ currencyBalances }: BalanceSectionProps) => {
   return (
     <div>
       <div className="mb-6">
@@ -24,35 +19,79 @@ export const BalanceSection = ({
         <p className="text-gray-600">即時查看系統內所有餘額狀況</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="總餘額"
-          value={totalBalance}
-          subtitle="系統內總金額"
-          textColor="text-purple-600"
-          icon={WalletIcon}
-        />
-        <StatCard
-          title="可用餘額"
-          value={systemBalance?.totalAvailableAmount || "0"}
-          subtitle="可立即使用"
-          textColor="text-green-600"
-          icon={ChartIcon}
-        />
-        <StatCard
-          title="未結算額度"
-          value={systemBalance?.totalDepositUnsettledAmount || "0"}
-          subtitle="待處理金額"
-          textColor="text-amber-600"
-          icon={CreditCardIcon}
-        />
-        <StatCard
-          title="凍結額度"
-          value={systemBalance?.totalFrozenAmount || "0"}
-          subtitle="暫時凍結"
-          textColor="text-red-600"
-          icon={TrendingUpIcon}
-        />
+      {/* Currency-grouped Balance Summary Table */}
+      <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
+        {currencyBalances.length > 0 ? (
+          currencyBalances.map(({ currency, ...balances }) => {
+            const currencySymbol = getCurrencySymbol(currency);
+            return (
+              <div
+                key={currency}
+                className="border border-gray-200 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 w-full min-w-0"
+              >
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="font-semibold text-gray-900 text-lg">
+                      {currency}
+                    </div>
+                    <div className="text-sm text-gray-500 font-medium">
+                      {currencySymbol}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {/* 總餘額 */}
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-gray-600 mb-1">
+                      總餘額
+                    </p>
+                    <p className="text-2xl font-bold text-purple-600 break-words">
+                      {currencySymbol} {formatNumber(balances.totalBalance)}
+                    </p>
+                  </div>
+
+                  {/* 可用餘額 */}
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-gray-600 mb-1">
+                      可用餘額
+                    </p>
+                    <p className="text-xl font-bold text-green-600 break-words">
+                      {currencySymbol}{" "}
+                      {formatNumber(balances.totalAvailableAmount)}
+                    </p>
+                  </div>
+
+                  {/* 未結算額度 */}
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-gray-600 mb-1">
+                      未結算額度
+                    </p>
+                    <p className="text-xl font-bold text-amber-600 break-words">
+                      {currencySymbol}{" "}
+                      {formatNumber(balances.totalDepositUnsettledAmount)}
+                    </p>
+                  </div>
+
+                  {/* 凍結額度 */}
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-gray-600 mb-1">
+                      凍結額度
+                    </p>
+                    <p className="text-xl font-bold text-red-600 break-words">
+                      {currencySymbol}{" "}
+                      {formatNumber(balances.totalFrozenAmount)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="col-span-full border border-gray-200 bg-white rounded-lg p-6 text-center">
+            <p className="text-sm text-gray-500">暫無餘額資料</p>
+          </div>
+        )}
       </div>
     </div>
   );

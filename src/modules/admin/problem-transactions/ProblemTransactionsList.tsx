@@ -1,5 +1,6 @@
 import {
   PaymentMethodDisplayNames,
+  PaymentMethodCurrencyMapping,
   TransactionInternalStatusDisplayNames,
   TransactionStatusDisplayNames,
   TransactionTypeDisplayNames,
@@ -10,6 +11,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/ui/select";
@@ -244,12 +246,34 @@ export function ProblemTransactionsList() {
                     <SelectItem value="all" className="h-8">
                       全部
                     </SelectItem>
-                    {Object.values(PaymentMethod).map((method) => (
-                      <SelectItem key={method} value={method}>
-                        {PaymentMethodDisplayNames[method]}
-                      </SelectItem>
-                    ))}
                   </SelectGroup>
+                  {Object.entries(PaymentMethodCurrencyMapping).map(
+                    ([currency, methods]) => {
+                      const validMethods = methods.filter(
+                        (method): method is PaymentMethod =>
+                          Object.values(PaymentMethod).includes(
+                            method as PaymentMethod
+                          )
+                      );
+                      if (validMethods.length === 0) return null;
+                      return (
+                        <SelectGroup key={currency}>
+                          <SelectLabel className="text-xs text-gray-500">
+                            {currency}
+                          </SelectLabel>
+                          {validMethods.map((method) => (
+                            <SelectItem
+                              key={method}
+                              value={method}
+                              className="pl-6"
+                            >
+                              {PaymentMethodDisplayNames[method]}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      );
+                    }
+                  )}
                 </SelectContent>
               </Select>
             </div>

@@ -113,11 +113,11 @@ export function OrganizationList({
 
   return (
     <div>
-      <div className="flex gap-1 mb-4">
+      <div className="flex gap-2 mb-4">
         {/* Type */}
         <div className="max-w-xs">
           <select
-            className="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-12 text-gray-900 ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6"
+            className="w-full border border-gray-200 bg-white py-1.5 pl-3 pr-12 text-gray-900 sm:text-sm sm:leading-6"
             value={selectedType || ""}
             onChange={handleTypeChange}
           >
@@ -137,20 +137,20 @@ export function OrganizationList({
         <Button
           onClick={expandAll}
           variant="outline"
-          className="h-8 text-gray-900 border-gray-300"
+          className="h-8 text-gray-900 border-gray-200 bg-white hover:bg-gray-50"
         >
           展開全部
         </Button>
         <Button
           onClick={shrinkAll}
           variant="outline"
-          className="h-8 text-gray-900 border-gray-300"
+          className="h-8 text-gray-900 border-gray-200 bg-white hover:bg-gray-50"
         >
           收合全部
         </Button>
       </div>
 
-      <ul className="divide-y xl:w-[400px] max-h-[450px] xl:max-h-[calc(100vh-132px)] overflow-y-auto border rounded-lg">
+      <ul className="divide-y xl:w-[400px] max-h-[450px] xl:max-h-[calc(100vh-132px)] overflow-y-auto border border-gray-200 bg-white">
         {filteredOrganizations &&
           filteredOrganizations.map((org) => (
             <li
@@ -158,7 +158,7 @@ export function OrganizationList({
               style={{ paddingLeft: `${org.depth * 20 + 16}px` }}
               className={classNames(
                 selectedOrganizationId === org.id ? "bg-gray-100" : "bg-white",
-                "relative flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                "relative flex items-center gap-2 px-4 py-3 hover:bg-gray-50 cursor-pointer"
               )}
               onClick={() => setSelectedOrganizationId(org.id)}
             >

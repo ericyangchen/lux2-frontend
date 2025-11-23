@@ -17,26 +17,26 @@ export function OrganizationDetail({
 
   if (!organizationId || !organization) {
     return (
-      <div className="border rounded-lg p-4 flex h-full justify-center items-center">
-        No organization selected
+      <div className="border border-gray-200 p-4 flex h-full justify-center items-center bg-white">
+        <span className="text-gray-500">No organization selected</span>
       </div>
     );
   }
 
   return (
-    <div className="border rounded-lg p-4 divide-y min-h-fit xl:h-[calc(100vh-84px)] xl:overflow-y-scroll">
+    <div className="border border-gray-200 bg-white p-4 divide-y divide-gray-200 min-h-fit xl:h-[calc(100vh-84px)] xl:overflow-y-scroll">
       <OrganizationInfo organizationId={organizationId} />
       <OrganizationBalance organizationId={organizationId} />
       {organization.type === OrgType.ADMIN ? (
         <div className="py-8">
-          <Label className="text-xl font-bold">通道設定</Label>
+          <Label className="text-sm font-semibold text-gray-900 uppercase tracking-wide">通道設定</Label>
 
           <div className="px-0 sm:px-4 py-4 flex gap-2 items-center">
-            <span>總代理請至</span>
+            <span className="text-sm text-gray-600">總代理請至</span>
             <Link href={`/admin/channel-controls`}>
-              <Button variant="outline">上游設定</Button>
+              <Button variant="outline" className="border-gray-200 bg-white text-gray-900 hover:bg-gray-50">上游設定</Button>
             </Link>
-            <span>修改</span>
+            <span className="text-sm text-gray-600">修改</span>
           </div>
         </div>
       ) : (

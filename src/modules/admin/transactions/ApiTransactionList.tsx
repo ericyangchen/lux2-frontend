@@ -51,10 +51,92 @@ import { TransactionInternalStatus } from "@/lib/enums/transactions/transaction-
 import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { classNames } from "@/lib/utils/classname-utils";
-import { currencySymbol } from "@/lib/constants/common";
+// Currency symbol mapping
+const getCurrencySymbol = (currency: string): string => {
+  const symbols: Record<string, string> = {
+    PHP: "₱",
+    USD: "$",
+    CNY: "¥",
+    TWD: "NT$",
+    HKD: "HK$",
+    SGD: "S$",
+    MYR: "RM",
+    IDR: "Rp",
+    THB: "฿",
+    VND: "₫",
+  };
+  return symbols[currency] || currency;
+};
+
+// Get currency for a payment method
+const getCurrencyForPaymentMethod = (
+  paymentMethod: PaymentMethod
+): string | null => {
+  for (const [currency, methods] of Object.entries(
+    PaymentMethodCurrencyMapping
+  )) {
+    if (methods.includes(paymentMethod)) {
+      return currency;
+    }
+  }
+  return null;
+};
+
+// Group payment method summaries by currency
+const groupSummariesByCurrency = (
+  summaries: Array<{
+    paymentMethod: PaymentMethod;
+    count: string;
+    amountSum: string;
+    totalFeeSum: string;
+  }>
+): Array<{
+  currency: string;
+  count: string;
+  amountSum: string;
+  totalFeeSum: string;
+}> => {
+  const currencyMap = new Map<
+    string,
+    { count: string; amountSum: string; totalFeeSum: string }
+  >();
+
+  for (const summary of summaries) {
+    const currency = getCurrencyForPaymentMethod(summary.paymentMethod);
+    if (!currency) continue;
+
+    if (currencyMap.has(currency)) {
+      const existing = currencyMap.get(currency)!;
+      existing.count = (
+        parseInt(existing.count) + parseInt(summary.count || "0")
+      ).toString();
+      existing.amountSum = Calculator.plus(
+        existing.amountSum,
+        summary.amountSum || "0"
+      );
+      existing.totalFeeSum = Calculator.plus(
+        existing.totalFeeSum,
+        summary.totalFeeSum || "0"
+      );
+    } else {
+      currencyMap.set(currency, {
+        count: summary.count || "0",
+        amountSum: summary.amountSum || "0",
+        totalFeeSum: summary.totalFeeSum || "0",
+      });
+    }
+  }
+
+  return Array.from(currencyMap.entries()).map(([currency, data]) => ({
+    currency,
+    count: data.count,
+    amountSum: data.amountSum,
+    totalFeeSum: data.totalFeeSum,
+  }));
+};
 import { flattenOrganizations } from "../common/flattenOrganizations";
 import { format } from "date-fns";
-import { formatNumber } from "@/lib/utils/number";
+import { formatNumber, formatNumberInInteger } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useOrganizationWithChildren } from "@/lib/hooks/swr/organization";
 import { useRouter } from "next/router";
@@ -133,11 +215,14 @@ export function ApiTransactionList() {
   const [
     transactionCountAndSumOfAmountAndFee,
     setTransactionCountAndSumOfAmountAndFee,
-  ] = useState<{
-    count: string;
-    amountSum: string;
-    totalFeeSum: string;
-  }>();
+  ] = useState<
+    Array<{
+      paymentMethod: PaymentMethod;
+      count: string;
+      amountSum: string;
+      totalFeeSum: string;
+    }>
+  >([]);
 
   const [currentQueryType, setCurrentQueryType] = useState<string>();
 
@@ -285,8 +370,11 @@ export function ApiTransactionList() {
           const transactionCountAndSumOfAmountAndFeeData =
             await transactionCountAndSumOfAmountAndFeeResponse.json();
 
+          // Ensure data is always an array
           setTransactionCountAndSumOfAmountAndFee(
-            transactionCountAndSumOfAmountAndFeeData
+            Array.isArray(transactionCountAndSumOfAmountAndFeeData)
+              ? transactionCountAndSumOfAmountAndFeeData
+              : []
           );
         }
       }
@@ -336,7 +424,7 @@ export function ApiTransactionList() {
     setAmount("");
     setAmountMin("");
     setAmountMax("");
-    setTransactionCountAndSumOfAmountAndFee(undefined);
+    setTransactionCountAndSumOfAmountAndFee([]);
   };
 
   const handleClearAll = () => {
@@ -793,45 +881,72 @@ export function ApiTransactionList() {
             }
             scrollableTarget="scrollableDiv"
           >
-            <div className="pb-2 flex justify-between flex-wrap gap-4">
+            <div className="pb-2 flex-col gap-4">
               <Label className="whitespace-nowrap font-bold text-md">
                 {currentQueryType === QueryTypes.SEARCH_BY_TRANSACTION_ID
                   ? "單筆查詢結果: 系統訂單號"
                   : "多筆查詢結果"}
               </Label>
               {currentQueryType === QueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS &&
-                transactionCountAndSumOfAmountAndFee && (
-                  <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500 whitespace-nowrap">
-                        總筆數:
-                      </span>
-                      <span className="font-mono whitespace-nowrap">
-                        {transactionCountAndSumOfAmountAndFee?.count || 0}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500 whitespace-nowrap">
-                        總金額:
-                      </span>
-                      <span className="font-mono whitespace-nowrap">
-                        {currencySymbol}{" "}
-                        {formatNumber(
-                          transactionCountAndSumOfAmountAndFee?.amountSum || "0"
-                        )}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500 whitespace-nowrap">
-                        總手續費:
-                      </span>
-                      <span className="font-mono whitespace-nowrap">
-                        {currencySymbol}{" "}
-                        {formatNumber(
-                          transactionCountAndSumOfAmountAndFee?.totalFeeSum ||
-                            "0"
-                        )}
-                      </span>
+                transactionCountAndSumOfAmountAndFee &&
+                transactionCountAndSumOfAmountAndFee.length > 0 && (
+                  <div className="border border-gray-200 bg-white">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50 border-b border-gray-200">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                              貨幣
+                            </th>
+                            <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                              總筆數
+                            </th>
+                            <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                              總金額
+                            </th>
+                            <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                              總手續費
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {groupSummariesByCurrency(
+                            transactionCountAndSumOfAmountAndFee
+                          ).map((summary) => {
+                            const currencySymbol = getCurrencySymbol(
+                              summary.currency
+                            );
+                            return (
+                              <tr
+                                key={summary.currency}
+                                className="hover:bg-gray-50 transition-colors"
+                              >
+                                <td className="px-4 py-3">
+                                  <div className="font-medium text-gray-900">
+                                    {summary.currency}
+                                  </div>
+                                  <div className="text-sm text-gray-500">
+                                    {currencySymbol}
+                                  </div>
+                                </td>
+                                <td className="px-4 py-3 text-right font-mono text-gray-900">
+                                  {formatNumberInInteger(summary.count || "0")}
+                                </td>
+                                <td className="px-4 py-3 text-right font-mono text-gray-900">
+                                  {`${currencySymbol} ${formatNumber(
+                                    summary.amountSum || "0"
+                                  )}`}
+                                </td>
+                                <td className="px-4 py-3 text-right font-mono text-gray-900">
+                                  {`${currencySymbol} ${formatNumber(
+                                    summary.totalFeeSum || "0"
+                                  )}`}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 )}
@@ -955,14 +1070,34 @@ export function ApiTransactionList() {
                       {/* Amount */}
                       <td className="px-4 py-3 text-right">
                         <div className="font-mono text-gray-900 whitespace-nowrap">
-                          ₱ {formatNumber(transaction.amount)}
+                          {(() => {
+                            const currency = getCurrencyForPaymentMethod(
+                              transaction.paymentMethod
+                            );
+                            const currencySymbol = currency
+                              ? getCurrencySymbol(currency)
+                              : "₱";
+                            return `${currencySymbol} ${formatNumber(
+                              transaction.amount
+                            )}`;
+                          })()}
                         </div>
                       </td>
 
                       {/* Total Fee */}
                       <td className="px-4 py-3 text-right">
                         <div className="font-mono text-gray-400 text-sm whitespace-nowrap">
-                          ₱ {formatNumber(transaction.totalFee)}
+                          {(() => {
+                            const currency = getCurrencyForPaymentMethod(
+                              transaction.paymentMethod
+                            );
+                            const currencySymbol = currency
+                              ? getCurrencySymbol(currency)
+                              : "₱";
+                            return `${currencySymbol} ${formatNumber(
+                              transaction.totalFee
+                            )}`;
+                          })()}
                         </div>
                       </td>
 

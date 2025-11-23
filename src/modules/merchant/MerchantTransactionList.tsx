@@ -39,12 +39,97 @@ import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum"
 import { TransactionTypeDisplayNames } from "@/lib/constants/transaction";
 import { cn } from "@/lib/utils/classname-utils";
 import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/utils/timezone";
-import { formatNumber } from "@/lib/utils/number";
+import { formatNumber, formatNumberInInteger } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import moment from "moment-timezone";
 import { useToast } from "@/components/shadcn/ui/use-toast";
+import { Calculator } from "@/lib/utils/calculator";
 
 const PHILIPPINES_TIMEZONE = "Asia/Manila";
+
+// Currency symbol mapping
+const getCurrencySymbol = (currency: string): string => {
+  const symbols: Record<string, string> = {
+    PHP: "₱",
+    USD: "$",
+    CNY: "¥",
+    TWD: "NT$",
+    HKD: "HK$",
+    SGD: "S$",
+    MYR: "RM",
+    IDR: "Rp",
+    THB: "฿",
+    VND: "₫",
+  };
+  return symbols[currency] || currency;
+};
+
+// Get currency for a payment method
+const getCurrencyForPaymentMethod = (
+  paymentMethod: PaymentMethod
+): string | null => {
+  for (const [currency, methods] of Object.entries(
+    PaymentMethodCurrencyMapping
+  )) {
+    if (methods.includes(paymentMethod)) {
+      return currency;
+    }
+  }
+  return null;
+};
+
+// Group payment method summaries by currency
+const groupSummariesByCurrency = (
+  summaries: Array<{
+    paymentMethod: PaymentMethod;
+    count: string;
+    amountSum: string;
+    totalFeeSum: string;
+  }>
+): Array<{
+  currency: string;
+  count: string;
+  amountSum: string;
+  totalFeeSum: string;
+}> => {
+  const currencyMap = new Map<
+    string,
+    { count: string; amountSum: string; totalFeeSum: string }
+  >();
+
+  for (const summary of summaries) {
+    const currency = getCurrencyForPaymentMethod(summary.paymentMethod);
+    if (!currency) continue;
+
+    if (currencyMap.has(currency)) {
+      const existing = currencyMap.get(currency)!;
+      existing.count = (
+        parseInt(existing.count) + parseInt(summary.count || "0")
+      ).toString();
+      existing.amountSum = Calculator.plus(
+        existing.amountSum,
+        summary.amountSum || "0"
+      );
+      existing.totalFeeSum = Calculator.plus(
+        existing.totalFeeSum,
+        summary.totalFeeSum || "0"
+      );
+    } else {
+      currencyMap.set(currency, {
+        count: summary.count || "0",
+        amountSum: summary.amountSum || "0",
+        totalFeeSum: summary.totalFeeSum || "0",
+      });
+    }
+  }
+
+  return Array.from(currencyMap.entries()).map(([currency, data]) => ({
+    currency,
+    count: data.count,
+    amountSum: data.amountSum,
+    totalFeeSum: data.totalFeeSum,
+  }));
+};
 
 const QueryTypes = {
   SEARCH_BY_TRANSACTION_ID: "searchByTransactionId",
@@ -134,10 +219,10 @@ const UnifiedSearchBar = ({
       </div>
     </div>
     <div className="flex justify-center">
-      <Button 
-        onClick={onSearch} 
-        disabled={isLoading} 
-          className="min-w-32 border border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none font-medium rounded-none"
+      <Button
+        onClick={onSearch}
+        disabled={isLoading}
+        className="min-w-32 border border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none font-medium rounded-none"
       >
         <MagnifyingGlassIcon className="h-4 w-4 mr-2" />
         {isLoading ? "搜尋中..." : "搜尋"}
@@ -340,8 +425,8 @@ const FilterPanel = ({
       </div>
 
       <div className="flex justify-end pt-2">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={onClearFilters}
           className="border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
         >
@@ -425,11 +510,31 @@ const TransactionTable = ({
                 </td>
                 <td className="px-6 py-4">
                   <div className="font-medium text-gray-900">
-                    ${formatNumber(transaction.amount)}
+                    {(() => {
+                      const currency = getCurrencyForPaymentMethod(
+                        transaction.paymentMethod
+                      );
+                      const currencySymbol = currency
+                        ? getCurrencySymbol(currency)
+                        : "₱";
+                      return `${currencySymbol} ${formatNumber(
+                        transaction.amount
+                      )}`;
+                    })()}
                   </div>
                   {transaction.totalFee && (
                     <div className="text-sm text-gray-500">
-                      手續費: ${formatNumber(transaction.totalFee)}
+                      {(() => {
+                        const currency = getCurrencyForPaymentMethod(
+                          transaction.paymentMethod
+                        );
+                        const currencySymbol = currency
+                          ? getCurrencySymbol(currency)
+                          : "₱";
+                        return `手續費: ${currencySymbol} ${formatNumber(
+                          transaction.totalFee
+                        )}`;
+                      })()}
                     </div>
                   )}
                 </td>
@@ -467,11 +572,14 @@ export function MerchantTransactionList() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [transactionSummary, setTransactionSummary] = useState<{
-    count: string;
-    amountSum: string;
-    totalFeeSum: string;
-  } | null>(null);
+  const [transactionSummary, setTransactionSummary] = useState<
+    Array<{
+      paymentMethod: PaymentMethod;
+      count: string;
+      amountSum: string;
+      totalFeeSum: string;
+    }>
+  >([]);
   const [nextCursor, setNextCursor] = useState<{
     createdAt: string;
     id: string;
@@ -524,7 +632,8 @@ export function MerchantTransactionList() {
 
       if (response.ok) {
         const data = await response.json();
-        setTransactionSummary(data);
+        // Ensure data is always an array
+        setTransactionSummary(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error("Failed to fetch transaction summary:", error);
@@ -536,7 +645,7 @@ export function MerchantTransactionList() {
       setIsLoading(true);
       setNextCursor(null);
       setTransactions([]);
-      setTransactionSummary(null);
+      setTransactionSummary([]);
     } else {
       setLoadingMore(true);
     }
@@ -646,7 +755,7 @@ export function MerchantTransactionList() {
     setTransactions([]);
     setCurrentQueryType(undefined);
     setNextCursor(null);
-    setTransactionSummary(null);
+    setTransactionSummary([]);
   };
 
   const handleClearFilters = () => {
@@ -748,9 +857,9 @@ export function MerchantTransactionList() {
               訂單管理
             </h1>
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleClearAll}
                 className="border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
               >
@@ -798,57 +907,64 @@ export function MerchantTransactionList() {
           </h2>
 
           {currentQueryType === QueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS &&
-            transactionSummary && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Total Count Card */}
-                <div className="border border-gray-200 bg-white">
-                  <div className="p-4">
-                    <div className="flex items-center gap-3">
-                      <ListBulletIcon className="h-5 w-5 text-gray-500" />
-                      <div>
-                        <p className="text-xs text-gray-600 uppercase tracking-wide">
+            transactionSummary.length > 0 && (
+              <div className="border border-gray-200 bg-white">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                          貨幣
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wide">
                           總筆數
-                        </p>
-                        <p className="text-xl font-semibold text-gray-900 font-mono mt-1">
-                          {transactionSummary.count || "0"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Total Amount Card */}
-                <div className="border border-gray-200 bg-white">
-                  <div className="p-4">
-                    <div className="flex items-center gap-3">
-                      <CurrencyDollarIcon className="h-5 w-5 text-gray-500" />
-                      <div>
-                        <p className="text-xs text-gray-600 uppercase tracking-wide">
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wide">
                           總金額
-                        </p>
-                        <p className="text-xl font-semibold text-gray-900 font-mono mt-1">
-                          ${formatNumber(transactionSummary.amountSum || "0")}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Total Fee Card */}
-                <div className="border border-gray-200 bg-white">
-                  <div className="p-4">
-                    <div className="flex items-center gap-3">
-                      <BanknotesIcon className="h-5 w-5 text-gray-500" />
-                      <div>
-                        <p className="text-xs text-gray-600 uppercase tracking-wide">
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wide">
                           總手續費
-                        </p>
-                        <p className="text-xl font-semibold text-gray-900 font-mono mt-1">
-                          ${formatNumber(transactionSummary.totalFeeSum || "0")}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {groupSummariesByCurrency(transactionSummary).map(
+                        (summary) => {
+                          const currencySymbol = getCurrencySymbol(
+                            summary.currency
+                          );
+                          return (
+                            <tr
+                              key={summary.currency}
+                              className="hover:bg-gray-50 transition-colors"
+                            >
+                              <td className="px-4 py-3">
+                                <div className="font-medium text-gray-900">
+                                  {summary.currency}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {currencySymbol}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 text-right font-mono text-gray-900">
+                                {formatNumberInInteger(summary.count || "0")}
+                              </td>
+                              <td className="px-4 py-3 text-right font-mono text-gray-900">
+                                {`${currencySymbol} ${formatNumber(
+                                  summary.amountSum || "0"
+                                )}`}
+                              </td>
+                              <td className="px-4 py-3 text-right font-mono text-gray-900">
+                                {`${currencySymbol} ${formatNumber(
+                                  summary.totalFeeSum || "0"
+                                )}`}
+                              </td>
+                            </tr>
+                          );
+                        }
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}

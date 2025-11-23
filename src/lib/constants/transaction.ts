@@ -139,6 +139,10 @@ export const DepositPaymentChannelCategories = {
     // // MyPay
     // PaymentChannel.MAYA_MYPAY_DEPOSIT,
   ] as PaymentChannel[],
+  [PaymentMethod.QRPH]: [
+    // APAY
+    PaymentChannel.NATIVE_GCASH_APAY_DEPOSIT,
+  ],
 };
 
 export const WithdrawalPaymentChannelCategories = {
@@ -200,6 +204,10 @@ export const WithdrawalPaymentChannelCategories = {
     // // MyPay
     // PaymentChannel.MAYA_MYPAY_WITHDRAWAL,
   ] as PaymentChannel[],
+  [PaymentMethod.QRPH]: [
+    // APAY
+    PaymentChannel.NATIVE_GCASH_APAY_WITHDRAWAL,
+  ],
 };
 
 export const AllPaymentChannelCategories = {
@@ -211,11 +219,16 @@ export const AllPaymentChannelCategories = {
     ...DepositPaymentChannelCategories[PaymentMethod.MAYA],
     ...WithdrawalPaymentChannelCategories[PaymentMethod.MAYA],
   ],
+  [PaymentMethod.QRPH]: [
+    ...DepositPaymentChannelCategories[PaymentMethod.QRPH],
+    ...WithdrawalPaymentChannelCategories[PaymentMethod.QRPH],
+  ],
 };
 
 export const PaymentMethodDisplayNames = {
   [PaymentMethod.NATIVE_GCASH]: "GCash",
   [PaymentMethod.MAYA]: "Maya",
+  [PaymentMethod.QRPH]: "ThaiPay",
 };
 
 export const PaymentMethodCurrencyMapping: Record<
@@ -223,7 +236,7 @@ export const PaymentMethodCurrencyMapping: Record<
   (PaymentMethod | string)[]
 > = {
   PHP: [PaymentMethod.NATIVE_GCASH, PaymentMethod.MAYA],
-  THB: [],
+  THB: [PaymentMethod.QRPH],
 };
 
 export const PaymentChannelDisplayNames = {
@@ -291,9 +304,9 @@ export const PaymentChannelDisplayNames = {
   [PaymentChannel.NATIVE_GCASH_QRPAY_WITHDRAWAL]:
     "N-GCash: QRPay 100起通道 (withdrawal)",
 
-  // /* APAY */
-  // [PaymentChannel.NATIVE_GCASH_APAY_DEPOSIT]: "N-GCash: APay (deposit)",
-  // [PaymentChannel.NATIVE_GCASH_APAY_WITHDRAWAL]: "N-GCash: APay (withdrawal)",
+  /* APAY */
+  [PaymentChannel.NATIVE_GCASH_APAY_DEPOSIT]: "ThaiPay: APay (deposit)",
+  [PaymentChannel.NATIVE_GCASH_APAY_WITHDRAWAL]: "ThaiPay: APay (withdrawal)",
 
   // /* TKINGPAY */
   // [PaymentChannel.NATIVE_GCASH_TKINGPAY_WITHDRAWAL]:

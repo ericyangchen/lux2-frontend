@@ -11,6 +11,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/ui/select";
@@ -23,7 +24,10 @@ import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { OrganizationSearchBar } from "../common/OrganizationSearchBar";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
-import { PaymentMethodDisplayNames } from "@/lib/constants/transaction";
+import {
+  PaymentMethodDisplayNames,
+  PaymentMethodCurrencyMapping,
+} from "@/lib/constants/transaction";
 import { Textarea } from "@/components/shadcn/ui/textarea";
 import { formatNumber } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
@@ -141,13 +145,33 @@ export function UnfreezeBalance() {
                   <SelectValue placeholder="選擇通道" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectGroup>
-                    {Object.values(PaymentMethod).map((method) => (
-                      <SelectItem key={method} value={method}>
-                        {PaymentMethodDisplayNames[method]}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
+                  {Object.entries(PaymentMethodCurrencyMapping).map(
+                    ([currency, methods]) => {
+                      const validMethods = methods.filter(
+                        (method): method is PaymentMethod =>
+                          Object.values(PaymentMethod).includes(
+                            method as PaymentMethod
+                          )
+                      );
+                      if (validMethods.length === 0) return null;
+                      return (
+                        <SelectGroup key={currency}>
+                          <SelectLabel className="text-xs text-gray-500">
+                            {currency}
+                          </SelectLabel>
+                          {validMethods.map((method) => (
+                            <SelectItem
+                              key={method}
+                              value={method}
+                              className="pl-6"
+                            >
+                              {PaymentMethodDisplayNames[method]}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      );
+                    }
+                  )}
                 </SelectContent>
               </Select>
             </div>

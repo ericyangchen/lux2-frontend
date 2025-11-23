@@ -13,9 +13,13 @@ export interface Balance {
   deletedAt?: string;
 }
 
-export interface SystemBalance {
-  totalAvailableAmount: string;
-  totalDepositUnsettledAmount: string;
-  totalWithdrawalPendingAmount: string;
-  totalFrozenAmount: string;
+// System balances grouped by payment method (returned from API)
+export interface SystemBalanceByPaymentMethod {
+  paymentMethod: PaymentMethod;
+  availableAmount: string;
+  depositUnsettledAmount: string;
+  withdrawalPendingAmount: string;
+  frozenAmount: string;
 }
+
+export type SystemBalancesByPaymentMethod = SystemBalanceByPaymentMethod[];

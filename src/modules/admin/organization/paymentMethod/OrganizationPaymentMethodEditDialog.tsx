@@ -475,7 +475,7 @@ export function OrganizationPaymentMethodEditDialog({
                 const feeEntries = getFeeEntries(setting.feeSettingList);
 
                 return (
-                  <div key={settingIdx} className="border p-4 rounded-md">
+                  <div key={settingIdx} className="border border-gray-200 p-4">
                     {/* Channel Header */}
                     <div className="flex justify-between items-center mb-4">
                       <div className="flex items-center space-x-4">
@@ -612,7 +612,7 @@ export function OrganizationPaymentMethodEditDialog({
                       {feeEntries.map((feeEntry, feeIdx) => (
                         <div
                           key={feeIdx}
-                          className="flex items-center space-x-4 p-3 bg-gray-50 rounded"
+                          className="flex items-center space-x-4 p-3 bg-gray-50"
                         >
                           <div className="w-24">
                             <span className="text-sm font-medium">

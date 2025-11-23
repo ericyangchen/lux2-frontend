@@ -6,8 +6,7 @@ import { useDashboardData } from "./hooks/useDashboardData";
 
 export default function DashboardView() {
   const {
-    systemBalance,
-    totalBalance,
+    currencyBalances,
     systemDailyTransactionCount,
     systemWeeklyTransactionTrends,
     systemPaymentMethodDistribution,
@@ -17,10 +16,7 @@ export default function DashboardView() {
 
   return (
     <div className="space-y-8">
-      <BalanceSection
-        totalBalance={totalBalance}
-        systemBalance={systemBalance}
-      />
+      <BalanceSection currencyBalances={currencyBalances} />
 
       <TransactionSection
         systemDailyTransactionCount={systemDailyTransactionCount}

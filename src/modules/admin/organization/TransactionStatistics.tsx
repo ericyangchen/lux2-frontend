@@ -34,6 +34,8 @@ import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { formatNumber } from "@/lib/utils/number";
 import { useOrganization } from "@/lib/hooks/swr/organization";
 import { useTransactionStatisticsCounts } from "@/lib/hooks/swr/transaction";
+import { getCurrencySymbol } from "@/lib/utils/currency";
+import { PaymentMethodCurrencyMapping } from "@/lib/constants/transaction";
 
 // Color constants
 const COLORS = {
@@ -55,6 +57,47 @@ interface StatisticsData {
   pending: number;
   fail: number;
   amountSum: number;
+}
+
+// Helper function to get payment method from payment channel
+function getPaymentMethodFromChannel(
+  paymentChannel: PaymentChannel,
+  isDeposit: boolean
+): PaymentMethod | null {
+  const categories = isDeposit
+    ? DepositPaymentChannelCategories
+    : WithdrawalPaymentChannelCategories;
+
+  for (const [method, channels] of Object.entries(categories)) {
+    if (channels.includes(paymentChannel)) {
+      return method as PaymentMethod;
+    }
+  }
+  return null;
+}
+
+// Helper function to get currency from payment method
+function getCurrencyForPaymentMethod(
+  paymentMethod: PaymentMethod
+): string | null {
+  for (const [currency, paymentMethods] of Object.entries(
+    PaymentMethodCurrencyMapping
+  )) {
+    if (paymentMethods.includes(paymentMethod)) {
+      return currency;
+    }
+  }
+  return null;
+}
+
+// Helper function to get currency from payment channel
+function getCurrencyFromChannel(
+  paymentChannel: PaymentChannel,
+  isDeposit: boolean
+): string | null {
+  const paymentMethod = getPaymentMethodFromChannel(paymentChannel, isDeposit);
+  if (!paymentMethod) return null;
+  return getCurrencyForPaymentMethod(paymentMethod);
 }
 
 export function TransactionStatistics({
@@ -209,31 +252,82 @@ export function TransactionStatistics({
     return { deposit: depositData, withdrawal: withdrawalData };
   }, [statistics]);
 
-  // Calculate summary totals
-  const summaryTotals = useMemo(() => {
-    const deposit = processedData.deposit.reduce(
-      (acc, item) => ({
-        total: acc.total + item.total,
-        success: acc.success + item.success,
-        pending: acc.pending + item.pending,
-        fail: acc.fail + item.fail,
-        amountSum: acc.amountSum + item.amountSum,
-      }),
-      { total: 0, success: 0, pending: 0, fail: 0, amountSum: 0 }
-    );
+  // Group deposit and withdrawal data by currency
+  const dataByCurrency = useMemo(() => {
+    const depositByCurrency = new Map<
+      string,
+      {
+        total: number;
+        success: number;
+        pending: number;
+        fail: number;
+        amountSum: number;
+      }
+    >();
+    const withdrawalByCurrency = new Map<
+      string,
+      {
+        total: number;
+        success: number;
+        pending: number;
+        fail: number;
+        amountSum: number;
+      }
+    >();
 
-    const withdrawal = processedData.withdrawal.reduce(
-      (acc, item) => ({
-        total: acc.total + item.total,
-        success: acc.success + item.success,
-        pending: acc.pending + item.pending,
-        fail: acc.fail + item.fail,
-        amountSum: acc.amountSum + item.amountSum,
-      }),
-      { total: 0, success: 0, pending: 0, fail: 0, amountSum: 0 }
-    );
+    processedData.deposit.forEach((item) => {
+      const currency = getCurrencyFromChannel(item.paymentChannel, true);
+      if (!currency) return;
 
-    return { deposit, withdrawal };
+      const current = depositByCurrency.get(currency) || {
+        total: 0,
+        success: 0,
+        pending: 0,
+        fail: 0,
+        amountSum: 0,
+      };
+
+      depositByCurrency.set(currency, {
+        total: current.total + item.total,
+        success: current.success + item.success,
+        pending: current.pending + item.pending,
+        fail: current.fail + item.fail,
+        amountSum: current.amountSum + item.amountSum,
+      });
+    });
+
+    processedData.withdrawal.forEach((item) => {
+      const currency = getCurrencyFromChannel(item.paymentChannel, false);
+      if (!currency) return;
+
+      const current = withdrawalByCurrency.get(currency) || {
+        total: 0,
+        success: 0,
+        pending: 0,
+        fail: 0,
+        amountSum: 0,
+      };
+
+      withdrawalByCurrency.set(currency, {
+        total: current.total + item.total,
+        success: current.success + item.success,
+        pending: current.pending + item.pending,
+        fail: current.fail + item.fail,
+        amountSum: current.amountSum + item.amountSum,
+      });
+    });
+
+    // Get all currencies and sort them
+    const allCurrencies = new Set([
+      ...Array.from(depositByCurrency.keys()),
+      ...Array.from(withdrawalByCurrency.keys()),
+    ]);
+
+    return {
+      currencies: Array.from(allCurrencies).sort(),
+      deposit: depositByCurrency,
+      withdrawal: withdrawalByCurrency,
+    };
   }, [processedData]);
 
   // Group data by payment method
@@ -423,21 +517,196 @@ export function TransactionStatistics({
       {/* Statistics Content */}
       {!isLoading && !isError && statistics && (
         <div className="space-y-6">
-          {/* Summary Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Deposit Summary */}
-            <SummaryCard
-              title="代收統計"
-              data={summaryTotals.deposit}
-              color="blue"
-            />
+          {/* Summary Section - Grouped by Currency */}
+          <div className="flex flex-col gap-6">
+            {/* Deposit Summary by Currency */}
+            <Card className="border border-gray-200">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-gray-900">
+                  總代收統計
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {dataByCurrency.currencies.filter((currency) =>
+                  dataByCurrency.deposit.has(currency)
+                ).length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                            幣種
+                          </th>
+                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
+                            總比數
+                          </th>
+                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
+                            成功
+                          </th>
+                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
+                            處理中
+                          </th>
+                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
+                            失敗
+                          </th>
+                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
+                            成功率
+                          </th>
+                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
+                            總金額
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {dataByCurrency.currencies
+                          .filter((currency) =>
+                            dataByCurrency.deposit.has(currency)
+                          )
+                          .map((currency) => {
+                            const data = dataByCurrency.deposit.get(currency)!;
+                            const successRate =
+                              data.total > 0
+                                ? `${(
+                                    (data.success / data.total) *
+                                    100
+                                  ).toFixed(2)}%`
+                                : "None";
+                            const currencySymbol = getCurrencySymbol(currency);
+                            return (
+                              <tr
+                                key={`deposit-${currency}`}
+                                className="hover:bg-gray-50"
+                              >
+                                <td className="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
+                                  {currencySymbol} {currency}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-gray-900 text-right whitespace-nowrap">
+                                  {data.total.toLocaleString()}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-green-600 text-right whitespace-nowrap">
+                                  {data.success.toLocaleString()}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-yellow-600 text-right whitespace-nowrap">
+                                  {data.pending.toLocaleString()}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-red-600 text-right whitespace-nowrap">
+                                  {data.fail.toLocaleString()}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-gray-900 text-right whitespace-nowrap">
+                                  {successRate}
+                                </td>
+                                <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right whitespace-nowrap">
+                                  {currencySymbol}{" "}
+                                  {formatNumber(data.amountSum.toString())}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-gray-500">
+                    無代收數據
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-            {/* Withdrawal Summary */}
-            <SummaryCard
-              title="代付統計"
-              data={summaryTotals.withdrawal}
-              color="green"
-            />
+            {/* Withdrawal Summary by Currency */}
+            <Card className="border border-gray-200">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-gray-900">
+                  總代付統計
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {dataByCurrency.currencies.filter((currency) =>
+                  dataByCurrency.withdrawal.has(currency)
+                ).length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                            幣種
+                          </th>
+                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
+                            總比數
+                          </th>
+                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
+                            成功
+                          </th>
+                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
+                            處理中
+                          </th>
+                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
+                            失敗
+                          </th>
+                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
+                            成功率
+                          </th>
+                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
+                            總金額
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {dataByCurrency.currencies
+                          .filter((currency) =>
+                            dataByCurrency.withdrawal.has(currency)
+                          )
+                          .map((currency) => {
+                            const data =
+                              dataByCurrency.withdrawal.get(currency)!;
+                            const successRate =
+                              data.total > 0
+                                ? `${(
+                                    (data.success / data.total) *
+                                    100
+                                  ).toFixed(2)}%`
+                                : "None";
+                            const currencySymbol = getCurrencySymbol(currency);
+                            return (
+                              <tr
+                                key={`withdrawal-${currency}`}
+                                className="hover:bg-gray-50"
+                              >
+                                <td className="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
+                                  {currencySymbol} {currency}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-gray-900 text-right whitespace-nowrap">
+                                  {data.total.toLocaleString()}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-green-600 text-right whitespace-nowrap">
+                                  {data.success.toLocaleString()}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-yellow-600 text-right whitespace-nowrap">
+                                  {data.pending.toLocaleString()}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-red-600 text-right whitespace-nowrap">
+                                  {data.fail.toLocaleString()}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-gray-900 text-right whitespace-nowrap">
+                                  {successRate}
+                                </td>
+                                <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right whitespace-nowrap">
+                                  {currencySymbol}
+                                  {formatNumber(data.amountSum.toString())}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-gray-500">
+                    無代付數據
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Payment Method Details */}
@@ -472,13 +741,21 @@ interface SummaryCardProps {
     amountSum: number;
   };
   color: "blue" | "green";
+  currency?: string;
 }
 
-function SummaryCard({ title, data, color }: SummaryCardProps) {
+function SummaryCard({
+  title,
+  data,
+  color,
+  currency = "PHP",
+}: SummaryCardProps) {
   const successRate =
     data.total > 0
       ? `${((data.success / data.total) * 100).toFixed(2)}%`
       : "None";
+
+  const currencySymbol = getCurrencySymbol(currency);
 
   return (
     <Card className="hover:shadow-sm transition-shadow border border-gray-200">
@@ -514,7 +791,8 @@ function SummaryCard({ title, data, color }: SummaryCardProps) {
           <div className="text-center p-4 border border-gray-200 rounded-lg bg-gray-50">
             <div className="text-xs text-gray-600 mb-1">總金額</div>
             <div className="text-2xl font-bold text-gray-900">
-              ₱{formatNumber(data.amountSum.toString())}
+              {currencySymbol}
+              {formatNumber(data.amountSum.toString())}
             </div>
           </div>
         </div>

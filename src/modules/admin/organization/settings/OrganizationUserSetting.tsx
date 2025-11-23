@@ -110,7 +110,7 @@ export function OrganizationUserSetting({
             </Label>
             {showOwnerAddButton && (
               <button
-                className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 rounded-md transition-colors duration-200"
+                className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 transition-colors duration-200"
                 onClick={() =>
                   openAddDialog({
                     role: ownerUserRole,
@@ -121,7 +121,7 @@ export function OrganizationUserSetting({
               </button>
             )}
           </div>
-          <div className="shadow ring-1 ring-black ring-opacity-5 rounded-lg mt-2 overflow-x-scroll">
+          <div className="border border-gray-200 mt-2 overflow-x-scroll">
             <table className="divide-y divide-gray-300 w-full">
               <thead className="bg-gray-50">
                 <tr>
@@ -243,7 +243,7 @@ export function OrganizationUserSetting({
             </Label>
             {showStaffAddButton && (
               <button
-                className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 rounded-md transition-colors duration-200"
+                className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 transition-colors duration-200"
                 onClick={() =>
                   openAddDialog({
                     role: staffUserRole,
@@ -254,7 +254,7 @@ export function OrganizationUserSetting({
               </button>
             )}
           </div>
-          <div className="shadow ring-1 ring-black ring-opacity-5 rounded-lg mt-2 overflow-x-scroll">
+          <div className="border border-gray-200 mt-2 overflow-x-scroll">
             <table className="divide-y divide-gray-300 w-full">
               <thead className="bg-gray-50">
                 <tr>

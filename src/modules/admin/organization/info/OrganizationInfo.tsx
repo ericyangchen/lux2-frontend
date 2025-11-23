@@ -44,7 +44,7 @@ export default function OrganizationInfo({
   return (
     <>
       <div className="py-4">
-        <Label className="text-xl font-bold">資訊</Label>
+        <Label className="text-sm font-semibold text-gray-900 uppercase tracking-wide">資訊</Label>
 
         <div className="flex flex-wrap">
           {/* name */}
@@ -118,11 +118,19 @@ export default function OrganizationInfo({
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={openEditDialog}>
+            <Button 
+              variant="outline" 
+              onClick={openEditDialog}
+              className="border-gray-200 bg-white text-gray-900 hover:bg-gray-50"
+            >
               編輯單位
             </Button>
             {!isMerchant && (
-              <Button variant="outline" onClick={openCreateSubOrgDialog}>
+              <Button 
+                variant="outline" 
+                onClick={openCreateSubOrgDialog}
+                className="border-gray-200 bg-white text-gray-900 hover:bg-gray-50"
+              >
                 新增子單位
               </Button>
             )}

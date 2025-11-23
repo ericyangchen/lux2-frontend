@@ -10,6 +10,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/ui/select";
@@ -25,7 +26,10 @@ import { Label } from "@/components/shadcn/ui/label";
 import { OrgType } from "@/lib/enums/organizations/org-type.enum";
 import { OrganizationSearchBar } from "../common/OrganizationSearchBar";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
-import { PaymentMethodDisplayNames } from "@/lib/constants/transaction";
+import {
+  PaymentMethodDisplayNames,
+  PaymentMethodCurrencyMapping,
+} from "@/lib/constants/transaction";
 import { currencySymbol } from "@/lib/constants/common";
 import { formatNumber } from "@/lib/utils/number";
 import { getApplicationCookies } from "@/lib/utils/cookie";
@@ -152,12 +156,34 @@ export function AdminBalanceModificationList() {
             <SelectContent>
               <SelectGroup>
                 <SelectItem value="all">全部</SelectItem>
-                {Object.values(PaymentMethod).map((method) => (
-                  <SelectItem key={method} value={method}>
-                    {PaymentMethodDisplayNames[method]}
-                  </SelectItem>
-                ))}
               </SelectGroup>
+              {Object.entries(PaymentMethodCurrencyMapping).map(
+                ([currency, methods]) => {
+                  const validMethods = methods.filter(
+                    (method): method is PaymentMethod =>
+                      Object.values(PaymentMethod).includes(
+                        method as PaymentMethod
+                      )
+                  );
+                  if (validMethods.length === 0) return null;
+                  return (
+                    <SelectGroup key={currency}>
+                      <SelectLabel className="text-xs text-gray-500">
+                        {currency}
+                      </SelectLabel>
+                      {validMethods.map((method) => (
+                        <SelectItem
+                          key={method}
+                          value={method}
+                          className="pl-6"
+                        >
+                          {PaymentMethodDisplayNames[method]}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  );
+                }
+              )}
             </SelectContent>
           </Select>
         </div>

@@ -2,7 +2,7 @@ import {
   ApiGetOrganizationBalance,
   ApiGetSystemBalances,
 } from "@/lib/apis/balances/get";
-import { Balance, SystemBalance } from "@/lib/types/balance";
+import { Balance, SystemBalancesByPaymentMethod } from "@/lib/types/balance";
 import {
   USD_SYSTEM_BALANCE_REFRESH_INTERVAL,
   USE_BALANCES_REFRESH_INTERVAL,
@@ -87,7 +87,7 @@ export const useSystemBalance = () => {
   );
 
   return {
-    systemBalance: data as SystemBalance,
+    systemBalances: (data as SystemBalancesByPaymentMethod) || [],
     isLoading: isLoading,
     isError: error,
     mutate,

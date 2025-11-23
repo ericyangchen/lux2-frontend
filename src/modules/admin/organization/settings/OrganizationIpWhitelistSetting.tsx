@@ -67,7 +67,7 @@ export function OrganizationIpWhitelistSetting({
             <div className="flex justify-between items-center h-7">
               <Label className="text-md font-semibold px-2">允許登入 IP</Label>
               <button
-                className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 rounded-md transition-colors duration-200"
+                className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 transition-colors duration-200"
                 onClick={() =>
                   openAddDialog({
                     type: IpWhitelistType.LOGIN,
@@ -77,7 +77,7 @@ export function OrganizationIpWhitelistSetting({
                 新增
               </button>
             </div>
-            <div className="shadow ring-1 ring-black ring-opacity-5 rounded-lg mt-2 overflow-x-scroll">
+            <div className="border border-gray-200 mt-2 overflow-x-scroll">
               <table className="w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
                   <tr>
@@ -168,7 +168,7 @@ export function OrganizationIpWhitelistSetting({
             <div className="flex justify-between items-center h-7">
               <Label className="text-md font-semibold px-2">允許代付 IP</Label>
               <button
-                className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 rounded-md transition-colors duration-200"
+                className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 transition-colors duration-200"
                 onClick={() =>
                   openAddDialog({
                     type: IpWhitelistType.WITHDRAWAL,
@@ -178,7 +178,7 @@ export function OrganizationIpWhitelistSetting({
                 新增
               </button>
             </div>
-            <div className="shadow ring-1 ring-black ring-opacity-5 rounded-lg mt-2 overflow-x-scroll">
+            <div className="border border-gray-200 mt-2 overflow-x-scroll">
               <table className="min-w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
                   <tr>
