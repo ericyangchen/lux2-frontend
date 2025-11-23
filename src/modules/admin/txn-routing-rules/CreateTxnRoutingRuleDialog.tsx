@@ -13,7 +13,9 @@ import { Textarea } from "@/components/shadcn/ui/textarea";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/ui/select";
@@ -35,6 +37,7 @@ import {
   DepositPaymentChannelCategories,
   WithdrawalPaymentChannelCategories,
   PaymentMethodDisplayNames,
+  PaymentMethodCurrencyMapping,
 } from "@/lib/constants/transaction";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
@@ -382,11 +385,33 @@ export const CreateTxnRoutingRuleDialog = ({
                 <SelectValue placeholder="選擇通道" />
               </SelectTrigger>
               <SelectContent>
-                {Object.values(PaymentMethod).map((method) => (
-                  <SelectItem key={method} value={method}>
-                    {PaymentMethodDisplayNames[method]}
-                  </SelectItem>
-                ))}
+                {Object.entries(PaymentMethodCurrencyMapping).map(
+                  ([currency, methods]) => {
+                    const validMethods = methods.filter(
+                      (method): method is PaymentMethod =>
+                        Object.values(PaymentMethod).includes(
+                          method as PaymentMethod
+                        )
+                    );
+                    if (validMethods.length === 0) return null;
+                    return (
+                      <SelectGroup key={currency}>
+                        <SelectLabel className="text-xs text-gray-500">
+                          {currency}
+                        </SelectLabel>
+                        {validMethods.map((method) => (
+                          <SelectItem
+                            key={method}
+                            value={method}
+                            className="pl-6"
+                          >
+                            {PaymentMethodDisplayNames[method]}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    );
+                  }
+                )}
               </SelectContent>
             </Select>
             {errors.paymentMethod && (

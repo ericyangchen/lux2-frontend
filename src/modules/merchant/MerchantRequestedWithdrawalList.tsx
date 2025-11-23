@@ -11,6 +11,7 @@ import {
 } from "@/components/shadcn/ui/dialog";
 import {
   PaymentMethodDisplayNames,
+  PaymentMethodCurrencyMapping,
   TransactionStatusDisplayNames,
 } from "@/lib/constants/transaction";
 import {
@@ -18,6 +19,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/ui/select";
@@ -238,12 +240,34 @@ export function MerchantRequestedWithdrawalList({
                 <SelectContent>
                   <SelectGroup>
                     <SelectItem value={"all"}>全部</SelectItem>
-                    {Object.values(PaymentMethod).map((method) => (
-                      <SelectItem key={method} value={method}>
-                        {PaymentMethodDisplayNames[method]}
-                      </SelectItem>
-                    ))}
                   </SelectGroup>
+                  {Object.entries(PaymentMethodCurrencyMapping).map(
+                    ([currency, methods]) => {
+                      const validMethods = methods.filter(
+                        (method): method is PaymentMethod =>
+                          Object.values(PaymentMethod).includes(
+                            method as PaymentMethod
+                          )
+                      );
+                      if (validMethods.length === 0) return null;
+                      return (
+                        <SelectGroup key={currency}>
+                          <SelectLabel className="text-xs text-gray-500">
+                            {currency}
+                          </SelectLabel>
+                          {validMethods.map((method) => (
+                            <SelectItem
+                              key={method}
+                              value={method}
+                              className="pl-6"
+                            >
+                              {PaymentMethodDisplayNames[method]}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      );
+                    }
+                  )}
                 </SelectContent>
               </Select>
             </div>

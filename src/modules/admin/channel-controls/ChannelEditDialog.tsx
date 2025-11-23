@@ -3,6 +3,7 @@ import {
   DepositPaymentChannelCategories,
   PaymentChannelDisplayNames,
   PaymentMethodDisplayNames,
+  PaymentMethodCurrencyMapping,
   TransactionTypeDisplayNames,
   WithdrawalAccountTypeDisplayNames,
   WithdrawalPaymentChannelCategories,
@@ -20,6 +21,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/ui/select";
@@ -438,15 +440,33 @@ export function ChannelEditDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectGroup>
-                    {Object.values(PaymentMethod).map((paymentMethod) => {
-                      return (
-                        <SelectItem key={paymentMethod} value={paymentMethod}>
-                          {PaymentMethodDisplayNames[paymentMethod]}
-                        </SelectItem>
+                  {Object.entries(PaymentMethodCurrencyMapping).map(
+                    ([currency, methods]) => {
+                      const validMethods = methods.filter(
+                        (method): method is PaymentMethod =>
+                          Object.values(PaymentMethod).includes(
+                            method as PaymentMethod
+                          )
                       );
-                    })}
-                  </SelectGroup>
+                      if (validMethods.length === 0) return null;
+                      return (
+                        <SelectGroup key={currency}>
+                          <SelectLabel className="text-xs text-gray-500">
+                            {currency}
+                          </SelectLabel>
+                          {validMethods.map((method) => (
+                            <SelectItem
+                              key={method}
+                              value={method}
+                              className="pl-6"
+                            >
+                              {PaymentMethodDisplayNames[method]}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      );
+                    }
+                  )}
                 </SelectContent>
               </Select>
             </div>

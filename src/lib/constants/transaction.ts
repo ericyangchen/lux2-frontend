@@ -139,12 +139,6 @@ export const DepositPaymentChannelCategories = {
     // // MyPay
     // PaymentChannel.MAYA_MYPAY_DEPOSIT,
   ] as PaymentChannel[],
-  [PaymentMethod.QRPH]: [
-    // // BIFU
-    // PaymentChannel.QRPH_BIFU_DEPOSIT,
-    // // IPay
-    // PaymentChannel.QRPH_IPAY_DEPOSIT,
-  ] as PaymentChannel[],
 };
 
 export const WithdrawalPaymentChannelCategories = {
@@ -206,14 +200,6 @@ export const WithdrawalPaymentChannelCategories = {
     // // MyPay
     // PaymentChannel.MAYA_MYPAY_WITHDRAWAL,
   ] as PaymentChannel[],
-  [PaymentMethod.QRPH]: [
-    // // BIFU
-    // PaymentChannel.QRPH_BIFU_BANK_WITHDRAWAL,
-    // // IPay
-    // PaymentChannel.QRPH_IPAY_WITHDRAWAL,
-    // // WorldPay
-    // PaymentChannel.QRPH_WORLDPAY_WITHDRAWAL,
-  ] as PaymentChannel[],
 };
 
 export const AllPaymentChannelCategories = {
@@ -225,16 +211,19 @@ export const AllPaymentChannelCategories = {
     ...DepositPaymentChannelCategories[PaymentMethod.MAYA],
     ...WithdrawalPaymentChannelCategories[PaymentMethod.MAYA],
   ],
-  [PaymentMethod.QRPH]: [
-    ...DepositPaymentChannelCategories[PaymentMethod.QRPH],
-    ...WithdrawalPaymentChannelCategories[PaymentMethod.QRPH],
-  ],
 };
 
 export const PaymentMethodDisplayNames = {
   [PaymentMethod.NATIVE_GCASH]: "GCash",
   [PaymentMethod.MAYA]: "Maya",
-  [PaymentMethod.QRPH]: "QRPH",
+};
+
+export const PaymentMethodCurrencyMapping: Record<
+  string,
+  (PaymentMethod | string)[]
+> = {
+  PHP: [PaymentMethod.NATIVE_GCASH, PaymentMethod.MAYA],
+  THB: [],
 };
 
 export const PaymentChannelDisplayNames = {
@@ -260,12 +249,6 @@ export const PaymentChannelDisplayNames = {
   // [PaymentChannel.MAYA_BIFU_BANK_WITHDRAWAL]:
   //   "Maya: Bifu 100 Bank (withdrawal)",
 
-  // /* QRPH Deposit */
-  // [PaymentChannel.QRPH_BIFU_DEPOSIT]: "QRPH: Bifu 112 (deposit)",
-  // /* QRPH Withdrawal */
-  // [PaymentChannel.QRPH_BIFU_BANK_WITHDRAWAL]:
-  //   "QRPH: Bifu 100 Bank (withdrawal)",
-
   // /**
   //  * IPay
   //  */
@@ -276,15 +259,9 @@ export const PaymentChannelDisplayNames = {
   // /* NATIVE_GCASH Withdrawal */
   // [PaymentChannel.NATIVE_GCASH_IPAY_WITHDRAWAL]: "N-GCash: IPay (withdrawal)",
 
-  // /* QRPH Deposit */
-  // [PaymentChannel.QRPH_IPAY_DEPOSIT]: "QRPH: IPay (deposit)",
-  // /* QRPH Withdrawal */
-  // [PaymentChannel.QRPH_IPAY_WITHDRAWAL]: "QRPH: IPay (withdrawal)",
-
   // /* WorldPay */
   // [PaymentChannel.NATIVE_GCASH_WORLDPAY_WITHDRAWAL]:
   //   "N-GCash: WorldPay (withdrawal)",
-  // [PaymentChannel.QRPH_WORLDPAY_WITHDRAWAL]: "QRPH: WorldPay (withdrawal)",
   // [PaymentChannel.MAYA_WORLDPAY_WITHDRAWAL]: "Maya: WorldPay (withdrawal)",
 
   /* DaliPay */

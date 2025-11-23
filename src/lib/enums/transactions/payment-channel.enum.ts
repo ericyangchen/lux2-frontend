@@ -11,11 +11,6 @@ export enum PaymentChannel {
   // /* NATIVE_GCASH Withdrawal */
   // NATIVE_GCASH_BIFU_BANK = 'NATIVE_GCASH_BIFU_BANK', // 100
 
-  // /* QRPH Deposit */
-  // QRPH_BIFU_DEPOSIT = 'QRPH_BIFU_DEPOSIT', // 112
-  // /* QRPH Withdrawal */
-  // QRPH_BIFU_BANK_WITHDRAWAL = 'QRPH_BIFU_BANK_WITHDRAWAL', // 100
-
   // /* MAYA Deposit */
   // MAYA_BIFU_DEPOSIT = 'MAYA_BIFU_DEPOSIT', // 107
   // /* MAYA Withdrawal */
@@ -30,18 +25,11 @@ export enum PaymentChannel {
   // /* NATIVE_GCASH Withdrawal */
   // NATIVE_GCASH_IPAY_WITHDRAWAL = 'NATIVE_GCASH_IPAY_WITHDRAWAL',
 
-  // /* QRPH Deposit */
-  // QRPH_IPAY_DEPOSIT = 'QRPH_IPAY_DEPOSIT',
-  // /* QRPH Withdrawal */
-  // QRPH_IPAY_WITHDRAWAL = 'QRPH_IPAY_WITHDRAWAL',
-
   // /*
   //  * WorldPay
   //  */
   // /* NATIVE_GCASH Withdrawal */
   // NATIVE_GCASH_WORLDPAY_WITHDRAWAL = 'NATIVE_GCASH_WORLDPAY_WITHDRAWAL',
-  // /* QRPH Withdrawal */
-  // QRPH_WORLDPAY_WITHDRAWAL = 'QRPH_WORLDPAY_WITHDRAWAL',
   // /* MAYA Withdrawal */
   // MAYA_WORLDPAY_WITHDRAWAL = 'MAYA_WORLDPAY_WITHDRAWAL',
 

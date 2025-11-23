@@ -3,6 +3,7 @@ import {
   DepositPaymentChannelCategories,
   PaymentChannelDisplayNames,
   PaymentMethodDisplayNames,
+  PaymentMethodCurrencyMapping,
   TransactionTypeDisplayNames,
   WithdrawalAccountTypeDisplayNames,
   WithdrawalPaymentChannelCategories,
@@ -20,6 +21,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/ui/select";
@@ -335,21 +337,41 @@ export function ChannelAddDialog({
                   <SelectValue placeholder="選擇通道" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectGroup>
-                    {availablePaymentMethods.length > 0 ? (
-                      availablePaymentMethods.map((paymentMethod) => {
-                        return (
-                          <SelectItem key={paymentMethod} value={paymentMethod}>
-                            {PaymentMethodDisplayNames[paymentMethod]}
-                          </SelectItem>
+                  {availablePaymentMethods.length > 0 ? (
+                    Object.entries(PaymentMethodCurrencyMapping).map(
+                      ([currency, methods]) => {
+                        const validMethods = methods.filter(
+                          (method): method is PaymentMethod =>
+                            Object.values(PaymentMethod).includes(
+                              method as PaymentMethod
+                            ) && availablePaymentMethods.includes(method)
                         );
-                      })
-                    ) : (
+                        if (validMethods.length === 0) return null;
+                        return (
+                          <SelectGroup key={currency}>
+                            <SelectLabel className="text-xs text-gray-500">
+                              {currency}
+                            </SelectLabel>
+                            {validMethods.map((method) => (
+                              <SelectItem
+                                key={method}
+                                value={method}
+                                className="pl-6"
+                              >
+                                {PaymentMethodDisplayNames[method]}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        );
+                      }
+                    )
+                  ) : (
+                    <SelectGroup>
                       <SelectItem value="" disabled>
                         所有通道都已配置
                       </SelectItem>
-                    )}
-                  </SelectGroup>
+                    </SelectGroup>
+                  )}
                 </SelectContent>
               </Select>
             </div>

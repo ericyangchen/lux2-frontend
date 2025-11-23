@@ -4,7 +4,4 @@ export enum PaymentMethod {
 
   // MAYA
   MAYA = "MAYA",
-
-  // QRPH
-  QRPH = "QRPH",
 }

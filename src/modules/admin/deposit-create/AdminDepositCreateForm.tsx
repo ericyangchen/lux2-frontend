@@ -1,7 +1,9 @@
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/ui/select";
@@ -14,6 +16,10 @@ import { Label } from "@/components/shadcn/ui/label";
 import { OrgType } from "@/lib/enums/organizations/org-type.enum";
 import { OrganizationSearchBar } from "@/modules/admin/common/OrganizationSearchBar";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
+import {
+  PaymentMethodDisplayNames,
+  PaymentMethodCurrencyMapping,
+} from "@/lib/constants/transaction";
 import { Textarea } from "@/components/shadcn/ui/textarea";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 
@@ -73,11 +79,33 @@ export function AdminDepositCreateForm({
             <SelectValue placeholder="Select payment method" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={PaymentMethod.NATIVE_GCASH}>
-              Native GCash
-            </SelectItem>
-            <SelectItem value={PaymentMethod.MAYA}>Maya</SelectItem>
-            <SelectItem value={PaymentMethod.QRPH}>QRPH</SelectItem>
+            {Object.entries(PaymentMethodCurrencyMapping).map(
+              ([currency, methods]) => {
+                const validMethods = methods.filter(
+                  (method): method is PaymentMethod =>
+                    Object.values(PaymentMethod).includes(
+                      method as PaymentMethod
+                    )
+                );
+                if (validMethods.length === 0) return null;
+                return (
+                  <SelectGroup key={currency}>
+                    <SelectLabel className="text-xs text-gray-500">
+                      {currency}
+                    </SelectLabel>
+                    {validMethods.map((method) => (
+                      <SelectItem
+                        key={method}
+                        value={method}
+                        className="pl-6"
+                      >
+                        {PaymentMethodDisplayNames[method]}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                );
+              }
+            )}
           </SelectContent>
         </Select>
       </div>
