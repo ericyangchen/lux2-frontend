@@ -365,13 +365,7 @@ export function ChannelAddDialog({
                         );
                       }
                     )
-                  ) : (
-                    <SelectGroup>
-                      <SelectItem value="" disabled>
-                        所有通道都已配置
-                      </SelectItem>
-                    </SelectGroup>
-                  )}
+                  ) : null}
                 </SelectContent>
               </Select>
             </div>

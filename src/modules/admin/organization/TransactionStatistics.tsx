@@ -846,6 +846,10 @@ function PaymentMethodSection({
   paymentMethod,
   data,
 }: PaymentMethodSectionProps) {
+  // Get currency for this payment method
+  const currency = getCurrencyForPaymentMethod(paymentMethod) || "PHP";
+  const currencySymbol = getCurrencySymbol(currency);
+
   // Calculate totals for deposit and withdrawal
   const depositTotals = data.deposit.reduce(
     (acc, item) => ({
@@ -918,7 +922,8 @@ function PaymentMethodSection({
               <div className="text-center p-3 border border-gray-200 rounded-lg bg-gray-50">
                 <div className="text-xs text-gray-600 mb-1">總金額</div>
                 <div className="text-xl font-bold text-gray-900">
-                  ₱{formatNumber(depositTotals.amountSum.toString())}
+                  {currencySymbol}
+                  {formatNumber(depositTotals.amountSum.toString())}
                 </div>
               </div>
             </div>
@@ -996,7 +1001,8 @@ function PaymentMethodSection({
               <div className="text-center p-3 border border-gray-200 rounded-lg bg-gray-50">
                 <div className="text-xs text-gray-600 mb-1">總金額</div>
                 <div className="text-xl font-bold text-gray-900">
-                  ₱{formatNumber(withdrawalTotals.amountSum.toString())}
+                  {currencySymbol}
+                  {formatNumber(withdrawalTotals.amountSum.toString())}
                 </div>
               </div>
             </div>
@@ -1048,7 +1054,11 @@ function PaymentMethodSection({
               </div>
               <div className="space-y-3">
                 {data.deposit.map((item) => (
-                  <ChannelDetailRow key={item.paymentChannel} data={item} />
+                  <ChannelDetailRow
+                    key={item.paymentChannel}
+                    data={item}
+                    currency={currency}
+                  />
                 ))}
               </div>
             </div>
@@ -1064,7 +1074,11 @@ function PaymentMethodSection({
               </div>
               <div className="space-y-3">
                 {data.withdrawal.map((item) => (
-                  <ChannelDetailRow key={item.paymentChannel} data={item} />
+                  <ChannelDetailRow
+                    key={item.paymentChannel}
+                    data={item}
+                    currency={currency}
+                  />
                 ))}
               </div>
             </div>
@@ -1077,13 +1091,16 @@ function PaymentMethodSection({
 
 interface ChannelDetailRowProps {
   data: StatisticsData;
+  currency: string;
 }
 
-function ChannelDetailRow({ data }: ChannelDetailRowProps) {
+function ChannelDetailRow({ data, currency }: ChannelDetailRowProps) {
   const successRate =
     data.total > 0
       ? `${((data.success / data.total) * 100).toFixed(2)}%`
       : "None";
+
+  const currencySymbol = getCurrencySymbol(currency);
 
   return (
     <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow flex-wrap">
@@ -1135,9 +1152,10 @@ function ChannelDetailRow({ data }: ChannelDetailRowProps) {
         <div className="text-xs text-gray-600">總金額</div>
         <div
           className="text-sm font-bold text-gray-900 truncate"
-          title={`₱${formatNumber(data.amountSum.toString())}`}
+          title={`${currencySymbol}${formatNumber(data.amountSum.toString())}`}
         >
-          ₱{formatNumber(data.amountSum.toString())}
+          {currencySymbol}
+          {formatNumber(data.amountSum.toString())}
         </div>
       </div>
 
