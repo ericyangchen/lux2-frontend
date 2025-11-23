@@ -205,7 +205,7 @@ export default function ChannelListTable({
           <div className="flex justify-between items-center h-7">
             <div className="flex items-center">
               <span className="text-sm font-medium text-gray-700">
-                支付類型: {paymentMethodConfigurations.length} (上游渠道:{" "}
+                通道: {paymentMethodConfigurations.length} (上游:{" "}
                 {paymentMethodConfigurations.reduce(
                   (total, config) => total + config.channels.length,
                   0
@@ -376,7 +376,7 @@ export default function ChannelListTable({
 
             {paymentMethodConfigurations.length === 0 && (
               <div className="text-center py-8 text-gray-500">
-                沒有上游渠道設定
+                沒有上游設定
               </div>
             )}
           </div>

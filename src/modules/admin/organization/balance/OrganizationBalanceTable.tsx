@@ -20,7 +20,7 @@ export default function OrganizationBalanceTable({
                     scope="col"
                     className="text-left px-3 py-3.5 text-sm font-semibold text-gray-900 pl-4 sm:pl-6"
                   >
-                    支付類型
+                    通道
                   </th>
                   <th
                     scope="col"

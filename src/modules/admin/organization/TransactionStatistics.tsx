@@ -765,7 +765,7 @@ function PaymentMethodSection({
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <h5 className="text-lg font-semibold text-gray-900">
-                  代收渠道詳情
+                  代收上游詳情
                 </h5>
               </div>
               <div className="space-y-3">
@@ -781,7 +781,7 @@ function PaymentMethodSection({
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <h5 className="text-lg font-semibold text-gray-900">
-                  代付渠道詳情
+                  代付上游詳情
                 </h5>
               </div>
               <div className="space-y-3">

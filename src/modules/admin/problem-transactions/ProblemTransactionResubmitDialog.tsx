@@ -44,8 +44,8 @@ export function ProblemTransactionResubmitDialog({
   const handleResubmit = async () => {
     if (!selectedPaymentChannel) {
       toast({
-        title: "請選擇支付渠道",
-        description: "請先選擇新的支付渠道",
+        title: "請選擇上游",
+        description: "請先選擇新的上游",
         variant: "destructive",
       });
       return;
@@ -127,8 +127,8 @@ export function ProblemTransactionResubmitDialog({
               ⚠️ 重要提醒
             </Label>
             <div className="text-xs text-yellow-700 mt-1">
-              <div>• 重新提交將使用新的上游渠道處理這些交易</div>
-              <div>• 請確保所選交易都具有相同的支付類型</div>
+              <div>• 重新提交將使用新的上游處理這些交易</div>
+              <div>• 請確保所選交易都具有相同的通道</div>
               <div>• 操作完成後交易狀態將會更新</div>
             </div>
           </div>
@@ -136,11 +136,11 @@ export function ProblemTransactionResubmitDialog({
           {/* Payment Channel Selection */}
           <div className="flex flex-col gap-4">
             <Label className="whitespace-nowrap font-bold text-lg">
-              選擇新的上游渠道
+              選擇新的上游
             </Label>
 
             <div className="flex flex-col gap-2">
-              <Label className="text-sm">上游渠道 *</Label>
+              <Label className="text-sm">上游 *</Label>
               <Select
                 value={selectedPaymentChannel}
                 onValueChange={(value) =>
@@ -148,7 +148,7 @@ export function ProblemTransactionResubmitDialog({
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="請選擇上游渠道" />
+                  <SelectValue placeholder="請選擇上游" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>

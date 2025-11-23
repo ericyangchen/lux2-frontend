@@ -299,7 +299,7 @@ export function ForceModifyTransactionView() {
               </div>
               <div>
                 <Label className="text-sm font-medium text-gray-500">
-                  支付類型
+                  通道
                 </Label>
                 <p>{PaymentMethodDisplayNames[transaction.paymentMethod]}</p>
               </div>

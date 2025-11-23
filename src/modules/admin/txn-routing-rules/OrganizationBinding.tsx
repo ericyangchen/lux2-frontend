@@ -249,7 +249,7 @@ export const OrganizationBinding = ({
 
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="font-medium text-gray-700">支付方式:</span>
+                <span className="font-medium text-gray-700">通道:</span>
                 <span className="ml-2">
                   {PaymentMethodDisplayNames[selectedRule.paymentMethod]}
                 </span>
@@ -313,7 +313,7 @@ export const OrganizationBinding = ({
                           <thead>
                             <tr className="border-b border-gray-200">
                               <th className="text-left py-2 px-3 font-medium text-gray-700">
-                                支付渠道
+                                上游
                               </th>
                               <th className="text-right py-2 px-3 font-medium text-gray-700">
                                 百分比
@@ -343,7 +343,7 @@ export const OrganizationBinding = ({
                       </div>
                     ) : (
                       <div className="text-gray-500 text-sm py-2">
-                        暫無支付渠道配置
+                        暫無上游配置
                       </div>
                     )}
                   </div>

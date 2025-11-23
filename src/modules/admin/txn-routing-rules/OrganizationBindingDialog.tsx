@@ -182,7 +182,7 @@ export const OrganizationBindingDialog = ({
               <div className="text-sm text-gray-500 space-y-1">
                 <div className="flex items-center gap-2">
                   <span>
-                    支付方式:{" "}
+                    通道:{" "}
                     {PaymentMethodDisplayNames[selectedRule.paymentMethod]}
                   </span>
                   <span>
@@ -224,7 +224,7 @@ export const OrganizationBindingDialog = ({
                           <thead>
                             <tr className="border-b border-gray-200">
                               <th className="text-left py-1 px-1 font-medium text-gray-700">
-                                渠道
+                                上游
                               </th>
                               <th className="text-right py-1 px-1 font-medium text-gray-700">
                                 百分比
@@ -253,7 +253,7 @@ export const OrganizationBindingDialog = ({
                         </table>
                       ) : (
                         <div className="text-gray-500 text-xs py-1">
-                          暫無支付渠道配置
+                          暫無上游配置
                         </div>
                       )}
                     </div>

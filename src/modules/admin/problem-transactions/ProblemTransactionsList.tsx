@@ -228,7 +228,7 @@ export function ProblemTransactionsList() {
 
           {/* paymentMethod */}
           <div className="flex items-center gap-4">
-            <Label className="whitespace-nowrap">支付類型</Label>
+            <Label className="whitespace-nowrap">通道</Label>
             <div className="w-fit min-w-[150px]">
               <Select
                 value={paymentMethod}
@@ -448,7 +448,7 @@ export function ProblemTransactionsList() {
                       類別
                     </th>
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      支付類型
+                      通道
                     </th>
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
                       代付到

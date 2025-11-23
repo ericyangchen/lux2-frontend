@@ -415,14 +415,14 @@ export function OrganizationPaymentMethodEditDialog({
       <DialogContent className="max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            編輯{type && TransactionTypeDisplayNames[type]}支付類型
+            編輯{type && TransactionTypeDisplayNames[type]}通道
           </DialogTitle>
           <DialogDescription>編輯一個通道</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-4">
           <div className="flex items-center gap-4">
-            <Label className="whitespace-nowrap w-[70px]">支付類型</Label>
+            <Label className="whitespace-nowrap w-[70px]">通道</Label>
             <div className="w-fit min-w-[150px]">
               <Select defaultValue={paymentMethod} disabled>
                 <SelectTrigger>
@@ -452,7 +452,7 @@ export function OrganizationPaymentMethodEditDialog({
 
         <div className="py-4 flex flex-col">
           <Label className="whitespace-nowrap w-[70px] pb-3">
-            {type && TransactionTypeDisplayNames[type]}上游渠道設定
+            {type && TransactionTypeDisplayNames[type]}上游設定
           </Label>
 
           {paymentMethod && (
@@ -687,7 +687,7 @@ export function OrganizationPaymentMethodEditDialog({
                     onClick={addNewChannel}
                     className="text-sm text-blue-600 hover:text-blue-900"
                   >
-                    + 新增上游渠道
+                    + 新增上游
                   </button>
                 </div>
               )}

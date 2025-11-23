@@ -295,7 +295,7 @@ export const OrganizationRoutingRules = ({
                           )}
                           <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
                             <span>
-                              支付方式:{" "}
+                              通道:{" "}
                               {PaymentMethodDisplayNames[rule.paymentMethod] ||
                                 rule.paymentMethod}
                             </span>

@@ -29,14 +29,14 @@ export function OrganizationDetail({
       <OrganizationBalance organizationId={organizationId} />
       {organization.type === OrgType.ADMIN ? (
         <div className="py-8">
-          <Label className="text-xl font-bold">支付類型設定</Label>
+          <Label className="text-xl font-bold">通道設定</Label>
 
           <div className="px-0 sm:px-4 py-4 flex gap-2 items-center">
             <span>總代理請至</span>
             <Link href={`/admin/channel-controls`}>
-              <Button variant="outline">上游渠道</Button>
+              <Button variant="outline">上游設定</Button>
             </Link>
-            <span>設定</span>
+            <span>修改</span>
           </div>
         </div>
       ) : (

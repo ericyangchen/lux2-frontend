@@ -139,7 +139,7 @@ export function AdminBalanceModificationList() {
 
         {/* Payment Method */}
         <div className="space-y-2 max-w-xs">
-          <Label className="font-medium">支付方式</Label>
+          <Label className="font-medium">通道</Label>
           <Select
             value={paymentMethod}
             onValueChange={(value) =>
@@ -147,7 +147,7 @@ export function AdminBalanceModificationList() {
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="選擇支付方式" />
+              <SelectValue placeholder="選擇通道" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
@@ -224,7 +224,7 @@ export function AdminBalanceModificationList() {
                       操作類型
                     </th>
                     <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
-                      支付方式
+                      通道
                     </th>
                     <th className="px-4 py-3 text-right text-sm font-medium text-gray-700">
                       可用餘額變動

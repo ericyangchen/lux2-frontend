@@ -97,7 +97,7 @@ export const CreateTxnRoutingRuleDialog = ({
     return [];
   };
 
-  // 根據帳戶類型類別和支付方式獲取可用的支付渠道
+  // 根據帳戶類型類別和通道獲取可用的上游
   const getAvailablePaymentChannels = () => {
     if (!selectedPaymentMethod) return [];
 
@@ -126,7 +126,7 @@ export const CreateTxnRoutingRuleDialog = ({
     }
 
     if (!selectedPaymentMethod) {
-      newErrors.paymentMethod = "請選擇支付方式";
+      newErrors.paymentMethod = "請選擇通道";
     }
 
     // 驗證金額範圍 - 必須同時設置或都不設置
@@ -169,8 +169,7 @@ export const CreateTxnRoutingRuleDialog = ({
         }
 
         if (Object.keys(rule.percentage).length === 0) {
-          newErrors[`routingRule.${index}.percentage`] =
-            "至少需要選擇一個支付渠道";
+          newErrors[`routingRule.${index}.percentage`] = "至少需要選擇一個上游";
         }
       });
     }
@@ -328,7 +327,7 @@ export const CreateTxnRoutingRuleDialog = ({
     }));
   };
 
-  // 當支付方式改變時，重置路由規則
+  // 當通道改變時，重置路由規則
   const handlePaymentMethodChange = (value: string) => {
     const paymentMethod = value as PaymentMethod;
     setSelectedPaymentMethod(paymentMethod);
@@ -372,15 +371,15 @@ export const CreateTxnRoutingRuleDialog = ({
             </Select>
           </div>
 
-          {/* 支付方式選擇 */}
+          {/* 通道選擇 */}
           <div className="space-y-2">
-            <Label htmlFor="paymentMethod">支付方式 *</Label>
+            <Label htmlFor="paymentMethod">通道 *</Label>
             <Select
               value={selectedPaymentMethod}
               onValueChange={handlePaymentMethodChange}
             >
               <SelectTrigger>
-                <SelectValue placeholder="選擇支付方式" />
+                <SelectValue placeholder="選擇通道" />
               </SelectTrigger>
               <SelectContent>
                 {Object.values(PaymentMethod).map((method) => (
@@ -604,9 +603,9 @@ export const CreateTxnRoutingRuleDialog = ({
                     </div>
 
                     <div className="space-y-2">
-                      <Label>支付渠道分配</Label>
+                      <Label>上游分配</Label>
                       <div className="space-y-2">
-                        {/* 已選擇的支付渠道 */}
+                        {/* 已選擇的上游 */}
                         {Object.entries(rule.percentage).map(
                           ([channel, percentage]) => (
                             <div
@@ -650,7 +649,7 @@ export const CreateTxnRoutingRuleDialog = ({
                           )
                         )}
 
-                        {/* 新增支付渠道 */}
+                        {/* 新增上游 */}
                         <div className="flex items-center gap-2">
                           <Select
                             key={`${ruleIndex}-${
@@ -671,7 +670,7 @@ export const CreateTxnRoutingRuleDialog = ({
                             disabled={!selectedPaymentMethod}
                           >
                             <SelectTrigger className="flex-1">
-                              <SelectValue placeholder="選擇支付渠道" />
+                              <SelectValue placeholder="選擇上游" />
                             </SelectTrigger>
                             <SelectContent>
                               {availablePaymentChannels

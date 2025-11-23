@@ -30,7 +30,7 @@ export default function OrganizationPaymentMethodSetting({
 
   return (
     <div className="py-8">
-      <Label className="text-xl font-bold">支付類型設定</Label>
+      <Label className="text-xl font-bold">通道設定</Label>
 
       <div className="px-0 sm:px-4 py-4">
         <div className="sm:hidden">

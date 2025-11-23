@@ -277,14 +277,14 @@ export function OrganizationPaymentMethodAddDialog({
       <DialogContent className="max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            新增{type && TransactionTypeDisplayNames[type]}支付類型
+            新增{type && TransactionTypeDisplayNames[type]}通道
           </DialogTitle>
           <DialogDescription>新增一個通道</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-4">
           <div className="flex items-center gap-4">
-            <Label className="whitespace-nowrap w-[70px]">支付類型</Label>
+            <Label className="whitespace-nowrap w-[70px]">通道</Label>
             <div className="w-fit min-w-[150px]">
               <Select
                 value={paymentMethod}
@@ -309,7 +309,7 @@ export function OrganizationPaymentMethodAddDialog({
                       })
                     ) : (
                       <SelectItem value="" disabled>
-                        所有支付類型都已配置
+                        所有通道都已配置
                       </SelectItem>
                     )}
                   </SelectGroup>
@@ -321,13 +321,13 @@ export function OrganizationPaymentMethodAddDialog({
 
         {availablePaymentMethods.length === 0 ? (
           <div className="py-8 text-center text-gray-500">
-            <p>所有支付類型都已配置完成</p>
+            <p>所有通道都已配置完成</p>
             <p className="text-sm mt-2">如需新增通道，請使用編輯功能</p>
           </div>
         ) : (
           <div className="py-4 flex flex-col">
             <Label className="whitespace-nowrap w-[70px] pb-3">
-              {type && TransactionTypeDisplayNames[type]}上游渠道設定
+              {type && TransactionTypeDisplayNames[type]}上游設定
             </Label>
 
             {paymentMethod && (
@@ -546,7 +546,7 @@ export function OrganizationPaymentMethodAddDialog({
                       }}
                       className="text-sm text-blue-600 hover:text-blue-900"
                     >
-                      + 新增上游渠道
+                      + 新增上游
                     </button>
                   </div>
                 )}

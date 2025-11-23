@@ -286,7 +286,7 @@ export function MerchantWithdrawalRequestList() {
 
           {/* paymentMethod */}
           <div className="flex items-center gap-4">
-            <Label className="whitespace-nowrap">支付類型</Label>
+            <Label className="whitespace-nowrap">通道</Label>
             <div className="w-fit min-w-[150px]">
               <Select
                 value={paymentMethod}
@@ -477,7 +477,7 @@ export function MerchantWithdrawalRequestList() {
                       類別
                     </th>
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      支付類型
+                      通道
                     </th>
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
                       商戶
@@ -687,7 +687,7 @@ export function MerchantWithdrawalRequestList() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">支付類型:</span>
+                    <span className="text-sm text-gray-600">通道:</span>
                     <span className="text-sm">
                       {
                         PaymentMethodDisplayNames[

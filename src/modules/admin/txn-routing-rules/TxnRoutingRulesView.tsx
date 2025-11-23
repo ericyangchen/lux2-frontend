@@ -115,14 +115,14 @@ export const TxnRoutingRulesView = () => {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "未知錯誤";
 
-      // 檢查是否為支付渠道驗證錯誤
+      // 檢查是否為上游驗證錯誤
       if (
         errorMessage.includes("payment channels") ||
         errorMessage.includes("PaymentChannel")
       ) {
         toast({
           title: "創建失敗",
-          description: "支付渠道與帳戶類型不匹配，請檢查設置",
+          description: "上游與帳戶類型不匹配，請檢查設置",
           variant: "destructive",
         });
       } else {

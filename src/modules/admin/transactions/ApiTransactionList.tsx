@@ -492,7 +492,7 @@ export function ApiTransactionList() {
             </div>
             {/* paymentMethod */}
             <div className="flex items-center gap-4">
-              <Label className="whitespace-nowrap">支付類型</Label>
+              <Label className="whitespace-nowrap">通道</Label>
               <div className="w-fit min-w-[150px]">
                 <Select
                   defaultValue={paymentMethod}
@@ -521,7 +521,7 @@ export function ApiTransactionList() {
             </div>
             {/* paymentChannel */}
             <div className="flex items-center gap-4">
-              <Label className="whitespace-nowrap">上游渠道</Label>
+              <Label className="whitespace-nowrap">上游</Label>
               <div className="w-fit min-w-[150px]">
                 <Select
                   defaultValue={paymentChannel}
@@ -831,10 +831,10 @@ export function ApiTransactionList() {
                       類別
                     </th>
                     <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                      支付類型
+                      通道
                     </th>
                     <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                      上游渠道
+                      上游
                     </th>
                     <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
                       金額

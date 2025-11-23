@@ -40,15 +40,13 @@ export const PaymentChannelSection = ({
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          支付類型及上游渠道
-        </h2>
-        <p className="text-gray-600">支付類型資金分布與渠道交易量分析</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">通道及上游</h2>
+        <p className="text-gray-600">通道資金分布與上游交易量分析</p>
       </div>
 
       <div className="grid grid-cols-1 gap-6">
         {/* Payment Method Distribution */}
-        <ChartCard title="支付類型交易量" subtitle="各支付類型交易量百分比">
+        <ChartCard title="通道交易量" subtitle="各通道交易量百分比">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -102,9 +100,9 @@ export const PaymentChannelSection = ({
         <Card className="bg-white border border-gray-200 shadow-md">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-gray-900">
-              上游渠道績效摘要
+              上游績效摘要
             </CardTitle>
-            <p className="text-sm text-gray-600">上游支付渠道的績效表現</p>
+            <p className="text-sm text-gray-600">上游的績效表現</p>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

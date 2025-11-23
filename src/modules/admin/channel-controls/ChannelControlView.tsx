@@ -11,8 +11,8 @@ enum Tab {
 }
 
 const tabDisplayNames = {
-  [Tab.DepositChannelList]: "代收渠道",
-  [Tab.WithdrawalChannelList]: "代付渠道",
+  [Tab.DepositChannelList]: "代收上游",
+  [Tab.WithdrawalChannelList]: "代付上游",
 };
 
 export function ChannelControlView() {

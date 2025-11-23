@@ -88,7 +88,7 @@ const CustomerServiceSupportInfo = () => {
           className="bg-none border-none cursor-pointer pl-0 flex gap-1"
           onClick={() => {
             // TODO: add telegram customer service account
-            // window.open("https://t.me/LUXBOSS_1");
+            // window.open("https://t.me/");
           }}
         >
           <Image src="/telegram.png" width={16} height={16} alt="" />

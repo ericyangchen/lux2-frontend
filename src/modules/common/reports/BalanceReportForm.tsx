@@ -64,14 +64,14 @@ export function BalanceReportForm({
         {/* Payment Method */}
         <div className="space-y-2 min-w-[200px] ">
           <Label className="font-medium">
-            支付方式 <span className="text-red-500">*</span>
+            通道 <span className="text-red-500">*</span>
           </Label>
           <Select
             value={paymentMethod}
             onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="選擇支付方式" />
+              <SelectValue placeholder="選擇通道" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>

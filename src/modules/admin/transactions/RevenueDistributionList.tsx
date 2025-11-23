@@ -162,7 +162,7 @@
 //             </div>
 //             {/* paymentMethod */}
 //             <div className="flex items-center gap-4">
-//               <Label className="whitespace-nowrap">支付類型</Label>
+//               <Label className="whitespace-nowrap">通道</Label>
 //               <div className="w-fit min-w-[150px]">
 //                 <Select
 //                   defaultValue={paymentMethod}
@@ -247,7 +247,7 @@
 //                       單位 ID
 //                     </th>
 //                     <th className="px-3 py-2 text-center text-sm font-semibold text-gray-900">
-//                       支付類型
+//                       通道
 //                     </th>
 //                     <th className="px-3 py-2 text-center text-sm font-semibold text-gray-900">
 //                       系統訂單號

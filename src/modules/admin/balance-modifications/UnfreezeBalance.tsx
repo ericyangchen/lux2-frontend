@@ -128,7 +128,7 @@ export function UnfreezeBalance() {
           {/* paymentMethod */}
           <div className="flex items-center gap-4">
             <Label className="whitespace-nowrap w-[70px]">
-              支付類型<span className="text-red-500">*</span>
+              通道<span className="text-red-500">*</span>
             </Label>
             <div className="w-fit min-w-[200px]">
               <Select
@@ -138,7 +138,7 @@ export function UnfreezeBalance() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="選擇支付類型" />
+                  <SelectValue placeholder="選擇通道" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>

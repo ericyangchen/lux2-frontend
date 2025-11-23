@@ -91,7 +91,7 @@ export function BalanceReportDisplay({
             </p>
           </div>
           <div>
-            <Label className="font-medium text-gray-600">支付方式</Label>
+            <Label className="font-medium text-gray-600">通道</Label>
             <p>{PaymentMethodDisplayNames[report.paymentMethod]}</p>
           </div>
           <div>
