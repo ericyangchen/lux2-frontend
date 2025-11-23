@@ -44,25 +44,9 @@ import { getApplicationCookies } from "@/lib/utils/cookie";
 import moment from "moment-timezone";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 import { Calculator } from "@/lib/utils/calculator";
+import { getCurrencySymbol } from "@/lib/utils/currency";
 
 const PHILIPPINES_TIMEZONE = "Asia/Manila";
-
-// Currency symbol mapping
-const getCurrencySymbol = (currency: string): string => {
-  const symbols: Record<string, string> = {
-    PHP: "₱",
-    USD: "$",
-    CNY: "¥",
-    TWD: "NT$",
-    HKD: "HK$",
-    SGD: "S$",
-    MYR: "RM",
-    IDR: "Rp",
-    THB: "฿",
-    VND: "₫",
-  };
-  return symbols[currency] || currency;
-};
 
 // Get currency for a payment method
 const getCurrencyForPaymentMethod = (

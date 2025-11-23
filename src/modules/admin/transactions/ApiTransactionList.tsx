@@ -51,22 +51,7 @@ import { TransactionInternalStatus } from "@/lib/enums/transactions/transaction-
 import { TransactionStatus } from "@/lib/enums/transactions/transaction-status.enum";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { classNames } from "@/lib/utils/classname-utils";
-// Currency symbol mapping
-const getCurrencySymbol = (currency: string): string => {
-  const symbols: Record<string, string> = {
-    PHP: "₱",
-    USD: "$",
-    CNY: "¥",
-    TWD: "NT$",
-    HKD: "HK$",
-    SGD: "S$",
-    MYR: "RM",
-    IDR: "Rp",
-    THB: "฿",
-    VND: "₫",
-  };
-  return symbols[currency] || currency;
-};
+import { getCurrencySymbol } from "@/lib/utils/currency";
 
 // Get currency for a payment method
 const getCurrencyForPaymentMethod = (

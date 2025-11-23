@@ -41,6 +41,7 @@ import { useOrganizationDailyBalanceSnapshots } from "@/lib/hooks/swr/balance-sn
 import { PaymentMethodCurrencyMapping } from "@/lib/constants/transaction";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { Balance } from "@/lib/types/balance";
+import { getCurrencySymbol } from "@/lib/utils/currency";
 
 // Minimal color palette for business style
 const COLORS = {
@@ -53,23 +54,6 @@ const COLORS = {
 };
 
 const CHART_COLORS = ["#111827", "#374151", "#6b7280", "#9ca3af", "#d1d5db"];
-
-// Currency symbol mapping
-const getCurrencySymbol = (currency: string): string => {
-  const symbols: Record<string, string> = {
-    PHP: "₱",
-    USD: "$",
-    CNY: "¥",
-    TWD: "NT$",
-    HKD: "HK$",
-    SGD: "S$",
-    MYR: "RM",
-    IDR: "Rp",
-    THB: "฿",
-    VND: "₫",
-  };
-  return symbols[currency] || currency;
-};
 
 // Get currency for a payment method
 const getCurrencyForPaymentMethod = (
