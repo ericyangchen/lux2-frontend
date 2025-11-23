@@ -9,10 +9,13 @@ import {
 
 import { Button } from "@/components/shadcn/ui/button";
 import { DatePicker } from "@/components/DatePicker";
+import { MerchantDatePicker } from "@/components/MerchantDatePicker";
 import { Label } from "@/components/shadcn/ui/label";
 import { OrganizationSearchBar } from "@/modules/admin/common/OrganizationSearchBar";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { PaymentMethodDisplayNames } from "@/lib/constants/transaction";
+import { PHILIPPINES_TIMEZONE } from "@/lib/utils/timezone";
+import * as moment from "moment-timezone";
 import { useState } from "react";
 
 interface BalanceReportFormProps {
@@ -45,8 +48,11 @@ export function BalanceReportForm({
     return paymentMethod && date;
   };
 
+  // Check if this is merchant usage (no organization selector)
+  const isMerchant = !showOrganizationSelector;
+  
   return (
-    <div className="bg-white rounded-lg border p-6 space-y-4 w-full">
+    <div className={`bg-white border border-gray-200 p-6 space-y-4 w-full ${isMerchant ? '' : 'rounded-lg'}`}>
       <div className="flex flex-wrap gap-4">
         {/* Organization Selector - Only show for admin */}
         {showOrganizationSelector && setOrganizationId && (
@@ -70,7 +76,7 @@ export function BalanceReportForm({
             value={paymentMethod}
             onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}
           >
-            <SelectTrigger>
+            <SelectTrigger className={isMerchant ? "border-gray-200 focus:ring-gray-900 focus:ring-1 shadow-none rounded-none" : ""}>
               <SelectValue placeholder="選擇通道" />
             </SelectTrigger>
             <SelectContent>
@@ -90,25 +96,46 @@ export function BalanceReportForm({
           <Label className="font-medium">
             日期 <span className="text-red-500">*</span>
           </Label>
-          <DatePicker
-            date={date ? new Date(date) : undefined}
-            setDate={(selectedDate) => {
-              if (selectedDate) {
-                // Format as YYYY-MM-DD in local timezone to avoid UTC conversion issues
-                const year = selectedDate.getFullYear();
-                const month = String(selectedDate.getMonth() + 1).padStart(
-                  2,
-                  "0"
-                );
-                const day = String(selectedDate.getDate()).padStart(2, "0");
-                const formattedDate = `${year}-${month}-${day}`;
-                setDate(formattedDate);
-              } else {
-                setDate("");
+          {isMerchant ? (
+            <MerchantDatePicker
+              date={
+                date
+                  ? moment.tz(date, "YYYY-MM-DD", PHILIPPINES_TIMEZONE).toDate()
+                  : undefined
               }
-            }}
-            placeholder="選擇日期"
-          />
+              setDate={(selectedDate) => {
+                if (selectedDate) {
+                  // Extract date parts from Philippines timezone
+                  const phMoment = moment.tz(selectedDate, PHILIPPINES_TIMEZONE);
+                  const formattedDate = phMoment.format("YYYY-MM-DD");
+                  setDate(formattedDate);
+                } else {
+                  setDate("");
+                }
+              }}
+              placeholder="選擇日期"
+            />
+          ) : (
+            <DatePicker
+              date={date ? new Date(date) : undefined}
+              setDate={(selectedDate) => {
+                if (selectedDate) {
+                  // Format as YYYY-MM-DD in local timezone to avoid UTC conversion issues
+                  const year = selectedDate.getFullYear();
+                  const month = String(selectedDate.getMonth() + 1).padStart(
+                    2,
+                    "0"
+                  );
+                  const day = String(selectedDate.getDate()).padStart(2, "0");
+                  const formattedDate = `${year}-${month}-${day}`;
+                  setDate(formattedDate);
+                } else {
+                  setDate("");
+                }
+              }}
+              placeholder="選擇日期"
+            />
+          )}
         </div>
       </div>
 
@@ -117,7 +144,7 @@ export function BalanceReportForm({
         <Button
           onClick={onGenerateReport}
           disabled={!isFormValid() || isLoading}
-          className="min-w-[120px]"
+          className={`min-w-[120px] ${isMerchant ? 'bg-gray-900 text-white hover:bg-gray-800 shadow-none rounded-none' : ''}`}
         >
           {isLoading ? "生成中..." : "生成報表"}
         </Button>
@@ -126,7 +153,7 @@ export function BalanceReportForm({
           onClick={onExportExcel}
           disabled={!isFormValid() || isLoading}
           variant="outline"
-          className="min-w-[120px]"
+          className={`min-w-[120px] ${isMerchant ? 'border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none' : ''}`}
         >
           {isLoading ? "匯出中..." : "匯出Excel"}
         </Button>

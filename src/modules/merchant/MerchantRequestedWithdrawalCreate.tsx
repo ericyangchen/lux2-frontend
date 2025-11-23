@@ -12,22 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/ui/select";
-import {
-  BanknotesIcon,
-  BuildingLibraryIcon,
-  CreditCardIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  UserIcon,
-  CheckCircleIcon,
-  SparklesIcon,
-} from "@heroicons/react/24/outline";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
 
 import { ApiCreateMerchantRequestedWithdrawal } from "@/lib/apis/txn-merchant-requested-withdrawals/post";
 import { ApplicationError } from "@/lib/error/applicationError";
 import { BANK_NAMES_MAPPING } from "@/lib/constants/bank-names";
 import { Button } from "@/components/shadcn/ui/button";
-import { Calculator } from "@/lib/utils/calculator";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { MerchantRequestedWithdrawalTab } from "./MerchantRequestedWithdrawalView";
@@ -35,17 +25,14 @@ import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { PaymentMethodDisplayNames } from "@/lib/constants/transaction";
 import { TransactionType } from "@/lib/enums/transactions/transaction-type.enum";
 import { getApplicationCookies } from "@/lib/utils/cookie";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
-import { cn } from "@/lib/utils/classname-utils";
 
 export function MerchantRequestedWithdrawalCreate({
   setActiveTab,
 }: {
   setActiveTab: (tab: MerchantRequestedWithdrawalTab) => void;
 }) {
-  const router = useRouter();
   const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -171,32 +158,30 @@ export function MerchantRequestedWithdrawalCreate({
 
   return (
     <div className="max-w-5xl mx-auto">
-      {/* Header with gradient */}
-      <div className="relative overflow-hidden rounded-t-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-8 mb-6 shadow-lg">
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
-              <SparklesIcon className="h-6 w-6 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-white">建立商戶提領請求</h1>
+      {/* Header */}
+      <div className="border border-gray-200 bg-white mb-6">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg font-semibold text-gray-900 uppercase tracking-wide">
+              建立商戶提領請求
+            </h1>
           </div>
-          <p className="text-indigo-100">填寫以下資訊來建立新的提領請求</p>
         </div>
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24"></div>
+        <div className="px-6 py-3">
+          <p className="text-sm text-gray-600">
+            填寫以下資訊來建立新的提領請求
+          </p>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Required Fields Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-indigo-100 overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 px-6 py-4 border-b border-indigo-100">
+        <div className="bg-white border border-gray-200">
+          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
             <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
-              <h2 className="font-semibold text-indigo-900">必填欄位</h2>
-              <span className="text-xs text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full">
-                Required
-              </span>
+              <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+                必填欄位
+              </h2>
             </div>
           </div>
 
@@ -205,9 +190,8 @@ export function MerchantRequestedWithdrawalCreate({
             <div className="space-y-2">
               <Label
                 htmlFor="merchantOrderId"
-                className="text-slate-700 font-medium flex items-center gap-2"
+                className="text-gray-700 font-medium"
               >
-                <CreditCardIcon className="h-4 w-4 text-indigo-500" />
                 商戶訂單號 <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -215,17 +199,13 @@ export function MerchantRequestedWithdrawalCreate({
                 value={merchantOrderId}
                 onChange={(e) => setMerchantOrderId(e.target.value)}
                 placeholder="輸入唯一的商戶訂單號"
-                className="font-mono border-indigo-200 focus:border-indigo-400 focus:ring-indigo-400"
+                className="font-mono border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               />
             </div>
 
             {/* Amount */}
             <div className="space-y-2">
-              <Label
-                htmlFor="amount"
-                className="text-slate-700 font-medium flex items-center gap-2"
-              >
-                <BanknotesIcon className="h-4 w-4 text-indigo-500" />
+              <Label htmlFor="amount" className="text-gray-700 font-medium">
                 金額 <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -234,10 +214,9 @@ export function MerchantRequestedWithdrawalCreate({
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="例如: 1000 或 1000.50"
                 type="text"
-                className="border-indigo-200 focus:border-indigo-400 focus:ring-indigo-400"
+                className="border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               />
-              <p className="text-xs text-slate-500 flex items-center gap-1">
-                <span className="inline-block w-1 h-1 rounded-full bg-slate-400"></span>
+              <p className="text-xs text-gray-500">
                 支援最多三位小數，例如: 120, 120.00, 120.500
               </p>
             </div>
@@ -246,10 +225,9 @@ export function MerchantRequestedWithdrawalCreate({
             <div className="space-y-2">
               <Label
                 htmlFor="paymentMethod"
-                className="text-slate-700 font-medium flex items-center gap-2"
+                className="text-gray-700 font-medium"
               >
-                <CreditCardIcon className="h-4 w-4 text-indigo-500" />
-                支付錢包 <span className="text-red-500">*</span>
+                通道 <span className="text-red-500">*</span>
               </Label>
               <Select
                 value={paymentMethod}
@@ -257,8 +235,8 @@ export function MerchantRequestedWithdrawalCreate({
                   setPaymentMethod(value as PaymentMethod)
                 }
               >
-                <SelectTrigger className="border-indigo-200 focus:border-indigo-400 focus:ring-indigo-400">
-                  <SelectValue placeholder="選擇支付錢包" />
+                <SelectTrigger className="border-gray-200 focus:ring-gray-900 focus:ring-1 shadow-none rounded-none">
+                  <SelectValue placeholder="選擇通道" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -275,32 +253,27 @@ export function MerchantRequestedWithdrawalCreate({
         </div>
 
         {/* Optional Payment Details Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-purple-100 overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4 border-b border-purple-100">
+        <div className="bg-white border border-gray-200">
+          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
             <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-purple-400"></div>
-              <h2 className="font-semibold text-purple-900">支付欄位</h2>
-              <span className="text-xs text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">
-                Optional
-              </span>
+              <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+                支付欄位
+              </h2>
+              <span className="text-xs text-gray-500">(選填)</span>
             </div>
           </div>
 
           <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Bank Name */}
             <div className="space-y-2">
-              <Label
-                htmlFor="bankName"
-                className="text-slate-700 font-medium flex items-center gap-2"
-              >
-                <BuildingLibraryIcon className="h-4 w-4 text-purple-500" />
+              <Label htmlFor="bankName" className="text-gray-700 font-medium">
                 銀行名稱
               </Label>
               <Select
                 value={bankName}
                 onValueChange={(value) => setBankName(value)}
               >
-                <SelectTrigger className="border-purple-200 focus:border-purple-400 focus:ring-purple-400">
+                <SelectTrigger className="border-gray-200 focus:ring-gray-900 focus:ring-1 shadow-none rounded-none">
                   <SelectValue placeholder="選擇銀行名稱" />
                 </SelectTrigger>
                 <SelectContent>
@@ -319,9 +292,8 @@ export function MerchantRequestedWithdrawalCreate({
             <div className="space-y-2">
               <Label
                 htmlFor="bankAccount"
-                className="text-slate-700 font-medium flex items-center gap-2"
+                className="text-gray-700 font-medium"
               >
-                <CreditCardIcon className="h-4 w-4 text-purple-500" />
                 銀行帳號
               </Label>
               <Input
@@ -329,7 +301,7 @@ export function MerchantRequestedWithdrawalCreate({
                 value={bankAccount}
                 onChange={(e) => setBankAccount(e.target.value)}
                 placeholder="銀行帳號"
-                className="border-purple-200 focus:border-purple-400 focus:ring-purple-400"
+                className="border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               />
             </div>
 
@@ -337,9 +309,8 @@ export function MerchantRequestedWithdrawalCreate({
             <div className="space-y-2">
               <Label
                 htmlFor="receiverName"
-                className="text-slate-700 font-medium flex items-center gap-2"
+                className="text-gray-700 font-medium"
               >
-                <UserIcon className="h-4 w-4 text-purple-500" />
                 收款人姓名
               </Label>
               <Input
@@ -348,21 +319,17 @@ export function MerchantRequestedWithdrawalCreate({
                 onChange={(e) => setReceiverName(e.target.value)}
                 placeholder="收款人姓名"
                 maxLength={50}
-                className="border-purple-200 focus:border-purple-400 focus:ring-purple-400"
+                className="border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               />
-              <p className="text-xs text-slate-500 flex items-center gap-1">
-                <span className="inline-block w-1 h-1 rounded-full bg-slate-400"></span>
-                最多 50 個字元
-              </p>
+              <p className="text-xs text-gray-500">最多 50 個字元</p>
             </div>
 
             {/* Receiver Email */}
             <div className="space-y-2">
               <Label
                 htmlFor="receiverEmail"
-                className="text-slate-700 font-medium flex items-center gap-2"
+                className="text-gray-700 font-medium"
               >
-                <EnvelopeIcon className="h-4 w-4 text-purple-500" />
                 收款人電郵
               </Label>
               <Input
@@ -370,7 +337,7 @@ export function MerchantRequestedWithdrawalCreate({
                 value={receiverEmail}
                 onChange={(e) => setReceiverEmail(e.target.value)}
                 placeholder="收款人電郵"
-                className="border-purple-200 focus:border-purple-400 focus:ring-purple-400"
+                className="border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               />
             </div>
 
@@ -378,9 +345,8 @@ export function MerchantRequestedWithdrawalCreate({
             <div className="space-y-2 md:col-span-2">
               <Label
                 htmlFor="receiverPhoneNumber"
-                className="text-slate-700 font-medium flex items-center gap-2"
+                className="text-gray-700 font-medium"
               >
-                <PhoneIcon className="h-4 w-4 text-purple-500" />
                 收款人電話
               </Label>
               <Input
@@ -388,12 +354,9 @@ export function MerchantRequestedWithdrawalCreate({
                 value={receiverPhoneNumber}
                 onChange={(e) => setReceiverPhoneNumber(e.target.value)}
                 placeholder="收款人電話"
-                className="border-purple-200 focus:border-purple-400 focus:ring-purple-400"
+                className="border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               />
-              <p className="text-xs text-slate-500 flex items-center gap-1">
-                <span className="inline-block w-1 h-1 rounded-full bg-slate-400"></span>
-                使用菲律賓手機號碼格式
-              </p>
+              <p className="text-xs text-gray-500">使用菲律賓手機號碼格式</p>
             </div>
           </div>
         </div>
@@ -405,18 +368,18 @@ export function MerchantRequestedWithdrawalCreate({
             variant="outline"
             onClick={resetForm}
             disabled={isLoading}
-            className="border-slate-300 hover:bg-slate-50"
+            className="border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
           >
             重設
           </Button>
           <Button
             type="submit"
             disabled={isLoading}
-            className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+            className="bg-gray-900 text-white hover:bg-gray-800 shadow-none rounded-none"
           >
             {isLoading ? (
               <span className="flex items-center gap-2">
-                <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white animate-spin"></span>
                 建立中...
               </span>
             ) : (
@@ -428,16 +391,16 @@ export function MerchantRequestedWithdrawalCreate({
 
       {/* Success Dialog */}
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md border border-gray-200 rounded-none shadow-none">
           <div className="flex flex-col items-center text-center gap-4 py-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center shadow-lg">
-              <CheckCircleIcon className="h-10 w-10 text-white" />
+            <div className="w-16 h-16 bg-gray-900 flex items-center justify-center">
+              <CheckCircleIcon className="h-8 w-8 text-white" />
             </div>
             <div>
-              <DialogTitle className="text-2xl font-bold text-slate-900 mb-2">
+              <DialogTitle className="text-lg font-semibold text-gray-900 mb-2">
                 提領請求已建立
               </DialogTitle>
-              <p className="text-slate-600">你想要？</p>
+              <p className="text-sm text-gray-600">你想要？</p>
             </div>
           </div>
           <DialogFooter className="flex flex-col sm:flex-col gap-2">
@@ -447,7 +410,7 @@ export function MerchantRequestedWithdrawalCreate({
                 setShowSuccessDialog(false);
                 // stay on page, preserve info
               }}
-              className="w-full border-slate-300 hover:bg-slate-50"
+              className="w-full border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
             >
               繼續建立新請求
             </Button>
@@ -457,7 +420,7 @@ export function MerchantRequestedWithdrawalCreate({
                 resetForm();
                 setActiveTab(MerchantRequestedWithdrawalTab.LIST);
               }}
-              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
+              className="w-full bg-gray-900 text-white hover:bg-gray-800 shadow-none rounded-none"
             >
               查看已建立之請求
             </Button>

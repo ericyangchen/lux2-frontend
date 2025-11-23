@@ -19,7 +19,7 @@ export default function MerchantLayout({
             : getCompanyName()}
         </title>
       </Head>
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-white">
         <MerchantNavigationHeader />
         <main className="w-full">
           <div className="w-full h-full overflow-x-hidden">{children}</div>

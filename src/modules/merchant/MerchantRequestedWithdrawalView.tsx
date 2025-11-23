@@ -13,12 +13,6 @@ import {
   PlusIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/shadcn/ui/card";
 import React, { useEffect, useState } from "react";
 import {
   Tabs,
@@ -59,75 +53,33 @@ const StatsCard = ({
   color = "default",
   trend,
 }: StatsCardProps) => {
-  const getColorClasses = () => {
-    switch (color) {
-      case "success":
-        return "border-emerald-200 bg-emerald-50";
-      case "warning":
-        return "border-amber-200 bg-amber-50";
-      case "danger":
-        return "border-red-200 bg-red-50";
-      default:
-        return "border-slate-200 bg-white";
-    }
-  };
-
-  const getIconColor = () => {
-    switch (color) {
-      case "success":
-        return "text-emerald-600";
-      case "warning":
-        return "text-amber-600";
-      case "danger":
-        return "text-red-600";
-      default:
-        return "text-slate-600";
-    }
-  };
-
   return (
-    <Card
-      className={cn(
-        "transition-all duration-200 hover:shadow-md",
-        getColorClasses()
-      )}
-    >
-      <CardContent className="p-6">
+    <div className="border border-gray-200 bg-white">
+      <div className="p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
-              <div className={cn("p-2 rounded-lg bg-white", getIconColor())}>
-                <Icon className="h-5 w-5" />
-              </div>
-              <span className="text-sm font-medium text-slate-600">
+              <Icon className="h-5 w-5 text-gray-500" />
+              <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
                 {title}
               </span>
             </div>
 
             <div className="space-y-1">
-              <div className="text-2xl font-bold text-slate-900">{value}</div>
+              <div className="text-2xl font-semibold text-gray-900">{value}</div>
               {subtitle && (
-                <div className="text-sm text-slate-500">{subtitle}</div>
+                <div className="text-sm text-gray-600">{subtitle}</div>
               )}
               {trend && (
-                <div
-                  className={cn(
-                    "text-sm flex items-center gap-1",
-                    trend.type === "up"
-                      ? "text-emerald-600"
-                      : trend.type === "down"
-                      ? "text-red-600"
-                      : "text-slate-500"
-                  )}
-                >
+                <div className="text-sm text-gray-600 flex items-center gap-1">
                   <span>{trend.value}</span>
                 </div>
               )}
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
@@ -144,36 +96,29 @@ const QuickActionCard = ({
   action: () => void;
   variant?: "default" | "primary";
 }) => (
-  <Card
+  <div
     className={cn(
-      "group cursor-pointer transition-all duration-200 hover:shadow-md border-slate-200",
-      variant === "primary" && "border-slate-900 bg-slate-50"
+      "group cursor-pointer border border-gray-200 bg-white hover:bg-gray-50 transition-colors",
+      variant === "primary" && "border-gray-900"
     )}
     onClick={action}
   >
-    <CardContent className="p-6">
+    <div className="p-6">
       <div className="flex items-start gap-4">
-        <div
-          className={cn(
-            "p-3 rounded-lg transition-colors",
-            variant === "primary"
-              ? "bg-slate-900 text-white"
-              : "bg-slate-100 text-slate-600 group-hover:bg-slate-200"
-          )}
-        >
-          <Icon className="h-6 w-6" />
+        <div className="p-3 border border-gray-200 bg-white">
+          <Icon className="h-6 w-6 text-gray-600" />
         </div>
         <div className="flex-1">
-          <h3 className="font-semibold text-slate-900 mb-1">{title}</h3>
-          <p className="text-sm text-slate-600 mb-3">{description}</p>
-          <div className="flex items-center gap-2 text-sm font-medium text-slate-700 group-hover:text-slate-900">
+          <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
+          <p className="text-sm text-gray-600 mb-3">{description}</p>
+          <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
             <span>開始</span>
             <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </div>
         </div>
       </div>
-    </CardContent>
-  </Card>
+    </div>
+  </div>
 );
 
 const ProcessSteps = () => {
@@ -205,36 +150,36 @@ const ProcessSteps = () => {
   ];
 
   return (
-    <Card className="border-slate-200">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold text-slate-900">
+    <div className="border border-gray-200 bg-white">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
           申請流程
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+        </h3>
+      </div>
+      <div className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {steps.map((step, index) => (
             <div key={step.number} className="relative">
               <div className="flex flex-col items-center text-center">
-                <div className="flex items-center justify-center w-12 h-12 bg-slate-100 rounded-full mb-3">
-                  <step.icon className="h-6 w-6 text-slate-600" />
+                <div className="flex items-center justify-center w-12 h-12 bg-gray-50 border border-gray-200 mb-3">
+                  <step.icon className="h-6 w-6 text-gray-600" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="font-medium text-slate-900">{step.title}</h4>
-                  <p className="text-sm text-slate-600">{step.description}</p>
+                  <h4 className="font-medium text-gray-900">{step.title}</h4>
+                  <p className="text-sm text-gray-600">{step.description}</p>
                 </div>
               </div>
 
               {index < steps.length - 1 && (
                 <div className="hidden md:block absolute top-6 left-full w-full">
-                  <div className="w-full h-px bg-slate-200 transform -translate-x-1/2"></div>
+                  <div className="w-full h-px bg-gray-200 transform -translate-x-1/2"></div>
                 </div>
               )}
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
@@ -335,24 +280,24 @@ export function MerchantRequestedWithdrawalView() {
           setActiveTab(value as MerchantRequestedWithdrawalTab)
         }
       >
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-3 rounded-none bg-gray-50 p-1 border border-gray-200">
           <TabsTrigger
             value={MerchantRequestedWithdrawalTab.OVERVIEW}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 rounded-none"
           >
             <CurrencyDollarIcon className="h-4 w-4" />
             總覽
           </TabsTrigger>
           <TabsTrigger
             value={MerchantRequestedWithdrawalTab.LIST}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 rounded-none"
           >
             <ListBulletIcon className="h-4 w-4" />
             申請記錄
           </TabsTrigger>
           <TabsTrigger
             value={MerchantRequestedWithdrawalTab.CREATE}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 rounded-none"
           >
             <PlusIcon className="h-4 w-4" />
             建立申請
@@ -368,15 +313,15 @@ export function MerchantRequestedWithdrawalView() {
             {isLoading ? (
               // Loading skeleton
               Array.from({ length: 2 }).map((_, index) => (
-                <Card key={index} className="border-slate-200">
-                  <CardContent className="p-4">
+                <div key={index} className="border border-gray-200 bg-white">
+                  <div className="p-4">
                     <div className="animate-pulse">
-                      <div className="h-4 bg-slate-200 rounded mb-2"></div>
-                      <div className="h-6 bg-slate-200 rounded mb-1"></div>
-                      <div className="h-3 bg-slate-200 rounded"></div>
+                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-6 bg-gray-200 rounded mb-1"></div>
+                      <div className="h-3 bg-gray-200 rounded"></div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))
             ) : (
               <>
@@ -421,13 +366,13 @@ export function MerchantRequestedWithdrawalView() {
           <ProcessSteps />
 
           {/* Recent Activity */}
-          <Card className="border-slate-200">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-slate-900">
+          <div className="border border-gray-200 bg-white">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
                 最近活動
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </h3>
+            </div>
+            <div className="p-6">
               <div className="space-y-4">
                 {recentWithdrawals.length === 0 ? (
                   <div className="text-center py-8 text-slate-500">
@@ -439,13 +384,13 @@ export function MerchantRequestedWithdrawalView() {
                     const getStatusColor = (status: string) => {
                       switch (status.toLowerCase()) {
                         case "success":
-                          return "border-emerald-200 text-emerald-800";
+                          return "border-emerald-200 text-emerald-700 bg-emerald-50";
                         case "pending":
-                          return "border-amber-200 text-amber-800";
+                          return "border-amber-200 text-amber-700 bg-amber-50";
                         case "failed":
-                          return "border-red-200 text-red-800";
+                          return "border-red-200 text-red-700 bg-red-50";
                         default:
-                          return "border-blue-200 text-blue-800";
+                          return "border-gray-200 text-gray-600 bg-white";
                       }
                     };
 
@@ -458,14 +403,14 @@ export function MerchantRequestedWithdrawalView() {
                         case "failed":
                           return "bg-red-500";
                         default:
-                          return "bg-blue-500";
+                          return "bg-gray-500";
                       }
                     };
 
                     return (
                       <div
                         key={withdrawal.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-slate-50"
+                        className="flex items-center justify-between p-3 border border-gray-200 bg-white"
                       >
                         <div className="flex items-center gap-3">
                           <div
@@ -503,17 +448,17 @@ export function MerchantRequestedWithdrawalView() {
                 )}
               </div>
 
-              <div className="mt-4 pt-4 border-t border-slate-200">
+              <div className="mt-4 pt-4 border-t border-gray-200">
                 <Button
                   variant="outline"
                   onClick={handleViewList}
-                  className="w-full"
+                  className="w-full border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
                 >
                   查看全部記錄
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value={MerchantRequestedWithdrawalTab.LIST}>

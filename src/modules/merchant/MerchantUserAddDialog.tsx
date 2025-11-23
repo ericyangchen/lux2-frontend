@@ -111,7 +111,7 @@ export function MerchantUserAddDialog({
             <Label className="text-right">帳號</Label>
             <Input
               id="email"
-              className="col-span-3"
+              className="col-span-3 border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -120,7 +120,7 @@ export function MerchantUserAddDialog({
             <Label className="text-right">密碼</Label>
             <Input
               id="password"
-              className="col-span-3"
+              className="col-span-3 border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -129,7 +129,7 @@ export function MerchantUserAddDialog({
             <Label className="text-right">名字</Label>
             <Input
               id="name"
-              className="col-span-3"
+              className="col-span-3 border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -138,7 +138,7 @@ export function MerchantUserAddDialog({
             <Label className="text-right">權限</Label>
             <Input
               id="role"
-              className="col-span-3"
+              className="col-span-3 border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               value={role && UserRoleDisplayNames[role]}
               readOnly
               disabled
@@ -149,6 +149,7 @@ export function MerchantUserAddDialog({
           <Button
             onClick={handleAddUser}
             disabled={!name || !email || !password}
+            className="bg-gray-900 text-white hover:bg-gray-800 shadow-none rounded-none"
           >
             {isLoading ? "新增中..." : "新增"}
           </Button>

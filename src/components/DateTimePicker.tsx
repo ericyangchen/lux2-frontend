@@ -145,7 +145,7 @@ export function DateTimePicker({
         <Button
           variant={"outline"}
           className={cn(
-            "w-[240px] justify-start font-normal flex gap-2 p-0 cursor-pointer",
+            "w-[240px] justify-start font-normal flex gap-2 p-0 cursor-pointer border-gray-200 bg-white hover:bg-gray-50 shadow-none",
             !date && "text-muted-foreground"
           )}
         >
@@ -221,7 +221,7 @@ export function DateTimePicker({
                 value={timeInputValue}
                 onChange={handleTimeChange}
                 onBlur={handleTimeBlur}
-                className="h-8 text-sm w-full font-mono tracking-wider text-center rounded-md border focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-clear-button]:appearance-none"
+                className="h-8 text-sm w-full font-mono tracking-wider text-center rounded-md border border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-clear-button]:appearance-none"
               />
               <Button
                 variant="ghost"
@@ -244,7 +244,7 @@ export function DateTimePicker({
             <Button
               variant="outline"
               size="sm"
-              className="flex-1 font-mono text-xs"
+              className="flex-1 font-mono text-xs border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none"
               onClick={() => {
                 if (calendarDate) {
                   const newDate = new Date(calendarDate);
@@ -259,7 +259,7 @@ export function DateTimePicker({
             <Button
               variant="outline"
               size="sm"
-              className="flex-1 font-mono text-xs"
+              className="flex-1 font-mono text-xs border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none"
               onClick={() => {
                 if (calendarDate) {
                   const newDate = new Date(calendarDate);

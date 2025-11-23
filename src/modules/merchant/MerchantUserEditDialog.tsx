@@ -202,7 +202,7 @@ export function MerchantUserEditDialog({
                   size="sm"
                   onClick={handleEnableOtp}
                   disabled={isOtpLoading}
-                  className="text-green-600 border-green-600 hover:bg-green-50"
+                  className="text-green-600 border-green-600 hover:bg-green-50 rounded-none"
                 >
                   啟用 OTP
                 </Button>
@@ -345,7 +345,7 @@ export function MerchantUserEditDialog({
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right">帳號</Label>
             <Input
-              className="col-span-3"
+              className="col-span-3 border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -353,7 +353,7 @@ export function MerchantUserEditDialog({
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right">更新密碼</Label>
             <Input
-              className="col-span-3"
+              className="col-span-3 border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
@@ -362,7 +362,7 @@ export function MerchantUserEditDialog({
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right">名字</Label>
             <Input
-              className="col-span-3"
+              className="col-span-3 border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -374,7 +374,7 @@ export function MerchantUserEditDialog({
                 defaultValue={role}
                 onValueChange={(value) => setRole(value as UserRole)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="border-gray-200 focus:ring-gray-900 focus:ring-1 shadow-none rounded-none">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -398,7 +398,7 @@ export function MerchantUserEditDialog({
               <Button
                 onClick={handleDeleteUser}
                 disabled={isDeleteLoading || isUpdateLoading}
-                className="bg-red-500 hover:bg-red-600"
+                className="bg-red-500 hover:bg-red-600 shadow-none rounded-none"
               >
                 {isDeleteLoading ? "刪除中..." : "刪除"}
               </Button>
@@ -409,6 +409,7 @@ export function MerchantUserEditDialog({
               <Button
                 onClick={handleUpdateUser}
                 disabled={isDeleteLoading || isUpdateLoading}
+                className="bg-gray-900 text-white hover:bg-gray-800 shadow-none rounded-none"
               >
                 {isUpdateLoading ? "更新中..." : "更新"}
               </Button>

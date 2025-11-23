@@ -8,7 +8,6 @@ import {
   ListBulletIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
-import { Card, CardContent } from "@/components/shadcn/ui/card";
 import React, { useState } from "react";
 import {
   Select,
@@ -23,7 +22,7 @@ import { ApiGetTransactionCountAndSumOfAmountAndFee } from "@/lib/apis/transacti
 import { ApiGetTransactionsByMerchantId } from "@/lib/apis/transactions/get";
 import { Badge } from "@/components/shadcn/ui/badge";
 import { Button } from "@/components/shadcn/ui/button";
-import { DateTimePicker } from "@/components/DateTimePicker";
+import { MerchantDateTimePicker } from "@/components/MerchantDateTimePicker";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
@@ -62,42 +61,28 @@ const TransactionStatusBadge = ({ status }: { status: string }) => {
   const getStatusStyle = () => {
     switch (status.toLowerCase()) {
       case "success":
-        return "bg-emerald-100 text-emerald-800 border-emerald-200";
+        return "bg-emerald-50 text-emerald-700 border-emerald-200";
       case "failed":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-red-50 text-red-700 border-red-200";
       case "pending":
-        return "bg-amber-100 text-amber-800 border-amber-200";
+        return "bg-amber-50 text-amber-700 border-amber-200";
       default:
-        return "bg-slate-100 text-slate-800 border-slate-200";
-    }
-  };
-
-  return (
-    <Badge variant="outline" className={cn("font-medium", getStatusStyle())}>
-      {TransactionStatusDisplayNames[status as TransactionStatus] || status}
-    </Badge>
-  );
-};
-
-const TransactionTypeChip = ({ type }: { type: string }) => {
-  const getTypeStyle = () => {
-    switch (type) {
-      case TransactionType.API_DEPOSIT:
-        return "bg-blue-100 text-blue-800";
-      case TransactionType.API_WITHDRAWAL:
-        return "bg-purple-100 text-purple-800";
-      default:
-        return "bg-slate-100 text-slate-800";
+        return "bg-gray-50 text-gray-600 border-gray-200";
     }
   };
 
   return (
     <span
-      className={cn(
-        "px-2 py-1 rounded-full text-xs font-medium",
-        getTypeStyle()
-      )}
+      className={cn("px-2 py-0.5 text-xs font-medium border", getStatusStyle())}
     >
+      {TransactionStatusDisplayNames[status as TransactionStatus] || status}
+    </span>
+  );
+};
+
+const TransactionTypeChip = ({ type }: { type: string }) => {
+  return (
+    <span className="px-2 py-0.5 text-xs font-medium text-gray-700 border border-gray-300 bg-gray-50">
       {TransactionTypeDisplayNames[type as TransactionType] || type}
     </span>
   );
@@ -121,7 +106,7 @@ const UnifiedSearchBar = ({
   <div className="space-y-4">
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
-        <Label className="text-sm font-medium text-slate-700">
+        <Label className="text-sm font-medium text-gray-600">
           系統訂單號 (atx)
         </Label>
         <Input
@@ -129,21 +114,26 @@ const UnifiedSearchBar = ({
           value={transactionId}
           onChange={(e) => onTransactionIdChange(e.target.value)}
           onKeyPress={(e) => e.key === "Enter" && onSearch()}
-          className="font-mono"
+          className="font-mono border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
         />
       </div>
       <div className="space-y-2">
-        <Label className="text-sm font-medium text-slate-700">商戶訂單號</Label>
+        <Label className="text-sm font-medium text-gray-600">商戶訂單號</Label>
         <Input
           placeholder="搜尋商戶訂單號..."
           value={merchantOrderId}
           onChange={(e) => onMerchantOrderIdChange(e.target.value)}
           onKeyPress={(e) => e.key === "Enter" && onSearch()}
+          className="border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
         />
       </div>
     </div>
     <div className="flex justify-center">
-      <Button onClick={onSearch} disabled={isLoading} className="min-w-32">
+      <Button 
+        onClick={onSearch} 
+        disabled={isLoading} 
+          className="min-w-32 border border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none font-medium rounded-none"
+      >
         <MagnifyingGlassIcon className="h-4 w-4 mr-2" />
         {isLoading ? "搜尋中..." : "搜尋"}
       </Button>
@@ -163,7 +153,7 @@ const FilterPanel = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-900 flex items-center">
+        <h3 className="text-xs font-semibold text-gray-900 uppercase tracking-wide flex items-center">
           <FunnelIcon className="h-4 w-4 mr-2" />
           進階篩選
         </h3>
@@ -172,7 +162,7 @@ const FilterPanel = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Transaction Type */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700">交易類型</label>
+          <label className="text-sm font-medium text-gray-600">交易類型</label>
           <Select
             value={filters.transactionType}
             onValueChange={(value) =>
@@ -182,7 +172,7 @@ const FilterPanel = ({
               })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger className="border-gray-200 focus:ring-gray-900 focus:ring-1 shadow-none rounded-none">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -199,7 +189,7 @@ const FilterPanel = ({
 
         {/* Payment Method */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700">支付方式</label>
+          <label className="text-sm font-medium text-gray-600">通道</label>
           <Select
             value={filters.paymentMethod}
             onValueChange={(value) =>
@@ -209,7 +199,7 @@ const FilterPanel = ({
               })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger className="border-gray-200 focus:ring-gray-900 focus:ring-1 shadow-none rounded-none">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -225,7 +215,7 @@ const FilterPanel = ({
 
         {/* Transaction Status */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700">交易狀態</label>
+          <label className="text-sm font-medium text-gray-600">交易狀態</label>
           <Select
             value={filters.status}
             onValueChange={(value) =>
@@ -235,7 +225,7 @@ const FilterPanel = ({
               })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger className="border-gray-200 focus:ring-gray-900 focus:ring-1 shadow-none rounded-none">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -253,32 +243,34 @@ const FilterPanel = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Amount Min */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700">最小金額</label>
+          <label className="text-sm font-medium text-gray-600">最小金額</label>
           <Input
             placeholder="0.00"
             value={filters.amountMin}
             onChange={(e) =>
               onFiltersChange({ ...filters, amountMin: e.target.value })
             }
+            className="border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
           />
         </div>
 
         {/* Amount Max */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700">最大金額</label>
+          <label className="text-sm font-medium text-gray-600">最大金額</label>
           <Input
             placeholder="0.00"
             value={filters.amountMax}
             onChange={(e) =>
               onFiltersChange({ ...filters, amountMax: e.target.value })
             }
+            className="border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
           />
         </div>
 
         {/* Start Date */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700">開始時間</label>
-          <DateTimePicker
+          <label className="text-sm font-medium text-gray-600">開始時間</label>
+          <MerchantDateTimePicker
             date={filters.startDate}
             setDate={(date) =>
               onFiltersChange({
@@ -298,8 +290,8 @@ const FilterPanel = ({
 
         {/* End Date */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700">結束時間</label>
-          <DateTimePicker
+          <label className="text-sm font-medium text-gray-600">結束時間</label>
+          <MerchantDateTimePicker
             date={filters.endDate}
             setDate={(date) =>
               onFiltersChange({
@@ -319,7 +311,11 @@ const FilterPanel = ({
       </div>
 
       <div className="flex justify-end pt-2">
-        <Button variant="outline" onClick={onClearFilters}>
+        <Button 
+          variant="outline" 
+          onClick={onClearFilters}
+          className="border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
+        >
           清除篩選
         </Button>
       </div>
@@ -336,36 +332,36 @@ const TransactionTable = ({
 }) => {
   if (isLoading) {
     return (
-      <Card className="border-slate-200">
-        <CardContent className="p-8 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mx-auto"></div>
-          <p className="mt-4 text-slate-600">載入中...</p>
-        </CardContent>
-      </Card>
+      <div className="border border-gray-200 bg-white">
+        <div className="p-8 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-600">載入中...</p>
+        </div>
+      </div>
     );
   }
 
   if (!transactions.length) {
     return (
-      <Card className="border-slate-200">
-        <CardContent className="p-8 text-center">
-          <MagnifyingGlassIcon className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-          <p className="text-slate-600">未找到符合條件的交易記錄</p>
-        </CardContent>
-      </Card>
+      <div className="border border-gray-200 bg-white">
+        <div className="p-8 text-center">
+          <MagnifyingGlassIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600">未找到符合條件的交易記錄</p>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="border-slate-200">
+    <div className="border border-gray-200 bg-white">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-slate-50 border-b border-slate-200">
+          <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               {[
                 "訂單號碼",
                 "類型",
-                "支付方式",
+                "通道",
                 "金額",
                 "狀態",
                 "創建時間",
@@ -373,37 +369,37 @@ const TransactionTable = ({
               ].map((header) => (
                 <th
                   key={header}
-                  className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wide"
+                  className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide"
                 >
                   {header}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-gray-200">
             {transactions.map((transaction) => (
               <tr
                 key={transaction.id}
-                className="hover:bg-slate-50 transition-colors"
+                className="hover:bg-gray-50 transition-colors"
               >
                 <td className="px-6 py-4">
-                  <div className="font-medium text-slate-900">
+                  <div className="font-medium text-gray-900">
                     {transaction.merchantOrderId}
                   </div>
-                  <div className="text-sm text-slate-500">{transaction.id}</div>
+                  <div className="text-sm text-gray-500">{transaction.id}</div>
                 </td>
                 <td className="px-6 py-4">
                   <TransactionTypeChip type={transaction.type} />
                 </td>
-                <td className="px-6 py-4 text-sm text-slate-900">
+                <td className="px-6 py-4 text-sm text-gray-900">
                   {PaymentMethodDisplayNames[transaction.paymentMethod]}
                 </td>
                 <td className="px-6 py-4">
-                  <div className="font-medium text-slate-900">
+                  <div className="font-medium text-gray-900">
                     ${formatNumber(transaction.amount)}
                   </div>
                   {transaction.totalFee && (
-                    <div className="text-sm text-slate-500">
+                    <div className="text-sm text-gray-500">
                       手續費: ${formatNumber(transaction.totalFee)}
                     </div>
                   )}
@@ -411,12 +407,12 @@ const TransactionTable = ({
                 <td className="px-6 py-4">
                   <TransactionStatusBadge status={transaction.status} />
                 </td>
-                <td className="px-6 py-4 text-sm text-slate-900">
+                <td className="px-6 py-4 text-sm text-gray-900">
                   {convertDatabaseTimeToReadablePhilippinesTime(
                     transaction.createdAt
                   )}
                 </td>
-                <td className="px-6 py-4 text-sm text-slate-900">
+                <td className="px-6 py-4 text-sm text-gray-900">
                   {transaction.successAt
                     ? convertDatabaseTimeToReadablePhilippinesTime(
                         transaction.successAt
@@ -428,7 +424,7 @@ const TransactionTable = ({
           </tbody>
         </table>
       </div>
-    </Card>
+    </div>
   );
 };
 
@@ -654,7 +650,7 @@ export function MerchantTransactionList() {
       "訂單號碼",
       "系統ID",
       "類型",
-      "支付方式",
+      "通道",
       "金額",
       "手續費",
       "狀態",
@@ -715,21 +711,27 @@ export function MerchantTransactionList() {
   return (
     <div className="space-y-6">
       {/* Search Controls */}
-      <div className="bg-white border border-slate-200 rounded-lg p-6 space-y-6">
+      <div className="bg-white border border-gray-200 p-6 space-y-6">
         {/* Unified Search */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label className="text-base font-semibold text-slate-900">
+            <h1 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
               訂單管理
-            </Label>
+            </h1>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={handleClearAll}>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleClearAll}
+                className="border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
+              >
                 清除全部
               </Button>
               <Button
                 variant="outline"
                 disabled={!transactions.length}
                 onClick={handleExportCSV}
+                className="border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
               >
                 <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
                 匯出 CSV
@@ -748,7 +750,7 @@ export function MerchantTransactionList() {
         </div>
 
         {/* Advanced Filters */}
-        <div className="border-t border-slate-200 pt-6">
+        <div className="border-t border-gray-200 pt-6">
           <FilterPanel
             filters={filters}
             onFiltersChange={setFilters}
@@ -760,71 +762,65 @@ export function MerchantTransactionList() {
       {/* Transaction Summary */}
       {transactions.length > 0 && (
         <div className="space-y-4">
-          <Label className="text-base font-semibold text-slate-900">
+          <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
             {currentQueryType === QueryTypes.SEARCH_BY_TRANSACTION_ID
               ? "單筆查詢結果: 系統訂單號"
               : "多筆查詢結果"}
-          </Label>
+          </h2>
 
           {currentQueryType === QueryTypes.SEARCH_BY_MULTIPLE_CONDITIONS &&
             transactionSummary && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Total Count Card */}
-                <Card className="border-slate-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <ListBulletIcon className="h-5 w-5 text-blue-600" />
-                      </div>
+                <div className="border border-gray-200 bg-white">
+                  <div className="p-4">
+                    <div className="flex items-center gap-3">
+                      <ListBulletIcon className="h-5 w-5 text-gray-500" />
                       <div>
-                        <p className="text-sm font-medium text-slate-600">
+                        <p className="text-xs text-gray-600 uppercase tracking-wide">
                           總筆數
                         </p>
-                        <p className="text-2xl font-bold text-slate-900 font-mono">
+                        <p className="text-xl font-semibold text-gray-900 font-mono mt-1">
                           {transactionSummary.count || "0"}
                         </p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
                 {/* Total Amount Card */}
-                <Card className="border-slate-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="p-2 bg-green-100 rounded-lg">
-                        <CurrencyDollarIcon className="h-5 w-5 text-green-600" />
-                      </div>
+                <div className="border border-gray-200 bg-white">
+                  <div className="p-4">
+                    <div className="flex items-center gap-3">
+                      <CurrencyDollarIcon className="h-5 w-5 text-gray-500" />
                       <div>
-                        <p className="text-sm font-medium text-slate-600">
+                        <p className="text-xs text-gray-600 uppercase tracking-wide">
                           總金額
                         </p>
-                        <p className="text-2xl font-bold text-slate-900 font-mono">
+                        <p className="text-xl font-semibold text-gray-900 font-mono mt-1">
                           ${formatNumber(transactionSummary.amountSum || "0")}
                         </p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
                 {/* Total Fee Card */}
-                <Card className="border-slate-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="p-2 bg-amber-100 rounded-lg">
-                        <BanknotesIcon className="h-5 w-5 text-amber-600" />
-                      </div>
+                <div className="border border-gray-200 bg-white">
+                  <div className="p-4">
+                    <div className="flex items-center gap-3">
+                      <BanknotesIcon className="h-5 w-5 text-gray-500" />
                       <div>
-                        <p className="text-sm font-medium text-slate-600">
+                        <p className="text-xs text-gray-600 uppercase tracking-wide">
                           總手續費
                         </p>
-                        <p className="text-2xl font-bold text-slate-900 font-mono">
+                        <p className="text-xl font-semibold text-gray-900 font-mono mt-1">
                           ${formatNumber(transactionSummary.totalFeeSum || "0")}
                         </p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </div>
             )}
         </div>
@@ -842,7 +838,7 @@ export function MerchantTransactionList() {
               variant="outline"
               onClick={() => handleSearch(true)}
               disabled={loadingMore}
-              className="min-w-32"
+              className="min-w-32 border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none"
             >
               {loadingMore ? "載入中..." : "載入更多"}
             </Button>

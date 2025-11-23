@@ -74,7 +74,7 @@ export const adminNavigation = [
     icon: ChartPieIcon,
   },
   {
-    name: "上游渠道",
+    name: "上游設定",
     href: "/admin/channel-controls",
     icon: CurrencyDollarIcon,
   },

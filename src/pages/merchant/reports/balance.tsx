@@ -326,7 +326,7 @@ export default function MerchantBalanceReportsPage() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-8">
       <div className="w-full min-w-full space-y-6">
         <BalanceReportForm
           paymentMethod={paymentMethod}
@@ -352,6 +352,7 @@ export default function MerchantBalanceReportsPage() {
             onNextPage={handleNextPage}
             onPrevPage={handlePrevPage}
             isLoadingPagination={isLoadingPagination}
+            isMerchant={true}
           />
         )}
       </div>

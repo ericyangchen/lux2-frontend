@@ -2,7 +2,7 @@ import { MerchantRequestedWithdrawalView } from "@/modules/merchant/MerchantRequ
 
 export default function MerchantRequestedWithdrawalPage() {
   return (
-    <div className="p-6">
+    <div className="p-8">
       <MerchantRequestedWithdrawalView />
     </div>
   );

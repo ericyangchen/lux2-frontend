@@ -2,7 +2,7 @@ import { MerchantBalanceModificationList } from "@/modules/merchant/MerchantBala
 
 export default function MerchantBalanceModificationHistoryPage() {
   return (
-    <div className="p-6">
+    <div className="p-8">
       <MerchantBalanceModificationList />
     </div>
   );

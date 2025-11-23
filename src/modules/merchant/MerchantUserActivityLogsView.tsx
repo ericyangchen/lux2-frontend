@@ -90,11 +90,11 @@ export function MerchantUserActivityLogsView() {
   return (
     <div className="space-y-6 pb-8">
       {/* Filter Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle>操作紀錄查詢</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="border border-gray-200 bg-white">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">操作紀錄查詢</h2>
+        </div>
+        <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <Label htmlFor="userId">使用者ID</Label>
@@ -108,6 +108,7 @@ export function MerchantUserActivityLogsView() {
                   }))
                 }
                 placeholder="輸入使用者ID"
+                className="border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               />
             </div>
 
@@ -125,7 +126,7 @@ export function MerchantUserActivityLogsView() {
                   }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="border-gray-200 focus:ring-gray-900 focus:ring-1 shadow-none rounded-none">
                   <SelectValue placeholder="選擇操作類型" />
                 </SelectTrigger>
                 <SelectContent>
@@ -151,20 +152,25 @@ export function MerchantUserActivityLogsView() {
                   }))
                 }
                 placeholder="輸入IP地址"
+                className="border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               />
             </div>
           </div>
 
           <div className="mt-4">
-            <Button onClick={handleInitialSearch} disabled={loading}>
+            <Button 
+              onClick={handleInitialSearch} 
+              disabled={loading}
+              className="border border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
+            >
               {loading ? "查詢中..." : "查詢"}
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Results Table */}
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
+      <div className="border border-gray-200 bg-white overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-[1000px] w-full bg-white">
             <thead className="bg-gray-50">
@@ -233,7 +239,12 @@ export function MerchantUserActivityLogsView() {
 
       {nextCursor.cursorCreatedAt && nextCursor.cursorId && (
         <div className="mt-4 text-center">
-          <Button variant="outline" onClick={handleLoadMore} disabled={loading}>
+          <Button 
+            variant="outline" 
+            onClick={handleLoadMore} 
+            disabled={loading}
+            className="border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
+          >
             載入更多
           </Button>
         </div>

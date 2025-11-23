@@ -204,16 +204,16 @@ export default function MerchantPaymentMethodInfo({
           return (
             <div
               key={`${type}-${paymentMethod}`}
-              className="bg-white border border-gray-200 rounded-lg shadow-sm"
+              className="border border-gray-200 bg-white"
             >
               {/* Payment Method Header */}
-              <div className="p-4 border-b border-gray-200 bg-gray-50">
+              <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                  <div className="flex items-center gap-6">
+                    <h3 className="text-base font-semibold text-gray-900">
                       {PaymentMethodDisplayNames[paymentMethod]}
                     </h3>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-xs text-gray-600">
                       <span>最小金額: </span>
                       <span className="font-medium">
                         {config.minAmount
@@ -229,19 +229,21 @@ export default function MerchantPaymentMethodInfo({
                       </span>
                     </div>
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      className={`px-2 py-0.5 text-xs font-medium border ${
                         isEnabled
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
+                          ? "bg-gray-50 text-gray-700 border-gray-300"
+                          : "bg-white text-gray-500 border-gray-200"
                       }`}
                     >
                       {isEnabled ? "啟用" : "停用"}
                     </span>
                   </div>
                   {config.balance && (
-                    <div className="text-right text-sm">
-                      <div className="text-gray-600">可用餘額</div>
-                      <div className="font-semibold text-lg">
+                    <div className="text-right">
+                      <div className="text-xs text-gray-600 uppercase tracking-wide">
+                        可用餘額
+                      </div>
+                      <div className="text-base font-semibold text-gray-900 mt-1">
                         {formatNumber(config.balance.availableAmount)}
                       </div>
                     </div>
@@ -250,30 +252,30 @@ export default function MerchantPaymentMethodInfo({
               </div>
 
               {/* Fee Settings */}
-              <div className="p-4">
+              <div className="px-6 py-4">
                 {isEnabled && consolidatedFeeSettings.length > 0 ? (
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-700 mb-3">
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
                       手續費資訊
                     </h4>
                     {consolidatedFeeSettings.map((feeSetting, feeIdx) => (
                       <div
                         key={feeIdx}
-                        className="flex justify-between items-center p-3 bg-gray-50 rounded-md"
+                        className="flex justify-between items-center px-4 py-3 border border-gray-200"
                       >
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-sm font-medium text-gray-900">
                           {feeSetting.accountTypeDisplay}
                         </span>
-                        <div className="text-sm text-gray-600 space-x-4">
+                        <div className="text-sm text-gray-600 space-x-6">
                           <span>
                             費率:{" "}
-                            <span className="font-medium">
+                            <span className="font-medium text-gray-900">
                               {formatNumberInPercentage(feeSetting.percentage)}
                             </span>
                           </span>
                           <span>
                             固定費:{" "}
-                            <span className="font-medium">
+                            <span className="font-medium text-gray-900">
                               {formatNumber(feeSetting.fixed)}
                             </span>
                           </span>
@@ -283,7 +285,7 @@ export default function MerchantPaymentMethodInfo({
                   </div>
                 ) : (
                   <div className="text-sm text-gray-500 text-center py-4">
-                    {isEnabled ? "無手續費資訊" : "此支付類型未啟用"}
+                    {isEnabled ? "無手續費資訊" : "此通道未啟用"}
                   </div>
                 )}
               </div>
@@ -300,10 +302,14 @@ export default function MerchantPaymentMethodInfo({
       : TransactionType.API_WITHDRAWAL;
 
   return (
-    <div className="">
-      <Label className="text-xl font-bold">支付類型資訊</Label>
+    <div className="border border-gray-200 bg-white">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+          通道資訊
+        </h2>
+      </div>
 
-      <div className="px-0 sm:px-4 py-4">
+      <div className="px-6 py-4 border-b border-gray-200">
         <div className="sm:hidden">
           <label className="sr-only">Select a tab</label>
           <select
@@ -311,7 +317,7 @@ export default function MerchantPaymentMethodInfo({
             name="tabs"
             defaultValue={selectedTab}
             onChange={(e) => setSelectedTab(e.target.value)}
-            className="block w-full rounded-md border border-gray-300 px-4 py-2"
+            className="block w-full border border-gray-200 px-3 py-2 text-sm bg-white"
           >
             {Object.values(Tab).map((tab) => (
               <option key={tab} value={tab}>
@@ -320,27 +326,25 @@ export default function MerchantPaymentMethodInfo({
             ))}
           </select>
         </div>
-        <div className="hidden sm:block">
-          <nav className="flex space-x-4">
-            {Object.values(Tab).map((tab) => (
-              <button
-                key={tab}
-                className={classNames(
-                  tab === selectedTab
-                    ? "bg-gray-200 text-gray-900"
-                    : "text-gray-500 hover:text-gray-700",
-                  "rounded-md px-3 py-2 text-sm font-medium"
-                )}
-                onClick={() => setSelectedTab(tab)}
-              >
-                {tabDisplayNames[tab]}
-              </button>
-            ))}
-          </nav>
+        <div className="hidden sm:flex gap-2">
+          {Object.values(Tab).map((tab) => (
+            <button
+              key={tab}
+              className={classNames(
+                tab === selectedTab
+                  ? "text-gray-900 border-b-2 border-gray-900"
+                  : "text-gray-600 hover:text-gray-900",
+                "px-4 py-2 text-sm font-medium transition-colors border-b-2 border-transparent"
+              )}
+              onClick={() => setSelectedTab(tab)}
+            >
+              {tabDisplayNames[tab]}
+            </button>
+          ))}
         </div>
       </div>
 
-      {renderPaymentMethodSection(currentType)}
+      <div className="p-6">{renderPaymentMethodSection(currentType)}</div>
     </div>
   );
 }

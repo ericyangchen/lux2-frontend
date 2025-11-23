@@ -20,7 +20,7 @@ import { BalanceAction } from "@/lib/enums/balances/balance-action.enum";
 import { BalanceActionDisplayNames } from "@/lib/constants/balance-record";
 import { BalanceRecord } from "@/lib/types/balance-record";
 import { Button } from "@/components/shadcn/ui/button";
-import { DateTimePicker } from "@/components/DateTimePicker";
+import { MerchantDateTimePicker } from "@/components/MerchantDateTimePicker";
 import { Label } from "@/components/shadcn/ui/label";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { PaymentMethodDisplayNames } from "@/lib/constants/transaction";
@@ -37,13 +37,13 @@ const formatDateTime = (dateString: string) => {
 const getActionColor = (action: string) => {
   switch (action) {
     case BalanceAction.DIRECT_MODIFY_ADD_BALANCE:
-      return "text-green-600";
+      return "text-emerald-700";
     case BalanceAction.DIRECT_MODIFY_SUBTRACT_BALANCE:
-      return "text-red-600";
+      return "text-red-700";
     case BalanceAction.FREEZE_BALANCE:
-      return "text-blue-600";
+      return "text-blue-700";
     case BalanceAction.UNFREEZE_BALANCE:
-      return "text-orange-600";
+      return "text-orange-700";
     default:
       return "text-gray-600";
   }
@@ -121,20 +121,20 @@ export function MerchantBalanceModificationList() {
   return (
     <div className="w-full space-y-6">
       {/* Search Form */}
-      <div className="bg-white rounded-lg border p-6 space-y-4">
-        <h2 className="text-lg font-semibold">搜尋條件</h2>
+      <div className="bg-white border border-gray-200 p-6 space-y-4">
+        <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">搜尋條件</h2>
 
         {/* Payment Method */}
         <div className="space-y-2 max-w-xs">
-          <Label className="font-medium">支付方式</Label>
+          <Label className="font-medium">通道</Label>
           <Select
             value={paymentMethod}
             onValueChange={(value) =>
               setPaymentMethod(value as PaymentMethod | "all")
             }
           >
-            <SelectTrigger>
-              <SelectValue placeholder="選擇支付方式" />
+            <SelectTrigger className="border-gray-200 focus:ring-gray-900 focus:ring-1 shadow-none rounded-none">
+              <SelectValue placeholder="選擇通道" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
@@ -156,7 +156,7 @@ export function MerchantBalanceModificationList() {
             <div className="flex flex-wrap gap-4 pl-4">
               <div className="flex items-center gap-4 w-full lg:w-fit">
                 <Label className="whitespace-nowrap">起始時間</Label>
-                <DateTimePicker
+                <MerchantDateTimePicker
                   date={startDate}
                   setDate={(date) => setStartDate(date)}
                   placeholder="yyyy/mm/dd HH:mm:ss"
@@ -165,7 +165,7 @@ export function MerchantBalanceModificationList() {
               </div>
               <div className="flex items-center gap-4 w-full lg:w-fit">
                 <Label className="whitespace-nowrap">結束時間</Label>
-                <DateTimePicker
+                <MerchantDateTimePicker
                   date={endDate}
                   setDate={(date) => setEndDate(date)}
                   placeholder="yyyy/mm/dd HH:mm:ss"
@@ -178,7 +178,11 @@ export function MerchantBalanceModificationList() {
 
         {/* Search Button */}
         <div className="flex">
-          <Button onClick={handleSearch} disabled={isLoading} className="px-8">
+          <Button 
+            onClick={handleSearch} 
+            disabled={isLoading} 
+            className="px-8 border border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
+          >
             {isLoading ? "搜尋中..." : "搜尋"}
           </Button>
         </div>
@@ -186,10 +190,12 @@ export function MerchantBalanceModificationList() {
 
       {/* Results */}
       {modifications && (
-        <div className="bg-white rounded-lg border">
-          <div className="p-4 border-b">
-            <h3 className="text-lg font-semibold">搜尋結果</h3>
-            <p className="text-sm text-gray-600">
+        <div className="bg-white border border-gray-200">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+              搜尋結果
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
               共找到 {modifications.length} 筆記錄
             </p>
           </div>
@@ -207,7 +213,7 @@ export function MerchantBalanceModificationList() {
                       操作類型
                     </th>
                     <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
-                      支付方式
+                      通道
                     </th>
                     <th className="px-4 py-3 text-right text-sm font-medium text-gray-700">
                       可用餘額變動

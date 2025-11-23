@@ -2,7 +2,7 @@ import { MerchantTransactionList } from "@/modules/merchant/MerchantTransactionL
 
 export default function MerchantTransactionListPage() {
   return (
-    <div className="p-6">
+    <div className="p-8">
       <MerchantTransactionList />
     </div>
   );

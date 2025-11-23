@@ -24,12 +24,6 @@ import {
   EyeSlashIcon,
   WalletIcon,
 } from "@heroicons/react/24/outline";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/shadcn/ui/card";
 import React, { useState } from "react";
 import { formatNumber, formatNumberInInteger } from "@/lib/utils/number";
 import {
@@ -46,17 +40,17 @@ import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useBalances } from "@/lib/hooks/swr/balance";
 import { useOrganizationDailyBalanceSnapshots } from "@/lib/hooks/swr/balance-snapshots";
 
-// Enhanced color palette for professional look
+// Minimal color palette for business style
 const COLORS = {
-  primary: "#0f172a", // slate-900
-  success: "#059669", // emerald-600
-  warning: "#d97706", // amber-600
-  danger: "#dc2626", // red-600
-  neutral: "#64748b", // slate-500
-  accent: "#3b82f6", // blue-500
+  primary: "#111827", // gray-900
+  secondary: "#6b7280", // gray-500
+  accent: "#4b5563", // gray-600
+  success: "#065f46", // muted green
+  error: "#991b1b", // muted red
+  warning: "#92400e", // muted amber
 };
 
-const CHART_COLORS = ["#0f172a", "#059669", "#d97706", "#dc2626", "#3b82f6"];
+const CHART_COLORS = ["#111827", "#374151", "#6b7280", "#9ca3af", "#d1d5db"];
 
 // Modern Balance Card Component
 const BalanceCard = ({
@@ -79,11 +73,11 @@ const BalanceCard = ({
   const getChangeColor = () => {
     switch (changeType) {
       case "increase":
-        return "text-emerald-600";
+        return "text-gray-700";
       case "decrease":
-        return "text-red-600";
+        return "text-gray-900";
       default:
-        return "text-slate-500";
+        return "text-gray-500";
     }
   };
 
@@ -99,26 +93,26 @@ const BalanceCard = ({
   };
 
   return (
-    <Card className="group relative overflow-hidden border-slate-200 hover:shadow-md transition-all duration-200">
-      <CardContent className="p-6">
+    <div className="group relative border border-gray-200 bg-white">
+      <div className="p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <Icon className="h-5 w-5 text-slate-600" />
-              <span className="text-sm font-medium text-slate-600">
+            <div className="flex items-center gap-2 mb-3">
+              <Icon className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-600 uppercase tracking-wide">
                 {title}
               </span>
             </div>
 
-            <div className="space-y-1">
-              <div className="text-2xl font-bold text-slate-900">
+            <div className="space-y-2">
+              <div className="text-3xl font-semibold text-gray-900 tracking-tight">
                 {isVisible ? `${currencySymbol} ${value}` : "••••••"}
               </div>
 
               {change && (
                 <div
                   className={cn(
-                    "flex items-center gap-1 text-sm",
+                    "flex items-center gap-1 text-xs font-medium",
                     getChangeColor()
                   )}
                 >
@@ -132,18 +126,18 @@ const BalanceCard = ({
           {onToggleVisibility && (
             <button
               onClick={onToggleVisibility}
-              className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-slate-100 transition-all"
+              className="opacity-0 group-hover:opacity-100 p-1.5 border border-gray-200 rounded hover:bg-gray-50 transition-all"
             >
               {isVisible ? (
-                <EyeSlashIcon className="h-4 w-4 text-slate-400" />
+                <EyeSlashIcon className="h-4 w-4 text-gray-400" />
               ) : (
-                <EyeIcon className="h-4 w-4 text-slate-400" />
+                <EyeIcon className="h-4 w-4 text-gray-400" />
               )}
             </button>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
@@ -153,44 +147,37 @@ const QuickActions = () => {
     {
       label: "查看交易",
       href: "/merchant/transactions",
-      color: "bg-slate-900",
     },
     {
       label: "申請下發",
       href: "/merchant/merchant-requested-withdrawals",
-      color: "bg-emerald-600",
     },
-    { label: "用戶管理", href: "/merchant/users", color: "bg-blue-600" },
+    { label: "用戶管理", href: "/merchant/users" },
     {
       label: "生成報表",
       href: "/merchant/reports/balance",
-      color: "bg-amber-600",
     },
   ];
 
   return (
-    <Card className="border-slate-200">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-semibold text-slate-900">
+    <div className="border border-gray-200 bg-white">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
           快速操作
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
+        </h3>
+      </div>
+      <div className="p-6 space-y-2">
         {actions.map((action, index) => (
           <a
             key={index}
             href={action.href}
-            className={cn(
-              "flex items-center justify-center py-3 px-4 rounded-lg text-white font-medium",
-              "hover:opacity-90 transition-all duration-200",
-              action.color
-            )}
+            className="flex items-center justify-center py-2.5 px-4 text-sm font-medium text-gray-900 border border-gray-200 hover:bg-gray-50 transition-colors"
           >
             {action.label}
           </a>
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
@@ -210,35 +197,39 @@ const TransactionSummary = ({ data }: { data: any }) => {
       : "0";
 
   return (
-    <Card className="border-slate-200">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-semibold text-slate-900">
+    <div className="border border-gray-200 bg-white">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
           今日交易
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+        </h3>
+      </div>
+      <div className="p-6 space-y-6">
         <div className="grid grid-cols-2 gap-4">
-          <div className="text-center p-4 bg-slate-50 rounded-lg">
-            <div className="text-2xl font-bold text-slate-900">
+          <div className="text-center p-4 border border-gray-200">
+            <div className="text-2xl font-semibold text-gray-900">
               {formatNumberInInteger(data.total || "0")}
             </div>
-            <div className="text-sm text-slate-600">總筆數</div>
+            <div className="text-xs text-gray-600 mt-1 uppercase tracking-wide">
+              總筆數
+            </div>
           </div>
-          <div className="text-center p-4 bg-emerald-50 rounded-lg">
-            <div className="text-2xl font-bold text-emerald-600">
+          <div className="text-center p-4 border border-gray-200">
+            <div className="text-2xl font-semibold text-gray-900">
               {successRate}%
             </div>
-            <div className="text-sm text-slate-600">成功率</div>
+            <div className="text-xs text-gray-600 mt-1 uppercase tracking-wide">
+              成功率
+            </div>
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3 pt-2 border-t border-gray-200">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-              <span className="text-sm text-slate-600">成功</span>
+              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+              <span className="text-sm text-gray-600">成功</span>
             </div>
-            <span className="font-medium text-slate-900">
+            <span className="text-sm font-medium text-gray-900">
               {formatNumberInInteger(
                 (
                   parseInt(data.depositSuccessTotal || "0") +
@@ -249,10 +240,10 @@ const TransactionSummary = ({ data }: { data: any }) => {
           </div>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-              <span className="text-sm text-slate-600">失敗</span>
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <span className="text-sm text-gray-600">失敗</span>
             </div>
-            <span className="font-medium text-slate-900">
+            <span className="text-sm font-medium text-gray-900">
               {formatNumberInInteger(
                 (
                   parseInt(data.depositFailedTotal || "0") +
@@ -263,10 +254,10 @@ const TransactionSummary = ({ data }: { data: any }) => {
           </div>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-              <span className="text-sm text-slate-600">處理中</span>
+              <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+              <span className="text-sm text-gray-600">處理中</span>
             </div>
-            <span className="font-medium text-slate-900">
+            <span className="text-sm font-medium text-gray-900">
               {formatNumberInInteger(
                 (
                   parseInt(data.depositPendingTotal || "0") +
@@ -276,8 +267,8 @@ const TransactionSummary = ({ data }: { data: any }) => {
             </span>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
@@ -291,16 +282,16 @@ const ChartContainer = ({
   children: React.ReactNode;
   className?: string;
 }) => (
-  <Card className={cn("border-slate-200", className)}>
-    <CardHeader className="pb-4">
-      <CardTitle className="text-lg font-semibold text-slate-900">
+  <div className={cn("border border-gray-200 bg-white", className)}>
+    <div className="px-6 py-4 border-b border-gray-200">
+      <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
         {title}
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
+      </h3>
+    </div>
+    <div className="p-6">
       <div className="h-80">{children}</div>
-    </CardContent>
-  </Card>
+    </div>
+  </div>
 );
 
 export default function MerchantDashboardView() {
@@ -364,7 +355,7 @@ export default function MerchantDashboardView() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 p-8">
       {/* Hero Section - Balance Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <BalanceCard
@@ -405,24 +396,23 @@ export default function MerchantDashboardView() {
           <ChartContainer title="餘額趨勢 (近7天)">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={dailyBalanceData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
                 <XAxis
                   dataKey="name"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: "#64748b", fontSize: 12 }}
+                  tick={{ fill: "#6b7280", fontSize: 12 }}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: "#64748b", fontSize: 12 }}
+                  tick={{ fill: "#6b7280", fontSize: 12 }}
                 />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "white",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "4px",
                   }}
                 />
                 <Area
@@ -430,8 +420,8 @@ export default function MerchantDashboardView() {
                   dataKey="balance"
                   stroke={COLORS.primary}
                   fill={COLORS.primary}
-                  fillOpacity={0.1}
-                  strokeWidth={2}
+                  fillOpacity={0.05}
+                  strokeWidth={1.5}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -441,30 +431,29 @@ export default function MerchantDashboardView() {
           <ChartContainer title="週交易趨勢">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={weeklyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
                 <XAxis
                   dataKey="date"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: "#64748b", fontSize: 12 }}
+                  tick={{ fill: "#6b7280", fontSize: 12 }}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: "#64748b", fontSize: 12 }}
+                  tick={{ fill: "#6b7280", fontSize: 12 }}
                 />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "white",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "4px",
                   }}
                 />
                 <Bar
                   dataKey="count"
-                  fill={COLORS.accent}
-                  radius={[4, 4, 0, 0]}
+                  fill={COLORS.primary}
+                  radius={[0, 0, 0, 0]}
                 />
               </BarChart>
             </ResponsiveContainer>

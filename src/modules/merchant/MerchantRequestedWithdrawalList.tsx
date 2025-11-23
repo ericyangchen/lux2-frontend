@@ -29,7 +29,7 @@ import {
 
 import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
-import { DatePicker } from "@/components/DatePicker";
+import { MerchantDateTimePicker } from "@/components/MerchantDateTimePicker";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
@@ -201,7 +201,7 @@ export function MerchantRequestedWithdrawalList({
 
   return (
     <div
-      className="sm:p-4 sm:border rounded-md w-full lg:h-[calc(100vh-200px)] h-[calc(100vh-104px)] overflow-y-scroll"
+      className="sm:p-4 sm:border border-gray-200 w-full lg:h-[calc(100vh-200px)] h-[calc(100vh-104px)] overflow-y-scroll"
       id="scrollableDiv"
     >
       {/* Search Filters */}
@@ -215,7 +215,7 @@ export function MerchantRequestedWithdrawalList({
           <div className="flex items-center gap-4 w-full lg:w-fit">
             <Label className="whitespace-nowrap">商戶訂單號</Label>
             <Input
-              className="sm:min-w-[300px] font-mono"
+              className="sm:min-w-[300px] font-mono border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               value={merchantOrderId}
               onChange={(e) => setMerchantOrderId(e.target.value)}
               placeholder="輸入商戶訂單號"
@@ -224,7 +224,7 @@ export function MerchantRequestedWithdrawalList({
 
           {/* paymentMethod */}
           <div className="flex items-center gap-4">
-            <Label className="whitespace-nowrap">支付類型</Label>
+            <Label className="whitespace-nowrap">通道</Label>
             <div className="w-fit min-w-[150px]">
               <Select
                 value={paymentMethod}
@@ -232,7 +232,7 @@ export function MerchantRequestedWithdrawalList({
                   setPaymentMethod(value as PaymentMethod)
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="border-gray-200 focus:ring-gray-900 focus:ring-1 shadow-none rounded-none">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -259,7 +259,7 @@ export function MerchantRequestedWithdrawalList({
                   setTransactionStatus(value as TransactionStatus)
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="border-gray-200 focus:ring-gray-900 focus:ring-1 shadow-none rounded-none">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -308,29 +308,39 @@ export function MerchantRequestedWithdrawalList({
           {/* startDate */}
           <div className="flex items-center gap-4 w-full lg:w-fit">
             <Label className="whitespace-nowrap">起始日期</Label>
-            <DatePicker
+            <MerchantDateTimePicker
               date={startDate}
               setDate={setStartDate}
-              placeholder="yyyy/mm/dd"
+              placeholder="yyyy/mm/dd HH:mm:ss"
+              onChange={setStartDate}
             />
           </div>
 
           {/* endDate */}
           <div className="flex items-center gap-4 w-full lg:w-fit">
             <Label className="whitespace-nowrap">結束日期</Label>
-            <DatePicker
+            <MerchantDateTimePicker
               date={endDate}
               setDate={setEndDate}
-              placeholder="yyyy/mm/dd"
+              placeholder="yyyy/mm/dd HH:mm:ss"
+              onChange={setEndDate}
             />
           </div>
         </div>
 
         <div className="flex gap-4 px-4">
-          <Button onClick={() => handleSearch()} disabled={isLoading}>
+          <Button 
+            onClick={() => handleSearch()} 
+            disabled={isLoading}
+            className="border border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
+          >
             {isLoading ? "搜尋中..." : "搜尋"}
           </Button>
-          <Button variant="outline" onClick={clearFilters}>
+          <Button 
+            variant="outline" 
+            onClick={clearFilters}
+            className="border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
+          >
             清除條件
           </Button>
         </div>
@@ -393,7 +403,7 @@ export function MerchantRequestedWithdrawalList({
                       商戶訂單號
                     </th>
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
-                      支付類型
+                      通道
                     </th>
                     <th className="px-1 py-2 text-center text-sm font-semibold text-gray-900">
                       金額
@@ -498,7 +508,7 @@ export function MerchantRequestedWithdrawalList({
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">支付類型:</span>
+                    <span className="text-sm text-gray-600">通道:</span>
                     <span className="text-sm">
                       {
                         PaymentMethodDisplayNames[

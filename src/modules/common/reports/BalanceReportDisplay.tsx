@@ -1,4 +1,5 @@
 import * as moment from "moment-timezone";
+import * as React from "react";
 
 import {
   BalanceBreakdown,
@@ -54,6 +55,7 @@ interface BalanceReportDisplayProps {
   onNextPage?: () => void;
   onPrevPage?: () => void;
   isLoadingPagination?: boolean;
+  isMerchant?: boolean;
 }
 
 export function BalanceReportDisplay({
@@ -64,6 +66,7 @@ export function BalanceReportDisplay({
   onNextPage,
   onPrevPage,
   isLoadingPagination = false,
+  isMerchant = false,
 }: BalanceReportDisplayProps) {
   const { toast } = useToast();
 
@@ -75,10 +78,21 @@ export function BalanceReportDisplay({
     });
   };
 
+  const sectionClassName = isMerchant 
+    ? "border border-gray-200 bg-white p-6" 
+    : "";
+  
+  const Section = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => {
+    if (isMerchant) {
+      return <div className={`${sectionClassName} ${className}`}>{children}</div>;
+    }
+    return <Card className={`p-6 ${className}`}>{children}</Card>;
+  };
+  
   return (
     <div className="space-y-6">
       {/* Report Header */}
-      <Card className="p-6">
+      <Section>
         <h3 className="text-lg font-semibold mb-4">報表資訊</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
@@ -99,10 +113,10 @@ export function BalanceReportDisplay({
             <p>{report.date}</p>
           </div>
         </div>
-      </Card>
+      </Section>
 
       {/* Start Balance */}
-      <Card className="p-6">
+      <Section>
         <h3 className="text-lg font-semibold mb-4">起始餘額 (前一日結算)</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div>
@@ -136,10 +150,10 @@ export function BalanceReportDisplay({
             </p>
           </div>
         </div>
-      </Card>
+      </Section>
 
       {/* Transactions */}
-      <Card className="p-6">
+      <Section>
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">
             當日交易記錄 ({report.transactionsPagination.total} 筆總計, 顯示{" "}
@@ -155,10 +169,10 @@ export function BalanceReportDisplay({
           )}
         </div>
         {report.transactions.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className={`overflow-x-auto ${isMerchant ? 'border border-gray-200' : ''}`}>
+            <table className={`w-full text-sm ${isMerchant ? '' : ''}`}>
               <thead>
-                <tr className="border-b bg-gray-50">
+                <tr className={`border-b ${isMerchant ? 'bg-gray-50' : ''}`}>
                   <th className="text-left p-2">交易ID</th>
                   <th className="text-left p-2">商戶訂單號</th>
                   <th className="text-left p-2">類型</th>
@@ -175,7 +189,7 @@ export function BalanceReportDisplay({
                 {report.transactions.map((transaction, index) => (
                   <tr
                     key={transaction.id}
-                    className="border-b hover:bg-gray-50"
+                    className={`border-b ${isMerchant ? 'hover:bg-gray-50' : ''}`}
                   >
                     <td
                       className="p-2 font-mono cursor-pointer hover:text-blue-600"
@@ -242,6 +256,7 @@ export function BalanceReportDisplay({
                       size="sm"
                       disabled={isLoadingPagination}
                       onClick={onPrevPage}
+                      className={isMerchant ? "border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none" : ""}
                     >
                       {isLoadingPagination ? "載入中..." : "上一頁"}
                     </Button>
@@ -319,6 +334,10 @@ export function BalanceReportDisplay({
                               pageNumber > totalVisitedPages
                             }
                             onClick={() => onPageChange?.(pageNumber)}
+                            className={isMerchant ? pageNumber === currentPage 
+                              ? "bg-gray-900 text-white hover:bg-gray-800 shadow-none rounded-none"
+                              : "border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
+                              : ""}
                           >
                             {pageNumber}
                           </Button>
@@ -338,6 +357,7 @@ export function BalanceReportDisplay({
                       size="sm"
                       disabled={isLoadingPagination}
                       onClick={onNextPage}
+                      className={isMerchant ? "border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none" : ""}
                     >
                       {isLoadingPagination ? "載入中..." : "下一頁"}
                     </Button>
@@ -359,18 +379,18 @@ export function BalanceReportDisplay({
               </div>
             </div>
           )}
-      </Card>
+      </Section>
 
       {/* Balance Modifications */}
-      <Card className="p-6">
+      <Section>
         <h3 className="text-lg font-semibold mb-4">
           手動餘額調整 ({report.balanceModifications.length} 筆)
         </h3>
         {report.balanceModifications.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className={`overflow-x-auto ${isMerchant ? 'border border-gray-200' : ''}`}>
+            <table className={`w-full text-sm ${isMerchant ? '' : ''}`}>
               <thead>
-                <tr className="border-b bg-gray-50">
+                <tr className={`border-b ${isMerchant ? 'bg-gray-50' : ''}`}>
                   <th className="text-left p-2">ID</th>
                   <th className="text-left p-2">操作</th>
                   <th className="text-left p-2">可用變動</th>
@@ -384,7 +404,7 @@ export function BalanceReportDisplay({
                 {report.balanceModifications.map((modification) => (
                   <tr
                     key={modification.id}
-                    className="border-b hover:bg-gray-50"
+                    className={`border-b ${isMerchant ? 'hover:bg-gray-50' : ''}`}
                   >
                     <td
                       className="p-2 font-mono cursor-pointer hover:text-blue-600"
@@ -424,10 +444,10 @@ export function BalanceReportDisplay({
         ) : (
           <p className="text-gray-500 text-center py-8">當日無手動調整記錄</p>
         )}
-      </Card>
+      </Section>
 
       {/* End Balance */}
-      <Card className="p-6">
+      <Section>
         <h3 className="text-lg font-semibold mb-4">結算餘額 (當日結束)</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div>
@@ -461,10 +481,10 @@ export function BalanceReportDisplay({
             </p>
           </div>
         </div>
-      </Card>
+      </Section>
 
       {/* Summary */}
-      <Card className="p-6">
+      <Section>
         <h3 className="text-lg font-semibold mb-4">摘要統計</h3>
         <div className="grid grid-cols-3 gap-6 mb-4">
           {/* First column */}
@@ -521,13 +541,13 @@ export function BalanceReportDisplay({
         </div>
 
         {!report.summary.isValid && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className={`bg-red-50 border border-red-200 p-4 ${isMerchant ? 'rounded-none' : 'rounded-lg'}`}>
             <p className="text-red-700 font-medium">
               ⚠️ 警告：餘額計算驗證失敗，可能存在資料不一致的問題
             </p>
           </div>
         )}
-      </Card>
+      </Section>
     </div>
   );
 }

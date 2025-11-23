@@ -83,30 +83,29 @@ export function MerchantUserListView() {
   const showStaffEditButton = permission.accessingSelfOrg && permission.isOwner;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Administrator */}
-      <div>
-        <div className="mb-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-slate-900">
-              {UserRoleDisplayNames[UserRole.MERCHANT_OWNER]}
-            </h2>
-            {showOwnerAddButton && (
-              <button
-                className="text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 px-3 py-1.5 rounded-md transition-colors duration-150"
-                onClick={() =>
-                  openAddDialog({
-                    role: UserRole.MERCHANT_OWNER,
-                  })
-                }
-              >
-                新增
-              </button>
-            )}
-          </div>
-          <div className="shadow ring-1 ring-black ring-opacity-5 rounded-lg mt-2 overflow-x-scroll">
-            <table className="divide-y divide-gray-300 w-full">
-              <thead className="bg-gray-50">
+      <div className="border border-gray-200 bg-white">
+        <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+          <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+            {UserRoleDisplayNames[UserRole.MERCHANT_OWNER]}
+          </h2>
+          {showOwnerAddButton && (
+            <button
+              className="text-sm font-medium text-gray-900 border border-gray-200 hover:bg-gray-50 px-3 py-1.5 transition-colors"
+              onClick={() =>
+                openAddDialog({
+                  role: UserRole.MERCHANT_OWNER,
+                })
+              }
+            >
+              新增
+            </button>
+          )}
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th
                     scope="col"
@@ -178,8 +177,8 @@ export function MerchantUserListView() {
                           <div
                             className={`w-2 h-2 rounded-full mr-2 ${
                               ownerUser.isOtpEnabled
-                                ? "bg-green-500"
-                                : "bg-gray-400"
+                                ? "bg-gray-700"
+                                : "bg-gray-300"
                             }`}
                           ></div>
                           {ownerUser.isOtpEnabled ? "已啟用" : "未啟用"}
@@ -213,33 +212,31 @@ export function MerchantUserListView() {
                 )}
               </tbody>
             </table>
-          </div>
         </div>
       </div>
 
       {/* Operator */}
-      <div className="px-0 sm:px-4">
-        <div className="py-2 pb-4">
-          <div className="flex justify-between items-center h-7">
-            <Label className="text-md font-semibold px-2">
-              {UserRoleDisplayNames[UserRole.MERCHANT_STAFF]}
-            </Label>
-            {showStaffAddButton && (
-              <button
-                className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 rounded-md transition-colors duration-200"
-                onClick={() =>
-                  openAddDialog({
-                    role: UserRole.MERCHANT_STAFF,
-                  })
-                }
-              >
-                新增
-              </button>
-            )}
-          </div>
-          <div className="shadow ring-1 ring-black ring-opacity-5 rounded-lg mt-2 overflow-x-scroll">
-            <table className="divide-y divide-gray-300 w-full">
-              <thead className="bg-gray-50">
+      <div className="border border-gray-200 bg-white">
+        <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+          <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+            {UserRoleDisplayNames[UserRole.MERCHANT_STAFF]}
+          </h2>
+          {showStaffAddButton && (
+            <button
+              className="text-sm font-medium text-gray-900 border border-gray-200 hover:bg-gray-50 px-3 py-1.5 transition-colors"
+              onClick={() =>
+                openAddDialog({
+                  role: UserRole.MERCHANT_STAFF,
+                })
+              }
+            >
+              新增
+            </button>
+          )}
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th
                     scope="col"
@@ -311,8 +308,8 @@ export function MerchantUserListView() {
                           <div
                             className={`w-2 h-2 rounded-full mr-2 ${
                               staffUser.isOtpEnabled
-                                ? "bg-green-500"
-                                : "bg-gray-400"
+                                ? "bg-gray-700"
+                                : "bg-gray-300"
                             }`}
                           ></div>
                           {staffUser.isOtpEnabled ? "已啟用" : "未啟用"}
@@ -347,7 +344,6 @@ export function MerchantUserListView() {
                 )}
               </tbody>
             </table>
-          </div>
         </div>
       </div>
 

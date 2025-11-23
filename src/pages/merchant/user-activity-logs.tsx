@@ -2,7 +2,7 @@ import { MerchantUserActivityLogsView } from "@/modules/merchant/MerchantUserAct
 
 export default function MerchantUserActivityLogsPage() {
   return (
-    <div className="p-6">
+    <div className="p-8">
       <MerchantUserActivityLogsView />
     </div>
   );
