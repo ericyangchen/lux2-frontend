@@ -8,6 +8,7 @@ import {
 import { Calculator } from "@/lib/utils/calculator";
 import { useSystemBalance } from "@/lib/hooks/swr/balance";
 import { useSystemDailyBalanceSnapshots } from "@/lib/hooks/swr/balance-snapshots";
+import { useUpstreamBalances } from "@/lib/hooks/swr/upstream-balances";
 import { PaymentMethodCurrencyMapping } from "@/lib/constants/transaction";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { SystemBalanceByPaymentMethod } from "@/lib/types/balance";
@@ -59,6 +60,7 @@ export const useDashboardData = () => {
   const { systemDailyBalanceSnapshots } = useSystemDailyBalanceSnapshots({
     days: 7,
   });
+  const { upstreamBalances } = useUpstreamBalances();
 
   // Group balances by currency
   const balancesByCurrency = groupBalancesByCurrency(systemBalances);
@@ -107,5 +109,6 @@ export const useDashboardData = () => {
     systemPaymentMethodDistribution,
     systemChannelPerformance,
     systemDailyBalanceSnapshots,
+    upstreamBalances,
   };
 };

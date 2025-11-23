@@ -1,6 +1,6 @@
 import { AnalyticsSection } from "./components/sections/AnalyticsSection";
 import { BalanceSection } from "./components/sections/BalanceSection";
-import { PaymentChannelSection } from "./components/sections/PaymentChannelSection";
+import { UpstreamBalancesSection } from "./components/sections/UpstreamBalancesSection";
 import { TransactionSection } from "./components/sections/TransactionSection";
 import { useDashboardData } from "./hooks/useDashboardData";
 
@@ -12,11 +12,14 @@ export default function DashboardView() {
     systemPaymentMethodDistribution,
     systemChannelPerformance,
     systemDailyBalanceSnapshots,
+    upstreamBalances,
   } = useDashboardData();
 
   return (
     <div className="space-y-8">
       <BalanceSection currencyBalances={currencyBalances} />
+
+      <UpstreamBalancesSection upstreamBalances={upstreamBalances} />
 
       <TransactionSection
         systemDailyTransactionCount={systemDailyTransactionCount}
@@ -26,11 +29,6 @@ export default function DashboardView() {
         systemWeeklyTransactionTrends={systemWeeklyTransactionTrends}
         systemDailyTransactionCount={systemDailyTransactionCount}
         systemDailyBalanceSnapshots={systemDailyBalanceSnapshots}
-      />
-
-      <PaymentChannelSection
-        systemPaymentMethodDistribution={systemPaymentMethodDistribution}
-        systemChannelPerformance={systemChannelPerformance}
       />
     </div>
   );
