@@ -34,11 +34,13 @@ import {
 import { Calculator } from "@/lib/utils/calculator";
 import MerchantPaymentMethodInfo from "./MerchantPaymentMethodInfo";
 import { cn } from "@/lib/utils/classname-utils";
-import { currencySymbol } from "@/lib/constants/common";
 import { format } from "date-fns";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useBalances } from "@/lib/hooks/swr/balance";
 import { useOrganizationDailyBalanceSnapshots } from "@/lib/hooks/swr/balance-snapshots";
+import { PaymentMethodCurrencyMapping } from "@/lib/constants/transaction";
+import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
+import { Balance } from "@/lib/types/balance";
 
 // Minimal color palette for business style
 const COLORS = {
@@ -52,10 +54,65 @@ const COLORS = {
 
 const CHART_COLORS = ["#111827", "#374151", "#6b7280", "#9ca3af", "#d1d5db"];
 
+// Currency symbol mapping
+const getCurrencySymbol = (currency: string): string => {
+  const symbols: Record<string, string> = {
+    PHP: "₱",
+    USD: "$",
+    CNY: "¥",
+    TWD: "NT$",
+    HKD: "HK$",
+    SGD: "S$",
+    MYR: "RM",
+    IDR: "Rp",
+    THB: "฿",
+    VND: "₫",
+  };
+  return symbols[currency] || currency;
+};
+
+// Get currency for a payment method
+const getCurrencyForPaymentMethod = (
+  paymentMethod: PaymentMethod
+): string | null => {
+  for (const [currency, paymentMethods] of Object.entries(
+    PaymentMethodCurrencyMapping
+  )) {
+    if (paymentMethods.includes(paymentMethod)) {
+      return currency;
+    }
+  }
+  return null;
+};
+
+// Group balances by currency
+const groupBalancesByCurrency = (
+  balances: Balance[] | undefined
+): Map<string, Balance[]> => {
+  const grouped = new Map<string, Balance[]>();
+
+  if (!balances) {
+    return grouped;
+  }
+
+  for (const balance of balances) {
+    const currency = getCurrencyForPaymentMethod(balance.paymentMethod);
+    if (currency) {
+      if (!grouped.has(currency)) {
+        grouped.set(currency, []);
+      }
+      grouped.get(currency)!.push(balance);
+    }
+  }
+
+  return grouped;
+};
+
 // Modern Balance Card Component
 const BalanceCard = ({
   title,
   value,
+  currency,
   change,
   changeType,
   icon: Icon,
@@ -64,6 +121,7 @@ const BalanceCard = ({
 }: {
   title: string;
   value: string;
+  currency?: string;
   change?: string;
   changeType?: "increase" | "decrease" | "neutral";
   icon: React.ElementType;
@@ -92,6 +150,8 @@ const BalanceCard = ({
     }
   };
 
+  const currencySymbol = currency ? getCurrencySymbol(currency) : "₱";
+
   return (
     <div className="group relative border border-gray-200 bg-white">
       <div className="p-6">
@@ -101,6 +161,11 @@ const BalanceCard = ({
               <Icon className="h-4 w-4 text-gray-500" />
               <span className="text-sm font-medium text-gray-600 uppercase tracking-wide">
                 {title}
+                {currency && (
+                  <span className="ml-2 text-xs font-normal text-gray-500 normal-case">
+                    ({currency})
+                  </span>
+                )}
               </span>
             </div>
 
@@ -296,12 +361,6 @@ const ChartContainer = ({
 
 export default function MerchantDashboardView() {
   const { organizationId } = getApplicationCookies();
-  const [balanceVisibility, setBalanceVisibility] = useState({
-    total: true,
-    available: true,
-    unsettled: true,
-    frozen: true,
-  });
 
   // Data hooks
   const { balances } = useBalances({ organizationId });
@@ -315,7 +374,46 @@ export default function MerchantDashboardView() {
   const { weeklyTransactionTrendsByOrganizationId } =
     useWeeklyTransactionTrendsByOrganizationId({ organizationId });
 
-  // Balance calculations
+  // Group balances by currency
+  const balancesByCurrency = groupBalancesByCurrency(balances);
+
+  // Calculate aggregated balances per currency
+  const currencyBalances = Array.from(balancesByCurrency.entries()).map(
+    ([currency, currencyBalanceList]) => {
+      const totalBalance = currencyBalanceList.reduce((acc, balance) => {
+        const balanceTotal = Calculator.plus(
+          balance.availableAmount,
+          balance.depositUnsettledAmount
+        );
+        return Calculator.plus(acc, balanceTotal);
+      }, "0");
+
+      const totalAvailableAmount = currencyBalanceList.reduce(
+        (acc, balance) => Calculator.plus(acc, balance.availableAmount),
+        "0"
+      );
+
+      const totalDepositUnsettledAmount = currencyBalanceList.reduce(
+        (acc, balance) => Calculator.plus(acc, balance.depositUnsettledAmount),
+        "0"
+      );
+
+      const totalFrozenAmount = currencyBalanceList.reduce(
+        (acc, balance) => Calculator.plus(acc, balance.frozenAmount),
+        "0"
+      );
+
+      return {
+        currency,
+        totalBalance,
+        totalAvailableAmount,
+        totalDepositUnsettledAmount,
+        totalFrozenAmount,
+      };
+    }
+  );
+
+  // Legacy calculations for backwards compatibility (total across all currencies)
   const totalBalance = balances?.reduce((acc, balance) => {
     const totalBalance = Calculator.plus(
       balance.availableAmount,
@@ -350,42 +448,95 @@ export default function MerchantDashboardView() {
 
   const weeklyData = weeklyTransactionTrendsByOrganizationId?.weeklyData || [];
 
-  const toggleBalanceVisibility = (type: keyof typeof balanceVisibility) => {
-    setBalanceVisibility((prev) => ({ ...prev, [type]: !prev[type] }));
-  };
-
   return (
     <div className="space-y-8 p-8">
       {/* Hero Section - Balance Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <BalanceCard
-          title="總餘額"
-          value={formatNumber(totalBalance) || "0.000"}
-          icon={WalletIcon}
-          isVisible={balanceVisibility.total}
-          onToggleVisibility={() => toggleBalanceVisibility("total")}
-        />
-        <BalanceCard
-          title="可用餘額"
-          value={formatNumber(totalAvailableAmount) || "0.000"}
-          icon={CreditCardIcon}
-          isVisible={balanceVisibility.available}
-          onToggleVisibility={() => toggleBalanceVisibility("available")}
-        />
-        <BalanceCard
-          title="未結算額度"
-          value={formatNumber(totalDepositUnsettledAmount) || "0.000"}
-          icon={ClockIcon}
-          isVisible={balanceVisibility.unsettled}
-          onToggleVisibility={() => toggleBalanceVisibility("unsettled")}
-        />
-        <BalanceCard
-          title="凍結額度"
-          value={formatNumber(totalFrozenAmount) || "0.000"}
-          icon={ArrowUpIcon}
-          isVisible={balanceVisibility.frozen}
-          onToggleVisibility={() => toggleBalanceVisibility("frozen")}
-        />
+      <div className="border border-gray-200 bg-white">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">餘額總覽</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                  貨幣
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                  總餘額
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                  可用餘額
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                  未結算額度
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                  凍結額度
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {currencyBalances.length > 0 ? (
+                currencyBalances.map(({ currency, ...balances }) => {
+                  const currencySymbol = getCurrencySymbol(currency);
+                  return (
+                    <tr
+                      key={currency}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-gray-900">
+                          {currency}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {currencySymbol}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-mono text-gray-900">
+                          {`${currencySymbol} ${
+                            formatNumber(balances.totalBalance) || "0.000"
+                          }`}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-mono text-gray-900">
+                          {`${currencySymbol} ${
+                            formatNumber(balances.totalAvailableAmount) ||
+                            "0.000"
+                          }`}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-mono text-gray-900">
+                          {`${currencySymbol} ${
+                            formatNumber(
+                              balances.totalDepositUnsettledAmount
+                            ) || "0.000"
+                          }`}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-mono text-rose-600">
+                          {`${currencySymbol} ${
+                            formatNumber(balances.totalFrozenAmount) || "0.000"
+                          }`}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td className="px-6 py-4 text-sm text-gray-500" colSpan={5}>
+                    暫無餘額資料
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Main Content Grid */}
