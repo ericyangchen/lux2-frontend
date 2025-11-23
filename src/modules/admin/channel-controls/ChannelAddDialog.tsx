@@ -344,7 +344,10 @@ export function ChannelAddDialog({
                           (method): method is PaymentMethod =>
                             Object.values(PaymentMethod).includes(
                               method as PaymentMethod
-                            ) && availablePaymentMethods.includes(method)
+                            ) &&
+                            availablePaymentMethods.includes(
+                              method as PaymentMethod
+                            )
                         );
                         if (validMethods.length === 0) return null;
                         return (
@@ -365,7 +368,13 @@ export function ChannelAddDialog({
                         );
                       }
                     )
-                  ) : null}
+                  ) : (
+                    <SelectGroup>
+                      <SelectItem value="" disabled>
+                        所有通道都已配置
+                      </SelectItem>
+                    </SelectGroup>
+                  )}
                 </SelectContent>
               </Select>
             </div>
