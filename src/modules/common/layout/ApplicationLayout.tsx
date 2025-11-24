@@ -182,30 +182,44 @@ export default function ApplicationLayout({
                     單位: {organization?.name}
                   </div>
                   <ul role="list" className="-mx-2 space-y-1">
-                    {adminNavigation.map((item) => (
-                      <li key={item.name}>
-                        <Link
-                          href={item.href}
-                          className={classNames(
-                            currentNavigation?.href === item.href
-                              ? "bg-gray-100 text-blue-800"
-                              : "text-gray-700 hover:bg-gray-100",
-                            "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full"
-                          )}
-                        >
-                          <item.icon
-                            aria-hidden="true"
+                    {adminNavigation.map((item, index) => {
+                      if (item.type === "category") {
+                        return (
+                          <li
+                            key={`category-${index}`}
+                            className="mt-4 first:mt-0"
+                          >
+                            <div className="text-xs font-medium leading-6 text-gray-500 px-2">
+                              {item.label}
+                            </div>
+                          </li>
+                        );
+                      }
+                      return (
+                        <li key={item.name}>
+                          <Link
+                            href={item.href}
                             className={classNames(
                               currentNavigation?.href === item.href
-                                ? "text-blue-800"
-                                : "text-gray-400",
-                              "h-6 w-6 shrink-0"
+                                ? "bg-gray-100 text-blue-800"
+                                : "text-gray-700 hover:bg-gray-100",
+                              "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full"
                             )}
-                          />
-                          {item.name}
-                        </Link>
-                      </li>
-                    ))}
+                          >
+                            <item.icon
+                              aria-hidden="true"
+                              className={classNames(
+                                currentNavigation?.href === item.href
+                                  ? "text-blue-800"
+                                  : "text-gray-400",
+                                "h-6 w-6 shrink-0"
+                              )}
+                            />
+                            {item.name}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </li>
 
@@ -245,7 +259,8 @@ export default function ApplicationLayout({
             </nav>
           </div>
 
-          <div className="flex flex-col gap-2 overflow-y-auto border-r border-gray-200 bg-white px-2 py-4">
+          <div className="flex flex-col gap-2 border-r border-gray-200 bg-white px-2 py-4 h-fit">
+            <UserInfo user={user} />
             <div
               className="text-gray-700 hover:bg-gray-100 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full cursor-pointer border"
               onClick={handleLogout}
@@ -256,8 +271,7 @@ export default function ApplicationLayout({
               />
               登出
             </div>
-            <UserInfo user={user} />
-            <CustomerServiceSupportInfo />
+            {/* <CustomerServiceSupportInfo /> */}
           </div>
         </div>
 
@@ -349,33 +363,47 @@ export default function ApplicationLayout({
                       </div>
                       <li>
                         <ul role="list" className="-mx-2 space-y-1">
-                          {adminNavigation.map((item) => (
-                            <li key={item.name}>
-                              <Link
-                                href={item.href}
-                                className={classNames(
-                                  currentNavigation?.href === item.href
-                                    ? "bg-gray-100 text-blue-800"
-                                    : "text-gray-700 hover:bg-gray-100",
-                                  "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full"
-                                )}
-                                onClick={() => {
-                                  setSidebarOpen(false);
-                                }}
-                              >
-                                <item.icon
-                                  aria-hidden="true"
+                          {adminNavigation.map((item, index) => {
+                            if (item.type === "category") {
+                              return (
+                                <li
+                                  key={`category-${index}`}
+                                  className="mt-4 first:mt-0"
+                                >
+                                  <div className="text-xs font-medium leading-6 text-gray-500 px-2">
+                                    {item.label}
+                                  </div>
+                                </li>
+                              );
+                            }
+                            return (
+                              <li key={item.name}>
+                                <Link
+                                  href={item.href}
                                   className={classNames(
                                     currentNavigation?.href === item.href
-                                      ? "text-blue-800"
-                                      : "text-gray-400",
-                                    "h-6 w-6 shrink-0"
+                                      ? "bg-gray-100 text-blue-800"
+                                      : "text-gray-700 hover:bg-gray-100",
+                                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full"
                                   )}
-                                />
-                                {item.name}
-                              </Link>
-                            </li>
-                          ))}
+                                  onClick={() => {
+                                    setSidebarOpen(false);
+                                  }}
+                                >
+                                  <item.icon
+                                    aria-hidden="true"
+                                    className={classNames(
+                                      currentNavigation?.href === item.href
+                                        ? "text-blue-800"
+                                        : "text-gray-400",
+                                      "h-6 w-6 shrink-0"
+                                    )}
+                                  />
+                                  {item.name}
+                                </Link>
+                              </li>
+                            );
+                          })}
                         </ul>
                       </li>
                     </li>
@@ -420,7 +448,8 @@ export default function ApplicationLayout({
                   </ul>
                 </nav>
 
-                <div className="flex flex-col gap-2 overflow-y-auto bg-white py-2">
+                <div className="flex flex-col gap-2 bg-white py-2 h-fit">
+                  <UserInfo user={user} />
                   <div
                     className="text-gray-700 hover:bg-gray-100 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full cursor-pointer border"
                     onClick={handleLogout}
@@ -431,8 +460,7 @@ export default function ApplicationLayout({
                     />
                     登出
                   </div>
-                  <UserInfo user={user} />
-                  <CustomerServiceSupportInfo />
+                  {/* <CustomerServiceSupportInfo /> */}
                 </div>
               </div>
             </DialogPanel>
