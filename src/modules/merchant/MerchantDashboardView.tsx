@@ -419,16 +419,103 @@ export default function MerchantDashboardView() {
     "0"
   );
 
-  // Chart data
-  const dailyBalanceData = (
-    organizationDailyBalanceSnapshots?.balanceSnapshots || []
-  ).map((item: any) => ({
-    name: format(new Date(item.date), "MM/dd"),
-    balance: formatNumber(item.totalBalance),
-    available: formatNumber(item.availableBalance),
-    frozen: formatNumber(item.frozenBalance),
-    unsettled: formatNumber(item.unsettledBalance),
-  }));
+  // Chart data - group by currency
+  const transformDailyBalanceDataByCurrency = (
+    dailyBalances: any[]
+  ): { chartData: any[]; currencies: string[] } => {
+    if (!dailyBalances || dailyBalances.length === 0) {
+      return { chartData: [], currencies: [] };
+    }
+
+    // Group by date and currency
+    const dateCurrencyMap = new Map<string, Map<string, any>>();
+
+    for (const balance of dailyBalances) {
+      const date = balance.date;
+      const currency = getCurrencyForPaymentMethod(balance.paymentMethod || "");
+
+      if (!currency) continue;
+
+      if (!dateCurrencyMap.has(date)) {
+        dateCurrencyMap.set(date, new Map());
+      }
+
+      const currencyMap = dateCurrencyMap.get(date)!;
+
+      if (!currencyMap.has(currency)) {
+        currencyMap.set(currency, {
+          date,
+          currency,
+          totalBalance: "0",
+          availableBalance: "0",
+          frozenBalance: "0",
+          unsettledBalance: "0",
+        });
+      }
+
+      const existing = currencyMap.get(currency)!;
+      existing.totalBalance = Calculator.plus(
+        existing.totalBalance,
+        String(balance.totalBalance || 0)
+      );
+      existing.availableBalance = Calculator.plus(
+        existing.availableBalance,
+        String(balance.availableBalance || 0)
+      );
+      existing.frozenBalance = Calculator.plus(
+        existing.frozenBalance,
+        String(balance.frozenBalance || 0)
+      );
+      existing.unsettledBalance = Calculator.plus(
+        existing.unsettledBalance,
+        String(balance.unsettledBalance || 0)
+      );
+    }
+
+    // Get all unique dates and currencies
+    const allDates = Array.from(dateCurrencyMap.keys()).sort();
+    const allCurrencies = new Set<string>();
+    dateCurrencyMap.forEach((currencyMap) => {
+      currencyMap.forEach((_, currency) => allCurrencies.add(currency));
+    });
+    const currencies = Array.from(allCurrencies).sort();
+
+    // Build chart data: array of objects, one per date, with currency fields
+    const chartData = allDates.map((date) => {
+      const dataPoint: any = {
+        name: format(new Date(date), "MM/dd"),
+      };
+
+      const currencyMap = dateCurrencyMap.get(date)!;
+      currencies.forEach((currency) => {
+        const balance = currencyMap.get(currency);
+        if (balance) {
+          dataPoint[`${currency}_total`] = parseFloat(balance.totalBalance);
+          dataPoint[`${currency}_available`] = parseFloat(
+            balance.availableBalance
+          );
+          dataPoint[`${currency}_frozen`] = parseFloat(balance.frozenBalance);
+          dataPoint[`${currency}_unsettled`] = parseFloat(
+            balance.unsettledBalance
+          );
+        } else {
+          dataPoint[`${currency}_total`] = 0;
+          dataPoint[`${currency}_available`] = 0;
+          dataPoint[`${currency}_frozen`] = 0;
+          dataPoint[`${currency}_unsettled`] = 0;
+        }
+      });
+
+      return dataPoint;
+    });
+
+    return { chartData, currencies };
+  };
+
+  const { chartData: dailyBalanceData, currencies } =
+    transformDailyBalanceDataByCurrency(
+      organizationDailyBalanceSnapshots?.balanceSnapshots || []
+    );
 
   const weeklyData = weeklyTransactionTrendsByOrganizationId?.weeklyData || [];
 
@@ -530,7 +617,7 @@ export default function MerchantDashboardView() {
           {/* Balance Trend Chart */}
           <ChartContainer title="餘額趨勢 (近7天)">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={dailyBalanceData}>
+              <LineChart data={dailyBalanceData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
                 <XAxis
                   dataKey="name"
@@ -550,15 +637,23 @@ export default function MerchantDashboardView() {
                     borderRadius: "4px",
                   }}
                 />
-                <Area
-                  type="monotone"
-                  dataKey="balance"
-                  stroke={COLORS.primary}
-                  fill={COLORS.primary}
-                  fillOpacity={0.05}
-                  strokeWidth={1.5}
-                />
-              </AreaChart>
+                <Legend />
+                {currencies.map((currency, index) => (
+                  <Line
+                    key={`${currency}_total`}
+                    type="monotone"
+                    dataKey={`${currency}_total`}
+                    stroke={CHART_COLORS[index % CHART_COLORS.length]}
+                    strokeWidth={2}
+                    name={`${currency} 總餘額`}
+                    dot={{
+                      fill: CHART_COLORS[index % CHART_COLORS.length],
+                      strokeWidth: 2,
+                      r: 4,
+                    }}
+                  />
+                ))}
+              </LineChart>
             </ResponsiveContainer>
           </ChartContainer>
 

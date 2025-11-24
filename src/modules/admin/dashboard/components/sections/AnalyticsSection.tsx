@@ -19,7 +19,7 @@ import {
   COLORS,
   createSuccessRateData,
   createTransactionTypeData,
-  transformDailyBalanceData,
+  transformDailyBalanceDataByCurrency,
 } from "../../utils/chartDataTransformers";
 
 import { ChartCard } from "../cards/ChartCard";
@@ -36,9 +36,12 @@ export const AnalyticsSection = ({
   systemDailyTransactionCount: SystemDailyTransactionCount;
   systemDailyBalanceSnapshots: SystemDailyBalanceSnapshots;
 }) => {
-  const dailyBalanceData = transformDailyBalanceData(
-    systemDailyBalanceSnapshots?.balanceSnapshots || []
-  );
+  const { chartData: dailyBalanceData, currencies } =
+    transformDailyBalanceDataByCurrency(
+      systemDailyBalanceSnapshots?.balanceSnapshots || []
+    );
+
+  const CHART_COLORS = ["#111827", "#374151", "#6b7280", "#9ca3af", "#d1d5db"];
   const successRateData = createSuccessRateData(systemDailyTransactionCount);
   const transactionTypeData = createTransactionTypeData(
     systemDailyTransactionCount
@@ -149,7 +152,7 @@ export const AnalyticsSection = ({
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Balance History */}
-        <ChartCard title="餘額變化趨勢" subtitle="近期餘額與凍結金額變化">
+        <ChartCard title="餘額變化趨勢" subtitle="近期餘額變化（按貨幣分組）">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={dailyBalanceData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
@@ -163,22 +166,21 @@ export const AnalyticsSection = ({
                 }}
               />
               <Legend />
-              <Line
-                type="monotone"
-                dataKey="available"
-                stroke={COLORS.success}
-                strokeWidth={2}
-                name="可用餘額"
-                dot={{ fill: COLORS.success, strokeWidth: 2, r: 4 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="frozen"
-                stroke={COLORS.danger}
-                strokeWidth={2}
-                name="凍結額度"
-                dot={{ fill: COLORS.danger, strokeWidth: 2, r: 4 }}
-              />
+              {currencies.map((currency: string, index: number) => (
+                <Line
+                  key={`${currency}_total`}
+                  type="monotone"
+                  dataKey={`${currency}_total`}
+                  stroke={CHART_COLORS[index % CHART_COLORS.length]}
+                  strokeWidth={2}
+                  name={`${currency} 總餘額`}
+                  dot={{
+                    fill: CHART_COLORS[index % CHART_COLORS.length],
+                    strokeWidth: 2,
+                    r: 4,
+                  }}
+                />
+              ))}
             </LineChart>
           </ResponsiveContainer>
         </ChartCard>
