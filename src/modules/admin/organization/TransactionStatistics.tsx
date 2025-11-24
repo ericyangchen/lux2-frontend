@@ -332,17 +332,25 @@ export function TransactionStatistics({
 
   // Group data by payment method
   const paymentMethodData = useMemo(() => {
+    // Initialize result object dynamically using all enum values
     const result: Record<
       PaymentMethod,
       {
         deposit: StatisticsData[];
         withdrawal: StatisticsData[];
       }
-    > = {
-      [PaymentMethod.NATIVE_GCASH]: { deposit: [], withdrawal: [] },
-      [PaymentMethod.MAYA]: { deposit: [], withdrawal: [] },
-      [PaymentMethod.QRPH]: { deposit: [], withdrawal: [] },
-    };
+    > = {} as Record<
+      PaymentMethod,
+      {
+        deposit: StatisticsData[];
+        withdrawal: StatisticsData[];
+      }
+    >;
+
+    // Initialize each payment method with empty arrays
+    Object.values(PaymentMethod).forEach((method) => {
+      result[method] = { deposit: [], withdrawal: [] };
+    });
 
     processedData.deposit.forEach((item) => {
       // Find which payment method this channel belongs to
@@ -877,7 +885,9 @@ function PaymentMethodSection({
     <Card className="hover:shadow-sm transition-shadow border border-gray-200">
       <CardHeader className="pb-4">
         <CardTitle className="text-xl font-bold text-gray-900">
-          {PaymentMethodDisplayNames[paymentMethod]}
+          {(PaymentMethodDisplayNames as Record<string, string>)[
+            paymentMethod
+          ] || paymentMethod}
         </CardTitle>
       </CardHeader>
       <CardContent className="px-6 pt-0">

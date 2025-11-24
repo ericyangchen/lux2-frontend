@@ -11,4 +11,3 @@ export const ApiGetUpstreamBalances = async ({
     headers: SMPayWebHeaderWithAccessToken(accessToken),
   });
 };
-
