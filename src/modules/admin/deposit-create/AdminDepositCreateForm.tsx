@@ -35,7 +35,7 @@ export function AdminDepositCreateForm({
   const [formData, setFormData] = useState<AdminCreateDepositRequest>({
     type: TransactionType.API_DEPOSIT,
     paymentMethod: PaymentMethod.NATIVE_GCASH,
-    merchantId: "org01JYE65J9S0X949XZY6NS01V6T", // Preset organization ID
+    merchantId: "m01KARC19WSMFH6B9P1D62GKR9K", // Preset organization ID
     merchantOrderId: "",
     amount: "100", // Prefilled amount
     notifyUrl: "",
@@ -94,11 +94,7 @@ export function AdminDepositCreateForm({
                       {currency}
                     </SelectLabel>
                     {validMethods.map((method) => (
-                      <SelectItem
-                        key={method}
-                        value={method}
-                        className="pl-6"
-                      >
+                      <SelectItem key={method} value={method} className="pl-6">
                         {PaymentMethodDisplayNames[method]}
                       </SelectItem>
                     ))}
