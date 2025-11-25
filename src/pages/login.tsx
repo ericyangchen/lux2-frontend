@@ -184,12 +184,10 @@ export default function LoginPage() {
         </title>
       </Head>
       <div
-        className="min-h-screen flex justify-center items-center p-4 relative bg-contain bg-center bg-black"
-        style={
-          {
-            // backgroundImage: "url(/luxpay-logo.jpg)",
-          }
-        }
+        className="min-h-screen flex justify-center items-center p-4 relative bg-cover bg-center bg-black"
+        style={{
+          backgroundImage: "url(/aapay-logo.jpg)",
+        }}
       >
         {/* Overlay for better readability */}
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
@@ -197,15 +195,14 @@ export default function LoginPage() {
           <Card className="shadow-2xl border border-gray-200 rounded-2xl overflow-hidden bg-white">
             <CardHeader className="bg-white text-black pb-8 pt-8">
               <div className="flex flex-col items-center space-y-6">
-                <div className="h-24 flex items-center justify-center">
-                  {/* <Image
+                <div className="h-28 flex items-center justify-center w-full">
+                  <Image
                     src="/aapay-logo-horizontal.jpg"
                     alt="AApay"
-                    width={1280}
-                    height={333}
-                    className="w-full h-full object-contain rounded-md"
-                  /> */}
-                  <div className=" text-6xl font-bold text-center">AApay</div>
+                    width={1024}
+                    height={552}
+                    className="w-full h-full object-cover rounded-md"
+                  />
                 </div>
                 {/* <CardTitle className="text-2xl font-bold text-center text-black">
                   {getCompanyName()}

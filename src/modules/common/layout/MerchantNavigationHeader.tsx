@@ -139,9 +139,18 @@ export default function MerchantNavigationHeader() {
             {/* Logo */}
             <div className="flex items-center gap-6">
               <div className="text-gray-900">
-                <span className="text-lg font-semibold tracking-tight">
+                {/* <span className="text-lg font-semibold tracking-tight">
                   {getCompanyName()}
-                </span>
+                </span> */}
+                <div className="h-12 flex items-center justify-center w-[100px]">
+                  <Image
+                    src="/aapay-logo-horizontal.jpg"
+                    alt="AApay"
+                    width={1024}
+                    height={552}
+                    className="w-full h-full object-cover rounded-md"
+                  />
+                </div>
               </div>
               {organization && (
                 <div className="hidden sm:block border-l border-gray-200 pl-6">
@@ -232,10 +241,23 @@ export default function MerchantNavigationHeader() {
             </TransitionChild>
 
             <div className="flex grow flex-col overflow-y-auto bg-white px-4 py-6">
-              <div className="flex h-12 shrink-0 items-center mb-6">
-                <span className="text-lg font-semibold text-gray-900">
+              <div className="flex h-16 shrink-0 items-center mb-6">
+                {/* <span className="text-lg font-semibold text-gray-900">
                   {getCompanyName()}
-                </span>
+                </span> */}
+
+                <div className="px-2 py-1 bg-white text-white rounded-lg w-full h-full">
+                  {/* <span className="font-bold text-xl">{getCompanyName()}</span> */}
+                  <div className="w-full h-full br-green-500">
+                    <Image
+                      src="/aapay-logo-horizontal.jpg"
+                      alt="AApay"
+                      width={1024}
+                      height={552}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                </div>
               </div>
 
               {organization && (

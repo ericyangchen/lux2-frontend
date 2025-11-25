@@ -137,8 +137,17 @@ export default function ApplicationLayout({
         <div className="h-full hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
           <div className="flex grow flex-col gap-y-2 overflow-y-auto border-r border-gray-200 bg-white px-6">
             <div className="flex h-14 shrink-0 items-center justify-center">
-              <div className="px-4 py-1 bg-black text-white rounded-lg">
-                <span className="font-bold text-xl">{getCompanyName()}</span>
+              <div className="px-8 py-1 bg-white text-white rounded-lg w-full h-full">
+                {/* <span className="font-bold text-xl">{getCompanyName()}</span> */}
+                <div className="w-full h-full br-green-500">
+                  <Image
+                    src="/aapay-logo-horizontal.jpg"
+                    alt="AApay"
+                    width={1024}
+                    height={552}
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                </div>
               </div>
             </div>
             <nav className="flex flex-1 flex-col">
@@ -309,10 +318,17 @@ export default function ApplicationLayout({
 
               <div className="flex grow flex-col gap-y-2 overflow-y-auto bg-white px-4 py-4">
                 <div className="flex h-14 shrink-0 items-center justify-center">
-                  <div className="px-4 py-1 bg-black text-white rounded-lg">
-                    <span className="font-bold text-xl">
-                      {getCompanyName()}
-                    </span>
+                  <div className="px-2 py-1 bg-white text-white rounded-lg w-full h-full">
+                    {/* <span className="font-bold text-xl">{getCompanyName()}</span> */}
+                    <div className="w-full h-full br-green-500">
+                      <Image
+                        src="/aapay-logo-horizontal.jpg"
+                        alt="AApay"
+                        width={1024}
+                        height={552}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    </div>
                   </div>
                 </div>
                 <nav className="flex flex-1 flex-col">
