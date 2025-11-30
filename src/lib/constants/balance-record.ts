@@ -22,4 +22,6 @@ export const BalanceActionDisplayNames = {
   [BalanceAction.DIRECT_MODIFY_SUBTRACT_BALANCE]: "扣除",
   [BalanceAction.FREEZE_BALANCE]: "凍結",
   [BalanceAction.UNFREEZE_BALANCE]: "解凍",
+  [BalanceAction.TRANSFER_OUT]: "轉出",
+  [BalanceAction.TRANSFER_IN]: "轉入",
 };

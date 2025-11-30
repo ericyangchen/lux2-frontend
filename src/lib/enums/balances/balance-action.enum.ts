@@ -21,4 +21,6 @@ export enum BalanceAction {
   UNFREEZE_BALANCE = 'UNFREEZE_BALANCE', // +availableAmount and -frozenAmount
   DIRECT_MODIFY_ADD_BALANCE = 'DIRECT_MODIFY_ADD_BALANCE', // +availableAmount (no txn record created)
   DIRECT_MODIFY_SUBTRACT_BALANCE = 'DIRECT_MODIFY_SUBTRACT_BALANCE', // -availableAmount (no txn record created)
+  TRANSFER_OUT = 'TRANSFER_OUT', // -availableAmount from source org
+  TRANSFER_IN = 'TRANSFER_IN', // +availableAmount to destination org
 }

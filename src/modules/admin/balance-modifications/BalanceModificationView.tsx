@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { DirectAddBalance } from "./DirectAddBalance";
 import { DirectSubtractBalance } from "./DirectSubtractBalance";
 import { FreezeBalance } from "./FreezeBalance";
+import { TransferBalance } from "./TransferBalance";
 import { UnfreezeBalance } from "./UnfreezeBalance";
 import { classNames } from "@/lib/utils/classname-utils";
 import { useRouter } from "next/router";
@@ -12,6 +13,7 @@ enum Tab {
   DirectSubtractBalance = "DirectSubtractBalance",
   FreezeBalance = "FreezeBalance",
   UnfreezeBalance = "UnfreezeBalance",
+  TransferBalance = "TransferBalance",
 }
 
 const tabDisplayNames = {
@@ -19,6 +21,7 @@ const tabDisplayNames = {
   [Tab.DirectSubtractBalance]: "直接扣除",
   [Tab.FreezeBalance]: "凍結餘額",
   [Tab.UnfreezeBalance]: "解凍餘額",
+  [Tab.TransferBalance]: "帳戶互轉",
 };
 
 export function BalanceModificationView() {
@@ -94,6 +97,7 @@ export function BalanceModificationView() {
         </div>
       </div>
 
+      {selectedTab === Tab.TransferBalance && <TransferBalance />}
       {selectedTab === Tab.DirectAddBalance && <DirectAddBalance />}
       {selectedTab === Tab.DirectSubtractBalance && <DirectSubtractBalance />}
       {selectedTab === Tab.FreezeBalance && <FreezeBalance />}

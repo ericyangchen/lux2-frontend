@@ -30,6 +30,38 @@ export const ApiDirectModifyAddBalance = async ({
   });
 };
 
+export interface TransferBalanceRequest {
+  sourceOrganizationId: string;
+  destinationOrganizationId: string;
+  paymentMethod: PaymentMethod;
+  amount: string;
+  notes?: string;
+  referenceId?: string;
+}
+
+export const ApiTransferBalance = async ({
+  sourceOrganizationId,
+  destinationOrganizationId,
+  paymentMethod,
+  amount,
+  notes,
+  referenceId,
+  accessToken,
+}: TransferBalanceRequest & { accessToken: string }) => {
+  return fetch(`${getBackendUrl()}/balance-modifications/transfer`, {
+    method: "POST",
+    headers: SMPayWebHeaderWithAccessToken(accessToken),
+    body: JSON.stringify({
+      sourceOrganizationId,
+      destinationOrganizationId,
+      paymentMethod,
+      amount,
+      notes,
+      referenceId,
+    }),
+  });
+};
+
 export const ApiDirectModifySubtractBalance = async ({
   organizationId,
   paymentMethod,
