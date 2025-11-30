@@ -40,8 +40,8 @@ export function AdminDepositCreateForm({
     amount: "100", // Prefilled amount
     notifyUrl: "",
     redirectUrl: "",
-    senderName: "Xiu Wei", // Prefilled sender name
-    senderEmail: "xiuwei@gmail.com", // Prefilled sender email
+    senderName: "Eth Aa", // Prefilled sender name
+    senderEmail: "eth-aa@gmail.com", // Prefilled sender email
     senderPhoneNumber: "9682269763", // Prefilled sender phone
   });
 
@@ -61,7 +61,7 @@ export function AdminDepositCreateForm({
 
   const generateRandomOrderId = () => {
     const timestamp = Date.now();
-    return `ADMIN-ORDER-${timestamp}`;
+    return `ao-${timestamp}`;
   };
 
   return (
