@@ -370,7 +370,7 @@ export function ChannelAddDialog({
                     )
                   ) : (
                     <SelectGroup>
-                      <SelectItem value="" disabled>
+                      <SelectItem value="disabled" disabled>
                         所有通道都已配置
                       </SelectItem>
                     </SelectGroup>
