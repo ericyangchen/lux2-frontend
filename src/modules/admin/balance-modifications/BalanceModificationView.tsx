@@ -9,11 +9,11 @@ import { classNames } from "@/lib/utils/classname-utils";
 import { useRouter } from "next/router";
 
 enum Tab {
+  TransferBalance = "TransferBalance",
   DirectAddBalance = "DirectAddBalance",
   DirectSubtractBalance = "DirectSubtractBalance",
   FreezeBalance = "FreezeBalance",
   UnfreezeBalance = "UnfreezeBalance",
-  TransferBalance = "TransferBalance",
 }
 
 const tabDisplayNames = {
