@@ -93,6 +93,9 @@ export const DepositPaymentChannelCategories = {
     // UnitPay
     PaymentChannel.NATIVE_GCASH_UNITPAY_DEPOSIT,
 
+    // T207PAY
+    PaymentChannel.NATIVE_GCASH_T207PAY_DEPOSIT,
+
     // // BIFU
     // PaymentChannel.NATIVE_GCASH_DIRECT_BIFU,
     // PaymentChannel.NATIVE_GCASH_QR_BIFU,
@@ -141,6 +144,9 @@ export const WithdrawalPaymentChannelCategories = {
 
     // UnitPay
     PaymentChannel.NATIVE_GCASH_UNITPAY_WITHDRAWAL,
+
+    // T207PAY
+    PaymentChannel.NATIVE_GCASH_T207PAY_WITHDRAWAL,
 
     // // BIFU
     // PaymentChannel.NATIVE_GCASH_BIFU_BANK,
@@ -201,6 +207,10 @@ export const PaymentChannelDisplayNames = {
   // /* UnitPay */
   [PaymentChannel.NATIVE_GCASH_UNITPAY_DEPOSIT]: "UnitPay: Gcash Deposit",
   [PaymentChannel.NATIVE_GCASH_UNITPAY_WITHDRAWAL]: "UnitPay: Gcash Withdrawal",
+
+  /* T207PAY */
+  [PaymentChannel.NATIVE_GCASH_T207PAY_DEPOSIT]: "207Pay: Gcash Deposit",
+  [PaymentChannel.NATIVE_GCASH_T207PAY_WITHDRAWAL]: "207Pay: Gcash Withdrawal",
 
   // /**
   //  * BIFU
