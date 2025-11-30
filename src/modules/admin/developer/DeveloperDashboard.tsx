@@ -1,5 +1,6 @@
 import { GetApiKeySection } from "./GetApiKeySection";
 import { UpdateApiKeySection } from "./UpdateApiKeySection";
+import { TransactionCleanupSection } from "./TransactionCleanupSection";
 import { useState } from "react";
 
 export function DeveloperDashboard() {
@@ -30,6 +31,8 @@ export function DeveloperDashboard() {
         setSelectedOrganizationId={setSelectedOrganizationId}
         setApiKey={setApiKey}
       />
+
+      <TransactionCleanupSection />
     </div>
   );
 }
