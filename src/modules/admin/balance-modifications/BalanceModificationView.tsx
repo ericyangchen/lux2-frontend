@@ -17,11 +17,11 @@ enum Tab {
 }
 
 const tabDisplayNames = {
+  [Tab.TransferBalance]: "帳戶互轉",
   [Tab.DirectAddBalance]: "直接加值",
   [Tab.DirectSubtractBalance]: "直接扣除",
   [Tab.FreezeBalance]: "凍結餘額",
   [Tab.UnfreezeBalance]: "解凍餘額",
-  [Tab.TransferBalance]: "帳戶互轉",
 };
 
 export function BalanceModificationView() {
