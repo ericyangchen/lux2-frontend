@@ -29,7 +29,7 @@ export function BalanceModificationView() {
   const { query } = router;
 
   const [selectedTab, setSelectedTab] = useState<string>(
-    (query.tab as Tab) || Tab.DirectAddBalance
+    (query.tab as Tab) || Tab.TransferBalance
   );
 
   const handleSelectTab = useCallback(
