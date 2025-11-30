@@ -89,6 +89,10 @@ export const DepositPaymentChannelCategories = {
   [PaymentMethod.NATIVE_GCASH]: [
     // SnapPay
     PaymentChannel.NATIVE_GCASH_SNAPPAY_DEPOSIT,
+
+    // UnitPay
+    PaymentChannel.NATIVE_GCASH_UNITPAY_DEPOSIT,
+
     // // BIFU
     // PaymentChannel.NATIVE_GCASH_DIRECT_BIFU,
     // PaymentChannel.NATIVE_GCASH_QR_BIFU,
@@ -134,6 +138,9 @@ export const WithdrawalPaymentChannelCategories = {
   [PaymentMethod.NATIVE_GCASH]: [
     // SnapPay
     PaymentChannel.NATIVE_GCASH_SNAPPAY_WITHDRAWAL,
+
+    // UnitPay
+    PaymentChannel.NATIVE_GCASH_UNITPAY_WITHDRAWAL,
 
     // // BIFU
     // PaymentChannel.NATIVE_GCASH_BIFU_BANK,
@@ -190,6 +197,10 @@ export const PaymentChannelDisplayNames = {
   /* SnapPay */
   [PaymentChannel.NATIVE_GCASH_SNAPPAY_DEPOSIT]: "Snap: Gcash Deposit",
   [PaymentChannel.NATIVE_GCASH_SNAPPAY_WITHDRAWAL]: "Snap: Gcash Withdrawal",
+
+  // /* UnitPay */
+  [PaymentChannel.NATIVE_GCASH_UNITPAY_DEPOSIT]: "UnitPay: Gcash Deposit",
+  [PaymentChannel.NATIVE_GCASH_UNITPAY_WITHDRAWAL]: "UnitPay: Gcash Withdrawal",
 
   // /**
   //  * BIFU
