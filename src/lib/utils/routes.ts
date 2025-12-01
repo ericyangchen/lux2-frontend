@@ -216,7 +216,7 @@ export const routesWithoutLayout = [
   "/",
   "/cashier",
   "/gcash-cashier",
-  "/test-signature",
+  "/v2-signature-generator",
 ];
 
 export const merchantRoutes = [
@@ -230,7 +230,12 @@ export const merchantRoutes = [
   "/merchant/manual-actions",
 ];
 
-const publicRoutes = ["/", "/cashier", "/gcash-cashier", "/test-signature"];
+const publicRoutes = [
+  "/",
+  "/cashier",
+  "/gcash-cashier",
+  "/v2-signature-generator",
+];
 
 const loginRoutes = ["/login"];
 
