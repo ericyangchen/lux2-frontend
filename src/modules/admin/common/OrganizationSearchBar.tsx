@@ -25,11 +25,17 @@ export function OrganizationSearchBar({
   const { organization } = useOrganizationWithChildren({
     organizationId: getApplicationCookies().organizationId,
   });
-  const organizations = organizationType
-    ? flattenOrganizations(organization).filter(
-        (org) => org.type === organizationType
-      )
-    : flattenOrganizations(organization);
+  const organizations = (
+    organizationType
+      ? flattenOrganizations(organization).filter(
+          (org) => org.type === organizationType
+        )
+      : flattenOrganizations(organization)
+  ).sort((a, b) => {
+    const dateA = new Date(a.createdAt).getTime();
+    const dateB = new Date(b.createdAt).getTime();
+    return dateA - dateB;
+  });
 
   const [query, setQuery] = useState("");
   const [isComposing, setIsComposing] = useState(false);

@@ -69,26 +69,32 @@ export function OrganizationList({
   };
 
   // Filter organizations by type and expansion state
-  const filteredOrganizations = flatOrganizations.filter((org) => {
-    // Filter by selected type
-    if (selectedType && org.type !== selectedType) {
-      return false;
-    }
-
-    // Only display if the parent organization is expanded
-    const parentIsExpanded = (id: string) => {
-      const parent = flatOrganizations.find(
-        (o) => o.children && o.children.some((child) => child.id === id)
-      );
-      if (!parent) return true;
-      if (expandedOrganizations.has(parent.id)) {
-        return parentIsExpanded(parent.id);
+  const filteredOrganizations = flatOrganizations
+    .filter((org) => {
+      // Filter by selected type
+      if (selectedType && org.type !== selectedType) {
+        return false;
       }
-      return false;
-    };
 
-    return parentIsExpanded(org.id);
-  });
+      // Only display if the parent organization is expanded
+      const parentIsExpanded = (id: string) => {
+        const parent = flatOrganizations.find(
+          (o) => o.children && o.children.some((child) => child.id === id)
+        );
+        if (!parent) return true;
+        if (expandedOrganizations.has(parent.id)) {
+          return parentIsExpanded(parent.id);
+        }
+        return false;
+      };
+
+      return parentIsExpanded(org.id);
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return dateA - dateB;
+    });
 
   // expand all initially
   useEffect(() => {
