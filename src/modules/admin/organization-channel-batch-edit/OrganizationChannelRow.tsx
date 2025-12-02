@@ -1,4 +1,8 @@
-import { ChevronDownIcon, ChevronRightIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
 import { Switch } from "@/components/shadcn/ui/switch";
 import { Button } from "@/components/shadcn/ui/button";
 import { Badge } from "@/components/shadcn/ui/badge";
@@ -36,7 +40,7 @@ export function OrganizationChannelRow({
     <div
       className={classNames(
         "flex items-center space-x-3 py-2 px-3 border-b",
-        hasWarning && "bg-yellow-50"
+        hasWarning ? "bg-yellow-50" : ""
       )}
       style={{ paddingLeft: `${org.level * 24 + 12}px` }}
     >
@@ -62,7 +66,11 @@ export function OrganizationChannelRow({
           </span>
 
           <span className="text-xs text-gray-500">
-            ({OrgTypeDisplayNames[org.organizationType as keyof typeof OrgTypeDisplayNames] || org.organizationType})
+            (
+            {OrgTypeDisplayNames[
+              org.organizationType as keyof typeof OrgTypeDisplayNames
+            ] || org.organizationType}
+            )
           </span>
 
           {hasWarning && (
@@ -71,7 +79,8 @@ export function OrganizationChannelRow({
 
           {org.feeSettings && org.feeSettings.length > 0 && (
             <span className="text-xs text-gray-500">
-              費率: {formatNumberInPercentage(org.feeSettings[0].percentage)}, 固定: {formatNumber(org.feeSettings[0].fixed)}
+              費率: {formatNumberInPercentage(org.feeSettings[0].percentage)},
+              固定: {formatNumber(org.feeSettings[0].fixed)}
             </span>
           )}
         </div>
@@ -104,7 +113,7 @@ export function OrganizationChannelRow({
           <div
             className={classNames(
               "flex items-center space-x-2 pl-2",
-              isModified && "rounded-full bg-blue-50/70 px-2 py-1"
+              isModified ? "rounded-full bg-blue-50/70 px-2 py-1" : ""
             )}
           >
             <Switch
@@ -112,11 +121,16 @@ export function OrganizationChannelRow({
               onCheckedChange={onToggleChange}
               className={classNames(
                 "transition-colors data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300",
-                isModified && "ring-2 ring-blue-400 ring-offset-1 ring-offset-white"
+                isModified
+                  ? "ring-2 ring-blue-400 ring-offset-1 ring-offset-white"
+                  : ""
               )}
             />
             {isModified && (
-              <Badge variant="outline" className="text-xs font-semibold text-blue-600 border-blue-400">
+              <Badge
+                variant="outline"
+                className="text-xs font-semibold text-blue-600 border-blue-400"
+              >
                 已修改
               </Badge>
             )}
@@ -128,4 +142,3 @@ export function OrganizationChannelRow({
     </div>
   );
 }
-
