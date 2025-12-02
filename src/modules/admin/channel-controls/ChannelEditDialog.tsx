@@ -75,7 +75,9 @@ export function ChannelEditDialog({
   // Update editable settings when transactionFeeSettings changes
   useEffect(() => {
     setEditableSettings(
-      transactionFeeSettings.map((setting) => ({ ...setting }))
+      transactionFeeSettings
+        .map((setting) => ({ ...setting }))
+        .sort((a, b) => a.paymentChannel.localeCompare(b.paymentChannel))
     );
   }, [transactionFeeSettings]);
   const [isLoading, setIsLoading] = useState(false);
@@ -517,8 +519,15 @@ export function ChannelEditDialog({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
-                              {paymentChannelCategories[paymentMethod]?.map(
-                                (paymentChannel) => {
+                              {paymentChannelCategories[paymentMethod]
+                                ?.sort((a, b) =>
+                                  (
+                                    PaymentChannelDisplayNames[a] || a
+                                  ).localeCompare(
+                                    PaymentChannelDisplayNames[b] || b
+                                  )
+                                )
+                                .map((paymentChannel) => {
                                   return (
                                     <SelectItem
                                       key={paymentChannel}
@@ -537,8 +546,7 @@ export function ChannelEditDialog({
                                       ] || paymentChannel}
                                     </SelectItem>
                                   );
-                                }
-                              )}
+                                })}
                             </SelectGroup>
                           </SelectContent>
                         </Select>

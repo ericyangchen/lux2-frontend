@@ -232,8 +232,19 @@ export const OrganizationBindingDialog = ({
                             </tr>
                           </thead>
                           <tbody>
-                            {Object.entries(routingRule.percentage).map(
-                              ([channel, percentage]) => (
+                            {Object.entries(routingRule.percentage)
+                              .sort(([a], [b]) =>
+                                (
+                                  PaymentChannelDisplayNames[
+                                    a as keyof typeof PaymentChannelDisplayNames
+                                  ] || a
+                                ).localeCompare(
+                                  PaymentChannelDisplayNames[
+                                    b as keyof typeof PaymentChannelDisplayNames
+                                  ] || b
+                                )
+                              )
+                              .map(([channel, percentage]) => (
                                 <tr
                                   key={channel}
                                   className="border-b border-gray-100"
@@ -247,8 +258,7 @@ export const OrganizationBindingDialog = ({
                                     {percentage}%
                                   </td>
                                 </tr>
-                              )
-                            )}
+                              ))}
                           </tbody>
                         </table>
                       ) : (

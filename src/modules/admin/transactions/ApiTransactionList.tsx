@@ -190,10 +190,15 @@ export function ApiTransactionList() {
       ? DepositPaymentChannelCategories
       : WithdrawalPaymentChannelCategories;
 
-  const filteredPaymentChannels =
+  const filteredPaymentChannels = (
     paymentMethod && paymentMethod !== "all"
       ? paymentChannelCategories[paymentMethod]
-      : Object.values(PaymentChannel);
+      : Object.values(PaymentChannel)
+  ).sort((a, b) =>
+    (PaymentChannelDisplayNames[a] || a).localeCompare(
+      PaymentChannelDisplayNames[b] || b
+    )
+  );
 
   const [transactions, setTransactions] = useState<Transaction[]>();
 

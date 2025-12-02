@@ -152,11 +152,17 @@ export function ProblemTransactionResubmitDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {Object.values(PaymentChannel).map((channel) => (
-                      <SelectItem key={channel} value={channel}>
-                        {PaymentChannelDisplayNames[channel]}
-                      </SelectItem>
-                    ))}
+                    {Object.values(PaymentChannel)
+                      .sort((a, b) =>
+                        (PaymentChannelDisplayNames[a] || a).localeCompare(
+                          PaymentChannelDisplayNames[b] || b
+                        )
+                      )
+                      .map((channel) => (
+                        <SelectItem key={channel} value={channel}>
+                          {PaymentChannelDisplayNames[channel]}
+                        </SelectItem>
+                      ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>

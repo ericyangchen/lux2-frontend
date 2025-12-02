@@ -631,8 +631,17 @@ export const CreateTxnRoutingRuleDialog = ({
                       <Label>上游分配</Label>
                       <div className="space-y-2">
                         {/* 已選擇的上游 */}
-                        {Object.entries(rule.percentage).map(
-                          ([channel, percentage]) => (
+                        {Object.entries(rule.percentage)
+                          .sort(([a], [b]) =>
+                            (
+                              PaymentChannelDisplayNames[a as PaymentChannel] ||
+                              a
+                            ).localeCompare(
+                              PaymentChannelDisplayNames[b as PaymentChannel] ||
+                                b
+                            )
+                          )
+                          .map(([channel, percentage]) => (
                             <div
                               key={channel}
                               className="flex items-center gap-2 p-2 border rounded"
@@ -671,8 +680,7 @@ export const CreateTxnRoutingRuleDialog = ({
                                 <XMarkIcon className="h-3 w-3" />
                               </Button>
                             </div>
-                          )
-                        )}
+                          ))}
 
                         {/* 新增上游 */}
                         <div className="flex items-center gap-2">
@@ -700,6 +708,13 @@ export const CreateTxnRoutingRuleDialog = ({
                             <SelectContent>
                               {availablePaymentChannels
                                 .filter((channel) => !rule.percentage[channel])
+                                .sort((a, b) =>
+                                  (
+                                    PaymentChannelDisplayNames[a] || a
+                                  ).localeCompare(
+                                    PaymentChannelDisplayNames[b] || b
+                                  )
+                                )
                                 .map((channel) => (
                                   <SelectItem key={channel} value={channel}>
                                     {PaymentChannelDisplayNames[channel] ||

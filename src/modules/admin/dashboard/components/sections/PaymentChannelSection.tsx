@@ -106,8 +106,19 @@ export const PaymentChannelSection = ({
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(systemChannelPerformance?.channelPerformanceData || []).map(
-                (channel, index) => (
+              {(systemChannelPerformance?.channelPerformanceData || [])
+                .sort((a, b) =>
+                  (
+                    PaymentChannelDisplayNames[
+                      a.channel as keyof typeof PaymentChannelDisplayNames
+                    ] || a.channel
+                  ).localeCompare(
+                    PaymentChannelDisplayNames[
+                      b.channel as keyof typeof PaymentChannelDisplayNames
+                    ] || b.channel
+                  )
+                )
+                .map((channel, index) => (
                   <div
                     key={channel.channel}
                     className="p-4 bg-gray-50 rounded-lg border"
@@ -162,8 +173,7 @@ export const PaymentChannelSection = ({
                       </div>
                     </div>
                   </div>
-                )
-              )}
+                ))}
             </div>
           </CardContent>
         </Card>

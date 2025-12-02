@@ -414,8 +414,15 @@ export function ChannelAddDialog({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
-                              {paymentChannelCategories[paymentMethod]?.map(
-                                (paymentChannel) => {
+                              {paymentChannelCategories[paymentMethod]
+                                ?.sort((a, b) =>
+                                  (
+                                    PaymentChannelDisplayNames[a] || a
+                                  ).localeCompare(
+                                    PaymentChannelDisplayNames[b] || b
+                                  )
+                                )
+                                .map((paymentChannel) => {
                                   return (
                                     <SelectItem
                                       key={paymentChannel}
@@ -435,8 +442,7 @@ export function ChannelAddDialog({
                                       ] || paymentChannel}
                                     </SelectItem>
                                   );
-                                }
-                              )}
+                                })}
                             </SelectGroup>
                           </SelectContent>
                         </Select>
