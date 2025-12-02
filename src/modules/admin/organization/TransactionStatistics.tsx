@@ -11,6 +11,8 @@ import {
   ClockIcon,
   ExclamationTriangleIcon,
   XCircleIcon,
+  PauseIcon,
+  PlayIcon,
 } from "@heroicons/react/24/outline";
 import {
   DepositPaymentChannelCategories,
@@ -22,20 +24,25 @@ import {
   PHILIPPINES_TIMEZONE,
   convertToPhilippinesTimezone,
 } from "@/lib/utils/timezone";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/shadcn/ui/badge";
 import { Button } from "@/components/shadcn/ui/button";
 import { DateTimePicker } from "@/components/DateTimePicker";
 import { Label } from "@/components/shadcn/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shadcn/ui/select";
 import { OrgType } from "@/lib/enums/organizations/org-type.enum";
 import { PaymentChannel } from "@/lib/enums/transactions/payment-channel.enum";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { formatNumber } from "@/lib/utils/number";
 import { useOrganization } from "@/lib/hooks/swr/organization";
 import { useTransactionStatisticsCounts } from "@/lib/hooks/swr/transaction";
-import { getCurrencySymbol } from "@/lib/utils/currency";
-import { PaymentMethodCurrencyMapping } from "@/lib/constants/transaction";
 
 // Color constants
 const COLORS = {
@@ -59,46 +66,29 @@ interface StatisticsData {
   amountSum: number;
 }
 
-// Helper function to get payment method from payment channel
-function getPaymentMethodFromChannel(
-  paymentChannel: PaymentChannel,
-  isDeposit: boolean
-): PaymentMethod | null {
-  const categories = isDeposit
-    ? DepositPaymentChannelCategories
-    : WithdrawalPaymentChannelCategories;
+type PeriodType =
+  | "1min"
+  | "3min"
+  | "5min"
+  | "10min"
+  | "20min"
+  | "30min"
+  | "60min"
+  | "today"
+  | "yesterday"
+  | "past7days"
+  | "thismonth"
+  | "lastmonth"
+  | "last2hours"
+  | "last6hours"
+  | "last12hours"
+  | "last2days"
+  | "last3days"
+  | "lastweek"
+  | "thisweek"
+  | "custom";
 
-  for (const [method, channels] of Object.entries(categories)) {
-    if (channels.includes(paymentChannel)) {
-      return method as PaymentMethod;
-    }
-  }
-  return null;
-}
-
-// Helper function to get currency from payment method
-function getCurrencyForPaymentMethod(
-  paymentMethod: PaymentMethod
-): string | null {
-  for (const [currency, paymentMethods] of Object.entries(
-    PaymentMethodCurrencyMapping
-  )) {
-    if (paymentMethods.includes(paymentMethod)) {
-      return currency;
-    }
-  }
-  return null;
-}
-
-// Helper function to get currency from payment channel
-function getCurrencyFromChannel(
-  paymentChannel: PaymentChannel,
-  isDeposit: boolean
-): string | null {
-  const paymentMethod = getPaymentMethodFromChannel(paymentChannel, isDeposit);
-  if (!paymentMethod) return null;
-  return getCurrencyForPaymentMethod(paymentMethod);
-}
+type UpdateInterval = "5s" | "10s" | "30s" | "1min";
 
 export function TransactionStatistics({
   organizationId,
@@ -121,22 +111,81 @@ export function TransactionStatistics({
   // Auto-query when organization is selected
   const shouldAutoQuery = organizationId && !shouldQuery;
 
-  // Quick time range functions
+  // Auto-update state
+  const [isAutoUpdateEnabled, setIsAutoUpdateEnabled] = useState(false);
+  const [isAutoUpdatePaused, setIsAutoUpdatePaused] = useState(false);
+  const [updateInterval, setUpdateInterval] = useState<UpdateInterval>("10s");
+  const [selectedPeriodType, setSelectedPeriodType] =
+    useState<PeriodType>("custom");
+  const [periodDropdownValue, setPeriodDropdownValue] = useState<string>("");
+  const [lastUpdatedTime, setLastUpdatedTime] = useState<Date | null>(null);
+  const [updateTimeDisplay, setUpdateTimeDisplay] = useState<string>("");
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isAutoUpdatingRef = useRef(false);
+  const previousStatisticsRef = useRef<any>(null);
+  const activeTimeoutsRef = useRef<Set<NodeJS.Timeout>>(new Set());
+
+  // Helper function to set period and update state
+  const setPeriod = (periodType: PeriodType) => {
+    setSelectedPeriodType(periodType);
+    setShouldQuery(true);
+  };
+
+  // Quick time range functions - relative periods (update with auto-update)
+  const set1Min = () => {
+    const now = moment.tz(PHILIPPINES_TIMEZONE);
+    setStartDate(now.clone().subtract(1, "minute").toDate());
+    setEndDate(now.toDate());
+    setPeriod("1min");
+  };
+
+  const set3Min = () => {
+    const now = moment.tz(PHILIPPINES_TIMEZONE);
+    setStartDate(now.clone().subtract(3, "minutes").toDate());
+    setEndDate(now.toDate());
+    setPeriod("3min");
+  };
+
+  const set5Min = () => {
+    const now = moment.tz(PHILIPPINES_TIMEZONE);
+    setStartDate(now.clone().subtract(5, "minutes").toDate());
+    setEndDate(now.toDate());
+    setPeriod("5min");
+  };
+
+  const set10Min = () => {
+    const now = moment.tz(PHILIPPINES_TIMEZONE);
+    setStartDate(now.clone().subtract(10, "minutes").toDate());
+    setEndDate(now.toDate());
+    setPeriod("10min");
+  };
+
+  const set20Min = () => {
+    const now = moment.tz(PHILIPPINES_TIMEZONE);
+    setStartDate(now.clone().subtract(20, "minutes").toDate());
+    setEndDate(now.toDate());
+    setPeriod("20min");
+  };
+
+  const set30Min = () => {
+    const now = moment.tz(PHILIPPINES_TIMEZONE);
+    setStartDate(now.clone().subtract(30, "minutes").toDate());
+    setEndDate(now.toDate());
+    setPeriod("30min");
+  };
+
+  const set60Min = () => {
+    const now = moment.tz(PHILIPPINES_TIMEZONE);
+    setStartDate(now.clone().subtract(1, "hour").toDate());
+    setEndDate(now.toDate());
+    setPeriod("60min");
+  };
+
+  // Fixed periods (don't update with auto-update, just refresh data)
   const setToday = () => {
     setStartDate(moment.tz(PHILIPPINES_TIMEZONE).startOf("day").toDate());
     setEndDate(moment.tz(PHILIPPINES_TIMEZONE).endOf("day").toDate());
-    setShouldQuery(true); // Auto query when quick selection is used
-  };
-
-  const setLastHour = () => {
-    setStartDate(moment.tz(PHILIPPINES_TIMEZONE).subtract(1, "hour").toDate());
-    setEndDate(moment.tz(PHILIPPINES_TIMEZONE).toDate());
-    setShouldQuery(true); // Auto query when quick selection is used
-  };
-  const setLastTwoHours = () => {
-    setStartDate(moment.tz(PHILIPPINES_TIMEZONE).subtract(2, "hour").toDate());
-    setEndDate(moment.tz(PHILIPPINES_TIMEZONE).toDate());
-    setShouldQuery(true); // Auto query when quick selection is used
+    setPeriod("today");
   };
 
   const setYesterday = () => {
@@ -146,43 +195,20 @@ export function TransactionStatistics({
     setEndDate(
       moment.tz(PHILIPPINES_TIMEZONE).subtract(1, "day").endOf("day").toDate()
     );
-    setShouldQuery(true); // Auto query when quick selection is used
+    setPeriod("yesterday");
   };
 
-  const setTheDayBeforeYesterday = () => {
-    setStartDate(
-      moment.tz(PHILIPPINES_TIMEZONE).subtract(2, "day").startOf("day").toDate()
-    );
-    setEndDate(
-      moment.tz(PHILIPPINES_TIMEZONE).subtract(2, "day").endOf("day").toDate()
-    );
-    setShouldQuery(true); // Auto query when quick selection is used
-  };
-
-  const setThisWeek = () => {
-    setStartDate(moment.tz(PHILIPPINES_TIMEZONE).startOf("week").toDate());
-    setEndDate(moment.tz(PHILIPPINES_TIMEZONE).endOf("week").toDate());
-    setShouldQuery(true); // Auto query when quick selection is used
-  };
-
-  const setLastWeek = () => {
-    setStartDate(
-      moment
-        .tz(PHILIPPINES_TIMEZONE)
-        .subtract(1, "week")
-        .startOf("week")
-        .toDate()
-    );
-    setEndDate(
-      moment.tz(PHILIPPINES_TIMEZONE).subtract(1, "week").endOf("week").toDate()
-    );
-    setShouldQuery(true); // Auto query when quick selection is used
+  const setPast7Days = () => {
+    const now = moment.tz(PHILIPPINES_TIMEZONE);
+    setStartDate(now.clone().subtract(7, "days").startOf("day").toDate());
+    setEndDate(now.clone().endOf("day").toDate());
+    setPeriod("past7days");
   };
 
   const setThisMonth = () => {
     setStartDate(moment.tz(PHILIPPINES_TIMEZONE).startOf("month").toDate());
     setEndDate(moment.tz(PHILIPPINES_TIMEZONE).endOf("month").toDate());
-    setShouldQuery(true); // Auto query when quick selection is used
+    setPeriod("thismonth");
   };
 
   const setLastMonth = () => {
@@ -200,43 +226,441 @@ export function TransactionStatistics({
         .endOf("month")
         .toDate()
     );
+    setPeriod("lastmonth");
+  };
 
-    setShouldQuery(true); // Auto query when quick selection is used
+  // Additional periods for dropdown
+  const setLast2Hours = () => {
+    const now = moment.tz(PHILIPPINES_TIMEZONE);
+    setStartDate(now.clone().subtract(2, "hours").toDate());
+    setEndDate(now.toDate());
+    setPeriod("last2hours");
+  };
+
+  const setLast6Hours = () => {
+    const now = moment.tz(PHILIPPINES_TIMEZONE);
+    setStartDate(now.clone().subtract(6, "hours").toDate());
+    setEndDate(now.toDate());
+    setPeriod("last6hours");
+  };
+
+  const setLast12Hours = () => {
+    const now = moment.tz(PHILIPPINES_TIMEZONE);
+    setStartDate(now.clone().subtract(12, "hours").toDate());
+    setEndDate(now.toDate());
+    setPeriod("last12hours");
+  };
+
+  const setLast2Days = () => {
+    const now = moment.tz(PHILIPPINES_TIMEZONE);
+    setStartDate(now.clone().subtract(2, "days").startOf("day").toDate());
+    setEndDate(now.clone().endOf("day").toDate());
+    setPeriod("last2days");
+  };
+
+  const setLast3Days = () => {
+    const now = moment.tz(PHILIPPINES_TIMEZONE);
+    setStartDate(now.clone().subtract(3, "days").startOf("day").toDate());
+    setEndDate(now.clone().endOf("day").toDate());
+    setPeriod("last3days");
+  };
+
+  const setThisWeek = () => {
+    setStartDate(moment.tz(PHILIPPINES_TIMEZONE).startOf("week").toDate());
+    setEndDate(moment.tz(PHILIPPINES_TIMEZONE).endOf("week").toDate());
+    setPeriod("thisweek");
+  };
+
+  const setLastWeek = () => {
+    setStartDate(
+      moment
+        .tz(PHILIPPINES_TIMEZONE)
+        .subtract(1, "week")
+        .startOf("week")
+        .toDate()
+    );
+    setEndDate(
+      moment.tz(PHILIPPINES_TIMEZONE).subtract(1, "week").endOf("week").toDate()
+    );
+    setPeriod("lastweek");
   };
 
   const handleQuery = () => {
     setShouldQuery(true);
   };
 
+  // Get statistics data (must be before useEffect that uses mutate)
+  const { statistics, isLoading, isError, mutate } =
+    useTransactionStatisticsCounts({
+      merchantId:
+        organization?.type === OrgType.ADMIN ? undefined : organizationId,
+      startOfCreatedAt: startDate
+        ? convertToPhilippinesTimezone(startDate.toISOString())
+        : undefined,
+      endOfCreatedAt: endDate
+        ? convertToPhilippinesTimezone(endDate.toISOString())
+        : undefined,
+    });
+
+  // Track when statistics actually update (for auto-update timing)
+  const statisticsUpdateTimeRef = useRef<number | null>(null);
+  const statisticsUpdateCounterRef = useRef<number>(0);
+
+  // Keep previous statistics during auto-updates to prevent glitches
+  useEffect(() => {
+    if (statistics) {
+      previousStatisticsRef.current = statistics;
+      // Update last updated time when new data arrives
+      setLastUpdatedTime(new Date());
+      // Track when statistics actually updated (use counter to ensure we detect updates even if timestamp is same)
+      statisticsUpdateTimeRef.current = Date.now();
+      statisticsUpdateCounterRef.current += 1;
+    }
+  }, [statistics]);
+
+  // Update the display time every second
+  useEffect(() => {
+    if (!lastUpdatedTime) {
+      setUpdateTimeDisplay("");
+      return;
+    }
+
+    const updateDisplay = () => {
+      const now = moment.tz(PHILIPPINES_TIMEZONE);
+      const diff = now.diff(moment.tz(lastUpdatedTime, PHILIPPINES_TIMEZONE));
+      const seconds = Math.floor(diff / 1000);
+      const minutes = Math.floor(seconds / 60);
+
+      if (seconds < 60) {
+        setUpdateTimeDisplay(`${seconds} 秒前`);
+      } else if (minutes < 60) {
+        setUpdateTimeDisplay(`${minutes} 分鐘前`);
+      } else {
+        const hours = Math.floor(minutes / 60);
+        setUpdateTimeDisplay(`${hours} 小時前`);
+      }
+    };
+
+    updateDisplay();
+    const interval = setInterval(updateDisplay, 1000);
+
+    return () => clearInterval(interval);
+  }, [lastUpdatedTime]);
+
+  // Use previous data during auto-updates if current is loading
+  const displayStatistics =
+    isAutoUpdatingRef.current && isLoading && previousStatisticsRef.current
+      ? previousStatisticsRef.current
+      : statistics;
+
+  // Determine if we should show loading (only show during initial load or manual updates, not auto-updates)
+  const shouldShowLoading = isLoading && !isAutoUpdatingRef.current;
+
+  // Function to recalculate dates for relative periods
+  const recalculateRelativePeriod = useCallback((periodType: PeriodType) => {
+    const now = moment.tz(PHILIPPINES_TIMEZONE);
+    switch (periodType) {
+      case "1min":
+        setStartDate(now.clone().subtract(1, "minute").toDate());
+        setEndDate(now.toDate());
+        break;
+      case "3min":
+        setStartDate(now.clone().subtract(3, "minutes").toDate());
+        setEndDate(now.toDate());
+        break;
+      case "5min":
+        setStartDate(now.clone().subtract(5, "minutes").toDate());
+        setEndDate(now.toDate());
+        break;
+      case "10min":
+        setStartDate(now.clone().subtract(10, "minutes").toDate());
+        setEndDate(now.toDate());
+        break;
+      case "20min":
+        setStartDate(now.clone().subtract(20, "minutes").toDate());
+        setEndDate(now.toDate());
+        break;
+      case "30min":
+        setStartDate(now.clone().subtract(30, "minutes").toDate());
+        setEndDate(now.toDate());
+        break;
+      case "60min":
+        setStartDate(now.clone().subtract(1, "hour").toDate());
+        setEndDate(now.toDate());
+        break;
+      case "last2hours":
+        setStartDate(now.clone().subtract(2, "hours").toDate());
+        setEndDate(now.toDate());
+        break;
+      case "last6hours":
+        setStartDate(now.clone().subtract(6, "hours").toDate());
+        setEndDate(now.toDate());
+        break;
+      case "last12hours":
+        setStartDate(now.clone().subtract(12, "hours").toDate());
+        setEndDate(now.toDate());
+        break;
+      case "last2days":
+        setStartDate(now.clone().subtract(2, "days").startOf("day").toDate());
+        setEndDate(now.clone().endOf("day").toDate());
+        break;
+      case "last3days":
+        setStartDate(now.clone().subtract(3, "days").startOf("day").toDate());
+        setEndDate(now.clone().endOf("day").toDate());
+        break;
+      case "past7days":
+        setStartDate(now.clone().subtract(7, "days").startOf("day").toDate());
+        setEndDate(now.clone().endOf("day").toDate());
+        break;
+      case "today":
+        setStartDate(now.clone().startOf("day").toDate());
+        setEndDate(now.clone().endOf("day").toDate());
+        break;
+      default:
+        // For fixed periods like yesterday, this month, last month, etc., don't recalculate
+        break;
+    }
+  }, []);
+
+  // Helper function to clear all active timeouts
+  const clearAllTimeouts = () => {
+    if (intervalRef.current) {
+      clearTimeout(intervalRef.current);
+      intervalRef.current = null;
+    }
+    activeTimeoutsRef.current.forEach((timeout) => {
+      clearTimeout(timeout);
+    });
+    activeTimeoutsRef.current.clear();
+  };
+
+  // Auto-update effect - uses recursive setTimeout to wait for API response before next update
+  useEffect(() => {
+    // Clear all existing timeouts
+    clearAllTimeouts();
+
+    // Set up recursive update if auto-update is enabled and not paused
+    if (isAutoUpdateEnabled && !isAutoUpdatePaused && organizationId) {
+      const getIntervalMs = (interval: UpdateInterval): number => {
+        switch (interval) {
+          case "5s":
+            return 5000;
+          case "10s":
+            return 10000;
+          case "30s":
+            return 30000;
+          case "1min":
+            return 60000;
+          default:
+            return 10000;
+        }
+      };
+
+      // Recursive function that waits for API response before scheduling next update
+      const scheduleNextUpdate = () => {
+        // Check current state values (not closure values) to ensure we have latest
+        // This is important because the effect might not re-run immediately when state changes
+        if (!isAutoUpdateEnabled || isAutoUpdatePaused || !organizationId) {
+          return;
+        }
+
+        const currentIntervalMs = getIntervalMs(updateInterval);
+
+        // Mark that we're auto-updating
+        isAutoUpdatingRef.current = true;
+
+        // Recalculate dates for relative periods
+        const relativePeriods: PeriodType[] = [
+          "1min",
+          "3min",
+          "5min",
+          "10min",
+          "20min",
+          "30min",
+          "60min",
+          "last2hours",
+          "last6hours",
+          "last12hours",
+          "last2days",
+          "last3days",
+          "past7days",
+          "today",
+        ];
+
+        if (relativePeriods.includes(selectedPeriodType)) {
+          recalculateRelativePeriod(selectedPeriodType);
+        }
+
+        // Record the current update counter BEFORE making the API call
+        // This way we can detect when new data arrives (counter will increment)
+        const updateCounterBeforeCall = statisticsUpdateCounterRef.current;
+
+        // Refresh data and schedule next update after API response completes AND data is updated
+        mutate(undefined, { revalidate: true })
+          .then(() => {
+            // Wait for statistics to actually update (poll every 50ms, max wait 5 seconds)
+            const waitForStatisticsUpdate = (
+              attempts: number = 0,
+              maxAttempts: number = 100
+            ) => {
+              // Check if auto-update is still enabled and not paused before proceeding
+              if (
+                !isAutoUpdateEnabled ||
+                isAutoUpdatePaused ||
+                !organizationId
+              ) {
+                isAutoUpdatingRef.current = false;
+                return;
+              }
+
+              // Check if statistics have been updated (counter should have increased)
+              const currentUpdateCounter = statisticsUpdateCounterRef.current;
+              const currentUpdateTime = statisticsUpdateTimeRef.current;
+
+              if (
+                currentUpdateCounter > updateCounterBeforeCall &&
+                currentUpdateTime
+              ) {
+                // Statistics have been updated!
+                // Now wait the FULL interval from the moment data was updated
+                const dataUpdatedTime = currentUpdateTime;
+                const now = Date.now();
+                const timeSinceUpdate = now - dataUpdatedTime;
+
+                isAutoUpdatingRef.current = false;
+
+                // Double-check state before scheduling next update
+                if (
+                  isAutoUpdateEnabled &&
+                  !isAutoUpdatePaused &&
+                  organizationId
+                ) {
+                  const nextIntervalMs = getIntervalMs(updateInterval);
+
+                  // Calculate remaining wait time
+                  // If some time has already passed since data update, subtract it
+                  // This ensures we always wait the full interval from when data was updated
+                  const remainingWaitTime = Math.max(
+                    0,
+                    nextIntervalMs - timeSinceUpdate
+                  );
+
+                  intervalRef.current = setTimeout(
+                    scheduleNextUpdate,
+                    remainingWaitTime
+                  );
+                }
+              } else if (attempts < maxAttempts) {
+                // Statistics not updated yet, check again in 50ms
+                // But first check if we should still continue
+                if (
+                  isAutoUpdateEnabled &&
+                  !isAutoUpdatePaused &&
+                  organizationId
+                ) {
+                  const timeoutId = setTimeout(
+                    () => waitForStatisticsUpdate(attempts + 1, maxAttempts),
+                    50
+                  );
+                  activeTimeoutsRef.current.add(timeoutId);
+                } else {
+                  isAutoUpdatingRef.current = false;
+                }
+              } else {
+                // Timeout - proceed anyway (statistics might not have changed or update was missed)
+                // In this case, wait the full interval from now
+                isAutoUpdatingRef.current = false;
+
+                // Double-check state before scheduling next update
+                if (
+                  isAutoUpdateEnabled &&
+                  !isAutoUpdatePaused &&
+                  organizationId
+                ) {
+                  const nextIntervalMs = getIntervalMs(updateInterval);
+                  intervalRef.current = setTimeout(
+                    scheduleNextUpdate,
+                    nextIntervalMs
+                  );
+                }
+              }
+            };
+
+            // Start checking for statistics update immediately
+            waitForStatisticsUpdate();
+          })
+          .catch(() => {
+            // Even on error, schedule next update after full interval
+            isAutoUpdatingRef.current = false;
+            // Double-check state before scheduling next update
+            if (isAutoUpdateEnabled && !isAutoUpdatePaused && organizationId) {
+              const nextIntervalMs = getIntervalMs(updateInterval);
+              intervalRef.current = setTimeout(
+                scheduleNextUpdate,
+                nextIntervalMs
+              );
+            }
+          });
+      };
+
+      // Start the first update immediately, then it will schedule itself recursively
+      scheduleNextUpdate();
+    }
+
+    // Cleanup on unmount or when dependencies change
+    return () => {
+      clearAllTimeouts();
+    };
+  }, [
+    isAutoUpdateEnabled,
+    isAutoUpdatePaused,
+    updateInterval,
+    selectedPeriodType,
+    organizationId,
+    mutate,
+    recalculateRelativePeriod,
+  ]);
+
   // Reset query state when organization changes
   const prevOrganizationId = useRef(organizationId);
   useEffect(() => {
     if (prevOrganizationId.current !== organizationId) {
       setShouldQuery(false);
+      setIsAutoUpdateEnabled(false);
+      setIsAutoUpdatePaused(false);
+      isAutoUpdatingRef.current = false;
+      setLastUpdatedTime(null);
       prevOrganizationId.current = organizationId;
     }
   }, [organizationId]);
 
-  // Get statistics data
-  const { statistics, isLoading, isError } = useTransactionStatisticsCounts({
-    merchantId:
-      organization?.type === OrgType.ADMIN ? undefined : organizationId,
-    startOfCreatedAt: startDate
-      ? convertToPhilippinesTimezone(startDate.toISOString())
-      : undefined,
-    endOfCreatedAt: endDate
-      ? convertToPhilippinesTimezone(endDate.toISOString())
-      : undefined,
-  });
+  // Handle manual date changes - pause auto-update
+  const handleStartDateChange = (date: Date | undefined) => {
+    setStartDate(date);
+    isAutoUpdatingRef.current = false; // Reset flag for manual changes
+    if (isAutoUpdateEnabled) {
+      setIsAutoUpdatePaused(true);
+      setSelectedPeriodType("custom");
+    }
+  };
+
+  const handleEndDateChange = (date: Date | undefined) => {
+    setEndDate(date);
+    isAutoUpdatingRef.current = false; // Reset flag for manual changes
+    if (isAutoUpdateEnabled) {
+      setIsAutoUpdatePaused(true);
+      setSelectedPeriodType("custom");
+    }
+  };
 
   // Process statistics data
   const processedData = useMemo(() => {
-    if (!statistics?.data) return { deposit: [], withdrawal: [] };
+    if (!displayStatistics?.data) return { deposit: [], withdrawal: [] };
 
     const depositData: StatisticsData[] = [];
     const withdrawalData: StatisticsData[] = [];
 
-    statistics.data.forEach((item: StatisticsData) => {
+    displayStatistics.data.forEach((item: StatisticsData) => {
       // Check if this is a deposit or withdrawal channel
       const isDeposit = Object.values(DepositPaymentChannelCategories).some(
         (channels) => channels.includes(item.paymentChannel)
@@ -250,89 +674,37 @@ export function TransactionStatistics({
     });
 
     return { deposit: depositData, withdrawal: withdrawalData };
-  }, [statistics]);
+  }, [displayStatistics]);
 
-  // Group deposit and withdrawal data by currency
-  const dataByCurrency = useMemo(() => {
-    const depositByCurrency = new Map<
-      string,
-      {
-        total: number;
-        success: number;
-        pending: number;
-        fail: number;
-        amountSum: number;
-      }
-    >();
-    const withdrawalByCurrency = new Map<
-      string,
-      {
-        total: number;
-        success: number;
-        pending: number;
-        fail: number;
-        amountSum: number;
-      }
-    >();
+  // Calculate summary totals
+  const summaryTotals = useMemo(() => {
+    const deposit = processedData.deposit.reduce(
+      (acc, item) => ({
+        total: acc.total + item.total,
+        success: acc.success + item.success,
+        pending: acc.pending + item.pending,
+        fail: acc.fail + item.fail,
+        amountSum: acc.amountSum + item.amountSum,
+      }),
+      { total: 0, success: 0, pending: 0, fail: 0, amountSum: 0 }
+    );
 
-    processedData.deposit.forEach((item) => {
-      const currency = getCurrencyFromChannel(item.paymentChannel, true);
-      if (!currency) return;
+    const withdrawal = processedData.withdrawal.reduce(
+      (acc, item) => ({
+        total: acc.total + item.total,
+        success: acc.success + item.success,
+        pending: acc.pending + item.pending,
+        fail: acc.fail + item.fail,
+        amountSum: acc.amountSum + item.amountSum,
+      }),
+      { total: 0, success: 0, pending: 0, fail: 0, amountSum: 0 }
+    );
 
-      const current = depositByCurrency.get(currency) || {
-        total: 0,
-        success: 0,
-        pending: 0,
-        fail: 0,
-        amountSum: 0,
-      };
-
-      depositByCurrency.set(currency, {
-        total: current.total + item.total,
-        success: current.success + item.success,
-        pending: current.pending + item.pending,
-        fail: current.fail + item.fail,
-        amountSum: current.amountSum + item.amountSum,
-      });
-    });
-
-    processedData.withdrawal.forEach((item) => {
-      const currency = getCurrencyFromChannel(item.paymentChannel, false);
-      if (!currency) return;
-
-      const current = withdrawalByCurrency.get(currency) || {
-        total: 0,
-        success: 0,
-        pending: 0,
-        fail: 0,
-        amountSum: 0,
-      };
-
-      withdrawalByCurrency.set(currency, {
-        total: current.total + item.total,
-        success: current.success + item.success,
-        pending: current.pending + item.pending,
-        fail: current.fail + item.fail,
-        amountSum: current.amountSum + item.amountSum,
-      });
-    });
-
-    // Get all currencies and sort them
-    const allCurrencies = new Set([
-      ...Array.from(depositByCurrency.keys()),
-      ...Array.from(withdrawalByCurrency.keys()),
-    ]);
-
-    return {
-      currencies: Array.from(allCurrencies).sort(),
-      deposit: depositByCurrency,
-      withdrawal: withdrawalByCurrency,
-    };
+    return { deposit, withdrawal };
   }, [processedData]);
 
   // Group data by payment method
   const paymentMethodData = useMemo(() => {
-    // Initialize result object dynamically using all enum values
     const result: Record<
       PaymentMethod,
       {
@@ -394,8 +766,71 @@ export function TransactionStatistics({
 
       {/* Date Range Selection */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-        <div className="flex gap-8">
-          {/* 左半邊：時間範圍設置 + 快捷按鈕 */}
+        <div className="flex flex-col gap-4">
+          {/* Auto-update controls */}
+          <div className="flex items-center gap-4 pb-4 border-b border-gray-200">
+            <Button
+              variant={isAutoUpdateEnabled ? "default" : "outline"}
+              size="sm"
+              onClick={() => {
+                setIsAutoUpdateEnabled(!isAutoUpdateEnabled);
+                setIsAutoUpdatePaused(false);
+              }}
+              className={`text-sm ${
+                isAutoUpdateEnabled
+                  ? "bg-green-600 hover:bg-green-700 text-white"
+                  : "bg-white text-gray-900"
+              }`}
+            >
+              自動更新
+            </Button>
+            {isAutoUpdateEnabled && (
+              <>
+                <Label className="whitespace-nowrap text-sm">更新間隔</Label>
+                <Select
+                  value={updateInterval}
+                  onValueChange={(value) =>
+                    setUpdateInterval(value as UpdateInterval)
+                  }
+                >
+                  <SelectTrigger className="w-[120px] h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5s">5秒</SelectItem>
+                    <SelectItem value="10s">10秒</SelectItem>
+                    <SelectItem value="30s">30秒</SelectItem>
+                    <SelectItem value="1min">1分鐘</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAutoUpdatePaused(!isAutoUpdatePaused)}
+                  className="text-sm"
+                >
+                  {isAutoUpdatePaused ? (
+                    <>
+                      <PlayIcon className="h-4 w-4 mr-1" />
+                      繼續
+                    </>
+                  ) : (
+                    <>
+                      <PauseIcon className="h-4 w-4 mr-1" />
+                      暫停
+                    </>
+                  )}
+                </Button>
+                {updateTimeDisplay && !isAutoUpdatePaused && (
+                  <div className="text-sm text-gray-500 ml-2">
+                    已更新 {updateTimeDisplay}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Date range inputs */}
           <div className="flex-1">
             <Label className="text-lg font-semibold block mb-4">時間範圍</Label>
             <div className="flex flex-col gap-4 mb-4">
@@ -404,7 +839,7 @@ export function TransactionStatistics({
                 <div className="w-fit min-w-[240px]">
                   <DateTimePicker
                     date={startDate}
-                    setDate={setStartDate}
+                    setDate={handleStartDateChange}
                     placeholder="yyyy/mm/dd HH:mm:ss"
                   />
                 </div>
@@ -414,17 +849,89 @@ export function TransactionStatistics({
                 <div className="w-fit min-w-[240px]">
                   <DateTimePicker
                     date={endDate}
-                    setDate={setEndDate}
+                    setDate={handleEndDateChange}
                     placeholder="yyyy/mm/dd HH:mm:ss"
                   />
                 </div>
               </div>
             </div>
-            <div className="flex gap-4 items-center">
+            <div className="flex gap-4 items-center flex-wrap">
               <Label className="whitespace-nowrap">快速查詢</Label>
               <div className="flex items-center gap-2 flex-wrap">
                 <Button
-                  variant="outline"
+                  variant={
+                    selectedPeriodType === "1min" ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={set1Min}
+                  className="text-xs"
+                >
+                  1分鐘
+                </Button>
+                <Button
+                  variant={
+                    selectedPeriodType === "3min" ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={set3Min}
+                  className="text-xs"
+                >
+                  3分鐘
+                </Button>
+                <Button
+                  variant={
+                    selectedPeriodType === "5min" ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={set5Min}
+                  className="text-xs"
+                >
+                  5分鐘
+                </Button>
+                <Button
+                  variant={
+                    selectedPeriodType === "10min" ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={set10Min}
+                  className="text-xs"
+                >
+                  10分鐘
+                </Button>
+                <Button
+                  variant={
+                    selectedPeriodType === "20min" ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={set20Min}
+                  className="text-xs"
+                >
+                  20分鐘
+                </Button>
+                <Button
+                  variant={
+                    selectedPeriodType === "30min" ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={set30Min}
+                  className="text-xs"
+                >
+                  30分鐘
+                </Button>
+                <Button
+                  variant={
+                    selectedPeriodType === "60min" ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={set60Min}
+                  className="text-xs"
+                >
+                  60分鐘
+                </Button>
+                <Button
+                  variant={
+                    selectedPeriodType === "today" ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={setToday}
                   className="text-xs"
@@ -432,23 +939,9 @@ export function TransactionStatistics({
                   今天
                 </Button>
                 <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={setLastTwoHours}
-                  className="text-xs"
-                >
-                  前兩小時
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={setLastHour}
-                  className="text-xs"
-                >
-                  前一小時
-                </Button>
-                <Button
-                  variant="outline"
+                  variant={
+                    selectedPeriodType === "yesterday" ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={setYesterday}
                   className="text-xs"
@@ -456,31 +949,19 @@ export function TransactionStatistics({
                   昨天
                 </Button>
                 <Button
-                  variant="outline"
+                  variant={
+                    selectedPeriodType === "past7days" ? "default" : "outline"
+                  }
                   size="sm"
-                  onClick={setTheDayBeforeYesterday}
+                  onClick={setPast7Days}
                   className="text-xs"
                 >
-                  前天
+                  過去7天
                 </Button>
                 <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={setThisWeek}
-                  className="text-xs"
-                >
-                  這週
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={setLastWeek}
-                  className="text-xs"
-                >
-                  上週
-                </Button>
-                <Button
-                  variant="outline"
+                  variant={
+                    selectedPeriodType === "thismonth" ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={setThisMonth}
                   className="text-xs"
@@ -488,7 +969,9 @@ export function TransactionStatistics({
                   這個月
                 </Button>
                 <Button
-                  variant="outline"
+                  variant={
+                    selectedPeriodType === "lastmonth" ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={setLastMonth}
                   className="text-xs"
@@ -496,20 +979,55 @@ export function TransactionStatistics({
                   上個月
                 </Button>
               </div>
+              <Select
+                value={periodDropdownValue}
+                onValueChange={(value) => {
+                  setPeriodDropdownValue("");
+                  switch (value) {
+                    case "last2hours":
+                      setLast2Hours();
+                      break;
+                    case "last6hours":
+                      setLast6Hours();
+                      break;
+                    case "last12hours":
+                      setLast12Hours();
+                      break;
+                    case "last2days":
+                      setLast2Days();
+                      break;
+                    case "last3days":
+                      setLast3Days();
+                      break;
+                    case "thisweek":
+                      setThisWeek();
+                      break;
+                    case "lastweek":
+                      setLastWeek();
+                      break;
+                  }
+                }}
+              >
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="其他期間" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="last2hours">前2小時</SelectItem>
+                  <SelectItem value="last6hours">前6小時</SelectItem>
+                  <SelectItem value="last12hours">前12小時</SelectItem>
+                  <SelectItem value="last2days">過去2天</SelectItem>
+                  <SelectItem value="last3days">過去3天</SelectItem>
+                  <SelectItem value="thisweek">這週</SelectItem>
+                  <SelectItem value="lastweek">上週</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-
-          {/* 右半邊：查詢按鈕 */}
-          {/* <div className="flex items-end flex-wrap">
-            <Button onClick={handleQuery} className="w-[120px]">
-              查詢
-            </Button>
-          </div> */}
         </div>
       </div>
 
-      {/* Loading State */}
-      {isLoading && (
+      {/* Loading State - only show during initial load or manual updates */}
+      {shouldShowLoading && (
         <div className="flex items-center justify-center h-48">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
@@ -523,198 +1041,23 @@ export function TransactionStatistics({
       )}
 
       {/* Statistics Content */}
-      {!isLoading && !isError && statistics && (
+      {!shouldShowLoading && !isError && displayStatistics && (
         <div className="space-y-6">
-          {/* Summary Section - Grouped by Currency */}
-          <div className="flex flex-col gap-6">
-            {/* Deposit Summary by Currency */}
-            <Card className="border border-gray-200">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900">
-                  總代收統計
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {dataByCurrency.currencies.filter((currency) =>
-                  dataByCurrency.deposit.has(currency)
-                ).length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                            幣種
-                          </th>
-                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
-                            總比數
-                          </th>
-                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
-                            成功
-                          </th>
-                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
-                            處理中
-                          </th>
-                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
-                            失敗
-                          </th>
-                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
-                            成功率
-                          </th>
-                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
-                            總金額
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {dataByCurrency.currencies
-                          .filter((currency) =>
-                            dataByCurrency.deposit.has(currency)
-                          )
-                          .map((currency) => {
-                            const data = dataByCurrency.deposit.get(currency)!;
-                            const successRate =
-                              data.total > 0
-                                ? `${(
-                                    (data.success / data.total) *
-                                    100
-                                  ).toFixed(2)}%`
-                                : "None";
-                            const currencySymbol = getCurrencySymbol(currency);
-                            return (
-                              <tr
-                                key={`deposit-${currency}`}
-                                className="hover:bg-gray-50"
-                              >
-                                <td className="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
-                                  {currencySymbol} {currency}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-gray-900 text-right whitespace-nowrap">
-                                  {data.total.toLocaleString()}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-green-600 text-right whitespace-nowrap">
-                                  {data.success.toLocaleString()}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-yellow-600 text-right whitespace-nowrap">
-                                  {data.pending.toLocaleString()}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-red-600 text-right whitespace-nowrap">
-                                  {data.fail.toLocaleString()}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-gray-900 text-right whitespace-nowrap">
-                                  {successRate}
-                                </td>
-                                <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right whitespace-nowrap">
-                                  {currencySymbol}{" "}
-                                  {formatNumber(data.amountSum.toString())}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div className="p-4 text-center text-gray-500">
-                    無代收數據
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          {/* Summary Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Deposit Summary */}
+            <SummaryCard
+              title="代收統計"
+              data={summaryTotals.deposit}
+              color="blue"
+            />
 
-            {/* Withdrawal Summary by Currency */}
-            <Card className="border border-gray-200">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900">
-                  總代付統計
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {dataByCurrency.currencies.filter((currency) =>
-                  dataByCurrency.withdrawal.has(currency)
-                ).length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                            幣種
-                          </th>
-                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
-                            總比數
-                          </th>
-                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
-                            成功
-                          </th>
-                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
-                            處理中
-                          </th>
-                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
-                            失敗
-                          </th>
-                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
-                            成功率
-                          </th>
-                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 whitespace-nowrap">
-                            總金額
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {dataByCurrency.currencies
-                          .filter((currency) =>
-                            dataByCurrency.withdrawal.has(currency)
-                          )
-                          .map((currency) => {
-                            const data =
-                              dataByCurrency.withdrawal.get(currency)!;
-                            const successRate =
-                              data.total > 0
-                                ? `${(
-                                    (data.success / data.total) *
-                                    100
-                                  ).toFixed(2)}%`
-                                : "None";
-                            const currencySymbol = getCurrencySymbol(currency);
-                            return (
-                              <tr
-                                key={`withdrawal-${currency}`}
-                                className="hover:bg-gray-50"
-                              >
-                                <td className="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
-                                  {currencySymbol} {currency}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-gray-900 text-right whitespace-nowrap">
-                                  {data.total.toLocaleString()}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-green-600 text-right whitespace-nowrap">
-                                  {data.success.toLocaleString()}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-yellow-600 text-right whitespace-nowrap">
-                                  {data.pending.toLocaleString()}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-red-600 text-right whitespace-nowrap">
-                                  {data.fail.toLocaleString()}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-gray-900 text-right whitespace-nowrap">
-                                  {successRate}
-                                </td>
-                                <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right whitespace-nowrap">
-                                  {currencySymbol}
-                                  {formatNumber(data.amountSum.toString())}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div className="p-4 text-center text-gray-500">
-                    無代付數據
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {/* Withdrawal Summary */}
+            <SummaryCard
+              title="代付統計"
+              data={summaryTotals.withdrawal}
+              color="green"
+            />
           </div>
 
           {/* Payment Method Details */}
@@ -749,21 +1092,13 @@ interface SummaryCardProps {
     amountSum: number;
   };
   color: "blue" | "green";
-  currency?: string;
 }
 
-function SummaryCard({
-  title,
-  data,
-  color,
-  currency = "PHP",
-}: SummaryCardProps) {
+function SummaryCard({ title, data, color }: SummaryCardProps) {
   const successRate =
     data.total > 0
       ? `${((data.success / data.total) * 100).toFixed(2)}%`
       : "None";
-
-  const currencySymbol = getCurrencySymbol(currency);
 
   return (
     <Card className="hover:shadow-sm transition-shadow border border-gray-200">
@@ -799,8 +1134,7 @@ function SummaryCard({
           <div className="text-center p-4 border border-gray-200 rounded-lg bg-gray-50">
             <div className="text-xs text-gray-600 mb-1">總金額</div>
             <div className="text-2xl font-bold text-gray-900">
-              {currencySymbol}
-              {formatNumber(data.amountSum.toString())}
+              ₱{formatNumber(data.amountSum.toString())}
             </div>
           </div>
         </div>
@@ -854,10 +1188,6 @@ function PaymentMethodSection({
   paymentMethod,
   data,
 }: PaymentMethodSectionProps) {
-  // Get currency for this payment method
-  const currency = getCurrencyForPaymentMethod(paymentMethod) || "PHP";
-  const currencySymbol = getCurrencySymbol(currency);
-
   // Calculate totals for deposit and withdrawal
   const depositTotals = data.deposit.reduce(
     (acc, item) => ({
@@ -885,9 +1215,7 @@ function PaymentMethodSection({
     <Card className="hover:shadow-sm transition-shadow border border-gray-200">
       <CardHeader className="pb-4">
         <CardTitle className="text-xl font-bold text-gray-900">
-          {(PaymentMethodDisplayNames as Record<string, string>)[
-            paymentMethod
-          ] || paymentMethod}
+          {PaymentMethodDisplayNames[paymentMethod]}
         </CardTitle>
       </CardHeader>
       <CardContent className="px-6 pt-0">
@@ -932,8 +1260,7 @@ function PaymentMethodSection({
               <div className="text-center p-3 border border-gray-200 rounded-lg bg-gray-50">
                 <div className="text-xs text-gray-600 mb-1">總金額</div>
                 <div className="text-xl font-bold text-gray-900">
-                  {currencySymbol}
-                  {formatNumber(depositTotals.amountSum.toString())}
+                  ₱{formatNumber(depositTotals.amountSum.toString())}
                 </div>
               </div>
             </div>
@@ -1011,8 +1338,7 @@ function PaymentMethodSection({
               <div className="text-center p-3 border border-gray-200 rounded-lg bg-gray-50">
                 <div className="text-xs text-gray-600 mb-1">總金額</div>
                 <div className="text-xl font-bold text-gray-900">
-                  {currencySymbol}
-                  {formatNumber(withdrawalTotals.amountSum.toString())}
+                  ₱{formatNumber(withdrawalTotals.amountSum.toString())}
                 </div>
               </div>
             </div>
@@ -1059,16 +1385,12 @@ function PaymentMethodSection({
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <h5 className="text-lg font-semibold text-gray-900">
-                  代收上游詳情
+                  代收渠道詳情
                 </h5>
               </div>
               <div className="space-y-3">
                 {data.deposit.map((item) => (
-                  <ChannelDetailRow
-                    key={item.paymentChannel}
-                    data={item}
-                    currency={currency}
-                  />
+                  <ChannelDetailRow key={item.paymentChannel} data={item} />
                 ))}
               </div>
             </div>
@@ -1079,16 +1401,12 @@ function PaymentMethodSection({
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <h5 className="text-lg font-semibold text-gray-900">
-                  代付上游詳情
+                  代付渠道詳情
                 </h5>
               </div>
               <div className="space-y-3">
                 {data.withdrawal.map((item) => (
-                  <ChannelDetailRow
-                    key={item.paymentChannel}
-                    data={item}
-                    currency={currency}
-                  />
+                  <ChannelDetailRow key={item.paymentChannel} data={item} />
                 ))}
               </div>
             </div>
@@ -1101,16 +1419,13 @@ function PaymentMethodSection({
 
 interface ChannelDetailRowProps {
   data: StatisticsData;
-  currency: string;
 }
 
-function ChannelDetailRow({ data, currency }: ChannelDetailRowProps) {
+function ChannelDetailRow({ data }: ChannelDetailRowProps) {
   const successRate =
     data.total > 0
       ? `${((data.success / data.total) * 100).toFixed(2)}%`
       : "None";
-
-  const currencySymbol = getCurrencySymbol(currency);
 
   return (
     <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow flex-wrap">
@@ -1162,10 +1477,9 @@ function ChannelDetailRow({ data, currency }: ChannelDetailRowProps) {
         <div className="text-xs text-gray-600">總金額</div>
         <div
           className="text-sm font-bold text-gray-900 truncate"
-          title={`${currencySymbol}${formatNumber(data.amountSum.toString())}`}
+          title={`₱${formatNumber(data.amountSum.toString())}`}
         >
-          {currencySymbol}
-          {formatNumber(data.amountSum.toString())}
+          ₱{formatNumber(data.amountSum.toString())}
         </div>
       </div>
 
