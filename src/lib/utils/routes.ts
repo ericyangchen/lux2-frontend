@@ -102,6 +102,18 @@ export const adminNavigation = [
     href: "/admin/blocked-accounts",
     icon: ShieldExclamationIcon,
   },
+  // {
+  //   type: "item" as const,
+  //   name: "單位可用渠道",
+  //   href: "/admin/organization-available-channels",
+  //   icon: BuildingOffice2Icon,
+  // },
+  {
+    type: "item" as const,
+    name: "批量編輯通道",
+    href: "/admin/organization-channel-batch-edit",
+    icon: AdjustmentsHorizontalIcon,
+  },
   {
     type: "category" as const,
     label: "訂單管理",
