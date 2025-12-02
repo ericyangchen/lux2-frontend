@@ -22,6 +22,7 @@ import { UserActivityAction } from "@/lib/enums/users/user-activity-action.enum"
 import { UserActivityLog } from "@/lib/types/user-activity-log";
 import { format } from "date-fns";
 import { getApplicationCookies } from "@/lib/utils/cookie";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 interface MerchantFilterParams {
   userId?: string;
@@ -37,18 +38,36 @@ export function MerchantUserActivityLogsView() {
     getApplicationCookies();
   const [logs, setLogs] = useState<UserActivityLog[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [nextCursor, setNextCursor] = useState<{
-    cursorCreatedAt?: string;
-    cursorId?: string;
-  }>({});
+    createdAt?: string;
+    id?: string;
+  } | null>(null);
   const [filters, setFilters] = useState<MerchantFilterParams>({});
+  const [hasSearched, setHasSearched] = useState(false);
 
   const handleSearch = useCallback(
-    async (params: MerchantFilterParams) => {
+    async (isLoadMore: boolean = false) => {
       if (!accessToken || !merchantOrganizationId) return;
 
-      setLoading(true);
+      if (!isLoadMore) {
+        setLoading(true);
+        setNextCursor(null);
+      } else {
+        setLoadingMore(true);
+      }
+
       try {
+        const params: MerchantFilterParams = {
+          ...filters,
+          limit: 30,
+        };
+
+        if (isLoadMore && nextCursor) {
+          params.cursorCreatedAt = nextCursor.createdAt;
+          params.cursorId = nextCursor.id;
+        }
+
         const response = await ApiGetUserActivityLogs({
           ...params,
           organizationId: merchantOrganizationId, // Always use merchant's organizationId
@@ -57,34 +76,38 @@ export function MerchantUserActivityLogsView() {
 
         if (response.ok) {
           const data = await response.json();
-          if (params.cursorCreatedAt && params.cursorId) {
+          if (isLoadMore) {
             // Load more - append to existing logs
-            setLogs((prev) => [...prev, ...data.data]);
+            setLogs((prev) => [...prev, ...(data.data || [])]);
           } else {
             // New search - replace logs
-            setLogs(data.data);
+            setLogs(data.data || []);
           }
-          setNextCursor(data.pagination.nextCursor || {});
+          setNextCursor(
+            data.pagination?.nextCursor
+              ? {
+                  createdAt: data.pagination.nextCursor.createdAt,
+                  id: data.pagination.nextCursor.id,
+                }
+              : null
+          );
+          setHasSearched(true);
         }
       } catch (error) {
         console.error("Failed to fetch user activity logs:", error);
       } finally {
-        setLoading(false);
+        if (!isLoadMore) {
+          setLoading(false);
+        } else {
+          setLoadingMore(false);
+        }
       }
     },
-    [accessToken, merchantOrganizationId]
+    [accessToken, merchantOrganizationId, filters, nextCursor]
   );
 
   const handleInitialSearch = () => {
-    handleSearch(filters);
-  };
-
-  const handleLoadMore = () => {
-    handleSearch({
-      ...filters,
-      cursorCreatedAt: nextCursor.cursorCreatedAt,
-      cursorId: nextCursor.cursorId,
-    });
+    handleSearch(false);
   };
 
   return (
@@ -92,7 +115,9 @@ export function MerchantUserActivityLogsView() {
       {/* Filter Form */}
       <div className="border border-gray-200 bg-white">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">操作紀錄查詢</h2>
+          <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+            操作紀錄查詢
+          </h2>
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -158,8 +183,8 @@ export function MerchantUserActivityLogsView() {
           </div>
 
           <div className="mt-4">
-            <Button 
-              onClick={handleInitialSearch} 
+            <Button
+              onClick={handleInitialSearch}
               disabled={loading}
               className="border border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
             >
@@ -170,83 +195,105 @@ export function MerchantUserActivityLogsView() {
       </div>
 
       {/* Results Table */}
-      <div className="border border-gray-200 bg-white overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-[1000px] w-full bg-white">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                  時間
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                  使用者ID
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                  操作類型
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                  描述
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
-                  IP地址
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {logs.map((log) => (
-                <tr key={log.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="font-mono text-sm text-gray-600">
-                      {format(new Date(log.createdAt), "yyyy-MM-dd HH:mm:ss")}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="font-mono text-sm text-gray-600">
-                      {log.userId}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="text-sm text-gray-900">
-                      {USER_ACTIVITY_ACTION_DISPLAY_NAMES[log.action] ||
-                        log.action}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div
-                      className="text-sm text-gray-900 max-w-xs truncate"
-                      title={log.description || "-"}
-                    >
-                      {log.description || (
-                        <span className="text-sm text-gray-600">-</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="font-mono text-sm text-gray-600">
-                      {log.ipAddress}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {logs.length === 0 && !loading && (
-            <div className="text-center py-8 text-gray-500">暫無資料</div>
-          )}
-        </div>
-      </div>
-
-      {nextCursor.cursorCreatedAt && nextCursor.cursorId && (
-        <div className="mt-4 text-center">
-          <Button 
-            variant="outline" 
-            onClick={handleLoadMore} 
-            disabled={loading}
-            className="border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
+      {hasSearched && (
+        <div className="pt-4 flex flex-col">
+          <div
+            id="scrollableDiv"
+            className="border border-gray-200 bg-white overflow-hidden"
+            style={{ maxHeight: "70vh", overflowY: "auto" }}
           >
-            載入更多
-          </Button>
+            <InfiniteScroll
+              dataLength={logs.length}
+              next={() => {
+                if (nextCursor) handleSearch(true);
+              }}
+              hasMore={!!nextCursor}
+              loader={
+                <div className="h-16 text-center pt-6 pb-4">
+                  <Label className="text-gray-400">載入中...</Label>
+                </div>
+              }
+              endMessage={
+                <div className="h-16 text-center pt-6 pb-4">
+                  <Label className="text-gray-400">
+                    {loading
+                      ? "查詢中..."
+                      : logs.length
+                      ? "沒有更多記錄"
+                      : "沒有記錄"}
+                  </Label>
+                </div>
+              }
+              scrollableTarget="scrollableDiv"
+            >
+              <div className="overflow-x-auto">
+                <table className="min-w-[1000px] w-full bg-white">
+                  <thead className="bg-gray-50 sticky top-0">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                        時間
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                        使用者ID
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                        操作類型
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                        描述
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 whitespace-nowrap">
+                        IP地址
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {logs.map((log) => (
+                      <tr
+                        key={log.id}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-4 py-3">
+                          <div className="font-mono text-sm text-gray-600">
+                            {format(
+                              new Date(log.createdAt),
+                              "yyyy-MM-dd HH:mm:ss"
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="font-mono text-sm text-gray-600">
+                            {log.userId}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="text-sm text-gray-900">
+                            {USER_ACTIVITY_ACTION_DISPLAY_NAMES[log.action] ||
+                              log.action}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div
+                            className="text-sm text-gray-900 max-w-xs truncate"
+                            title={log.description || "-"}
+                          >
+                            {log.description || (
+                              <span className="text-sm text-gray-600">-</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="font-mono text-sm text-gray-600">
+                            {log.ipAddress}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </InfiniteScroll>
+          </div>
         </div>
       )}
     </div>
