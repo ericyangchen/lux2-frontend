@@ -9,6 +9,7 @@ import {
 
 import { OrgType } from "@/lib/enums/organizations/org-type.enum";
 import { flattenOrganizations } from "./flattenOrganizations";
+import { sortOrganizationTree } from "./sortOrganizationsByHierarchy";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useOrganizationWithChildren } from "@/lib/hooks/swr/organization";
 import { useState } from "react";
@@ -25,17 +26,15 @@ export function OrganizationSearchBar({
   const { organization } = useOrganizationWithChildren({
     organizationId: getApplicationCookies().organizationId,
   });
-  const organizations = (
-    organizationType
-      ? flattenOrganizations(organization).filter(
-          (org) => org.type === organizationType
-        )
-      : flattenOrganizations(organization)
-  ).sort((a, b) => {
-    const dateA = new Date(a.createdAt).getTime();
-    const dateB = new Date(b.createdAt).getTime();
-    return dateA - dateB;
-  });
+  // Sort the organization tree before flattening to ensure children appear after parents
+  const sortedOrganization = organization
+    ? sortOrganizationTree(organization)
+    : organization;
+  const organizations = organizationType
+    ? flattenOrganizations(sortedOrganization).filter(
+        (org) => org.type === organizationType
+      )
+    : flattenOrganizations(sortedOrganization);
 
   const [query, setQuery] = useState("");
   const [isComposing, setIsComposing] = useState(false);

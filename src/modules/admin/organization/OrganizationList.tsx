@@ -11,9 +11,15 @@ import { OrgType } from "@/lib/enums/organizations/org-type.enum";
 import { OrgTypeDisplayNames } from "@/lib/constants/organization";
 import { Organization } from "@/lib/types/organization";
 import { classNames } from "@/lib/utils/classname-utils";
+import { sortOrganizationTree } from "@/modules/admin/common/sortOrganizationsByHierarchy";
 
-function flattenOrganizations(org: Organization, depth = 0) {
-  let flatList = [{ ...org, depth }];
+type OrganizationWithDepth = Organization & { depth: number };
+
+function flattenOrganizations(
+  org: Organization,
+  depth = 0
+): OrganizationWithDepth[] {
+  let flatList: OrganizationWithDepth[] = [{ ...org, depth }];
   if (org?.children) {
     org.children.forEach((child) => {
       flatList = flatList.concat(flattenOrganizations(child, depth + 1));
@@ -36,7 +42,11 @@ export function OrganizationList({
   >(new Set());
   const [selectedType, setSelectedType] = useState<string | undefined>();
 
-  const flatOrganizations = flattenOrganizations(organization);
+  // Sort the organization tree before flattening to ensure children appear after parents
+  const sortedOrganization = organization
+    ? sortOrganizationTree(organization)
+    : organization;
+  const flatOrganizations = flattenOrganizations(sortedOrganization);
 
   const toggleExpand = (id: string) => {
     setExpandedOrganizations((prev) => {
@@ -69,32 +79,27 @@ export function OrganizationList({
   };
 
   // Filter organizations by type and expansion state
-  const filteredOrganizations = flatOrganizations
-    .filter((org) => {
-      // Filter by selected type
-      if (selectedType && org.type !== selectedType) {
-        return false;
+  // No need to sort again since the tree is already sorted before flattening
+  const filteredOrganizations = flatOrganizations.filter((org) => {
+    // Filter by selected type
+    if (selectedType && org.type !== selectedType) {
+      return false;
+    }
+
+    // Only display if the parent organization is expanded
+    const parentIsExpanded = (id: string) => {
+      const parent = flatOrganizations.find(
+        (o) => o.children && o.children.some((child) => child.id === id)
+      );
+      if (!parent) return true;
+      if (expandedOrganizations.has(parent.id)) {
+        return parentIsExpanded(parent.id);
       }
+      return false;
+    };
 
-      // Only display if the parent organization is expanded
-      const parentIsExpanded = (id: string) => {
-        const parent = flatOrganizations.find(
-          (o) => o.children && o.children.some((child) => child.id === id)
-        );
-        if (!parent) return true;
-        if (expandedOrganizations.has(parent.id)) {
-          return parentIsExpanded(parent.id);
-        }
-        return false;
-      };
-
-      return parentIsExpanded(org.id);
-    })
-    .sort((a, b) => {
-      const dateA = new Date(a.createdAt).getTime();
-      const dateB = new Date(b.createdAt).getTime();
-      return dateA - dateB;
-    });
+    return parentIsExpanded(org.id);
+  }) as OrganizationWithDepth[];
 
   // expand all initially
   useEffect(() => {
@@ -119,11 +124,11 @@ export function OrganizationList({
 
   return (
     <div>
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-1 mb-4">
         {/* Type */}
         <div className="max-w-xs">
           <select
-            className="w-full border border-gray-200 bg-white py-1.5 pl-3 pr-12 text-gray-900 sm:text-sm sm:leading-6"
+            className="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-12 text-gray-900 ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6"
             value={selectedType || ""}
             onChange={handleTypeChange}
           >
@@ -143,20 +148,20 @@ export function OrganizationList({
         <Button
           onClick={expandAll}
           variant="outline"
-          className="h-8 text-gray-900 border-gray-200 bg-white hover:bg-gray-50"
+          className="h-8 text-gray-900 border-gray-300"
         >
           展開全部
         </Button>
         <Button
           onClick={shrinkAll}
           variant="outline"
-          className="h-8 text-gray-900 border-gray-200 bg-white hover:bg-gray-50"
+          className="h-8 text-gray-900 border-gray-300"
         >
           收合全部
         </Button>
       </div>
 
-      <ul className="divide-y xl:w-[400px] max-h-[450px] xl:max-h-[calc(100vh-132px)] overflow-y-auto border border-gray-200 bg-white">
+      <ul className="divide-y xl:w-[400px] max-h-[450px] xl:max-h-[calc(100vh-132px)] overflow-y-auto border rounded-lg">
         {filteredOrganizations &&
           filteredOrganizations.map((org) => (
             <li
@@ -164,7 +169,7 @@ export function OrganizationList({
               style={{ paddingLeft: `${org.depth * 20 + 16}px` }}
               className={classNames(
                 selectedOrganizationId === org.id ? "bg-gray-100" : "bg-white",
-                "relative flex items-center gap-2 px-4 py-3 hover:bg-gray-50 cursor-pointer"
+                "relative flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
               )}
               onClick={() => setSelectedOrganizationId(org.id)}
             >
