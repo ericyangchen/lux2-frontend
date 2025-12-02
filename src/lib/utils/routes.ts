@@ -13,6 +13,7 @@ import {
   HomeIcon,
   InboxArrowDownIcon,
   ShieldExclamationIcon,
+  TrashIcon,
   UserCircleIcon,
   WalletIcon,
 } from "@heroicons/react/24/outline";
@@ -202,6 +203,11 @@ export const developerNavigation = [
     name: "開發者主頁",
     href: "/admin/developer/dashboard",
     icon: HomeIcon,
+  },
+  {
+    name: "測試帳號清理",
+    href: "/admin/developer/testing-account-cleanup",
+    icon: TrashIcon,
   },
 ];
 

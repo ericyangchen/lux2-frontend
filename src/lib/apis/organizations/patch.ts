@@ -6,12 +6,14 @@ export const ApiUpdateOrganization = async ({
   name,
   type,
   updateApiKey,
+  isTestingAccount,
   accessToken,
 }: {
   organizationId: string;
   name?: string;
   type?: OrgType;
   updateApiKey?: boolean;
+  isTestingAccount?: boolean;
   accessToken: string;
 }) => {
   return fetch(
@@ -19,7 +21,25 @@ export const ApiUpdateOrganization = async ({
     {
       method: "PATCH",
       headers: SMPayWebHeaderWithAccessToken(accessToken),
-      body: JSON.stringify({ name, type, updateApiKey }),
+      body: JSON.stringify({ name, type, updateApiKey, isTestingAccount }),
+    }
+  );
+};
+
+export const ApiConvertTestingAccountToOfficial = async ({
+  organizationId,
+  accessToken,
+}: {
+  organizationId: string;
+  accessToken: string;
+}) => {
+  return fetch(
+    `${getBackendUrl()}/organizations/testing-accounts/${encodeURIComponent(
+      organizationId
+    )}/convert-to-official`,
+    {
+      method: "PATCH",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
     }
   );
 };

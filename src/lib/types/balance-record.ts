@@ -5,6 +5,7 @@ export interface BalanceRecord {
   id: string;
   organizationId: string;
   paymentMethod: PaymentMethod;
+  transactionId?: string;
   action: BalanceAction;
   availableAmountChanged?: string;
   depositUnsettledAmountChanged?: string;
