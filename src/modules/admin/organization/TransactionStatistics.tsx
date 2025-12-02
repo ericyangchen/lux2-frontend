@@ -116,7 +116,7 @@ export function TransactionStatistics({
   const [isAutoUpdatePaused, setIsAutoUpdatePaused] = useState(false);
   const [updateInterval, setUpdateInterval] = useState<UpdateInterval>("10s");
   const [selectedPeriodType, setSelectedPeriodType] =
-    useState<PeriodType>("custom");
+    useState<PeriodType>("today");
   const [periodDropdownValue, setPeriodDropdownValue] = useState<string>("");
   const [lastUpdatedTime, setLastUpdatedTime] = useState<Date | null>(null);
   const [updateTimeDisplay, setUpdateTimeDisplay] = useState<string>("");
@@ -638,18 +638,18 @@ export function TransactionStatistics({
   const handleStartDateChange = (date: Date | undefined) => {
     setStartDate(date);
     isAutoUpdatingRef.current = false; // Reset flag for manual changes
+    setSelectedPeriodType("custom");
     if (isAutoUpdateEnabled) {
       setIsAutoUpdatePaused(true);
-      setSelectedPeriodType("custom");
     }
   };
 
   const handleEndDateChange = (date: Date | undefined) => {
     setEndDate(date);
     isAutoUpdatingRef.current = false; // Reset flag for manual changes
+    setSelectedPeriodType("custom");
     if (isAutoUpdateEnabled) {
       setIsAutoUpdatePaused(true);
-      setSelectedPeriodType("custom");
     }
   };
 
