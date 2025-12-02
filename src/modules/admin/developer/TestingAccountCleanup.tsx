@@ -14,7 +14,11 @@ import { Organization } from "@/lib/types/organization";
 import { Balance } from "@/lib/types/balance";
 import { Transaction } from "@/lib/types/transaction";
 import { BalanceRecord } from "@/lib/types/balance-record";
-import { PaymentMethodDisplayNames } from "@/lib/constants/transaction";
+import {
+  PaymentMethodDisplayNames,
+  TransactionTypeDisplayNames,
+  TransactionStatusDisplayNames,
+} from "@/lib/constants/transaction";
 
 interface CleanupInfo {
   organization: Organization;
@@ -131,10 +135,11 @@ export function TestingAccountCleanup() {
         title: "Success",
         description: data.message || "Successfully cleaned up transactions",
       });
-      setCleanupSuccess(true);
-      // Reload cleanup info
+      // Reload cleanup info first to get updated balances
       await loadCleanupInfo();
       await calculateReversal();
+      // Set success after reload completes so canConvert check uses fresh data
+      setCleanupSuccess(true);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -192,17 +197,23 @@ export function TestingAccountCleanup() {
     }
   }, [selectedOrganizationId, loadCleanupInfo]);
 
+  const isBalanceZero = (amount: string) => {
+    const num = parseFloat(amount);
+    return isNaN(num) || Math.abs(num) < 0.0001;
+  };
+
   const canCleanup =
     reversalResult?.allZero === true && !isLoadingCleanup && !cleanupSuccess;
   const canConvert =
     cleanupSuccess &&
     cleanupInfo &&
+    !isLoadingInfo &&
     cleanupInfo.balances.every(
       (b) =>
-        b.availableAmount === "0" &&
-        b.depositUnsettledAmount === "0" &&
-        b.withdrawalPendingAmount === "0" &&
-        b.frozenAmount === "0"
+        isBalanceZero(b.availableAmount) &&
+        isBalanceZero(b.depositUnsettledAmount) &&
+        isBalanceZero(b.withdrawalPendingAmount) &&
+        isBalanceZero(b.frozenAmount)
     ) &&
     cleanupInfo.balanceModifications.length === 0 &&
     !isLoadingConvert;
@@ -248,39 +259,97 @@ export function TestingAccountCleanup() {
             <div className="text-sm font-medium mb-2">
               交易記錄 ({cleanupInfo.transactions.length} 筆)
             </div>
-            <div className="border rounded divide-y max-h-[300px] overflow-y-auto">
+            <div className="border rounded divide-y">
               {cleanupInfo.transactions.map((transaction) => (
-                <div key={transaction.id} className="p-3 text-sm">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="font-mono text-xs">{transaction.id}</div>
-                    <div className="text-xs">
-                      {transaction.type} | {transaction.amount}
+                <div key={transaction.id} className="p-3 space-y-2">
+                  <div className="text-sm space-y-1">
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-xs font-medium">
+                        {transaction.id}
+                      </span>
+                      <span className="text-xs">
+                        {TransactionTypeDisplayNames[transaction.type] ||
+                          transaction.type}
+                      </span>
+                      <span className="text-xs">
+                        {TransactionStatusDisplayNames[transaction.status] ||
+                          transaction.status}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs text-gray-600">
+                      <span>金額: {transaction.amount}</span>
+                      <span>手續費: {transaction.totalFee}</span>
+                      <span>
+                        {PaymentMethodDisplayNames[transaction.paymentMethod]}
+                      </span>
+                      {transaction.merchantOrderId && (
+                        <span>訂單: {transaction.merchantOrderId}</span>
+                      )}
                     </div>
                   </div>
                   {transaction.balanceRecords.length > 0 && (
-                    <div className="pl-3 mt-1 space-y-0.5 text-xs text-gray-600">
-                      {transaction.balanceRecords.map((record) => (
-                        <div key={record.id} className="flex gap-2">
-                          <span className="font-mono">{record.id}</span>
-                          <span>{record.action}</span>
-                          {record.availableAmountChanged && (
-                            <span>可用:{record.availableAmountChanged}</span>
-                          )}
-                          {record.depositUnsettledAmountChanged && (
-                            <span>
-                              未結算:{record.depositUnsettledAmountChanged}
-                            </span>
-                          )}
-                          {record.withdrawalPendingAmountChanged && (
-                            <span>
-                              待處理:{record.withdrawalPendingAmountChanged}
-                            </span>
-                          )}
-                          {record.frozenAmountChanged && (
-                            <span>凍結:{record.frozenAmountChanged}</span>
-                          )}
-                        </div>
-                      ))}
+                    <div className="pl-3 mt-2">
+                      <div className="text-xs font-medium text-gray-500 mb-2">
+                        餘額記錄 ({transaction.balanceRecords.length} 筆):
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs border rounded">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-2 py-1.5 text-left font-medium text-gray-700">
+                                ID
+                              </th>
+                              <th className="px-2 py-1.5 text-left font-medium text-gray-700">
+                                動作
+                              </th>
+                              <th className="px-2 py-1.5 text-left font-medium text-gray-700">
+                                支付方式
+                              </th>
+                              <th className="px-2 py-1.5 text-right font-medium text-gray-700">
+                                可用
+                              </th>
+                              <th className="px-2 py-1.5 text-right font-medium text-gray-700">
+                                未結算
+                              </th>
+                              <th className="px-2 py-1.5 text-right font-medium text-gray-700">
+                                待處理
+                              </th>
+                              <th className="px-2 py-1.5 text-right font-medium text-gray-700">
+                                凍結
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y">
+                            {transaction.balanceRecords.map((record) => (
+                              <tr key={record.id} className="hover:bg-gray-50">
+                                <td className="px-2 py-1.5 font-mono">
+                                  {record.id}
+                                </td>
+                                <td className="px-2 py-1.5">{record.action}</td>
+                                <td className="px-2 py-1.5 text-gray-600">
+                                  {
+                                    PaymentMethodDisplayNames[
+                                      record.paymentMethod
+                                    ]
+                                  }
+                                </td>
+                                <td className="px-2 py-1.5 text-right font-mono">
+                                  {record.availableAmountChanged || "0"}
+                                </td>
+                                <td className="px-2 py-1.5 text-right font-mono">
+                                  {record.depositUnsettledAmountChanged || "0"}
+                                </td>
+                                <td className="px-2 py-1.5 text-right font-mono">
+                                  {record.withdrawalPendingAmountChanged || "0"}
+                                </td>
+                                <td className="px-2 py-1.5 text-right font-mono">
+                                  {record.frozenAmountChanged || "0"}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   )}
                 </div>
