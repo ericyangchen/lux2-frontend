@@ -7,13 +7,21 @@ import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { PaymentMethodDisplayNames } from "@/lib/constants/transaction";
 import { PaymentChannel } from "@/lib/enums/transactions/payment-channel.enum";
 import { PaymentChannelDisplayNames } from "@/lib/constants/transaction";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/shadcn/ui/tabs";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/shadcn/ui/tabs";
 import { Card, CardContent } from "@/components/shadcn/ui/card";
 import { classNames } from "@/lib/utils/classname-utils";
 
 export function AvailableChannelsView() {
-  const [selectedOrganizationId, setSelectedOrganizationId] = useState<string>("");
-  const [selectedTab, setSelectedTab] = useState<string>(TransactionType.API_DEPOSIT);
+  const [selectedOrganizationId, setSelectedOrganizationId] =
+    useState<string>("");
+  const [selectedTab, setSelectedTab] = useState<string>(
+    TransactionType.API_DEPOSIT
+  );
 
   const { data, isLoading } = useAvailableChannelsVisualization(
     selectedOrganizationId || undefined
@@ -121,8 +129,9 @@ export function AvailableChannelsView() {
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="font-medium text-gray-900">
-                                {PaymentChannelDisplayNames[channel.paymentChannel] ||
-                                  channel.paymentChannel}
+                                {PaymentChannelDisplayNames[
+                                  channel.paymentChannel
+                                ] || channel.paymentChannel}
                               </p>
                               <p
                                 className={classNames(
@@ -138,7 +147,9 @@ export function AvailableChannelsView() {
                             <div
                               className={classNames(
                                 "w-4 h-4 rounded-full",
-                                channel.isAvailable ? "bg-green-500" : "bg-gray-400"
+                                channel.isAvailable
+                                  ? "bg-green-500"
+                                  : "bg-gray-400"
                               )}
                             />
                           </div>
@@ -161,4 +172,3 @@ export function AvailableChannelsView() {
     </div>
   );
 }
-

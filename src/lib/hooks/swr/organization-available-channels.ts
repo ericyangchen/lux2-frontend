@@ -64,4 +64,3 @@ export const useAvailableChannelsVisualization = (organizationId?: string) => {
     mutate,
   };
 };
-

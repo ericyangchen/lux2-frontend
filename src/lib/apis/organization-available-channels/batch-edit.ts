@@ -56,16 +56,19 @@ export const ApiCheckWarnings = async ({
   updates: OrganizationChannelUpdate[];
   accessToken: string;
 }) => {
-  return fetch(`${getBackendUrl()}/organization-available-channels/check-warnings`, {
-    method: "POST",
-    headers: SMPayWebHeaderWithAccessToken(accessToken),
-    body: JSON.stringify({
-      transactionType,
-      paymentMethod,
-      paymentChannel,
-      updates,
-    }),
-  });
+  return fetch(
+    `${getBackendUrl()}/organization-available-channels/check-warnings`,
+    {
+      method: "POST",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+      body: JSON.stringify({
+        transactionType,
+        paymentMethod,
+        paymentChannel,
+        updates,
+      }),
+    }
+  );
 };
 
 export const ApiBatchUpdateChannels = async ({
@@ -81,15 +84,17 @@ export const ApiBatchUpdateChannels = async ({
   updates: OrganizationChannelUpdate[];
   accessToken: string;
 }) => {
-  return fetch(`${getBackendUrl()}/organization-available-channels/batch-update`, {
-    method: "POST",
-    headers: SMPayWebHeaderWithAccessToken(accessToken),
-    body: JSON.stringify({
-      transactionType,
-      paymentMethod,
-      paymentChannel,
-      updates,
-    }),
-  });
+  return fetch(
+    `${getBackendUrl()}/organization-available-channels/batch-update`,
+    {
+      method: "POST",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+      body: JSON.stringify({
+        transactionType,
+        paymentMethod,
+        paymentChannel,
+        updates,
+      }),
+    }
+  );
 };
-
