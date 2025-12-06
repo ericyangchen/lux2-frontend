@@ -29,7 +29,6 @@ import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { Checkbox } from "@/components/shadcn/ui/checkbox";
 import { Input } from "@/components/shadcn/ui/input";
-import { UserRoleDisplayNames } from "@/lib/constants/user";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
@@ -361,12 +360,6 @@ export function BlockedAccountsView() {
                     scope="col"
                     className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >
-                    角色
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
                     單位
                   </th>
                   <th
@@ -402,9 +395,6 @@ export function BlockedAccountsView() {
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
                       {user.userEmail}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
-                      {UserRoleDisplayNames[user.userRole] || user.userRole}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
                       <div>

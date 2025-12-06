@@ -32,7 +32,6 @@ import { getApplicationCookies } from "@/lib/utils/cookie";
 import { showTotpQrCodeInNewWindow } from "../admin/organization/info/utils";
 import { useUserPermission } from "@/lib/hooks/useUserPermission";
 import { useRolesByOrganization } from "@/lib/hooks/swr/roles";
-import { Role } from "@/lib/apis/roles/get";
 import { ApiAssignRolesToUserMerchant } from "@/lib/apis/user-roles/post";
 import { Permission } from "@/lib/enums/permissions/permission.enum";
 import { useState, useEffect, useMemo } from "react";
@@ -114,7 +113,7 @@ export function MerchantUserEditDialog({
   const canUpdateUser =
     permission.hasPermission(Permission.MERCHANT_UPDATE_USER) ||
     currentUser?.id === user.id; // Users can always update themselves
-  
+
   const canDeleteUser =
     permission.hasPermission(Permission.MERCHANT_DELETE_USER) &&
     currentUser?.id !== user.id; // Can't delete yourself
@@ -312,28 +311,28 @@ export function MerchantUserEditDialog({
         }
       }
 
-        closeDialog();
+      closeDialog();
 
-        if (isUpdatingSelf) {
-          toast({
-            title: "個人資料更新成功",
-            description: "正在驗證權限...",
-            duration: 1000,
-          });
+      if (isUpdatingSelf) {
+        toast({
+          title: "個人資料更新成功",
+          description: "正在驗證權限...",
+          duration: 1000,
+        });
 
-          setTimeout(() => {
-            // Trigger user fetch to check if token is still valid
-            mutateUser();
-          }, 1000);
-        } else {
-          toast({
+        setTimeout(() => {
+          // Trigger user fetch to check if token is still valid
+          mutateUser();
+        }, 1000);
+      } else {
+        toast({
           title: `用戶更新成功`,
-            description: `User ID: ${user.id}`,
-            variant: "success",
-          });
-        }
+          description: `User ID: ${user.id}`,
+          variant: "success",
+        });
+      }
 
-        mutate();
+      mutate();
     } catch (error) {
       if (error instanceof ApplicationError) {
         toast({

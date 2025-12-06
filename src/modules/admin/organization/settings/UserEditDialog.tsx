@@ -29,7 +29,6 @@ import { getApplicationCookies } from "@/lib/utils/cookie";
 import { showTotpQrCodeInNewWindow } from "../info/utils";
 import { useUserPermission } from "@/lib/hooks/useUserPermission";
 import { useRolesByOrganization } from "@/lib/hooks/swr/roles";
-import { Role } from "@/lib/apis/roles/get";
 import { ApiAssignRolesToUserAdmin } from "@/lib/apis/user-roles/post";
 import { Permission } from "@/lib/enums/permissions/permission.enum";
 import { useState, useEffect, useMemo } from "react";
@@ -115,9 +114,10 @@ export function UserEditDialog({
   const canDeleteUser =
     permission.hasPermission(Permission.ADMIN_MANAGE_USER) &&
     currentUser?.id !== user.id; // Can't delete yourself
-  
-  const canAssignRoles =
-    permission.hasPermission(Permission.ADMIN_MANAGE_ROLES);
+
+  const canAssignRoles = permission.hasPermission(
+    Permission.ADMIN_MANAGE_ROLES
+  );
 
   // OTP Management
 
@@ -128,9 +128,9 @@ export function UserEditDialog({
       if (!accessToken) return;
 
       const response = await ApiAdminEnableTotp({
-          userId: user.id,
-          accessToken,
-        });
+        userId: user.id,
+        accessToken,
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -170,9 +170,9 @@ export function UserEditDialog({
       if (!accessToken) return;
 
       const response = await ApiAdminDisableTotp({
-          userId: user.id,
-          accessToken,
-        });
+        userId: user.id,
+        accessToken,
+      });
 
       if (response.ok) {
         setIsOtpEnabled(false);
@@ -312,28 +312,28 @@ export function UserEditDialog({
         }
       }
 
-        closeDialog();
+      closeDialog();
 
-        if (isUpdatingSelf) {
-          toast({
-            title: "個人資料更新成功",
-            description: "正在驗證權限...",
-            duration: 1000,
-          });
+      if (isUpdatingSelf) {
+        toast({
+          title: "個人資料更新成功",
+          description: "正在驗證權限...",
+          duration: 1000,
+        });
 
-          setTimeout(() => {
-            // Trigger user fetch to check if token is still valid
-            mutateUser();
-          }, 1000);
-        } else {
-          toast({
+        setTimeout(() => {
+          // Trigger user fetch to check if token is still valid
+          mutateUser();
+        }, 1000);
+      } else {
+        toast({
           title: `用戶更新成功`,
-            description: `User ID: ${user.id}`,
-            variant: "success",
-          });
-        }
+          description: `User ID: ${user.id}`,
+          variant: "success",
+        });
+      }
 
-        mutate();
+      mutate();
     } catch (error) {
       if (error instanceof ApplicationError) {
         toast({
@@ -441,28 +441,28 @@ export function UserEditDialog({
             />
           </div>
           {canAssignRoles && (
-          <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right">角色</Label>
-            <div className="col-span-3">
-              <Select
+              <div className="col-span-3">
+                <Select
                   value={selectedRoleIds[0] || ""}
                   onValueChange={(value) => setSelectedRoleIds([value])}
-              >
-                <SelectTrigger>
+                >
+                  <SelectTrigger>
                     <SelectValue placeholder="選擇角色" />
-                </SelectTrigger>
-                <SelectContent>
+                  </SelectTrigger>
+                  <SelectContent>
                     {availableRoles.map((role) => (
                       <SelectItem key={role.id} value={role.id}>
                         {role.isSystemRole
                           ? getSystemRoleDisplayName(role.name)
                           : role.name}
-                    </SelectItem>
+                      </SelectItem>
                     ))}
-                </SelectContent>
-              </Select>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          </div>
           )}
           {renderOtpSection()}
         </div>

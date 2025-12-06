@@ -1,4 +1,3 @@
-import { UserRole } from "@/lib/enums/users/user-role.enum";
 import { getBackendUrl } from "@/lib/constants/common";
 
 export const ApiGetAllUsers = async ({
@@ -21,7 +20,6 @@ export interface UserWithInfo {
   userId: string;
   userName: string;
   userEmail: string;
-  userRole: UserRole;
   organizationId: string;
   organizationName: string;
   isBlocked: boolean;
