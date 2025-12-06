@@ -53,6 +53,7 @@ export const ApiMerchantCreateUser = async ({
     method: "POST",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
     body: JSON.stringify({
+      organizationId,
       name,
       email,
       password,
