@@ -12,6 +12,7 @@ import {
   HandRaisedIcon,
   HomeIcon,
   InboxArrowDownIcon,
+  KeyIcon,
   ShieldExclamationIcon,
   TrashIcon,
   UserCircleIcon,
@@ -95,6 +96,12 @@ export const adminNavigation = [
     name: "單位列表",
     href: "/admin/organizations",
     icon: BuildingOffice2Icon,
+  },
+  {
+    type: "item" as const,
+    name: "API Key 管理",
+    href: "/admin/organization-api-key",
+    icon: KeyIcon,
   },
   {
     type: "item" as const,
