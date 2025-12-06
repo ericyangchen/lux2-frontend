@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/shadcn/ui/dialog";
 
-import { ApiCreateUser } from "@/lib/apis/users/post";
+import { ApiMerchantCreateUser } from "@/lib/apis/users/post";
 import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
@@ -52,7 +52,7 @@ export function MerchantUserAddDialog({
 
     try {
       setIsLoading(true);
-      const response = await ApiCreateUser({
+      const response = await ApiMerchantCreateUser({
         organizationId,
         name,
         email,
