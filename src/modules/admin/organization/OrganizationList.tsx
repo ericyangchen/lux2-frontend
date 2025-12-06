@@ -2,11 +2,13 @@ import {
   ArrowRightCircleIcon,
   ChevronDownIcon,
   ChevronRightIcon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/shadcn/ui/badge";
 import { Button } from "@/components/shadcn/ui/button";
+import { Input } from "@/components/shadcn/ui/input";
 import { OrgType } from "@/lib/enums/organizations/org-type.enum";
 import { OrgTypeDisplayNames } from "@/lib/constants/organization";
 import { Organization } from "@/lib/types/organization";
@@ -41,6 +43,7 @@ export function OrganizationList({
     Set<string>
   >(new Set());
   const [selectedType, setSelectedType] = useState<string | undefined>();
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Sort the organization tree before flattening to ensure children appear after parents
   const sortedOrganization = organization
@@ -78,12 +81,40 @@ export function OrganizationList({
     setExpandedOrganizations(new Set());
   };
 
-  // Filter organizations by type and expansion state
+  // Filter organizations by type, search query, and expansion state
   // No need to sort again since the tree is already sorted before flattening
   const filteredOrganizations = flatOrganizations.filter((org) => {
     // Filter by selected type
     if (selectedType && org.type !== selectedType) {
       return false;
+    }
+
+    // Filter by search query (name or ID)
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch =
+        org.name.toLowerCase().includes(query) ||
+        org.id.toLowerCase().includes(query);
+
+      if (!matchesSearch) {
+        // Check if any child matches (if so, we should show this org)
+        const hasMatchingChild = (orgToCheck: Organization): boolean => {
+          if (
+            orgToCheck.name.toLowerCase().includes(query) ||
+            orgToCheck.id.toLowerCase().includes(query)
+          ) {
+            return true;
+          }
+          if (orgToCheck.children) {
+            return orgToCheck.children.some(hasMatchingChild);
+          }
+          return false;
+        };
+
+        if (!hasMatchingChild(org)) {
+          return false;
+        }
+      }
     }
 
     // Only display if the parent organization is expanded
@@ -100,6 +131,14 @@ export function OrganizationList({
 
     return parentIsExpanded(org.id);
   }) as OrganizationWithDepth[];
+
+  // When searching, expand all organizations so matching children are visible
+  useEffect(() => {
+    if (searchQuery) {
+      const allIds = flatOrganizations.map((org) => org.id);
+      setExpandedOrganizations(new Set(allIds));
+    }
+  }, [searchQuery, flatOrganizations]);
 
   // expand all initially
   useEffect(() => {
@@ -124,41 +163,55 @@ export function OrganizationList({
 
   return (
     <div>
-      <div className="flex gap-1 mb-4">
-        {/* Type */}
-        <div className="max-w-xs">
-          <select
-            className="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-12 text-gray-900 ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6"
-            value={selectedType || ""}
-            onChange={handleTypeChange}
-          >
-            <option value="">所有單位</option>
-            <option value={OrgType.ADMIN}>
-              {OrgTypeDisplayNames[OrgType.ADMIN]}
-            </option>
-            <option value={OrgType.AGENT}>
-              {OrgTypeDisplayNames[OrgType.AGENT]}
-            </option>
-            <option value={OrgType.MERCHANT}>
-              {OrgTypeDisplayNames[OrgType.MERCHANT]}
-            </option>
-          </select>
+      <div className="flex flex-col gap-3 mb-4">
+        {/* Search Bar */}
+        <div className="relative">
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="搜尋單位名稱或 ID..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
         </div>
-        {/* Expand/Collapse All */}
-        <Button
-          onClick={expandAll}
-          variant="outline"
-          className="h-8 text-gray-900 border-gray-300"
-        >
-          展開全部
-        </Button>
-        <Button
-          onClick={shrinkAll}
-          variant="outline"
-          className="h-8 text-gray-900 border-gray-300"
-        >
-          收合全部
-        </Button>
+
+        <div className="flex gap-1">
+          {/* Type */}
+          <div className="max-w-xs">
+            <select
+              className="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-12 text-gray-900 ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6"
+              value={selectedType || ""}
+              onChange={handleTypeChange}
+            >
+              <option value="">所有單位</option>
+              <option value={OrgType.ADMIN}>
+                {OrgTypeDisplayNames[OrgType.ADMIN]}
+              </option>
+              <option value={OrgType.AGENT}>
+                {OrgTypeDisplayNames[OrgType.AGENT]}
+              </option>
+              <option value={OrgType.MERCHANT}>
+                {OrgTypeDisplayNames[OrgType.MERCHANT]}
+              </option>
+            </select>
+          </div>
+          {/* Expand/Collapse All */}
+          <Button
+            onClick={expandAll}
+            variant="outline"
+            className="h-8 text-gray-900 border-gray-300"
+          >
+            展開全部
+          </Button>
+          <Button
+            onClick={shrinkAll}
+            variant="outline"
+            className="h-8 text-gray-900 border-gray-300"
+          >
+            收合全部
+          </Button>
+        </div>
       </div>
 
       <ul className="divide-y xl:w-[400px] max-h-[450px] xl:max-h-[calc(100vh-132px)] overflow-y-auto border rounded-lg">
