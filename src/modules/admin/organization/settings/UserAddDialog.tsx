@@ -37,6 +37,8 @@ function getSystemRoleDisplayName(roleName: string): string {
       return "系統管理員";
     case "DEVELOPER":
       return "開發者";
+    case "MERCHANT_OWNER":
+      return "管理員";
     default:
       return roleName;
   }
@@ -59,8 +61,9 @@ export function UserAddDialog({
     accessingOrganizationId: organizationId,
   });
 
-  const canAssignRoles =
-    permission.hasPermission(Permission.ADMIN_MANAGE_ROLES);
+  const canAssignRoles = permission.hasPermission(
+    Permission.ADMIN_MANAGE_ROLES
+  );
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -134,7 +137,7 @@ export function UserAddDialog({
     const { accessToken } = getApplicationCookies();
 
     if (!name || !email || !password || !accessToken) return;
-    
+
     // Role is required only if user can assign roles
     if (canAssignRoles && !selectedRoleId) return;
 
@@ -173,13 +176,21 @@ export function UserAddDialog({
       }
 
       const selectedRole = availableRoles?.find((r) => r.id === selectedRoleId);
-        closeDialog();
-        toast({
+      closeDialog();
+      toast({
         title: `用戶新增成功`,
-        description: `帳號: ${email}, 名字: ${name}${selectedRole ? `, 角色: ${selectedRole.isSystemRole ? getSystemRoleDisplayName(selectedRole.name) : selectedRole.name}` : ""}`,
-          variant: "success",
-        });
-        mutate();
+        description: `帳號: ${email}, 名字: ${name}${
+          selectedRole
+            ? `, 角色: ${
+                selectedRole.isSystemRole
+                  ? getSystemRoleDisplayName(selectedRole.name)
+                  : selectedRole.name
+              }`
+            : ""
+        }`,
+        variant: "success",
+      });
+      mutate();
     } catch (error) {
       if (error instanceof ApplicationError) {
         toast({
@@ -258,7 +269,7 @@ export function UserAddDialog({
             />
           </div>
           {canAssignRoles && (
-          <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right">角色</Label>
               <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
                 <SelectTrigger className="col-span-3 border-gray-200 focus:ring-gray-900 focus:ring-1 shadow-none rounded-none">
@@ -274,7 +285,7 @@ export function UserAddDialog({
                   ))}
                 </SelectContent>
               </Select>
-          </div>
+            </div>
           )}
         </div>
         <DialogFooter>

@@ -41,6 +41,8 @@ function getSystemRoleDisplayName(roleName: string): string {
       return "系統管理員";
     case "DEVELOPER":
       return "開發者";
+    case "MERCHANT_OWNER":
+      return "管理員";
     default:
       return roleName;
   }
