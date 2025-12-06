@@ -4,7 +4,7 @@ import { BlockedAccountsView } from "@/modules/admin/blocked-accounts/BlockedAcc
 export default function AdminBlockedAccountsPage() {
   return (
     <div className="flex flex-col h-full">
-      <ApplicationHeader title="封鎖帳號管理" />
+      <ApplicationHeader title="用戶帳號管理" />
       <BlockedAccountsView />
     </div>
   );

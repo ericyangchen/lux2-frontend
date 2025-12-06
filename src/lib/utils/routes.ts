@@ -105,7 +105,7 @@ export const adminNavigation = [
   },
   {
     type: "item" as const,
-    name: "封鎖帳號管理",
+    name: "用戶帳號管理",
     href: "/admin/blocked-accounts",
     icon: ShieldExclamationIcon,
   },
