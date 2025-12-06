@@ -20,15 +20,17 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { User } from "@/lib/types/user";
-import { UserRoleDisplayNames } from "@/lib/constants/user";
+import { Role } from "@/lib/apis/roles/get";
 import { classNames } from "@/lib/utils/classname-utils";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
 import { getCompanyName } from "@/lib/constants/common";
 import { merchantNavigation } from "@/lib/utils/routes";
 import { useNavigation } from "@/lib/hooks/useNavigation";
 import { useOrganization } from "@/lib/hooks/swr/organization";
+import { useRolesByOrganization } from "@/lib/hooks/swr/roles";
+import { useUserRoles } from "@/lib/hooks/swr/user-roles";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 import { useUser } from "@/lib/hooks/swr/user";
 
@@ -36,11 +38,18 @@ const UserDropdown = ({ user }: { user?: User }) => {
   const { toast } = useToast();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const { organizationId } = getApplicationCookies();
+  const { roles: userRoles } = useUserRoles({ userId: user?.id });
 
   const handleLogout = () => {
     clearApplicationCookies();
     router.push("/login");
   };
+
+  const roleNames = useMemo(() => {
+    if (!userRoles) return [];
+    return userRoles.map((r: Role) => r.name);
+  }, [userRoles]);
 
   if (!user) return null;
 
@@ -64,9 +73,11 @@ const UserDropdown = ({ user }: { user?: User }) => {
                 <span className="text-sm font-medium text-gray-900">
                   {user.name}
                 </span>
+                {roleNames.length > 0 && (
                 <span className="text-xs text-gray-500 px-2 py-0.5 border border-gray-200 rounded">
-                  {UserRoleDisplayNames[user.role]}
+                    {roleNames.join(", ")}
                 </span>
+                )}
               </div>
               <div className="flex items-center gap-2 text-xs text-gray-600">
                 <EnvelopeIcon className="h-3.5 w-3.5" />
@@ -130,6 +141,12 @@ export default function MerchantNavigationHeader() {
   const { organizationId } = getApplicationCookies();
   const { organization } = useOrganization({ organizationId });
   const { user } = useUser();
+  const { roles: userRoles } = useUserRoles({ userId: user?.id });
+
+  const roleNames = useMemo(() => {
+    if (!userRoles) return [];
+    return userRoles.map((r: Role) => r.name);
+  }, [userRoles]);
 
   return (
     <>
@@ -304,9 +321,11 @@ export default function MerchantNavigationHeader() {
                       <span className="text-sm font-medium text-gray-900">
                         {user.name}
                       </span>
+                      {roleNames.length > 0 && (
                       <span className="text-xs text-gray-500 px-2 py-0.5 border border-gray-200 rounded">
-                        {UserRoleDisplayNames[user.role]}
+                          {roleNames.join(", ")}
                       </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 text-xs text-gray-600">
                       <EnvelopeIcon className="h-3.5 w-3.5" />

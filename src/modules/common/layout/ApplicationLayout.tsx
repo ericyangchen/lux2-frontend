@@ -11,11 +11,7 @@ import {
   DialogPanel,
   TransitionChild,
 } from "@headlessui/react";
-import {
-  adminNavigation,
-  developerNavigation,
-  merchantNavigation,
-} from "@/lib/utils/routes";
+import { adminNavigation, merchantNavigation } from "@/lib/utils/routes";
 import {
   clearApplicationCookies,
   getApplicationCookies,
@@ -28,20 +24,33 @@ import { Label } from "@/components/shadcn/ui/label";
 import Link from "next/link";
 import { OrgType } from "@/lib/enums/organizations/org-type.enum";
 import { User } from "@/lib/types/user";
-import { UserRole } from "@/lib/enums/users/user-role.enum";
-import { UserRoleDisplayNames } from "@/lib/constants/user";
+import { Role } from "@/lib/apis/roles/get";
+import { useUserRoles } from "@/lib/hooks/swr/user-roles";
 import { classNames } from "@/lib/utils/classname-utils";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
 import { getCompanyName } from "@/lib/constants/common";
 import { useNavigation } from "@/lib/hooks/useNavigation";
 import { useOrganization } from "@/lib/hooks/swr/organization";
+import { useRolesByOrganization } from "@/lib/hooks/swr/roles";
+import { useUserPermission } from "@/lib/hooks/useUserPermission";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 import { useUser } from "@/lib/hooks/swr/user";
 
 const UserInfo = ({ user }: { user?: User }) => {
   const { toast } = useToast();
+  const { organizationId } = getApplicationCookies();
+  const { roles: organizationRoles } = useRolesByOrganization({
+    organizationId,
+  });
+  const { roles: userRoles } = useUserRoles({ userId: user?.id });
+
+  // Get role names from API - userRoles is already Role[]
+  const roleNames = useMemo(() => {
+    if (!userRoles) return [];
+    return userRoles.map((r: Role) => r.name);
+  }, [userRoles]);
 
   if (!user) return null;
 
@@ -51,7 +60,11 @@ const UserInfo = ({ user }: { user?: User }) => {
         <Badge>
           <span className="max-w-[149px] truncate">{user.name}</span>
         </Badge>
-        <Badge variant="outline">{UserRoleDisplayNames[user.role]}</Badge>
+        {roleNames.map((name) => (
+          <Badge key={name} variant="outline">
+            {name}
+          </Badge>
+        ))}
       </div>
       <Badge variant="outline" className="bg-none border-none pl-0">
         <EnvelopeIcon className="h-4 w-4 mr-2" />
@@ -111,10 +124,10 @@ export default function ApplicationLayout({
   const { organizationId } = getApplicationCookies();
   const { organization } = useOrganization({ organizationId });
   const { user } = useUser();
+  const { isDeveloper } = useUserPermission({});
 
   const isMerchant = organization?.type === OrgType.MERCHANT;
   const isAdmin = organization?.type === OrgType.ADMIN;
-  const isDeveloper = isAdmin && user?.role === UserRole.DEVELOPER;
 
   const router = useRouter();
 
@@ -229,39 +242,6 @@ export default function ApplicationLayout({
                         </li>
                       );
                     })}
-                  </ul>
-                </li>
-
-                {/* developer navigation */}
-                <li hidden={!isDeveloper}>
-                  <div className="text-xs font-semibold leading-6 text-gray-400">
-                    Developer
-                  </div>
-                  <ul role="list" className="-mx-2 space-y-1">
-                    {developerNavigation.map((item) => (
-                      <li key={item.name}>
-                        <Link
-                          href={item.href}
-                          className={classNames(
-                            currentNavigation?.href === item.href
-                              ? "bg-gray-100 text-blue-800"
-                              : "text-gray-700 hover:bg-gray-100",
-                            "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full"
-                          )}
-                        >
-                          <item.icon
-                            aria-hidden="true"
-                            className={classNames(
-                              currentNavigation?.href === item.href
-                                ? "text-blue-8000"
-                                : "text-gray-400",
-                              "h-6 w-6 shrink-0"
-                            )}
-                          />
-                          {item.name}
-                        </Link>
-                      </li>
-                    ))}
                   </ul>
                 </li>
               </ul>
@@ -420,44 +400,6 @@ export default function ApplicationLayout({
                               </li>
                             );
                           })}
-                        </ul>
-                      </li>
-                    </li>
-
-                    {/* developer navigation */}
-                    <li hidden={!isDeveloper}>
-                      <div className="text-xs font-semibold leading-6 text-gray-400">
-                        Developer - {organization?.name}
-                      </div>
-                      <li>
-                        <ul role="list" className="-mx-2 space-y-1">
-                          {developerNavigation.map((item) => (
-                            <li key={item.name}>
-                              <Link
-                                href={item.href}
-                                className={classNames(
-                                  currentNavigation?.href === item.href
-                                    ? "bg-gray-100 text-blue-800"
-                                    : "text-gray-700 hover:bg-gray-100",
-                                  "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 w-full"
-                                )}
-                                onClick={() => {
-                                  setSidebarOpen(false);
-                                }}
-                              >
-                                <item.icon
-                                  aria-hidden="true"
-                                  className={classNames(
-                                    currentNavigation?.href === item.href
-                                      ? "text-blue-800"
-                                      : "text-gray-400",
-                                    "h-6 w-6 shrink-0"
-                                  )}
-                                />
-                                {item.name}
-                              </Link>
-                            </li>
-                          ))}
                         </ul>
                       </li>
                     </li>

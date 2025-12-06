@@ -196,6 +196,22 @@ export const adminNavigation = [
     href: "/admin/telegram-broadcast",
     icon: InboxArrowDownIcon,
   },
+  {
+    type: "category" as const,
+    label: "開發者",
+  },
+  {
+    type: "item" as const,
+    name: "開發者主頁",
+    href: "/admin/developer/dashboard",
+    icon: HomeIcon,
+  },
+  {
+    type: "item" as const,
+    name: "測試帳號清理",
+    href: "/admin/developer/testing-account-cleanup",
+    icon: TrashIcon,
+  },
   // {
   //   type: "item" as const,
   //   name: "路由規則",
@@ -210,23 +226,9 @@ export const adminNavigation = [
   // },
 ];
 
-export const developerNavigation = [
-  {
-    name: "開發者主頁",
-    href: "/admin/developer/dashboard",
-    icon: HomeIcon,
-  },
-  {
-    name: "測試帳號清理",
-    href: "/admin/developer/testing-account-cleanup",
-    icon: TrashIcon,
-  },
-];
-
 export const allNavigation = [
   ...merchantNavigation,
   ...adminNavigation.filter((item) => item.type === "item"),
-  ...developerNavigation,
 ];
 
 export const routesWithoutLayout = [

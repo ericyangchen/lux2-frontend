@@ -1,7 +1,14 @@
 import { OrgType } from "../enums/organizations/org-type.enum";
-import { UserRole } from "../enums/users/user-role.enum";
-import { useOrganization } from "./swr/organization";
+import { Permission } from "../enums/permissions/permission.enum";
 import { useUser } from "./swr/user";
+import { getApplicationCookies } from "../utils/cookie";
+import { getUserPermissionsFromToken } from "../utils/jwt";
+import {
+  hasDeveloperPermission,
+  hasPermission,
+  hasAnyPermission,
+} from "../utils/permissions";
+import { useMemo } from "react";
 
 export const useUserPermission = ({
   accessingOrganizationId,
@@ -9,35 +16,40 @@ export const useUserPermission = ({
   accessingOrganizationId?: string;
 }) => {
   const { user } = useUser();
+  const { accessToken } = getApplicationCookies();
 
-  const { organization: userOrg } = useOrganization({
-    organizationId: user?.organizationId,
-  });
+  // Get permissions from JWT token or user object
+  const userPermissions = useMemo(() => {
+    if (user?.permissions && user.permissions.length > 0) {
+      return user.permissions;
+    }
+    if (accessToken) {
+      return getUserPermissionsFromToken(accessToken);
+    }
+    return [];
+  }, [user?.permissions, accessToken]);
 
-  if (!user || !userOrg) {
-    return {};
-  }
+  // Even if user/org not loaded, we can still check permissions from token
+  const isDeveloper = hasDeveloperPermission(userPermissions);
 
-  const isAdminOrg = userOrg?.type === OrgType.ADMIN;
-  const isMerchantOrg = userOrg?.type === OrgType.MERCHANT;
+  // Get org type directly from user
+  const userOrgType = user?.orgType;
+  const isAdminOrg = userOrgType === OrgType.ADMIN;
+  const isMerchantOrg = userOrgType === OrgType.MERCHANT;
 
-  const isOwner = isAdminOrg
-    ? user.role === UserRole.ADMIN_OWNER
-    : user.role === UserRole.MERCHANT_OWNER;
-  const isStaff = isAdminOrg
-    ? user.role === UserRole.ADMIN_STAFF
-    : user.role === UserRole.MERCHANT_STAFF;
-
-  const isDeveloper = user.role === UserRole.DEVELOPER;
-
-  const accessingSelfOrg = accessingOrganizationId === user.organizationId;
+  const accessingSelfOrg = user
+    ? accessingOrganizationId === user.organizationId
+    : false;
 
   return {
     isAdminOrg,
     isMerchantOrg,
-    isOwner,
-    isStaff,
     isDeveloper,
     accessingSelfOrg,
+    userPermissions,
+    hasPermission: (permission: Permission) =>
+      hasPermission(userPermissions, permission),
+    hasAnyPermission: (permissions: Permission[]) =>
+      hasAnyPermission(userPermissions, permissions),
   };
 };

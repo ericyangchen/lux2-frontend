@@ -1,8 +1,4 @@
-import {
-  ApiDeveloperDisableTotp,
-  ApiDeveloperEnableTotp,
-} from "@/lib/apis/developer/users/otp/post";
-import { ApiDisableUserOtp, ApiEnableTotp } from "@/lib/apis/otp/post";
+import { ApiAdminEnableTotp, ApiAdminDisableTotp } from "@/lib/apis/otp/post";
 import {
   Dialog,
   DialogContent,
@@ -28,24 +24,41 @@ import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { User } from "@/lib/types/user";
-import { UserRole } from "@/lib/enums/users/user-role.enum";
-import { UserRoleDisplayNames } from "@/lib/constants/user";
+import { Role } from "@/lib/apis/roles/get";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { showTotpQrCodeInNewWindow } from "../info/utils";
 import { useUserPermission } from "@/lib/hooks/useUserPermission";
-import { useState } from "react";
+import { useRolesByOrganization } from "@/lib/hooks/swr/roles";
+import { Role } from "@/lib/apis/roles/get";
+import { ApiAssignRolesToUserAdmin } from "@/lib/apis/user-roles/post";
+import { Permission } from "@/lib/enums/permissions/permission.enum";
+import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
+
+// Helper function to get display name for system roles (admin only)
+function getSystemRoleDisplayName(roleName: string): string {
+  switch (roleName) {
+    case "OWNER":
+      return "系統管理員";
+    case "DEVELOPER":
+      return "開發者";
+    default:
+      return roleName;
+  }
+}
 
 export function UserEditDialog({
   isOpen,
   closeDialog,
   user,
   organizationId,
+  userRoleAssociations,
 }: {
   isOpen: boolean;
   closeDialog: () => void;
   user: User;
   organizationId: string;
+  userRoleAssociations?: Array<{ userId: string; roleId: string; role: Role }>;
 }) {
   const { toast } = useToast();
 
@@ -53,12 +66,42 @@ export function UserEditDialog({
   const permission = useUserPermission({
     accessingOrganizationId: organizationId,
   });
+  const { roles: organizationRoles } = useRolesByOrganization({
+    organizationId,
+  });
+
+  // Get user's roles from userRoleAssociations (batch data) instead of individual API call
+  const userRoles = useMemo(() => {
+    if (!userRoleAssociations) return [];
+    return userRoleAssociations
+      .filter((ur) => ur.userId === user.id)
+      .map((ur) => ur.role);
+  }, [userRoleAssociations, user.id]);
+
+  // Filter out DEVELOPER role and sort roles
+  const availableRoles = useMemo(() => {
+    if (!organizationRoles) return [];
+    return organizationRoles
+      .filter((role) => role.name !== "DEVELOPER")
+      .sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateA - dateB;
+      });
+  }, [organizationRoles]);
 
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<UserRole>(user.role || UserRole.ADMIN_STAFF);
+  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
   const [isOtpEnabled, setIsOtpEnabled] = useState(user.isOtpEnabled);
+
+  // Initialize selected roles from user's current roles
+  useEffect(() => {
+    if (userRoles.length > 0) {
+      setSelectedRoleIds(userRoles.map((r) => r.id));
+    }
+  }, [userRoles]);
 
   const [isUpdateLoading, setIsUpdateLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
@@ -68,6 +111,14 @@ export function UserEditDialog({
     organizationId,
   });
 
+  // Permission checks
+  const canDeleteUser =
+    permission.hasPermission(Permission.ADMIN_MANAGE_USER) &&
+    currentUser?.id !== user.id; // Can't delete yourself
+  
+  const canAssignRoles =
+    permission.hasPermission(Permission.ADMIN_MANAGE_ROLES);
+
   // OTP Management
 
   const handleEnableOtp = async () => {
@@ -76,18 +127,10 @@ export function UserEditDialog({
       const { accessToken } = getApplicationCookies();
       if (!accessToken) return;
 
-      let response;
-      if (user.role === UserRole.DEVELOPER) {
-        response = await ApiDeveloperEnableTotp({
+      const response = await ApiAdminEnableTotp({
           userId: user.id,
           accessToken,
         });
-      } else {
-        response = await ApiEnableTotp({
-          userId: user.id,
-          accessToken,
-        });
-      }
 
       if (response.ok) {
         const data = await response.json();
@@ -126,18 +169,10 @@ export function UserEditDialog({
       const { accessToken } = getApplicationCookies();
       if (!accessToken) return;
 
-      let response;
-      if (user.role === UserRole.DEVELOPER) {
-        response = await ApiDeveloperDisableTotp({
+      const response = await ApiAdminDisableTotp({
           userId: user.id,
           accessToken,
         });
-      } else {
-        response = await ApiDisableUserOtp({
-          userId: user.id,
-          accessToken,
-        });
-      }
 
       if (response.ok) {
         setIsOtpEnabled(false);
@@ -172,9 +207,9 @@ export function UserEditDialog({
     // Users can manage their own OTP
     if (currentUser.id === user.id) return true;
 
-    // Owners and developers can manage OTP for users in their organization
+    // Developers can manage OTP for users in their organization
     if (
-      (permission.isOwner || permission.isDeveloper) &&
+      permission.isDeveloper &&
       currentUser.organizationId === user.organizationId
     )
       return true;
@@ -248,18 +283,35 @@ export function UserEditDialog({
     try {
       setIsUpdateLoading(true);
 
+      // Update user first
       const response = await ApiAdminUpdateUser({
         userId: user.id,
         name,
         email,
         password: password || undefined,
-        role,
         accessToken,
       });
 
       const data = await response.json();
 
-      if (response.ok) {
+      if (!response.ok) {
+        throw new ApplicationError(data);
+      }
+
+      // Assign roles if they changed and user has permission
+      if (canAssignRoles && selectedRoleIds.length > 0) {
+        const assignResponse = await ApiAssignRolesToUserAdmin({
+          userId: user.id,
+          roleIds: selectedRoleIds,
+          accessToken,
+        });
+
+        if (!assignResponse.ok) {
+          const assignErrorData = await assignResponse.json();
+          throw new ApplicationError(assignErrorData);
+        }
+      }
+
         closeDialog();
 
         if (isUpdatingSelf) {
@@ -275,26 +327,23 @@ export function UserEditDialog({
           }, 1000);
         } else {
           toast({
-            title: `${UserRoleDisplayNames[role]} 更新成功`,
+          title: `用戶更新成功`,
             description: `User ID: ${user.id}`,
             variant: "success",
           });
         }
 
         mutate();
-      } else {
-        throw new ApplicationError(data);
-      }
     } catch (error) {
       if (error instanceof ApplicationError) {
         toast({
-          title: `${error.statusCode} - ${UserRoleDisplayNames[role]} 更新失敗`,
+          title: `用戶更新失敗`,
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: `${UserRoleDisplayNames[role]} 更新失敗`,
+          title: `用戶更新失敗`,
           description: "Unknown error",
           variant: "destructive",
         });
@@ -322,7 +371,7 @@ export function UserEditDialog({
       if (response.ok) {
         closeDialog();
         toast({
-          title: `${UserRoleDisplayNames[role]} 刪除成功`,
+          title: `用戶刪除成功`,
           description: `用戶 ID: ${user.id}`,
           variant: "success",
         });
@@ -334,13 +383,13 @@ export function UserEditDialog({
     } catch (error) {
       if (error instanceof ApplicationError) {
         toast({
-          title: `${error.statusCode} - ${UserRoleDisplayNames[role]} 刪除失敗`,
+          title: `用戶刪除失敗`,
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: `${UserRoleDisplayNames[role]} 刪除失敗`,
+          title: `用戶刪除失敗`,
           description: "Unknown error",
           variant: "destructive",
         });
@@ -355,14 +404,14 @@ export function UserEditDialog({
     setName(user.name);
     setEmail(user.email);
     setPassword("");
-    setRole(user.role || UserRole.ADMIN_STAFF);
+    // Roles are loaded from userRoleAssociations (batch data)
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCloseDialog}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>編輯/刪除 {UserRoleDisplayNames[role]}</DialogTitle>
+          <DialogTitle>編輯/刪除用戶</DialogTitle>
           <DialogDescription>編輯或刪除一位用戶</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -391,40 +440,35 @@ export function UserEditDialog({
               onChange={(e) => setName(e.target.value)}
             />
           </div>
+          {canAssignRoles && (
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">權限</Label>
+              <Label className="text-right">角色</Label>
             <div className="col-span-3">
               <Select
-                defaultValue={role}
-                onValueChange={(value) => setRole(value as UserRole)}
+                  value={selectedRoleIds[0] || ""}
+                  onValueChange={(value) => setSelectedRoleIds([value])}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                    <SelectValue placeholder="選擇角色" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value={UserRole.ADMIN_OWNER}>
-                      {UserRoleDisplayNames[UserRole.ADMIN_OWNER]}
+                    {availableRoles.map((role) => (
+                      <SelectItem key={role.id} value={role.id}>
+                        {role.isSystemRole
+                          ? getSystemRoleDisplayName(role.name)
+                          : role.name}
                     </SelectItem>
-                    <SelectItem value={UserRole.ADMIN_STAFF}>
-                      {UserRoleDisplayNames[UserRole.ADMIN_STAFF]}
-                    </SelectItem>
-                    <SelectItem value={UserRole.MERCHANT_OWNER}>
-                      {UserRoleDisplayNames[UserRole.MERCHANT_OWNER]}
-                    </SelectItem>
-                    <SelectItem value={UserRole.MERCHANT_STAFF}>
-                      {UserRoleDisplayNames[UserRole.MERCHANT_STAFF]}
-                    </SelectItem>
-                  </SelectGroup>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
+          )}
           {renderOtpSection()}
         </div>
         <DialogFooter className="flex flex-row justify-between sm:justify-between">
           <div>
-            {!isUpdateLoading && (
+            {canDeleteUser && !isUpdateLoading && (
               <Button
                 onClick={handleDeleteUser}
                 disabled={isDeleteLoading || isUpdateLoading}

@@ -6,20 +6,18 @@ export const ApiAdminUpdateUser = async ({
   name,
   email,
   password,
-  role,
   accessToken,
 }: {
   userId: string;
   name?: string;
   email?: string;
   password?: string;
-  role?: string;
   accessToken: string;
 }) => {
   return fetch(`${getBackendUrl()}/users/${encodeURIComponent(userId)}`, {
     method: "PATCH",
     headers: SMPayWebHeaderWithAccessToken(accessToken),
-    body: JSON.stringify({ name, email, password, role }),
+    body: JSON.stringify({ name, email, password }),
   });
 };
 
@@ -29,7 +27,6 @@ export const ApiMerchantUpdateUser = async ({
   name,
   email,
   password,
-  role,
   accessToken,
 }: {
   organizationId: string;
@@ -37,7 +34,6 @@ export const ApiMerchantUpdateUser = async ({
   name?: string;
   email?: string;
   password?: string;
-  role?: string;
   accessToken: string;
 }) => {
   return fetch(
@@ -45,7 +41,7 @@ export const ApiMerchantUpdateUser = async ({
     {
       method: "PATCH",
       headers: SMPayWebHeaderWithAccessToken(accessToken),
-      body: JSON.stringify({ name, email, password, role }),
+      body: JSON.stringify({ name, email, password }),
     }
   );
 };

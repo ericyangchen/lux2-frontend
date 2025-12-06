@@ -1,17 +1,36 @@
 import { Label } from "@/components/shadcn/ui/label";
 import { OrgType } from "@/lib/enums/organizations/org-type.enum";
+import { Permission } from "@/lib/enums/permissions/permission.enum";
 import { User } from "@/lib/types/user";
+import { Role } from "@/lib/apis/roles/get";
 import { UserAddDialog } from "./UserAddDialog";
 import { UserEditDialog } from "./UserEditDialog";
-import { UserRole } from "@/lib/enums/users/user-role.enum";
-import { UserRoleDisplayNames } from "@/lib/constants/user";
+import { RoleCreateDialog } from "@/modules/common/RoleCreateDialog";
+import { RoleEditDialog } from "@/modules/common/RoleEditDialog";
 import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/utils/timezone";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
 import { useOrganization } from "@/lib/hooks/swr/organization";
-import { useState } from "react";
+import { useRolesByOrganization } from "@/lib/hooks/swr/roles";
+import { useUser, useUsersByOrganizationId } from "@/lib/hooks/swr/user";
+import { useState, useMemo } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 import { useUserPermission } from "@/lib/hooks/useUserPermission";
-import { useUsersByOrganizationId } from "@/lib/hooks/swr/user";
+
+interface UserWithRoles extends User {
+  roles?: Role[];
+}
+
+// Helper function to get display name for system roles (admin only)
+function getSystemRoleDisplayName(roleName: string): string {
+  switch (roleName) {
+    case "OWNER":
+      return "系統管理員";
+    case "DEVELOPER":
+      return "開發者";
+    default:
+      return roleName;
+  }
+}
 
 export function OrganizationUserSetting({
   organizationId,
@@ -19,40 +38,77 @@ export function OrganizationUserSetting({
   organizationId: string;
 }) {
   const { toast } = useToast();
+  const { user: currentUser } = useUser();
 
   const { users, mutate: mutateUsers } = useUsersByOrganizationId({
     organizationId,
   });
   const { organization } = useOrganization({ organizationId });
+  const { roles: organizationRoles, mutate: mutateRoles } =
+    useRolesByOrganization({
+      organizationId,
+    });
+
+  // Sort roles by createdAt ascending and filter out DEVELOPER role
+  const sortedRoles = useMemo(() => {
+    if (!organizationRoles) return [];
+    return [...organizationRoles]
+      .filter((role) => role.name !== "DEVELOPER")
+      .sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateA - dateB;
+      });
+  }, [organizationRoles]);
+
+  // Extract user-role associations from roles (each role has userRoles array)
+  const userRoleAssociations = useMemo(() => {
+    if (!organizationRoles) return [];
+    const associations: Array<{ userId: string; roleId: string; role: Role }> =
+      [];
+    organizationRoles.forEach((role) => {
+      if (role.userRoles && Array.isArray(role.userRoles)) {
+        role.userRoles.forEach(
+          (userRole: { userId: string; roleId: string }) => {
+            associations.push({
+              userId: userRole.userId,
+              roleId: role.id,
+              role: role,
+            });
+          }
+        );
+      }
+    });
+    return associations;
+  }, [organizationRoles]);
 
   const permission = useUserPermission({
     accessingOrganizationId: organizationId,
   });
 
-  const ownerUserRole =
-    organization?.type === OrgType.ADMIN
-      ? UserRole.ADMIN_OWNER
-      : UserRole.MERCHANT_OWNER;
+  // User roles are already available via userRoleAssociations extracted from organizationRoles
+  // No need to fetch individually - the data is already loaded in the batch query
 
-  const staffUserRole =
-    organization?.type === OrgType.ADMIN
-      ? UserRole.ADMIN_STAFF
-      : UserRole.MERCHANT_STAFF;
+  // Add User Dialog
+  const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
+  const openAddUserDialog = () => setIsAddUserDialogOpen(true);
+  const closeAddUserDialog = () => setIsAddUserDialogOpen(false);
 
-  const ownerUsers = users?.filter((user) => user.role === ownerUserRole);
+  // Add Role Dialog
+  const [isAddRoleDialogOpen, setIsAddRoleDialogOpen] = useState(false);
+  const openAddRoleDialog = () => setIsAddRoleDialogOpen(true);
+  const closeAddRoleDialog = () => setIsAddRoleDialogOpen(false);
 
-  const staffUsers = users?.filter((user) => user.role === staffUserRole);
-
-  // Add Dialog
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [addDialogRole, setAddDialogRole] = useState<UserRole>();
-
-  const openAddDialog = ({ role }: { role: UserRole }) => {
-    setAddDialogRole(role);
-    setIsAddDialogOpen(true);
+  // Edit Role Dialog
+  const [isEditRoleDialogOpen, setIsEditRoleDialogOpen] = useState(false);
+  const [editRole, setEditRole] = useState<Role>();
+  const openEditRoleDialog = (role: Role) => {
+    setEditRole(role);
+    setIsEditRoleDialogOpen(true);
   };
-  const closeAddDialog = () => {
-    setIsAddDialogOpen(false);
+  const closeEditRoleDialog = () => {
+    setIsEditRoleDialogOpen(false);
+    setEditRole(undefined);
   };
 
   // Edit Dialog
@@ -68,6 +124,7 @@ export function OrganizationUserSetting({
         description: `用戶 ID 不存在: ${id}`,
         variant: "destructive",
       });
+      return;
     }
 
     setEditUser(user);
@@ -78,311 +135,274 @@ export function OrganizationUserSetting({
     setEditUser(undefined);
   };
 
-  /**
-   * Permissions:
-   * - Show Add Button
-   *    - If
-   * - Show Edit Button
-   * - Show Delete Button
-   */
-  const showOwnerAddButton =
-    permission.isDeveloper ||
-    (permission.accessingSelfOrg && permission.isOwner) ||
-    (permission.isAdminOrg && permission.isOwner && ownerUsers?.length == 0);
-  const showOwnerEditButton =
-    permission.isDeveloper ||
-    (permission.accessingSelfOrg && permission.isOwner);
-  const showStaffAddButton =
-    permission.isDeveloper ||
-    (permission.accessingSelfOrg && permission.isOwner);
-  const showStaffEditButton =
-    permission.isDeveloper ||
-    (permission.accessingSelfOrg && permission.isOwner);
+  const canManageUsers = permission.hasPermission(Permission.ADMIN_MANAGE_USER);
+  const canManageRoles = permission.hasPermission(
+    Permission.ADMIN_MANAGE_ROLES
+  );
+
+  // Fetch roles for each user
+  const usersWithFetchedRoles = useMemo(() => {
+    if (!users || !organizationRoles) return [];
+    return users.map((user) => {
+      // We'll fetch roles per user using useUserRoles hook
+      // For now, return empty array - will be populated by individual hooks
+      return { ...user, roles: [] as Role[] };
+    });
+  }, [users, organizationRoles]);
 
   return (
-    <div className="">
-      {/* Organization Owner */}
-      <div className="px-0 sm:px-4">
-        <div className="py-2 pb-4">
-          <div className="flex justify-between items-center h-7">
-            <Label className="text-md font-semibold px-2">
-              {UserRoleDisplayNames[ownerUserRole]}
-            </Label>
-            {showOwnerAddButton && (
-              <button
-                className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 transition-colors duration-200"
-                onClick={() =>
-                  openAddDialog({
-                    role: ownerUserRole,
-                  })
-                }
-              >
-                新增
-              </button>
+    <div className="space-y-8">
+      {/* Roles Section */}
+      {canManageRoles && (
+        <div className="border border-gray-200 bg-white">
+          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+              角色管理
+            </h2>
+            <button
+              className="text-sm font-medium text-gray-900 border border-gray-200 hover:bg-gray-50 px-3 py-1.5 transition-colors"
+              onClick={openAddRoleDialog}
+            >
+              新增角色
+            </button>
+          </div>
+          <div className="p-6">
+            {sortedRoles && sortedRoles.length > 0 ? (
+              <div className="space-y-2">
+                {sortedRoles.map((role) => (
+                  <div
+                    key={role.id}
+                    className="flex items-center justify-between p-3 border border-gray-200"
+                  >
+                    <div>
+                      <span className="text-sm font-medium text-gray-900">
+                        {role.isSystemRole
+                          ? getSystemRoleDisplayName(role.name)
+                          : role.name}
+                      </span>
+                      {role.isSystemRole && (
+                        <span className="ml-2 text-xs text-gray-500">
+                          (系統角色)
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      className="text-sm text-gray-900 hover:text-black"
+                      onClick={() => openEditRoleDialog(role)}
+                    >
+                      {role.isSystemRole ? "查看" : "編輯"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-sm text-gray-500 text-center py-4">
+                尚無角色
+              </div>
             )}
           </div>
-          <div className="border border-gray-200 mt-2 overflow-x-scroll">
-            <table className="divide-y divide-gray-300 w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    scope="col"
-                    className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-                  >
-                    ID
-                  </th>
+        </div>
+      )}
 
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+      {/* Users List */}
+      <div className="border border-gray-200 bg-white">
+        <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+          <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+            用戶列表
+          </h2>
+          {canManageUsers && (
+            <button
+              className="text-sm font-medium text-gray-900 border border-gray-200 hover:bg-gray-50 px-3 py-1.5 transition-colors"
+              onClick={openAddUserDialog}
+            >
+              新增用戶
+            </button>
+          )}
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th
+                  scope="col"
+                  className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                >
+                  ID
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                >
+                  帳號
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                >
+                  名字
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                >
+                  角色
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                >
+                  創建時間
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                >
+                  OTP
+                </th>
+                <th
+                  scope="col"
+                  className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-semibold sm:pr-6"
+                >
+                  操作
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {users && users.length > 0 ? (
+                users.map((user) => (
+                  <UserRow
+                    key={user.id}
+                    user={user}
+                    organizationRoles={organizationRoles || []}
+                    userRoleAssociations={userRoleAssociations}
+                    canEdit={canManageUsers || user.id === currentUser?.id}
+                    onEdit={() => openEditDialog({ id: user.id })}
+                    toast={toast}
+                  />
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="px-4 py-4 text-sm text-gray-500 text-center"
                   >
-                    帳號
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    名字
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    創建時間
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    OTP
-                  </th>
-                  <th
-                    scope="col"
-                    className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-semibold sm:pr-6"
-                  >
-                    操作
-                  </th>
+                    沒有用戶
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {ownerUsers?.length ? (
-                  ownerUsers?.map((ownerUser) => (
-                    <tr key={ownerUser.id}>
-                      <td
-                        className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-500 sm:pl-6 font-mono cursor-pointer"
-                        onClick={() =>
-                          copyToClipboard({
-                            toast,
-                            copyingText: ownerUser.id,
-                          })
-                        }
-                      >
-                        {ownerUser.id}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-semibold">
-                        {ownerUser.email}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {ownerUser.name}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {convertDatabaseTimeToReadablePhilippinesTime(
-                          ownerUser.createdAt
-                        )}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <div className="flex items-center">
-                          <div
-                            className={`w-2 h-2 rounded-full mr-2 ${
-                              ownerUser.isOtpEnabled
-                                ? "bg-green-500"
-                                : "bg-gray-400"
-                            }`}
-                          ></div>
-                          {ownerUser.isOtpEnabled ? "已啟用" : "未啟用"}
-                        </div>
-                      </td>
-                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium">
-                        {showOwnerEditButton && (
-                          <button
-                            className="text-gray-900 hover:text-black"
-                            onClick={() =>
-                              openEditDialog({
-                                id: ownerUser.id,
-                              })
-                            }
-                          >
-                            編輯
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-4 text-sm text-gray-500 text-center"
-                    >
-                      沒有{UserRoleDisplayNames[ownerUserRole]}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* Organization Staff */}
-      <div className="px-0 sm:px-4">
-        <div className="py-2 pb-4">
-          <div className="flex justify-between items-center h-7">
-            <Label className="text-md font-semibold px-2">
-              {UserRoleDisplayNames[staffUserRole]}
-            </Label>
-            {showStaffAddButton && (
-              <button
-                className="text-right text-sm font-medium text-white bg-purple-700 hover:bg-purple-800 px-2 py-1 transition-colors duration-200"
-                onClick={() =>
-                  openAddDialog({
-                    role: staffUserRole,
-                  })
-                }
-              >
-                新增
-              </button>
-            )}
-          </div>
-          <div className="border border-gray-200 mt-2 overflow-x-scroll">
-            <table className="divide-y divide-gray-300 w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    scope="col"
-                    className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-                  >
-                    ID
-                  </th>
-
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    帳號
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    名字
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    創建時間
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    OTP
-                  </th>
-                  <th
-                    scope="col"
-                    className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-semibold sm:pr-6"
-                  >
-                    操作
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {staffUsers?.length ? (
-                  staffUsers?.map((staffUser) => (
-                    <tr key={staffUser.id}>
-                      <td
-                        className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-500 sm:pl-6 font-mono cursor-pointer"
-                        onClick={() =>
-                          copyToClipboard({
-                            toast,
-                            copyingText: staffUser.id,
-                          })
-                        }
-                      >
-                        {staffUser.id}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-semibold">
-                        {staffUser.email}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {staffUser.name}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {convertDatabaseTimeToReadablePhilippinesTime(
-                          staffUser.createdAt
-                        )}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <div className="flex items-center">
-                          <div
-                            className={`w-2 h-2 rounded-full mr-2 ${
-                              staffUser.isOtpEnabled
-                                ? "bg-green-500"
-                                : "bg-gray-400"
-                            }`}
-                          ></div>
-                          {staffUser.isOtpEnabled ? "已啟用" : "未啟用"}
-                        </div>
-                      </td>
-                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium">
-                        {showStaffEditButton && (
-                          <button
-                            className="text-gray-900 hover:text-black"
-                            onClick={() =>
-                              openEditDialog({
-                                id: staffUser.id,
-                              })
-                            }
-                          >
-                            編輯
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-4 text-sm text-gray-500 text-center"
-                    >
-                      沒有{UserRoleDisplayNames[staffUserRole]}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      {/* Dialog */}
-      <UserAddDialog
-        isOpen={isAddDialogOpen}
-        closeDialog={closeAddDialog}
-        role={addDialogRole}
-        orgType={organization?.type}
-        organizationId={organizationId}
-      />
-      {editUser && (
-        <UserEditDialog
-          isOpen={isEditDialogOpen}
-          closeDialog={closeEditDialog}
-          user={editUser}
-          organizationId={organizationId}
-        />
+      {/* Dialogs */}
+      {organizationId && (
+        <>
+          <RoleCreateDialog
+            isOpen={isAddRoleDialogOpen}
+            closeDialog={closeAddRoleDialog}
+            organizationId={organizationId}
+            orgType={organization?.type}
+          />
+          {editRole && (
+            <RoleEditDialog
+              isOpen={isEditRoleDialogOpen}
+              closeDialog={closeEditRoleDialog}
+              role={editRole}
+              organizationId={organizationId}
+              orgType={organization?.type}
+            />
+          )}
+          <UserAddDialog
+            isOpen={isAddUserDialogOpen}
+            closeDialog={closeAddUserDialog}
+            organizationId={organizationId}
+            organizationRoles={organizationRoles}
+          />
+          {editUser && (
+            <UserEditDialog
+              isOpen={isEditDialogOpen}
+              closeDialog={closeEditDialog}
+              user={editUser}
+              organizationId={organizationId}
+              userRoleAssociations={userRoleAssociations}
+            />
+          )}
+        </>
       )}
     </div>
+  );
+}
+
+// UserRow component to display user roles
+function UserRow({
+  user,
+  organizationRoles,
+  userRoleAssociations,
+  canEdit,
+  onEdit,
+  toast,
+}: {
+  user: User;
+  organizationRoles: Role[];
+  userRoleAssociations: Array<{ userId: string; roleId: string; role: Role }>;
+  canEdit: boolean;
+  onEdit: () => void;
+  toast: any;
+}) {
+  const roleNames = useMemo(() => {
+    if (!userRoleAssociations) return [];
+    return userRoleAssociations
+      .filter((ur) => ur.userId === user.id)
+      .map((ur) =>
+        ur.role.isSystemRole
+          ? getSystemRoleDisplayName(ur.role.name)
+          : ur.role.name
+      );
+  }, [userRoleAssociations, user.id]);
+
+  return (
+    <tr>
+      <td
+        className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-500 sm:pl-6 font-mono cursor-pointer"
+        onClick={() =>
+          copyToClipboard({
+            toast,
+            copyingText: user.id,
+          })
+        }
+      >
+        {user.id}
+      </td>
+      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-semibold">
+        {user.email}
+      </td>
+      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+        {user.name}
+      </td>
+      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+        {roleNames.length > 0 ? roleNames.join(", ") : "無角色"}
+      </td>
+      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+        {convertDatabaseTimeToReadablePhilippinesTime(user.createdAt)}
+      </td>
+      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+        <div className="flex items-center">
+          <div
+            className={`w-2 h-2 rounded-full mr-2 ${
+              user.isOtpEnabled ? "bg-green-500" : "bg-gray-400"
+            }`}
+          ></div>
+          {user.isOtpEnabled ? "已啟用" : "未啟用"}
+        </div>
+      </td>
+      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 sm:pr-6 text-right text-sm font-medium">
+        {canEdit && (
+          <button className="text-gray-900 hover:text-black" onClick={onEdit}>
+            編輯
+          </button>
+        )}
+      </td>
+    </tr>
   );
 }

@@ -18,6 +18,20 @@ export const decodeJwt = (token: string): any => {
 };
 
 /**
+ * Extract user permissions from JWT token
+ * Returns empty array if permissions are not found or token is invalid
+ */
+export const getUserPermissionsFromToken = (token: string): string[] => {
+  const decoded = decodeJwt(token);
+  if (!decoded || !decoded.user) {
+    return [];
+  }
+
+  // Permissions are stored in user.permissions array in JWT payload
+  return decoded.user.permissions || [];
+};
+
+/**
  * Check if JWT is expired
  * Returns true if expired or invalid
  */

@@ -21,6 +21,8 @@ export enum Permission {
   DEVELOPER_DELETE_REVENUES = "developer_delete_revenues",
   // available channels
   DEVELOPER_INITIALIZE_ORGANIZATION_AVAILABLE_CHANNELS = "developer_initialize_organization_available_channels",
+  // bypass ip whitelist
+  DEVELOPER_BYPASS_IP_WHITELIST = "developer_bypass_ip_whitelist",
 
   /**
    * Admin permissions
@@ -50,8 +52,6 @@ export enum Permission {
   ADMIN_BROADCAST_TO_TELEGRAM = "admin_broadcast_to_telegram",
   // force modify transactions
   ADMIN_FORCE_MODIFY_TRANSACTIONS = "admin_force_modify_transactions",
-  // bypass ip whitelist
-  ADMIN_BYPASS_IP_WHITELIST = "admin_bypass_ip_whitelist",
 
   /**
    * Merchant permissions

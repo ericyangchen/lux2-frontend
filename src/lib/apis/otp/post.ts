@@ -1,7 +1,7 @@
 import { SMPayWebHeaderWithAccessToken } from "../smpay-web-header";
 import { getBackendUrl } from "@/lib/constants/common";
 
-export const ApiEnableTotp = async ({
+export const ApiAdminEnableTotp = async ({
   userId,
   accessToken,
 }: {
@@ -17,7 +17,7 @@ export const ApiEnableTotp = async ({
   );
 };
 
-export const ApiDisableTotp = async ({
+export const ApiAdminDisableTotp = async ({
   userId,
   accessToken,
 }: {
@@ -33,24 +33,38 @@ export const ApiDisableTotp = async ({
   );
 };
 
-export const ApiDisableUserOtp = async ({
+export const ApiMerchantEnableTotp = async ({
+  organizationId,
   userId,
   accessToken,
-  token,
 }: {
+  organizationId: string;
   userId: string;
   accessToken: string;
-  token?: string;
 }) => {
   return fetch(
-    `${getBackendUrl()}/users/${encodeURIComponent(userId)}/totp/disable`,
+    `${getBackendUrl()}/organizations/${encodeURIComponent(organizationId)}/users/${encodeURIComponent(userId)}/totp/enable`,
     {
       method: "POST",
-      headers: {
-        ...SMPayWebHeaderWithAccessToken(accessToken),
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ token }),
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+    }
+  );
+};
+
+export const ApiMerchantDisableTotp = async ({
+  organizationId,
+  userId,
+  accessToken,
+}: {
+  organizationId: string;
+  userId: string;
+  accessToken: string;
+}) => {
+  return fetch(
+    `${getBackendUrl()}/organizations/${encodeURIComponent(organizationId)}/users/${encodeURIComponent(userId)}/totp/disable`,
+    {
+      method: "POST",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
     }
   );
 };

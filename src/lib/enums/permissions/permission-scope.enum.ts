@@ -1,0 +1,6 @@
+export enum PermissionScope {
+  DEVELOPER_ONLY = 'DEVELOPER_ONLY',
+  ADMIN_ONLY = 'ADMIN_ONLY',
+  MERCHANT_ONLY = 'MERCHANT_ONLY',
+}
+

@@ -7,7 +7,6 @@ export const ApiAdminCreateUser = async ({
   name,
   email,
   password,
-  role,
   orgType,
   accessToken,
 }: {
@@ -15,7 +14,6 @@ export const ApiAdminCreateUser = async ({
   name: string;
   email: string;
   password: string;
-  role: string;
   orgType: OrgType;
   accessToken: string;
 }) => {
@@ -37,7 +35,6 @@ export const ApiMerchantCreateUser = async ({
   name,
   email,
   password,
-  role,
   orgType,
   accessToken,
 }: {
@@ -45,7 +42,6 @@ export const ApiMerchantCreateUser = async ({
   name: string;
   email: string;
   password: string;
-  role: string;
   orgType: OrgType;
   accessToken: string;
 }) => {

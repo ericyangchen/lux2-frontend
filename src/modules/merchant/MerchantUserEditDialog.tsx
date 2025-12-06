@@ -1,4 +1,7 @@
-import { ApiDisableUserOtp, ApiEnableTotp } from "@/lib/apis/otp/post";
+import {
+  ApiMerchantEnableTotp,
+  ApiMerchantDisableTotp,
+} from "@/lib/apis/otp/post";
 import {
   Dialog,
   DialogContent,
@@ -24,24 +27,39 @@ import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
 import { Label } from "@/components/shadcn/ui/label";
 import { User } from "@/lib/types/user";
-import { UserRole } from "@/lib/enums/users/user-role.enum";
-import { UserRoleDisplayNames } from "@/lib/constants/user";
+import { Role } from "@/lib/apis/roles/get";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { showTotpQrCodeInNewWindow } from "../admin/organization/info/utils";
 import { useUserPermission } from "@/lib/hooks/useUserPermission";
-import { useState } from "react";
+import { useRolesByOrganization } from "@/lib/hooks/swr/roles";
+import { Role } from "@/lib/apis/roles/get";
+import { ApiAssignRolesToUserMerchant } from "@/lib/apis/user-roles/post";
+import { Permission } from "@/lib/enums/permissions/permission.enum";
+import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
+
+// Helper function to get display name for system roles (merchant only)
+function getSystemRoleDisplayName(roleName: string): string {
+  switch (roleName) {
+    case "MERCHANT_OWNER":
+      return "管理員";
+    default:
+      return roleName;
+  }
+}
 
 export function MerchantUserEditDialog({
   isOpen,
   closeDialog,
   user,
   organizationId,
+  userRoleAssociations,
 }: {
   isOpen: boolean;
   closeDialog: () => void;
   user: User;
   organizationId: string;
+  userRoleAssociations?: Array<{ userId: string; roleId: string; role: Role }>;
 }) {
   const { toast } = useToast();
 
@@ -49,14 +67,40 @@ export function MerchantUserEditDialog({
   const permission = useUserPermission({
     accessingOrganizationId: organizationId,
   });
+  const { roles: organizationRoles } = useRolesByOrganization({
+    organizationId,
+  });
+
+  // Get user's roles from userRoleAssociations (batch data) instead of individual API call
+  const userRoles = useMemo(() => {
+    if (!userRoleAssociations) return [];
+    return userRoleAssociations
+      .filter((ur) => ur.userId === user.id)
+      .map((ur) => ur.role);
+  }, [userRoleAssociations, user.id]);
+
+  // Sort roles by createdAt
+  const sortedRoles = useMemo(() => {
+    if (!organizationRoles) return [];
+    return [...organizationRoles].sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return dateA - dateB;
+    });
+  }, [organizationRoles]);
 
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<UserRole>(
-    user.role || UserRole.MERCHANT_STAFF
-  );
+  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
   const [isOtpEnabled, setIsOtpEnabled] = useState(user.isOtpEnabled);
+
+  // Initialize selected roles from user's current roles
+  useEffect(() => {
+    if (userRoles.length > 0) {
+      setSelectedRoleIds(userRoles.map((r) => r.id));
+    }
+  }, [userRoles]);
 
   const [isUpdateLoading, setIsUpdateLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
@@ -66,6 +110,15 @@ export function MerchantUserEditDialog({
     organizationId,
   });
 
+  // Permission checks
+  const canUpdateUser =
+    permission.hasPermission(Permission.MERCHANT_UPDATE_USER) ||
+    currentUser?.id === user.id; // Users can always update themselves
+  
+  const canDeleteUser =
+    permission.hasPermission(Permission.MERCHANT_DELETE_USER) &&
+    currentUser?.id !== user.id; // Can't delete yourself
+
   // OTP Management
 
   const handleEnableOtp = async () => {
@@ -74,7 +127,8 @@ export function MerchantUserEditDialog({
       const { accessToken } = getApplicationCookies();
       if (!accessToken) return;
 
-      const response = await ApiEnableTotp({
+      const response = await ApiMerchantEnableTotp({
+        organizationId,
         userId: user.id,
         accessToken,
       });
@@ -116,7 +170,8 @@ export function MerchantUserEditDialog({
       const { accessToken } = getApplicationCookies();
       if (!accessToken) return;
 
-      const response = await ApiDisableUserOtp({
+      const response = await ApiMerchantDisableTotp({
+        organizationId,
         userId: user.id,
         accessToken,
       });
@@ -154,9 +209,9 @@ export function MerchantUserEditDialog({
     // Users can manage their own OTP
     if (currentUser.id === user.id) return true;
 
-    // Owners and developers can manage OTP for users in their organization
+    // Developers can manage OTP for users in their organization
     if (
-      (permission.isOwner || permission.isDeveloper) &&
+      permission.isDeveloper &&
       currentUser.organizationId === user.organizationId
     )
       return true;
@@ -227,19 +282,36 @@ export function MerchantUserEditDialog({
     try {
       setIsUpdateLoading(true);
 
+      // Update user first
       const response = await ApiMerchantUpdateUser({
         organizationId,
         userId: user.id,
         name,
         email,
         password: password || undefined,
-        role,
         accessToken,
       });
 
       const data = await response.json();
 
-      if (response.ok) {
+      if (!response.ok) {
+        throw new ApplicationError(data);
+      }
+
+      // Assign roles if they changed
+      if (selectedRoleIds.length > 0) {
+        const assignResponse = await ApiAssignRolesToUserMerchant({
+          userId: user.id,
+          roleIds: selectedRoleIds,
+          accessToken,
+        });
+
+        if (!assignResponse.ok) {
+          const assignErrorData = await assignResponse.json();
+          throw new ApplicationError(assignErrorData);
+        }
+      }
+
         closeDialog();
 
         if (isUpdatingSelf) {
@@ -255,26 +327,23 @@ export function MerchantUserEditDialog({
           }, 1000);
         } else {
           toast({
-            title: `${UserRoleDisplayNames[role]} 更新成功`,
+          title: `用戶更新成功`,
             description: `User ID: ${user.id}`,
             variant: "success",
           });
         }
 
         mutate();
-      } else {
-        throw new ApplicationError(data);
-      }
     } catch (error) {
       if (error instanceof ApplicationError) {
         toast({
-          title: `${error.statusCode} - ${UserRoleDisplayNames[role]} 更新失敗`,
+          title: `用戶更新失敗`,
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: `${UserRoleDisplayNames[role]} 更新失敗`,
+          title: `用戶更新失敗`,
           description: "Unknown error",
           variant: "destructive",
         });
@@ -303,7 +372,7 @@ export function MerchantUserEditDialog({
       if (response.ok) {
         closeDialog();
         toast({
-          title: `${UserRoleDisplayNames[role]} 刪除成功`,
+          title: `用戶刪除成功`,
           description: `用戶 ID: ${user.id}`,
           variant: "success",
         });
@@ -315,13 +384,13 @@ export function MerchantUserEditDialog({
     } catch (error) {
       if (error instanceof ApplicationError) {
         toast({
-          title: `${error.statusCode} - ${UserRoleDisplayNames[role]} 刪除失敗`,
+          title: `用戶刪除失敗`,
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: `${UserRoleDisplayNames[role]} 刪除失敗`,
+          title: `用戶刪除失敗`,
           description: "Unknown error",
           variant: "destructive",
         });
@@ -336,14 +405,14 @@ export function MerchantUserEditDialog({
     setName(user.name);
     setEmail(user.email);
     setPassword("");
-    setRole(user.role || UserRole.MERCHANT_STAFF);
+    // Roles are loaded from userRoleAssociations (batch data)
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCloseDialog}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>編輯/刪除 {UserRoleDisplayNames[role]}</DialogTitle>
+          <DialogTitle>編輯/刪除用戶</DialogTitle>
           <DialogDescription>編輯或刪除一位用戶</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -353,6 +422,7 @@ export function MerchantUserEditDialog({
               className="col-span-3 border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={!canUpdateUser}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -362,6 +432,7 @@ export function MerchantUserEditDialog({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
+              disabled={!canUpdateUser}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -370,27 +441,28 @@ export function MerchantUserEditDialog({
               className="col-span-3 border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              disabled={!canUpdateUser}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">權限</Label>
+            <Label className="text-right">角色</Label>
             <div className="col-span-3">
               <Select
-                defaultValue={role}
-                onValueChange={(value) => setRole(value as UserRole)}
+                value={selectedRoleIds[0] || ""}
+                onValueChange={(value) => setSelectedRoleIds([value])}
+                disabled={!canUpdateUser}
               >
                 <SelectTrigger className="border-gray-200 focus:ring-gray-900 focus:ring-1 shadow-none rounded-none">
-                  <SelectValue />
+                  <SelectValue placeholder="選擇角色" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value={UserRole.MERCHANT_OWNER}>
-                      {UserRoleDisplayNames[UserRole.MERCHANT_OWNER]}
+                  {sortedRoles.map((role) => (
+                    <SelectItem key={role.id} value={role.id}>
+                      {role.isSystemRole
+                        ? getSystemRoleDisplayName(role.name)
+                        : role.name}
                     </SelectItem>
-                    <SelectItem value={UserRole.MERCHANT_STAFF}>
-                      {UserRoleDisplayNames[UserRole.MERCHANT_STAFF]}
-                    </SelectItem>
-                  </SelectGroup>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -399,7 +471,7 @@ export function MerchantUserEditDialog({
         </div>
         <DialogFooter className="flex flex-row justify-between sm:justify-between">
           <div>
-            {!isUpdateLoading && (
+            {canDeleteUser && !isUpdateLoading && (
               <Button
                 onClick={handleDeleteUser}
                 disabled={isDeleteLoading || isUpdateLoading}
@@ -410,7 +482,7 @@ export function MerchantUserEditDialog({
             )}
           </div>
           <div>
-            {!isDeleteLoading && (
+            {canUpdateUser && !isDeleteLoading && (
               <Button
                 onClick={handleUpdateUser}
                 disabled={isDeleteLoading || isUpdateLoading}
