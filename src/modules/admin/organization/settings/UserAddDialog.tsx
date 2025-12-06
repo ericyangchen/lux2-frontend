@@ -28,6 +28,7 @@ import { useToast } from "@/components/shadcn/ui/use-toast";
 import { useUsersByOrganizationId } from "@/lib/hooks/swr/user";
 import { useUserPermission } from "@/lib/hooks/useUserPermission";
 import { Permission } from "@/lib/enums/permissions/permission.enum";
+import { KeyIcon } from "@heroicons/react/24/outline";
 
 // Helper function to get display name for system roles (admin only)
 function getSystemRoleDisplayName(roleName: string): string {
@@ -66,6 +67,40 @@ export function UserAddDialog({
   const [password, setPassword] = useState("");
   const [selectedRoleId, setSelectedRoleId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Generate a strong password with numbers, letters, and special characters
+  const generateStrongPassword = () => {
+    const lowercase = "abcdefghijklmnopqrstuvwxyz";
+    const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const numbers = "0123456789";
+    const specialChars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+    const allChars = lowercase + uppercase + numbers + specialChars;
+
+    // Ensure at least one of each type
+    let password = "";
+    password += lowercase[Math.floor(Math.random() * lowercase.length)];
+    password += uppercase[Math.floor(Math.random() * uppercase.length)];
+    password += numbers[Math.floor(Math.random() * numbers.length)];
+    password += specialChars[Math.floor(Math.random() * specialChars.length)];
+
+    // Fill the rest randomly (total length 16)
+    for (let i = password.length; i < 16; i++) {
+      password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+
+    // Shuffle the password
+    return password
+      .split("")
+      .sort(() => Math.random() - 0.5)
+      .join("");
+  };
+
+  const handleGeneratePassword = () => {
+    const newPassword = generateStrongPassword();
+    setPassword(newPassword);
+    setShowPassword(true);
+  };
 
   const { mutate } = useUsersByOrganizationId({
     organizationId,
@@ -170,6 +205,7 @@ export function UserAddDialog({
     setEmail("");
     setPassword("");
     setSelectedRoleId("");
+    setShowPassword(false);
   };
 
   return (
@@ -191,13 +227,26 @@ export function UserAddDialog({
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right">密碼</Label>
-            <Input
-              id="password"
-              type="password"
-              className="col-span-3 border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="col-span-3 flex gap-2">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                className="flex-1 border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="輸入密碼或點擊生成"
+              />
+              <Button
+                type="button"
+                onClick={handleGeneratePassword}
+                variant="outline"
+                className="border-gray-200 hover:bg-gray-50 shadow-none rounded-none whitespace-nowrap"
+                title="生成強密碼"
+              >
+                <KeyIcon className="w-4 h-4 mr-1" />
+                生成
+              </Button>
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right">名字</Label>
