@@ -17,8 +17,8 @@ import {
 } from "@/components/shadcn/ui/select";
 import { useUser, useUsersByOrganizationId } from "@/lib/hooks/swr/user";
 
-import { ApiDeleteUser } from "@/lib/apis/users/delete";
-import { ApiUpdateUser } from "@/lib/apis/users/patch";
+import { ApiMerchantDeleteUser } from "@/lib/apis/users/delete";
+import { ApiMerchantUpdateUser } from "@/lib/apis/users/patch";
 import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
@@ -28,6 +28,7 @@ import { UserRole } from "@/lib/enums/users/user-role.enum";
 import { UserRoleDisplayNames } from "@/lib/constants/user";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { showTotpQrCodeInNewWindow } from "../admin/organization/info/utils";
+import { useUserPermission } from "@/lib/hooks/useUserPermission";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
@@ -45,11 +46,16 @@ export function MerchantUserEditDialog({
   const { toast } = useToast();
 
   const { user: currentUser, mutate: mutateUser } = useUser();
+  const permission = useUserPermission({
+    accessingOrganizationId: organizationId,
+  });
 
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<UserRole>(user.role);
+  const [role, setRole] = useState<UserRole>(
+    user.role || UserRole.MERCHANT_STAFF
+  );
   const [isOtpEnabled, setIsOtpEnabled] = useState(user.isOtpEnabled);
 
   const [isUpdateLoading, setIsUpdateLoading] = useState(false);
@@ -148,12 +154,9 @@ export function MerchantUserEditDialog({
     // Users can manage their own OTP
     if (currentUser.id === user.id) return true;
 
-    // ADMIN_OWNER can manage everyone's OTP
-    if (currentUser.role === UserRole.ADMIN_OWNER) return true;
-
-    // MERCHANT_OWNER can manage OTP for users in their organization
+    // Owners and developers can manage OTP for users in their organization
     if (
-      currentUser.role === UserRole.MERCHANT_OWNER &&
+      (permission.isOwner || permission.isDeveloper) &&
       currentUser.organizationId === user.organizationId
     )
       return true;
@@ -224,7 +227,8 @@ export function MerchantUserEditDialog({
     try {
       setIsUpdateLoading(true);
 
-      const response = await ApiUpdateUser({
+      const response = await ApiMerchantUpdateUser({
+        organizationId,
         userId: user.id,
         name,
         email,
@@ -288,7 +292,8 @@ export function MerchantUserEditDialog({
     try {
       setIsDeleteLoading(true);
 
-      const response = await ApiDeleteUser({
+      const response = await ApiMerchantDeleteUser({
+        organizationId,
         userId: user.id,
         accessToken,
       });
@@ -331,7 +336,7 @@ export function MerchantUserEditDialog({
     setName(user.name);
     setEmail(user.email);
     setPassword("");
-    setRole(user.role);
+    setRole(user.role || UserRole.MERCHANT_STAFF);
   };
 
   return (

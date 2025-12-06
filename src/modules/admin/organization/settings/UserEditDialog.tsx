@@ -21,8 +21,8 @@ import {
 } from "@/components/shadcn/ui/select";
 import { useUser, useUsersByOrganizationId } from "@/lib/hooks/swr/user";
 
-import { ApiDeleteUser } from "@/lib/apis/users/delete";
-import { ApiUpdateUser } from "@/lib/apis/users/patch";
+import { ApiAdminDeleteUser } from "@/lib/apis/users/delete";
+import { ApiAdminUpdateUser } from "@/lib/apis/users/patch";
 import { ApplicationError } from "@/lib/error/applicationError";
 import { Button } from "@/components/shadcn/ui/button";
 import { Input } from "@/components/shadcn/ui/input";
@@ -32,6 +32,7 @@ import { UserRole } from "@/lib/enums/users/user-role.enum";
 import { UserRoleDisplayNames } from "@/lib/constants/user";
 import { getApplicationCookies } from "@/lib/utils/cookie";
 import { showTotpQrCodeInNewWindow } from "../info/utils";
+import { useUserPermission } from "@/lib/hooks/useUserPermission";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 
@@ -49,11 +50,14 @@ export function UserEditDialog({
   const { toast } = useToast();
 
   const { user: currentUser, mutate: mutateUser } = useUser();
+  const permission = useUserPermission({
+    accessingOrganizationId: organizationId,
+  });
 
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<UserRole>(user.role);
+  const [role, setRole] = useState<UserRole>(user.role || UserRole.ADMIN_STAFF);
   const [isOtpEnabled, setIsOtpEnabled] = useState(user.isOtpEnabled);
 
   const [isUpdateLoading, setIsUpdateLoading] = useState(false);
@@ -168,18 +172,15 @@ export function UserEditDialog({
     // Users can manage their own OTP
     if (currentUser.id === user.id) return true;
 
-    // ADMIN_OWNER can manage everyone's OTP
-    if (currentUser.role === UserRole.ADMIN_OWNER) return true;
-
-    // MERCHANT_OWNER can manage OTP for users in their organization
+    // Owners and developers can manage OTP for users in their organization
     if (
-      currentUser.role === UserRole.MERCHANT_OWNER &&
+      (permission.isOwner || permission.isDeveloper) &&
       currentUser.organizationId === user.organizationId
     )
       return true;
 
-    // DEVELOPER can manage everyone's OTP
-    if (currentUser.role === UserRole.DEVELOPER) return true;
+    // Developers can manage OTP for all users
+    if (permission.isDeveloper) return true;
 
     return false;
   };
@@ -247,7 +248,7 @@ export function UserEditDialog({
     try {
       setIsUpdateLoading(true);
 
-      const response = await ApiUpdateUser({
+      const response = await ApiAdminUpdateUser({
         userId: user.id,
         name,
         email,
@@ -311,7 +312,7 @@ export function UserEditDialog({
     try {
       setIsDeleteLoading(true);
 
-      const response = await ApiDeleteUser({
+      const response = await ApiAdminDeleteUser({
         userId: user.id,
         accessToken,
       });
@@ -354,7 +355,7 @@ export function UserEditDialog({
     setName(user.name);
     setEmail(user.email);
     setPassword("");
-    setRole(user.role);
+    setRole(user.role || UserRole.ADMIN_STAFF);
   };
 
   return (
