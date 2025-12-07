@@ -48,16 +48,7 @@ import {
   AlertDialogTitle,
 } from "@/components/shadcn/ui/alert-dialog";
 import { logout } from "@/lib/utils/tokenRefresh";
-
-// Helper function to get display name for system roles (merchant only)
-function getSystemRoleDisplayName(roleName: string): string {
-  switch (roleName) {
-    case "MERCHANT_OWNER":
-      return "管理員";
-    default:
-      return roleName;
-  }
-}
+import { getSystemRoleDisplayName } from "@/lib/utils/roles";
 
 export function MerchantUserEditDialog({
   isOpen,

@@ -27,16 +27,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 import { useUsersByOrganizationId } from "@/lib/hooks/swr/user";
 import { KeyIcon } from "@heroicons/react/24/outline";
-
-// Helper function to get display name for system roles (merchant only)
-function getSystemRoleDisplayName(roleName: string): string {
-  switch (roleName) {
-    case "MERCHANT_OWNER":
-      return "管理員";
-    default:
-      return roleName;
-  }
-}
+import { getSystemRoleDisplayName } from "@/lib/utils/roles";
 
 export function MerchantUserAddDialog({
   isOpen,

@@ -21,6 +21,7 @@ import { Permission as PermissionEnum } from "@/lib/enums/permissions/permission
 import { PermissionDisplayNames } from "@/lib/constants/permissions";
 import { Role } from "@/lib/apis/roles/get";
 import { getApplicationCookies } from "@/lib/utils/cookie";
+import { getSystemRoleDisplayName } from "@/lib/utils/roles";
 import { usePermissions } from "@/lib/hooks/swr/permissions";
 import { useRolesByOrganization } from "@/lib/hooks/swr/roles";
 import { useState, useMemo, useEffect } from "react";
@@ -124,7 +125,8 @@ export function RoleEditDialog({
       const response = await ApiUpdateRole({
         roleId: role.id,
         name,
-        permissionIds: selectedPermissionIds.length > 0 ? selectedPermissionIds : undefined,
+        permissionIds:
+          selectedPermissionIds.length > 0 ? selectedPermissionIds : undefined,
         accessToken,
       });
 
@@ -246,7 +248,9 @@ export function RoleEditDialog({
     <Dialog open={isOpen} onOpenChange={handleCloseDialog}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isSystemRole ? "查看角色" : "編輯/刪除角色"}</DialogTitle>
+          <DialogTitle>
+            {isSystemRole ? "查看角色" : "編輯/刪除角色"}
+          </DialogTitle>
           <DialogDescription>
             {isSystemRole
               ? "查看系統角色的權限設定（系統角色無法編輯或刪除）"
@@ -259,7 +263,7 @@ export function RoleEditDialog({
             <Input
               id="name"
               className="col-span-3 border-gray-200 focus-visible:ring-gray-900 focus-visible:ring-1 shadow-none rounded-none"
-              value={name}
+              value={isSystemRole ? getSystemRoleDisplayName(name) : name}
               onChange={(e) => setName(e.target.value)}
               placeholder="例如: STAFF, MANAGER"
               disabled={isSystemRole}
@@ -287,24 +291,25 @@ export function RoleEditDialog({
                     </label>
                   </div>
                   {availablePermissions.map((permission) => (
-                  <div
-                    key={permission.id}
-                    className="flex items-center space-x-2"
-                  >
-                    <Checkbox
-                      id={permission.id}
-                      checked={selectedPermissionIds.includes(permission.id)}
-                      onCheckedChange={() => togglePermission(permission.id)}
-                      disabled={isSystemRole}
-                    />
-                    <label
-                      htmlFor={permission.id}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                    <div
+                      key={permission.id}
+                      className="flex items-center space-x-2"
                     >
-                      {PermissionDisplayNames[permission.name as PermissionEnum] ||
-                        permission.name}
-                    </label>
-                  </div>
+                      <Checkbox
+                        id={permission.id}
+                        checked={selectedPermissionIds.includes(permission.id)}
+                        onCheckedChange={() => togglePermission(permission.id)}
+                        disabled={isSystemRole}
+                      />
+                      <label
+                        htmlFor={permission.id}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        {PermissionDisplayNames[
+                          permission.name as PermissionEnum
+                        ] || permission.name}
+                      </label>
+                    </div>
                   ))}
                 </>
               ) : (
@@ -341,4 +346,3 @@ export function RoleEditDialog({
     </Dialog>
   );
 }
-

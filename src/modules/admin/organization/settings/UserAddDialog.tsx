@@ -29,20 +29,7 @@ import { useUsersByOrganizationId } from "@/lib/hooks/swr/user";
 import { useUserPermission } from "@/lib/hooks/useUserPermission";
 import { Permission } from "@/lib/enums/permissions/permission.enum";
 import { KeyIcon } from "@heroicons/react/24/outline";
-
-// Helper function to get display name for system roles (admin only)
-function getSystemRoleDisplayName(roleName: string): string {
-  switch (roleName) {
-    case "OWNER":
-      return "系統管理員";
-    case "DEVELOPER":
-      return "開發者";
-    case "MERCHANT_OWNER":
-      return "管理員";
-    default:
-      return roleName;
-  }
-}
+import { getSystemRoleDisplayName } from "@/lib/utils/roles";
 
 export function UserAddDialog({
   isOpen,

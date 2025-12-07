@@ -9,6 +9,7 @@ import { RoleCreateDialog } from "@/modules/common/RoleCreateDialog";
 import { RoleEditDialog } from "@/modules/common/RoleEditDialog";
 import { convertDatabaseTimeToReadablePhilippinesTime } from "@/lib/utils/timezone";
 import { copyToClipboard } from "@/lib/utils/copyToClipboard";
+import { getSystemRoleDisplayName } from "@/lib/utils/roles";
 import { useOrganization } from "@/lib/hooks/swr/organization";
 import { useRolesByOrganization } from "@/lib/hooks/swr/roles";
 import { useUser, useUsersByOrganizationId } from "@/lib/hooks/swr/user";
@@ -18,20 +19,6 @@ import { useUserPermission } from "@/lib/hooks/useUserPermission";
 
 interface UserWithRoles extends User {
   roles?: Role[];
-}
-
-// Helper function to get display name for system roles (admin only)
-function getSystemRoleDisplayName(roleName: string): string {
-  switch (roleName) {
-    case "OWNER":
-      return "系統管理員";
-    case "DEVELOPER":
-      return "開發者";
-    case "MERCHANT_OWNER":
-      return "管理員";
-    default:
-      return roleName;
-  }
 }
 
 export function OrganizationUserSetting({
