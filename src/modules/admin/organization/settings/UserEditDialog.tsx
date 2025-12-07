@@ -33,6 +33,18 @@ import { ApiAssignRolesToUserAdmin } from "@/lib/apis/user-roles/post";
 import { Permission } from "@/lib/enums/permissions/permission.enum";
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
+import { useRouter } from "next/router";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/shadcn/ui/alert-dialog";
+import { logout } from "@/lib/utils/tokenRefresh";
 
 // Helper function to get display name for system roles (admin only)
 function getSystemRoleDisplayName(roleName: string): string {
@@ -62,6 +74,7 @@ export function UserEditDialog({
   userRoleAssociations?: Array<{ userId: string; roleId: string; role: Role }>;
 }) {
   const { toast } = useToast();
+  const router = useRouter();
 
   const { user: currentUser, mutate: mutateUser } = useUser();
   const permission = useUserPermission({
@@ -78,6 +91,11 @@ export function UserEditDialog({
       .filter((ur) => ur.userId === user.id)
       .map((ur) => ur.role);
   }, [userRoleAssociations, user.id]);
+
+  // Get original role IDs for comparison
+  const originalRoleIds = useMemo(() => {
+    return userRoles.map((r) => r.id).sort();
+  }, [userRoles]);
 
   // Filter out DEVELOPER role and sort roles
   const availableRoles = useMemo(() => {
@@ -107,6 +125,7 @@ export function UserEditDialog({
   const [isUpdateLoading, setIsUpdateLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const [isOtpLoading, setIsOtpLoading] = useState(false);
+  const [showPasswordWarning, setShowPasswordWarning] = useState(false);
 
   const { mutate } = useUsersByOrganizationId({
     organizationId,
@@ -281,11 +300,48 @@ export function UserEditDialog({
     if (!organizationId || !accessToken || !user) return;
 
     const isUpdatingSelf = user.id === userId;
+    const isUpdatingPassword = password && password.trim() !== "";
+
+    // Show warning if user is updating their own password
+    if (isUpdatingSelf && isUpdatingPassword) {
+      setShowPasswordWarning(true);
+      return;
+    }
+
+    await performUpdate();
+  };
+
+  const currentRoleIds = [...selectedRoleIds].sort();
+  const rolesChanged =
+    currentRoleIds.length !== originalRoleIds.length ||
+    !currentRoleIds.every((id, index) => id === originalRoleIds[index]);
+
+  const performUpdate = async () => {
+    const { accessToken, userId } = getApplicationCookies();
+
+    if (!organizationId || !accessToken || !user) return;
+
+    const isUpdatingSelf = user.id === userId;
+    const isUpdatingPassword = password && password.trim() !== "";
 
     try {
       setIsUpdateLoading(true);
 
-      // Update user first
+      // 1. Assign roles if they changed and user has permission
+      if (canAssignRoles && rolesChanged) {
+        const assignResponse = await ApiAssignRolesToUserAdmin({
+          userId: user.id,
+          roleIds: selectedRoleIds,
+          accessToken,
+        });
+
+        if (!assignResponse.ok) {
+          const assignErrorData = await assignResponse.json();
+          throw new ApplicationError(assignErrorData);
+        }
+      }
+
+      // 2. Update user first
       const response = await ApiAdminUpdateUser({
         userId: user.id,
         name,
@@ -299,24 +355,19 @@ export function UserEditDialog({
       if (!response.ok) {
         throw new ApplicationError(data);
       }
-
-      // Assign roles if they changed and user has permission
-      if (canAssignRoles && selectedRoleIds.length > 0) {
-        const assignResponse = await ApiAssignRolesToUserAdmin({
-          userId: user.id,
-          roleIds: selectedRoleIds,
-          accessToken,
-        });
-
-        if (!assignResponse.ok) {
-          const assignErrorData = await assignResponse.json();
-          throw new ApplicationError(assignErrorData);
-        }
-      }
-
       closeDialog();
 
-      if (isUpdatingSelf) {
+      // If updating own password, logout and redirect to login
+      if (isUpdatingSelf && isUpdatingPassword) {
+        toast({
+          title: "密碼更新成功",
+          description: "您將被登出，請使用新密碼重新登入",
+          duration: 3000,
+        });
+
+        await logout();
+        router.push("/login");
+      } else if (isUpdatingSelf) {
         toast({
           title: "個人資料更新成功",
           description: "正在驗證權限...",
@@ -410,88 +461,115 @@ export function UserEditDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleCloseDialog}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>編輯/刪除用戶</DialogTitle>
-          <DialogDescription>編輯或刪除一位用戶</DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">帳號</Label>
-            <Input
-              className="col-span-3"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">更新密碼</Label>
-            <Input
-              className="col-span-3"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              type="password"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">名字</Label>
-            <Input
-              className="col-span-3"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          {canAssignRoles && (
+    <>
+      <AlertDialog
+        open={showPasswordWarning}
+        onOpenChange={setShowPasswordWarning}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>確認更新密碼</AlertDialogTitle>
+            <AlertDialogDescription>
+              更新密碼後，您將被登出，需要使用新密碼重新登入。確定要繼續嗎？
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShowPasswordWarning(false);
+                performUpdate();
+              }}
+            >
+              確認更新
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={isOpen} onOpenChange={handleCloseDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>編輯/刪除用戶</DialogTitle>
+            <DialogDescription>編輯或刪除一位用戶</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">角色</Label>
-              <div className="col-span-3">
-                <Select
-                  value={selectedRoleIds[0] || ""}
-                  onValueChange={(value) => setSelectedRoleIds([value])}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="選擇角色" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableRoles.map((role) => (
-                      <SelectItem key={role.id} value={role.id}>
-                        {role.isSystemRole
-                          ? getSystemRoleDisplayName(role.name)
-                          : role.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Label className="text-right">帳號</Label>
+              <Input
+                className="col-span-3"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
-          )}
-          {renderOtpSection()}
-        </div>
-        <DialogFooter className="flex flex-row justify-between sm:justify-between">
-          <div>
-            {canDeleteUser && !isUpdateLoading && (
-              <Button
-                onClick={handleDeleteUser}
-                disabled={isDeleteLoading || isUpdateLoading}
-                className="bg-red-500 hover:bg-red-600"
-              >
-                {isDeleteLoading ? "刪除中..." : "刪除"}
-              </Button>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">更新密碼</Label>
+              <Input
+                className="col-span-3"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type="password"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">名字</Label>
+              <Input
+                className="col-span-3"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            {canAssignRoles && (
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">角色</Label>
+                <div className="col-span-3">
+                  <Select
+                    value={selectedRoleIds[0] || ""}
+                    onValueChange={(value) => setSelectedRoleIds([value])}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="選擇角色" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableRoles.map((role) => (
+                        <SelectItem key={role.id} value={role.id}>
+                          {role.isSystemRole
+                            ? getSystemRoleDisplayName(role.name)
+                            : role.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             )}
+            {renderOtpSection()}
           </div>
-          <div>
-            {!isDeleteLoading && (
-              <Button
-                onClick={handleUpdateUser}
-                disabled={isDeleteLoading || isUpdateLoading}
-              >
-                {isUpdateLoading ? "更新中..." : "更新"}
-              </Button>
-            )}
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <DialogFooter className="flex flex-row justify-between sm:justify-between">
+            <div>
+              {canDeleteUser && !isUpdateLoading && (
+                <Button
+                  onClick={handleDeleteUser}
+                  disabled={isDeleteLoading || isUpdateLoading}
+                  className="bg-red-500 hover:bg-red-600"
+                >
+                  {isDeleteLoading ? "刪除中..." : "刪除"}
+                </Button>
+              )}
+            </div>
+            <div>
+              {!isDeleteLoading && (
+                <Button
+                  onClick={handleUpdateUser}
+                  disabled={isDeleteLoading || isUpdateLoading}
+                >
+                  {isUpdateLoading ? "更新中..." : "更新"}
+                </Button>
+              )}
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

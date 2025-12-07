@@ -10,11 +10,16 @@ export const ApiAssignRolesToUserAdmin = async ({
   roleIds: string[];
   accessToken: string;
 }): Promise<Response> => {
-  return fetch(`${getBackendUrl()}/user-roles/admin/users/${encodeURIComponent(userId)}/roles`, {
-    method: "POST",
-    headers: SMPayWebHeaderWithAccessToken(accessToken),
-    body: JSON.stringify({ roleIds }),
-  });
+  return fetch(
+    `${getBackendUrl()}/user-roles/admin/users/${encodeURIComponent(
+      userId
+    )}/roles`,
+    {
+      method: "POST",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+      body: JSON.stringify({ roleIds }),
+    }
+  );
 };
 
 export const ApiAssignRolesToUserMerchant = async ({
@@ -26,13 +31,14 @@ export const ApiAssignRolesToUserMerchant = async ({
   roleIds: string[];
   accessToken: string;
 }): Promise<Response> => {
-  return fetch(`${getBackendUrl()}/user-roles/merchant/users/${encodeURIComponent(userId)}/roles`, {
-    method: "POST",
-    headers: SMPayWebHeaderWithAccessToken(accessToken),
-    body: JSON.stringify({ roleIds }),
-  });
+  return fetch(
+    `${getBackendUrl()}/user-roles/merchant/users/${encodeURIComponent(
+      userId
+    )}/roles`,
+    {
+      method: "POST",
+      headers: SMPayWebHeaderWithAccessToken(accessToken),
+      body: JSON.stringify({ roleIds }),
+    }
+  );
 };
-
-// Legacy function for backward compatibility - can be removed later
-export const ApiAssignRolesToUser = ApiAssignRolesToUserAdmin;
-
