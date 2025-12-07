@@ -95,6 +95,7 @@ export const DepositPaymentChannelCategories = {
 
     // T207PAY
     PaymentChannel.NATIVE_GCASH_T207PAY_DEPOSIT,
+    PaymentChannel.NATIVE_GCASH_T207PAY_B_DEPOSIT,
 
     // XWINPAY
     PaymentChannel.NATIVE_GCASH_XWINPAY_DEPOSIT,
@@ -150,6 +151,7 @@ export const WithdrawalPaymentChannelCategories = {
 
     // T207PAY
     PaymentChannel.NATIVE_GCASH_T207PAY_WITHDRAWAL,
+    PaymentChannel.NATIVE_GCASH_T207PAY_B_WITHDRAWAL,
 
     // XWINPAY
     PaymentChannel.NATIVE_GCASH_XWINPAY_WITHDRAWAL,
@@ -217,6 +219,8 @@ export const PaymentChannelDisplayNames = {
   /* T207PAY */
   [PaymentChannel.NATIVE_GCASH_T207PAY_DEPOSIT]: "207: Gcash Deposit",
   [PaymentChannel.NATIVE_GCASH_T207PAY_WITHDRAWAL]: "207: Gcash Withdrawal",
+  [PaymentChannel.NATIVE_GCASH_T207PAY_B_DEPOSIT]: "207黑: Gcash Deposit",
+  [PaymentChannel.NATIVE_GCASH_T207PAY_B_WITHDRAWAL]: "207黑: Gcash Withdrawal",
 
   /* XWINPAY */
   [PaymentChannel.NATIVE_GCASH_XWINPAY_DEPOSIT]: "Xwin: Gcash Deposit",
