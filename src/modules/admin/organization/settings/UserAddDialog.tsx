@@ -49,11 +49,13 @@ export function UserAddDialog({
   closeDialog,
   organizationId,
   organizationRoles,
+  orgType,
 }: {
   isOpen: boolean;
   closeDialog: () => void;
   organizationId: string;
   organizationRoles?: Role[];
+  orgType?: OrgType;
 }) {
   const { toast } = useToast();
 
@@ -136,7 +138,7 @@ export function UserAddDialog({
   const handleAddUser = async () => {
     const { accessToken } = getApplicationCookies();
 
-    if (!name || !email || !password || !accessToken) return;
+    if (!name || !email || !password || !accessToken || !orgType) return;
 
     // Role is required only if user can assign roles
     if (canAssignRoles && !selectedRoleId) return;
@@ -149,7 +151,7 @@ export function UserAddDialog({
         name,
         email,
         password,
-        orgType: OrgType.ADMIN,
+        orgType: orgType,
         accessToken,
       });
 

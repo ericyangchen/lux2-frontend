@@ -320,6 +320,7 @@ export function OrganizationUserSetting({
             closeDialog={closeAddUserDialog}
             organizationId={organizationId}
             organizationRoles={organizationRoles}
+            orgType={organization?.type}
           />
           {editUser && (
             <UserEditDialog
