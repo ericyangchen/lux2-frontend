@@ -143,6 +143,10 @@ export const DepositPaymentChannelCategories = {
     // SahulatPay
     PaymentChannel.EASY_PAISA_SAHULAT_PAY_DEPOSIT,
   ] as PaymentChannel[],
+  [PaymentMethod.JAZZ_CASH]: [
+    // SahulatPay
+    PaymentChannel.JAZZ_CASH_SAHULAT_PAY_DEPOSIT,
+  ] as PaymentChannel[],
 };
 
 export const WithdrawalPaymentChannelCategories = {
@@ -195,6 +199,10 @@ export const WithdrawalPaymentChannelCategories = {
     // EasyPaisa SahulatPay
     PaymentChannel.EASY_PAISA_SAHULAT_PAY_WITHDRAWAL,
   ] as PaymentChannel[],
+  [PaymentMethod.JAZZ_CASH]: [
+    // SahulatPay
+    PaymentChannel.JAZZ_CASH_SAHULAT_PAY_WITHDRAWAL,
+  ] as PaymentChannel[],
 };
 
 export const AllPaymentChannelCategories = {
@@ -206,11 +214,16 @@ export const AllPaymentChannelCategories = {
     ...DepositPaymentChannelCategories[PaymentMethod.EASY_PAISA],
     ...WithdrawalPaymentChannelCategories[PaymentMethod.EASY_PAISA],
   ],
+  [PaymentMethod.JAZZ_CASH]: [
+    ...DepositPaymentChannelCategories[PaymentMethod.JAZZ_CASH],
+    ...WithdrawalPaymentChannelCategories[PaymentMethod.JAZZ_CASH],
+  ],
 };
 
 export const PaymentMethodDisplayNames = {
   [PaymentMethod.NATIVE_GCASH]: "GCash",
   [PaymentMethod.EASY_PAISA]: "EasyPaisa",
+  [PaymentMethod.JAZZ_CASH]: "JazzCash",
 };
 
 export const PaymentMethodCurrencyMapping: Record<
@@ -218,7 +231,7 @@ export const PaymentMethodCurrencyMapping: Record<
   (PaymentMethod | string)[]
 > = {
   PHP: [PaymentMethod.NATIVE_GCASH],
-  PKR: [PaymentMethod.EASY_PAISA],
+  PKR: [PaymentMethod.EASY_PAISA, PaymentMethod.JAZZ_CASH],
 };
 
 export const PaymentChannelDisplayNames = {
@@ -244,6 +257,9 @@ export const PaymentChannelDisplayNames = {
   [PaymentChannel.EASY_PAISA_SAHULAT_PAY_DEPOSIT]: "Sahulat: EasyPaisa Deposit",
   [PaymentChannel.EASY_PAISA_SAHULAT_PAY_WITHDRAWAL]:
     "Sahulat: EasyPaisa Withdrawal",
+  [PaymentChannel.JAZZ_CASH_SAHULAT_PAY_DEPOSIT]: "Sahulat: JazzCash Deposit",
+  [PaymentChannel.JAZZ_CASH_SAHULAT_PAY_WITHDRAWAL]:
+    "Sahulat: JazzCash Withdrawal",
 
   // /**
   //  * BIFU
@@ -350,6 +366,11 @@ export const WithdrawalAccountTypesByPaymentMethod = {
     WithdrawalToAccountType.MAYA_ACCOUNT,
   ] as WithdrawalToAccountType[],
   [PaymentMethod.EASY_PAISA]: [
+    WithdrawalToAccountType.BANK_ACCOUNT,
+    WithdrawalToAccountType.EASYPAISA_ACCOUNT,
+    WithdrawalToAccountType.JAZZCASH_ACCOUNT,
+  ] as WithdrawalToAccountType[],
+  [PaymentMethod.JAZZ_CASH]: [
     WithdrawalToAccountType.BANK_ACCOUNT,
     WithdrawalToAccountType.EASYPAISA_ACCOUNT,
     WithdrawalToAccountType.JAZZCASH_ACCOUNT,

@@ -4,4 +4,7 @@ export enum PaymentMethod {
 
   // EasyPaisa
   EASY_PAISA = "EASY_PAISA",
+
+  // JazzCash
+  JAZZ_CASH = "JAZZ_CASH",
 }
