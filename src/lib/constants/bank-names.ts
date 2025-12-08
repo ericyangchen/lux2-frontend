@@ -1,6 +1,6 @@
 import { WithdrawalToAccountType } from "../enums/transactions/withdrawal-to-account-type.enum";
 
-export const BANK_NAMES = [
+export const PHP_BANK_NAMES = [
   // PHP market
   "1001", // AllBank (A Thrift Bank), Inc.
   "1002", // Alipay / Lazada Wallet
@@ -103,7 +103,9 @@ export const BANK_NAMES = [
   "1099", // Vigan Banco Rural Incorporada
   "1100", // Wise Pilipinas Inc
   "1101", // Paynamics Technology Inc
+];
 
+export const PKR_BANK_NAMES = [
   // PKR market
   "2001", // ABHI FINANCE SERVICES LIMITED
   "2002", // AFT
@@ -179,7 +181,10 @@ export const BANK_NAMES = [
   "2072", // Waseela bank
   "2073", // ZTBL1
   "2074", // Zarai Taraqiati Bank
+  "2075", // JazzCash
 ];
+
+export const BANK_NAMES = [...PHP_BANK_NAMES, ...PKR_BANK_NAMES];
 
 export const BANK_NAMES_MAPPING = {
   // PHP market
@@ -362,6 +367,7 @@ export const BANK_NAMES_MAPPING = {
   "2072": "2072: Waseela bank", // Waseela bank
   "2073": "2073: ZTBL1", // ZTBL1
   "2074": "2074: Zarai Taraqiati Bank", // Zarai Taraqiati Bank
+  "2075": "2075: JazzCash", // JazzCash
 };
 
 export const getWithdrawalToAccountTypeFromBankName = (bankName: string) => {
