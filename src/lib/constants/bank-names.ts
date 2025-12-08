@@ -1,6 +1,7 @@
 import { WithdrawalToAccountType } from "../enums/transactions/withdrawal-to-account-type.enum";
 
 export const BANK_NAMES = [
+  // PHP market
   "1001", // AllBank (A Thrift Bank), Inc.
   "1002", // Alipay / Lazada Wallet
   "1003", // Asia United Bank Corporation
@@ -102,9 +103,86 @@ export const BANK_NAMES = [
   "1099", // Vigan Banco Rural Incorporada
   "1100", // Wise Pilipinas Inc
   "1101", // Paynamics Technology Inc
+
+  // PKR market
+  "2001", // ABHI FINANCE SERVICES LIMITED
+  "2002", // AFT
+  "2003", // AFT IBFT
+  "2004", // Advans
+  "2005", // Al Meezan Investment Management Limited
+  "2006", // AlHabib
+  "2007", // Albarka
+  "2008", // Alfalah
+  "2009", // Allied
+  "2010", // Apna
+  "2011", // Askari
+  "2012", // BOK
+  "2013", // BYKEA
+  "2014", // BankIslami
+  "2015", // Burj
+  "2016", // Central Directorate of National Savings
+  "2017", // Central Directorate of National Savings (CDNS)
+  "2018", // Central Directorate of National Savings (CDNS) – 1IBFT IMD Addition
+  "2019", // Citi
+  "2020", // DubaiIslamic
+  "2021", // EZ wage
+  "2022", // EasyPaisa
+  "2023", // FINC
+  "2024", // FINJA
+  "2025", // FWBL
+  "2026", // Faysal
+  "2027", // First Microfinance Bank
+  "2028", // HBL
+  "2029", // HBL ASSET MANAGEMENT
+  "2030", // Habib Metro Bank – Bulk 1IBFT
+  "2031", // HabibMetro
+  "2032", // Humrah Financial Services
+  "2033", // ICBC
+  "2034", // JS
+  "2035", // KASB
+  "2036", // KBL
+  "2037", // KEENU
+  "2038", // KEENU Bank
+  "2039", // KEENU – IMD and 1IBFT Screen Addition
+  "2040", // Keenu1
+  "2041", // MCB
+  "2042", // MCB-Arif Habib
+  "2043", // MIB
+  "2044", // Meezan
+  "2045", // MobilinkBank Pakistan
+  "2046", // NAYAPAY
+  "2047", // NBP
+  "2048", // NBP Fund Management Limited
+  "2049", // NBP1
+  "2050", // NIB
+  "2051", // NRSP
+  "2052", // National Bank
+  "2053", // Numbers Private Limited
+  "2054", // PayMax
+  "2055", // PayMax1
+  "2056", // PunjabBank
+  "2057", // SADAPAY
+  "2058", // SCB
+  "2059", // SEEDCREED Financial Services Limited
+  "2060", // SIMPAISA
+  "2061", // SIND
+  "2062", // Samba
+  "2063", // Silk
+  "2064", // SindhBank
+  "2065", // Soneri
+  "2066", // Summit
+  "2067", // TAG
+  "2068", // TezPAy
+  "2069", // UBL
+  "2070", // UPaisa
+  "2071", // Waseela
+  "2072", // Waseela bank
+  "2073", // ZTBL1
+  "2074", // Zarai Taraqiati Bank
 ];
 
 export const BANK_NAMES_MAPPING = {
+  // PHP market
   "1001": "1001: AllBank (A Thrift Bank), Inc.",
   "1002": "1002: Alipay / Lazada Wallet",
   "1003": "1003: Asia United Bank Corporation",
@@ -117,8 +195,7 @@ export const BANK_NAMES_MAPPING = {
   "1010": "1010: Binangonan Rural Bank(BRBDigital)",
   "1011": "1011: China Banking Corporation",
   "1012": "1012: China Bank Savings, Inc.",
-  "1013":
-    "1013: CTBC Bank(Philippines) Corporation / 161445 CTBC Bank (Philippines), Inc.",
+  "1013": "1013: CTBC Bank (Philippines), Inc.",
   "1014": "1014: Bayad",
   "1015": "1015: Cebuana Lhuillier Bank / Cebuana Xpress",
   "1016": "1016: Camalig Bank",
@@ -156,8 +233,7 @@ export const BANK_NAMES_MAPPING = {
   "1048": "1048: Philippine Bank of Communications",
   "1049": "1049: Philippine National Bank(PNB)",
   "1050": "1050: PayMaya Philippines, Inc.",
-  "1051":
-    "1051: PalawanPay / Philippine Payments and Settlements Corporation / PPS-PEPP Financial Services Corporation",
+  "1051": "1051: PalawanPay / Philippine Payments and Settlements Corporation",
   "1052": "1052: Producers Bank",
   "1053": "1053: Philippine Savings Bank",
   "1054": "1054: Philippine Trust Company",
@@ -208,6 +284,84 @@ export const BANK_NAMES_MAPPING = {
   "1099": "1099: Vigan Banco Rural Incorporada",
   "1100": "1100: Wise Pilipinas Inc",
   "1101": "1101: Paynamics Technology Inc",
+
+  // PKR market
+  // PKR market
+  "2001": "2001: ABHI FINANCE SERVICES LIMITED", // ABHI FINANCE SERVICES LIMITED
+  "2002": "2002: AFT", // AFT
+  "2003": "2003: AFT IBFT", // AFT IBFT
+  "2004": "2004: Advans", // Advans
+  "2005": "2005: Al Meezan Investment Management Limited", // Al Meezan Investment Management Limited
+  "2006": "2006: AlHabib", // AlHabib
+  "2007": "2007: Albarka", // Albarka
+  "2008": "2008: Alfalah", // Alfalah
+  "2009": "2009: Allied", // Allied
+  "2010": "2010: Apna", // Apna
+  "2011": "2011: Askari", // Askari
+  "2012": "2012: BOK", // BOK
+  "2013": "2013: BYKEA", // BYKEA
+  "2014": "2014: BankIslami", // BankIslami
+  "2015": "2015: Burj", // Burj
+  "2016": "2016: Central Directorate of National Savings", // Central Directorate of National Savings
+  "2017": "2017: Central Directorate of National Savings (CDNS)", // Central Directorate of National Savings (CDNS)
+  "2018":
+    "2018: Central Directorate of National Savings (CDNS) – 1IBFT IMD Addition", // Central Directorate of National Savings (CDNS) – 1IBFT IMD Addition
+  "2019": "2019: Citi", // Citi
+  "2020": "2020: DubaiIslamic", // DubaiIslamic
+  "2021": "2021: EZ wage", // EZ wage
+  "2022": "2022: EasyPaisa", // EasyPaisa
+  "2023": "2023: FINC", // FINC
+  "2024": "2024: FINJA", // FINJA
+  "2025": "2025: FWBL", // FWBL
+  "2026": "2026: Faysal", // Faysal
+  "2027": "2027: First Microfinance Bank", // First Microfinance Bank
+  "2028": "2028: HBL", // HBL
+  "2029": "2029: HBL ASSET MANAGEMENT", // HBL ASSET MANAGEMENT
+  "2030": "2030: Habib Metro Bank – Bulk 1IBFT", // Habib Metro Bank – Bulk 1IBFT
+  "2031": "2031: HabibMetro", // HabibMetro
+  "2032": "2032: Humrah Financial Services", // Humrah Financial Services
+  "2033": "2033: ICBC", // ICBC
+  "2034": "2034: JS", // JS
+  "2035": "2035: KASB", // KASB
+  "2036": "2036: KBL", // KBL
+  "2037": "2037: KEENU", // KEENU
+  "2038": "2038: KEENU Bank", // KEENU Bank
+  "2039": "2039: KEENU – IMD and 1IBFT Screen Addition", // KEENU – IMD and 1IBFT Screen Addition
+  "2040": "2040: Keenu1", // Keenu1
+  "2041": "2041: MCB", // MCB
+  "2042": "2042: MCB-Arif Habib", // MCB-Arif Habib
+  "2043": "2043: MIB", // MIB
+  "2044": "2044: Meezan", // Meezan
+  "2045": "2045: MobilinkBank Pakistan", // MobilinkBank Pakistan
+  "2046": "2046: NAYAPAY", // NAYAPAY
+  "2047": "2047: NBP", // NBP
+  "2048": "2048: NBP Fund Management Limited", // NBP Fund Management Limited
+  "2049": "2049: NBP1", // NBP1
+  "2050": "2050: NIB", // NIB
+  "2051": "2051: NRSP", // NRSP
+  "2052": "2052: National Bank", // National Bank
+  "2053": "2053: Numbers Private Limited", // Numbers Private Limited
+  "2054": "2054: PayMax", // PayMax
+  "2055": "2055: PayMax1", // PayMax1
+  "2056": "2056: PunjabBank", // PunjabBank
+  "2057": "2057: SADAPAY", // SADAPAY
+  "2058": "2058: SCB", // SCB
+  "2059": "2059: SEEDCREED Financial Services Limited", // SEEDCREED Financial Services Limited
+  "2060": "2060: SIMPAISA", // SIMPAISA
+  "2061": "2061: SIND", // SIND
+  "2062": "2062: Samba", // Samba
+  "2063": "2063: Silk", // Silk
+  "2064": "2064: SindhBank", // SindhBank
+  "2065": "2065: Soneri", // Soneri
+  "2066": "2066: Summit", // Summit
+  "2067": "2067: TAG", // TAG
+  "2068": "2068: TezPAy", // TezPAy
+  "2069": "2069: UBL", // UBL
+  "2070": "2070: UPaisa", // UPaisa
+  "2071": "2071: Waseela", // Waseela
+  "2072": "2072: Waseela bank", // Waseela bank
+  "2073": "2073: ZTBL1", // ZTBL1
+  "2074": "2074: Zarai Taraqiati Bank", // Zarai Taraqiati Bank
 };
 
 export const getWithdrawalToAccountTypeFromBankName = (bankName: string) => {
