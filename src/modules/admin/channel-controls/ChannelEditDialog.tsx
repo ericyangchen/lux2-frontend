@@ -6,6 +6,7 @@ import {
   PaymentMethodCurrencyMapping,
   TransactionTypeDisplayNames,
   WithdrawalAccountTypeDisplayNames,
+  WithdrawalAccountTypesByPaymentMethod,
   WithdrawalPaymentChannelCategories,
 } from "@/lib/constants/transaction";
 import {
@@ -109,7 +110,11 @@ export function ChannelEditDialog({
       }
     } else {
       const withdrawalFees = feeSettingList as any;
-      Object.values(WithdrawalToAccountType).forEach((accountType) => {
+      // Use payment method specific account types for withdrawal
+      const accountTypes = paymentMethod
+        ? WithdrawalAccountTypesByPaymentMethod[paymentMethod] || []
+        : [];
+      accountTypes.forEach((accountType) => {
         if (withdrawalFees[accountType]) {
           entries.push({
             accountType,
@@ -257,20 +262,15 @@ export function ChannelEditDialog({
           },
         } as any;
       } else {
-        return {
-          [WithdrawalToAccountType.BANK_ACCOUNT]: {
+        // Create all withdrawal account types (required by backend), but only display relevant ones
+        const feeSettingList: any = {};
+        Object.values(WithdrawalToAccountType).forEach((accountType) => {
+          feeSettingList[accountType] = {
             percentage: "0",
             fixed: "0",
-          },
-          [WithdrawalToAccountType.GCASH_ACCOUNT]: {
-            percentage: "0",
-            fixed: "0",
-          },
-          [WithdrawalToAccountType.MAYA_ACCOUNT]: {
-            percentage: "0",
-            fixed: "0",
-          },
-        } as any;
+          };
+        });
+        return feeSettingList as any;
       }
     };
 

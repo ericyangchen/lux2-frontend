@@ -34,6 +34,7 @@ import {
   PaymentChannelDisplayNames,
   DepositAccountTypeDisplayNames,
   WithdrawalAccountTypeDisplayNames,
+  WithdrawalAccountTypesByPaymentMethod,
   DepositPaymentChannelCategories,
   WithdrawalPaymentChannelCategories,
   PaymentMethodDisplayNames,
@@ -92,7 +93,13 @@ export const CreateTxnRoutingRuleDialog = ({
         label: DepositAccountTypeDisplayNames[type] || type,
       }));
     } else if (accountTypeCategory === "withdrawal") {
-      return Object.values(WithdrawalToAccountType).map((type) => ({
+      // Use payment method specific account types for withdrawal
+      const accountTypes = selectedPaymentMethod
+        ? WithdrawalAccountTypesByPaymentMethod[
+            selectedPaymentMethod as PaymentMethod
+          ] || []
+        : [];
+      return accountTypes.map((type) => ({
         value: type,
         label: WithdrawalAccountTypeDisplayNames[type] || type,
       }));

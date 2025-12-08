@@ -14,6 +14,8 @@ export interface WithdrawalFeeSettingList {
   [WithdrawalToAccountType.BANK_ACCOUNT]: FeeSetting;
   [WithdrawalToAccountType.GCASH_ACCOUNT]: FeeSetting;
   [WithdrawalToAccountType.MAYA_ACCOUNT]: FeeSetting;
+  [WithdrawalToAccountType.EASYPAISA_ACCOUNT]: FeeSetting;
+  [WithdrawalToAccountType.JAZZCASH_ACCOUNT]: FeeSetting;
 }
 
 export type FeeSettingList = DepositFeeSettingList | WithdrawalFeeSettingList;

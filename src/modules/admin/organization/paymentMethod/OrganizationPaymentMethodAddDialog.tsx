@@ -5,6 +5,7 @@ import {
   PaymentMethodDisplayNames,
   PaymentMethodCurrencyMapping,
   WithdrawalAccountTypeDisplayNames,
+  WithdrawalAccountTypesByPaymentMethod,
   WithdrawalPaymentChannelCategories,
 } from "@/lib/constants/transaction";
 import {
@@ -178,6 +179,7 @@ export function OrganizationPaymentMethodAddDialog({
         fixed: "0",
       });
     } else {
+      // Create all withdrawal account types (required by backend), but only display relevant ones
       Object.values(WithdrawalToAccountType).forEach((accountType) => {
         defaultFeeSettings.push({
           accountType,
@@ -307,7 +309,10 @@ export function OrganizationPaymentMethodAddDialog({
                           (method): method is PaymentMethod =>
                             Object.values(PaymentMethod).includes(
                               method as PaymentMethod
-                            ) && availablePaymentMethods.includes(method as PaymentMethod)
+                            ) &&
+                            availablePaymentMethods.includes(
+                              method as PaymentMethod
+                            )
                         );
                         if (validMethods.length === 0) return null;
                         return (
@@ -476,85 +481,116 @@ export function OrganizationPaymentMethodAddDialog({
                     {/* Fee Settings */}
                     <div className="space-y-3">
                       <Label className="text-sm font-medium">手續費設定</Label>
-                      {channelSetting.feeSettings.map((feeSetting, feeIdx) => (
-                        <div
-                          key={feeIdx}
-                          className="flex items-center space-x-4 p-3 bg-gray-50"
-                        >
-                          <div className="w-24">
-                            <span className="text-sm font-medium">
-                              {feeSetting.accountTypeDisplay}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Label className="text-sm">費率</Label>
-                            <Input
-                              className="w-20"
-                              value={
-                                percentageInputs[`${channelIdx}-${feeIdx}`] ??
-                                convertStringNumberToPercentageNumber(
-                                  feeSetting.percentage
-                                ).toString()
-                              }
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                const inputKey = `${channelIdx}-${feeIdx}`;
-
-                                // Allow empty string, decimal point, and valid number patterns
-                                if (value === "" || /^\d*\.?\d*$/.test(value)) {
-                                  // Store the raw input value
-                                  setPercentageInputs((prev) => ({
-                                    ...prev,
-                                    [inputKey]: value,
-                                  }));
-
-                                  const parsedValue = parseFloat(value);
-                                  if (!isNaN(parsedValue)) {
-                                    const percentageValue = new Decimal(
-                                      parsedValue
-                                    );
-                                    updateFeeSettingPercentage(
-                                      channelIdx,
-                                      feeIdx,
-                                      percentageValue.dividedBy(100).toString()
-                                    );
-                                  } else if (value === "") {
-                                    updateFeeSettingPercentage(
-                                      channelIdx,
-                                      feeIdx,
-                                      "0"
-                                    );
-                                  }
+                      {channelSetting.feeSettings
+                        .filter((feeSetting) => {
+                          // For withdrawal, only show account types valid for this payment method
+                          if (
+                            type === TransactionType.API_WITHDRAWAL &&
+                            paymentMethod
+                          ) {
+                            const validAccountTypes =
+                              WithdrawalAccountTypesByPaymentMethod[
+                                paymentMethod
+                              ] || [];
+                            return validAccountTypes.includes(
+                              feeSetting.accountType as WithdrawalToAccountType
+                            );
+                          }
+                          // For deposit, show all
+                          return true;
+                        })
+                        .map((feeSetting, feeIdx) => {
+                          // Find the original index in the full array for proper updates
+                          const originalIdx =
+                            channelSetting.feeSettings.findIndex(
+                              (f) => f.accountType === feeSetting.accountType
+                            );
+                          return { feeSetting, originalIdx };
+                        })
+                        .map(({ feeSetting, originalIdx: feeIdx }) => (
+                          <div
+                            key={feeSetting.accountType}
+                            className="flex items-center space-x-4 p-3 bg-gray-50"
+                          >
+                            <div className="w-24">
+                              <span className="text-sm font-medium">
+                                {feeSetting.accountTypeDisplay}
+                              </span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Label className="text-sm">費率</Label>
+                              <Input
+                                className="w-20"
+                                value={
+                                  percentageInputs[`${channelIdx}-${feeIdx}`] ??
+                                  convertStringNumberToPercentageNumber(
+                                    feeSetting.percentage
+                                  ).toString()
                                 }
-                              }}
-                              onBlur={() => {
-                                // Clear the raw input on blur to show formatted value
-                                const inputKey = `${channelIdx}-${feeIdx}`;
-                                setPercentageInputs((prev) => {
-                                  const newInputs = { ...prev };
-                                  delete newInputs[inputKey];
-                                  return newInputs;
-                                });
-                              }}
-                            />
-                            <span className="text-sm">%</span>
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  const inputKey = `${channelIdx}-${feeIdx}`;
+
+                                  // Allow empty string, decimal point, and valid number patterns
+                                  if (
+                                    value === "" ||
+                                    /^\d*\.?\d*$/.test(value)
+                                  ) {
+                                    // Store the raw input value
+                                    setPercentageInputs((prev) => ({
+                                      ...prev,
+                                      [inputKey]: value,
+                                    }));
+
+                                    const parsedValue = parseFloat(value);
+                                    if (!isNaN(parsedValue)) {
+                                      const percentageValue = new Decimal(
+                                        parsedValue
+                                      );
+                                      updateFeeSettingPercentage(
+                                        channelIdx,
+                                        feeIdx,
+                                        percentageValue
+                                          .dividedBy(100)
+                                          .toString()
+                                      );
+                                    } else if (value === "") {
+                                      updateFeeSettingPercentage(
+                                        channelIdx,
+                                        feeIdx,
+                                        "0"
+                                      );
+                                    }
+                                  }
+                                }}
+                                onBlur={() => {
+                                  // Clear the raw input on blur to show formatted value
+                                  const inputKey = `${channelIdx}-${feeIdx}`;
+                                  setPercentageInputs((prev) => {
+                                    const newInputs = { ...prev };
+                                    delete newInputs[inputKey];
+                                    return newInputs;
+                                  });
+                                }}
+                              />
+                              <span className="text-sm">%</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Label className="text-sm">固定費</Label>
+                              <Input
+                                className="w-24"
+                                value={feeSetting.fixed}
+                                onChange={(e) =>
+                                  updateFeeSettingFixed(
+                                    channelIdx,
+                                    feeIdx,
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            </div>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <Label className="text-sm">固定費</Label>
-                            <Input
-                              className="w-24"
-                              value={feeSetting.fixed}
-                              onChange={(e) =>
-                                updateFeeSettingFixed(
-                                  channelIdx,
-                                  feeIdx,
-                                  e.target.value
-                                )
-                              }
-                            />
-                          </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   </div>
                 ))}

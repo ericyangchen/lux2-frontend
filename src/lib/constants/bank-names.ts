@@ -376,7 +376,33 @@ export const getWithdrawalToAccountTypeFromBankName = (bankName: string) => {
       return WithdrawalToAccountType.GCASH_ACCOUNT;
     case "1050":
       return WithdrawalToAccountType.MAYA_ACCOUNT;
+    case "2022":
+      return WithdrawalToAccountType.EASYPAISA_ACCOUNT;
+    case "2075":
+      return WithdrawalToAccountType.JAZZCASH_ACCOUNT;
     default:
       return WithdrawalToAccountType.BANK_ACCOUNT;
   }
+};
+
+export const getVerboseBankName = (
+  bankName: string | null | undefined
+): string | null => {
+  if (!bankName) {
+    return null;
+  }
+
+  const mapping =
+    BANK_NAMES_MAPPING[bankName as keyof typeof BANK_NAMES_MAPPING];
+  if (!mapping) {
+    return null;
+  }
+
+  // Extract bank name after the code prefix (e.g., "1001: " -> "AllBank (A Thrift Bank), Inc.")
+  const colonIndex = mapping.indexOf(": ");
+  if (colonIndex === -1) {
+    return mapping;
+  }
+
+  return mapping.substring(colonIndex + 2);
 };

@@ -339,4 +339,19 @@ export const WithdrawalAccountTypeDisplayNames = {
   [WithdrawalToAccountType.BANK_ACCOUNT]: "銀行帳戶",
   [WithdrawalToAccountType.GCASH_ACCOUNT]: "GCash帳戶",
   [WithdrawalToAccountType.MAYA_ACCOUNT]: "Maya帳戶",
+  [WithdrawalToAccountType.EASYPAISA_ACCOUNT]: "EasyPaisa帳戶",
+  [WithdrawalToAccountType.JAZZCASH_ACCOUNT]: "JazzCash帳戶",
+};
+
+export const WithdrawalAccountTypesByPaymentMethod = {
+  [PaymentMethod.NATIVE_GCASH]: [
+    WithdrawalToAccountType.BANK_ACCOUNT,
+    WithdrawalToAccountType.GCASH_ACCOUNT,
+    WithdrawalToAccountType.MAYA_ACCOUNT,
+  ] as WithdrawalToAccountType[],
+  [PaymentMethod.EASY_PAISA]: [
+    WithdrawalToAccountType.BANK_ACCOUNT,
+    WithdrawalToAccountType.EASYPAISA_ACCOUNT,
+    WithdrawalToAccountType.JAZZCASH_ACCOUNT,
+  ] as WithdrawalToAccountType[],
 };

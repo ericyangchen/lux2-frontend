@@ -5,6 +5,7 @@ import {
   PaymentMethodDisplayNames,
   TransactionTypeDisplayNames,
   WithdrawalAccountTypeDisplayNames,
+  WithdrawalAccountTypesByPaymentMethod,
 } from "@/lib/constants/transaction";
 import { getCurrencySymbol } from "@/lib/utils/currency";
 
@@ -92,8 +93,10 @@ export default function MerchantPaymentMethodInfo({
     } else {
       const withdrawalFees = setting.feeSettingList as any;
 
-      // Check each withdrawal account type
-      Object.values(WithdrawalToAccountType).forEach((accountType) => {
+      // Use payment method specific account types for withdrawal
+      const accountTypes =
+        WithdrawalAccountTypesByPaymentMethod[setting.paymentMethod] || [];
+      accountTypes.forEach((accountType) => {
         const feeData = withdrawalFees[accountType];
         if (feeData) {
           feeSettings.push({
