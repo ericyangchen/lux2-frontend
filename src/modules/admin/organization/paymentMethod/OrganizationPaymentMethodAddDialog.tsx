@@ -179,8 +179,11 @@ export function OrganizationPaymentMethodAddDialog({
         fixed: "0",
       });
     } else {
-      // Create all withdrawal account types (required by backend), but only display relevant ones
-      Object.values(WithdrawalToAccountType).forEach((accountType) => {
+      // Only create account types valid for this payment method
+      const accountTypes = paymentMethod
+        ? WithdrawalAccountTypesByPaymentMethod[paymentMethod] || []
+        : [];
+      accountTypes.forEach((accountType) => {
         defaultFeeSettings.push({
           accountType,
           accountTypeDisplay: WithdrawalAccountTypeDisplayNames[accountType],
@@ -481,33 +484,7 @@ export function OrganizationPaymentMethodAddDialog({
                     {/* Fee Settings */}
                     <div className="space-y-3">
                       <Label className="text-sm font-medium">手續費設定</Label>
-                      {channelSetting.feeSettings
-                        .filter((feeSetting) => {
-                          // For withdrawal, only show account types valid for this payment method
-                          if (
-                            type === TransactionType.API_WITHDRAWAL &&
-                            paymentMethod
-                          ) {
-                            const validAccountTypes =
-                              WithdrawalAccountTypesByPaymentMethod[
-                                paymentMethod
-                              ] || [];
-                            return validAccountTypes.includes(
-                              feeSetting.accountType as WithdrawalToAccountType
-                            );
-                          }
-                          // For deposit, show all
-                          return true;
-                        })
-                        .map((feeSetting, feeIdx) => {
-                          // Find the original index in the full array for proper updates
-                          const originalIdx =
-                            channelSetting.feeSettings.findIndex(
-                              (f) => f.accountType === feeSetting.accountType
-                            );
-                          return { feeSetting, originalIdx };
-                        })
-                        .map(({ feeSetting, originalIdx: feeIdx }) => (
+                      {channelSetting.feeSettings.map((feeSetting, feeIdx) => (
                           <div
                             key={feeSetting.accountType}
                             className="flex items-center space-x-4 p-3 bg-gray-50"

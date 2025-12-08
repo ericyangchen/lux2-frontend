@@ -113,12 +113,21 @@ export function OrganizationPaymentMethodEditDialog({
         ? WithdrawalAccountTypesByPaymentMethod[paymentMethod] || []
         : [];
       accountTypes.forEach((accountType) => {
+        // If account type exists in feeSettingList, use it; otherwise initialize with defaults
         if (withdrawalFees[accountType]) {
           entries.push({
             accountType,
             accountTypeDisplay: WithdrawalAccountTypeDisplayNames[accountType],
             percentage: withdrawalFees[accountType].percentage,
             fixed: withdrawalFees[accountType].fixed,
+          });
+        } else {
+          // Initialize new account type with default values
+          entries.push({
+            accountType,
+            accountTypeDisplay: WithdrawalAccountTypeDisplayNames[accountType],
+            percentage: "0",
+            fixed: "0",
           });
         }
       });
@@ -181,11 +190,13 @@ export function OrganizationPaymentMethodEditDialog({
   ) => {
     const newSettings = [...editableSettings];
     const feeList = { ...newSettings[settingIdx].feeSettingList } as any;
-    if (feeList[accountType]) {
-      feeList[accountType] = { ...feeList[accountType], percentage };
-      newSettings[settingIdx].feeSettingList = feeList;
-      setEditableSettings(newSettings);
+    // Create entry if it doesn't exist (for newly added account types)
+    if (!feeList[accountType]) {
+      feeList[accountType] = { percentage: "0", fixed: "0" };
     }
+    feeList[accountType] = { ...feeList[accountType], percentage };
+    newSettings[settingIdx].feeSettingList = feeList;
+    setEditableSettings(newSettings);
   };
 
   const updateFeeSettingFixed = (
@@ -195,11 +206,13 @@ export function OrganizationPaymentMethodEditDialog({
   ) => {
     const newSettings = [...editableSettings];
     const feeList = { ...newSettings[settingIdx].feeSettingList } as any;
-    if (feeList[accountType]) {
-      feeList[accountType] = { ...feeList[accountType], fixed };
-      newSettings[settingIdx].feeSettingList = feeList;
-      setEditableSettings(newSettings);
+    // Create entry if it doesn't exist (for newly added account types)
+    if (!feeList[accountType]) {
+      feeList[accountType] = { percentage: "0", fixed: "0" };
     }
+    feeList[accountType] = { ...feeList[accountType], fixed };
+    newSettings[settingIdx].feeSettingList = feeList;
+    setEditableSettings(newSettings);
   };
 
   const updateSettingProperty = (
@@ -261,9 +274,12 @@ export function OrganizationPaymentMethodEditDialog({
           },
         } as any;
       } else {
-        // Create all withdrawal account types (required by backend), but only display relevant ones
+        // Only create account types valid for this payment method
+        const accountTypes = paymentMethod
+          ? WithdrawalAccountTypesByPaymentMethod[paymentMethod] || []
+          : [];
         const feeSettingList: any = {};
-        Object.values(WithdrawalToAccountType).forEach((accountType) => {
+        accountTypes.forEach((accountType) => {
           feeSettingList[accountType] = {
             percentage: "0",
             fixed: "0",
@@ -332,7 +348,7 @@ export function OrganizationPaymentMethodEditDialog({
       );
 
       // Create new settings using the API
-      for (const setting of newSettings) {
+      const createPromises = newSettings.map(async (setting) => {
         const settlementInterval = setting.settlementInterval;
         const formattedSettlementInterval = settlementInterval
           ? parseInt(settlementInterval) > 1
@@ -358,10 +374,10 @@ export function OrganizationPaymentMethodEditDialog({
           const errorData = await response.json();
           throw new ApplicationError(errorData);
         }
-      }
+      });
 
       // Update existing settings using the API
-      for (const setting of existingSettings) {
+      const updatePromises = existingSettings.map(async (setting) => {
         const settlementInterval = setting.settlementInterval;
         const formattedSettlementInterval = settlementInterval
           ? parseInt(settlementInterval) > 1
@@ -383,7 +399,10 @@ export function OrganizationPaymentMethodEditDialog({
           const errorData = await response.json();
           throw new ApplicationError(errorData);
         }
-      }
+      });
+
+      // Execute all create and update operations simultaneously
+      await Promise.all([...createPromises, ...updatePromises]);
 
       handleCloseDialog();
       toast({
