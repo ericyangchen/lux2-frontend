@@ -2,6 +2,7 @@
 export const getCurrencySymbol = (currency: string): string => {
   const symbols: Record<string, string> = {
     PHP: "₱",
+    PKR: "₨",
     USD: "$",
     CNY: "¥",
     TWD: "NT$",

@@ -139,6 +139,10 @@ export const DepositPaymentChannelCategories = {
     // // 724PAY
     // PaymentChannel.NATIVE_GCASH_724PAY_DEPOSIT,
   ] as PaymentChannel[],
+  [PaymentMethod.EASY_PAISA]: [
+    // SahulatPay
+    PaymentChannel.EASY_PAISA_SAHULAT_PAY_DEPOSIT,
+  ] as PaymentChannel[],
 };
 
 export const WithdrawalPaymentChannelCategories = {
@@ -187,6 +191,10 @@ export const WithdrawalPaymentChannelCategories = {
     // // 724PAY
     // PaymentChannel.NATIVE_GCASH_724PAY_WITHDRAWAL,
   ] as PaymentChannel[],
+  [PaymentMethod.EASY_PAISA]: [
+    // EasyPaisa SahulatPay
+    PaymentChannel.EASY_PAISA_SAHULAT_PAY_WITHDRAWAL,
+  ] as PaymentChannel[],
 };
 
 export const AllPaymentChannelCategories = {
@@ -194,10 +202,15 @@ export const AllPaymentChannelCategories = {
     ...DepositPaymentChannelCategories[PaymentMethod.NATIVE_GCASH],
     ...WithdrawalPaymentChannelCategories[PaymentMethod.NATIVE_GCASH],
   ],
+  [PaymentMethod.EASY_PAISA]: [
+    ...DepositPaymentChannelCategories[PaymentMethod.EASY_PAISA],
+    ...WithdrawalPaymentChannelCategories[PaymentMethod.EASY_PAISA],
+  ],
 };
 
 export const PaymentMethodDisplayNames = {
   [PaymentMethod.NATIVE_GCASH]: "GCash",
+  [PaymentMethod.EASY_PAISA]: "EasyPaisa",
 };
 
 export const PaymentMethodCurrencyMapping: Record<
@@ -205,6 +218,7 @@ export const PaymentMethodCurrencyMapping: Record<
   (PaymentMethod | string)[]
 > = {
   PHP: [PaymentMethod.NATIVE_GCASH],
+  PKR: [PaymentMethod.EASY_PAISA],
 };
 
 export const PaymentChannelDisplayNames = {
@@ -225,6 +239,11 @@ export const PaymentChannelDisplayNames = {
   /* XWINPAY */
   [PaymentChannel.NATIVE_GCASH_XWINPAY_DEPOSIT]: "Xwin: Gcash Deposit",
   [PaymentChannel.NATIVE_GCASH_XWINPAY_WITHDRAWAL]: "Xwin: Gcash Withdrawal",
+
+  /* SahulatPay */
+  [PaymentChannel.EASY_PAISA_SAHULAT_PAY_DEPOSIT]: "Sahulat: EasyPaisa Deposit",
+  [PaymentChannel.EASY_PAISA_SAHULAT_PAY_WITHDRAWAL]:
+    "Sahulat: EasyPaisa Withdrawal",
 
   // /**
   //  * BIFU
