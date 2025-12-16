@@ -1,5 +1,6 @@
 import {
   AdjustmentsHorizontalIcon,
+  ArrowDownTrayIcon,
   BuildingOffice2Icon,
   ChartBarSquareIcon,
   ChartPieIcon,
@@ -56,6 +57,11 @@ export const merchantNavigation = [
     name: "操作紀錄",
     href: "/merchant/user-activity-logs",
     icon: ClipboardDocumentListIcon,
+  },
+  {
+    name: "匯出下載",
+    href: "/merchant/exports",
+    icon: ArrowDownTrayIcon,
   },
   // {
   //   name: "歷史紀錄",
@@ -188,6 +194,12 @@ export const adminNavigation = [
     icon: ChartBarSquareIcon,
   },
   {
+    type: "item" as const,
+    name: "匯出下載",
+    href: "/admin/exports",
+    icon: ArrowDownTrayIcon,
+  },
+  {
     type: "category" as const,
     label: "其他",
   },
@@ -256,6 +268,7 @@ export const merchantRoutes = [
   "/merchant/reports/balance",
   "/merchant/balance-modification-history",
   "/merchant/user-activity-logs",
+  "/merchant/exports",
   "/merchant/manual-actions",
 ];
 
