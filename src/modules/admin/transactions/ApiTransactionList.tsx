@@ -993,21 +993,23 @@ export function ApiTransactionList() {
         </div>
       </div>
       {/* search button */}
-      <div className="flex justify-center sm:justify-start pb-4 gap-4">
-        <Button
-          onClick={handleClearAll}
-          className="w-[120px] border border-red-500 text-red-500 hover:border-red-600 hover:text-red-600 hover:bg-inherit"
-          variant="outline"
-        >
-          清除
-        </Button>
-        <Button
-          onClick={() => handleSearch()}
-          disabled={isLoading}
-          className="w-[120px]"
-        >
-          {isLoading ? "查詢中..." : "查詢"}
-        </Button>
+      <div className="flex justify-between items-center pb-4 gap-4">
+        <div className="flex gap-4">
+          <Button
+            onClick={handleClearAll}
+            className="w-[120px] border border-red-500 text-red-500 hover:border-red-600 hover:text-red-600 hover:bg-inherit"
+            variant="outline"
+          >
+            清除
+          </Button>
+          <Button
+            onClick={() => handleSearch()}
+            disabled={isLoading}
+            className="w-[120px]"
+          >
+            {isLoading ? "查詢中..." : "查詢"}
+          </Button>
+        </div>
         <Button
           variant="outline"
           disabled={
