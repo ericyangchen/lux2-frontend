@@ -35,6 +35,7 @@ interface BalanceReportFormProps {
   isExportInProgress?: boolean;
   showOrganizationSelector?: boolean;
   showGenerateButton?: boolean;
+  maxDate?: Date;
 }
 
 export function BalanceReportForm({
@@ -50,6 +51,7 @@ export function BalanceReportForm({
   isExportInProgress = false,
   showOrganizationSelector = false,
   showGenerateButton = true,
+  maxDate,
 }: BalanceReportFormProps) {
   const isFormValid = () => {
     if (showOrganizationSelector && !organizationId) return false;
@@ -142,6 +144,7 @@ export function BalanceReportForm({
                 }
               }}
               placeholder="選擇日期"
+              maxDate={maxDate}
             />
           ) : (
             <DatePicker
@@ -162,6 +165,7 @@ export function BalanceReportForm({
                 }
               }}
               placeholder="選擇日期"
+              maxDate={maxDate}
             />
           )}
         </div>

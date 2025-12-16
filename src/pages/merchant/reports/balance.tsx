@@ -5,6 +5,7 @@ import {
 import {
   ApiExportMerchantBalanceReport,
   ApiGetBalanceReportJobStatus,
+  ApiListMerchantBalanceReportExports,
   JobStatus as BalanceReportJobStatus,
 } from "@/lib/apis/reports/export";
 import {
@@ -22,11 +23,22 @@ import { getApplicationCookies } from "@/lib/utils/cookie";
 import { useExportJob } from "@/lib/hooks/use-export-job";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
+import { useRouter } from "next/router";
 import moment from "moment-timezone";
+import {
+  getCurrentDateInPhilippines,
+  getYesterdayDateInPhilippines,
+} from "@/lib/utils/timezone";
 
 export default function MerchantBalanceReportsPage() {
+  const router = useRouter();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">("");
-  const [date, setDate] = useState<string>("");
+  const [date, setDate] = useState<string>(getYesterdayDateInPhilippines());
+
+  // Only allow generating balance reports for dates before today (yesterday and earlier)
+  const maxDate = new Date(getCurrentDateInPhilippines());
+  maxDate.setDate(maxDate.getDate() - 1); // Set to yesterday
+
   const [isLoading, setIsLoading] = useState(false);
   const [summaryData, setSummaryData] = useState<BalanceSummary | null>(null);
   const [transactionsData, setTransactionsData] =
@@ -84,6 +96,42 @@ export default function MerchantBalanceReportsPage() {
       });
     },
   });
+
+  const checkExistingReport = async (): Promise<BalanceReportJobStatus | null> => {
+    if (!accessToken || !organizationId || !paymentMethod || !date) return null;
+
+    try {
+      const response = await ApiListMerchantBalanceReportExports({
+        organizationId,
+        accessToken,
+        limit: 100,
+        offset: 0,
+        status: "COMPLETED",
+      });
+
+      if (!response.ok) return null;
+
+      const data = await response.json();
+      const jobs: BalanceReportJobStatus[] = data.jobs || [];
+
+      // Find a completed report with matching date and payment method
+      const existingReport = jobs.find((job) => {
+        const metadata = job.metadata || {};
+        const jobDate = metadata.date || metadata.startDate;
+        const jobPaymentMethod = metadata.paymentMethod;
+        return (
+          job.status === "COMPLETED" &&
+          jobDate === date &&
+          jobPaymentMethod === paymentMethod
+        );
+      });
+
+      return existingReport || null;
+    } catch (error) {
+      console.error("Error checking existing report:", error);
+      return null;
+    }
+  };
 
   const handleGenerateReport = async () => {
     if (!paymentMethod || !date) {
@@ -168,7 +216,7 @@ export default function MerchantBalanceReportsPage() {
     if (!paymentMethod || !date) {
       toast({
         title: "錯誤",
-        description: "請填寫所有必要欄位",
+        description: "請填寫所有必要欄位（僅支援單日匯出）",
         variant: "destructive",
       });
       return;
@@ -192,7 +240,24 @@ export default function MerchantBalanceReportsPage() {
       return;
     }
 
+    setIsLoading(true);
+
     try {
+      // Check if a report already exists for this date and payment method
+      const existingReport = await checkExistingReport();
+      if (existingReport) {
+        toast({
+          title: "報表已存在",
+          description: "此日期與支付方式的報表已產生，即將跳轉至下載頁面...",
+        });
+        // Navigate to exports page with BalanceReports tab
+        setTimeout(() => {
+          router.push("/merchant/exports?tab=BalanceReports");
+        }, 1500);
+        setIsLoading(false);
+        return;
+      }
+
       const response = await ApiExportMerchantBalanceReport({
         organizationId,
         paymentMethod: paymentMethod as PaymentMethod,
@@ -245,6 +310,8 @@ export default function MerchantBalanceReportsPage() {
           error instanceof ApplicationError ? error.message : "匯出Excel失敗",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -388,14 +455,15 @@ export default function MerchantBalanceReportsPage() {
           date={date}
           setDate={setDate}
           onExportExcel={handleExportExcel}
-          isLoading={isLoading}
-          isExportInProgress={
-            ongoingJob !== null &&
-            (ongoingJob.status === "PENDING" ||
-              ongoingJob.status === "PROCESSING")
+          isLoading={
+            isLoading ||
+            (ongoingJob !== null &&
+              (ongoingJob.status === "PENDING" ||
+                ongoingJob.status === "PROCESSING"))
           }
           showOrganizationSelector={false}
           showGenerateButton={false}
+          maxDate={maxDate}
         />
 
         {/* Export Job Status - Only show when processing, not when completed */}

@@ -24,11 +24,20 @@ import { useExportJob } from "@/lib/hooks/use-export-job";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
 import moment from "moment-timezone";
+import {
+  getCurrentDateInPhilippines,
+  getYesterdayDateInPhilippines,
+} from "@/lib/utils/timezone";
 
 export default function AdminBalanceReportsPage() {
   const [organizationId, setOrganizationId] = useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">("");
-  const [date, setDate] = useState<string>("");
+  const [date, setDate] = useState<string>(getYesterdayDateInPhilippines());
+
+  // Only allow generating balance reports for dates before today (yesterday and earlier)
+  const maxDate = new Date(getCurrentDateInPhilippines());
+  maxDate.setDate(maxDate.getDate() - 1); // Set to yesterday
+
   const [isLoading, setIsLoading] = useState(false);
   const [summaryData, setSummaryData] = useState<BalanceSummary | null>(null);
   const [transactionsData, setTransactionsData] =
@@ -381,6 +390,7 @@ export default function AdminBalanceReportsPage() {
           }
           showOrganizationSelector={true}
           showGenerateButton={false}
+          maxDate={maxDate}
         />
 
         {/* Export Job Status - Only show when processing, not when completed */}

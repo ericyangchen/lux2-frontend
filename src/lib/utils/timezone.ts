@@ -10,6 +10,10 @@ export const getCurrentDateInPhilippines = (): string => {
   return moment.tz(PHILIPPINES_TIMEZONE).format("YYYY-MM-DD");
 };
 
+export const getYesterdayDateInPhilippines = (): string => {
+  return moment.tz(PHILIPPINES_TIMEZONE).subtract(1, "day").format("YYYY-MM-DD");
+};
+
 export const convertToPhilippinesTimezone = (time?: string): string => {
   if (!time) return "";
 

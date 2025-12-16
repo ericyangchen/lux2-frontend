@@ -12,10 +12,12 @@ export function MerchantDatePicker({
   date,
   setDate,
   placeholder,
+  maxDate,
 }: {
   date?: Date;
   setDate: (date?: Date) => void;
   placeholder: string;
+  maxDate?: Date;
 }) {
   const [inputValue, setInputValue] = useState<string>(
     date
@@ -34,6 +36,12 @@ export function MerchantDatePicker({
         .tz(inputValue, "YYYY/MM/DD", PHILIPPINES_TIMEZONE)
         .toDate();
       if (moment.tz(parsedDate, PHILIPPINES_TIMEZONE).isValid()) {
+        // Validate against maxDate if provided
+        if (maxDate && parsedDate > maxDate) {
+          setInputValue("");
+          setDate(undefined);
+          return;
+        }
         setDate(parsedDate);
         setInputValue(
           moment.tz(parsedDate, PHILIPPINES_TIMEZONE).format("YYYY/MM/DD")
@@ -72,6 +80,13 @@ export function MerchantDatePicker({
       phMoment.month(), 
       phMoment.date()
     );
+  };
+
+  // Convert maxDate to calendar-compatible local date
+  const getCalendarMaxDate = (): Date | undefined => {
+    if (!maxDate) return undefined;
+    const phMoment = moment.tz(maxDate, PHILIPPINES_TIMEZONE);
+    return new Date(phMoment.year(), phMoment.month(), phMoment.date());
   };
 
   const handleCalendarSelect = (selectedDate: Date | undefined) => {
@@ -153,6 +168,7 @@ export function MerchantDatePicker({
           mode="single"
           selected={getCalendarDate(date)}
           onSelect={handleCalendarSelect}
+          disabled={maxDate ? { after: getCalendarMaxDate()! } : undefined}
           initialFocus
         />
       </PopoverContent>

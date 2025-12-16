@@ -13,10 +13,12 @@ export function DatePicker({
   date,
   setDate,
   placeholder,
+  maxDate,
 }: {
   date?: Date;
   setDate: (date?: Date) => void;
   placeholder: string;
+  maxDate?: Date;
 }) {
   const [inputValue, setInputValue] = useState<string>(
     date ? format(date, "yyyy/MM/dd") : ""
@@ -28,6 +30,10 @@ export function DatePicker({
     // Try to parse the input into a valid date
     const parsedDate = parse(e.target.value, "yyyy/MM/dd", new Date());
     if (!isNaN(parsedDate.getTime())) {
+      // Validate against maxDate if provided
+      if (maxDate && parsedDate > maxDate) {
+        return; // Don't update date if it exceeds maxDate
+      }
       setDate(parsedDate);
     }
   };
@@ -37,6 +43,12 @@ export function DatePicker({
     const parsedDate = parse(inputValue, "yyyy/MM/dd", new Date());
 
     if (!isNaN(parsedDate.getTime())) {
+      // Validate against maxDate if provided
+      if (maxDate && parsedDate > maxDate) {
+        setInputValue("");
+        setDate(undefined);
+        return;
+      }
       // Update the input value to the parsed date
       setInputValue(parsedDate ? format(parsedDate, "yyyy/MM/dd") : "");
     } else {
@@ -97,6 +109,7 @@ export function DatePicker({
               selectedDate ? format(selectedDate, "yyyy/MM/dd") : ""
             );
           }}
+          disabled={maxDate ? { after: maxDate } : undefined}
           initialFocus
         />
       </PopoverContent>
