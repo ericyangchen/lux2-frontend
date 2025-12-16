@@ -1012,13 +1012,12 @@ export function ApiTransactionList() {
         </div>
         <Button
           variant="outline"
+          onClick={handleExportExcel}
           disabled={
             ongoingJob !== null &&
             (ongoingJob.status === "PENDING" ||
               ongoingJob.status === "PROCESSING")
           }
-          onClick={handleExportExcel}
-          className="border-gray-200 bg-white text-gray-900 hover:bg-gray-50"
         >
           <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
           {ongoingJob !== null &&
