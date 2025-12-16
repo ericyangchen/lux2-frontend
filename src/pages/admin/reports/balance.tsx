@@ -372,7 +372,6 @@ export default function AdminBalanceReportsPage() {
           setPaymentMethod={setPaymentMethod}
           date={date}
           setDate={setDate}
-          onGenerateReport={handleGenerateReport}
           onExportExcel={handleExportExcel}
           isLoading={isLoading}
           isExportInProgress={
@@ -381,6 +380,7 @@ export default function AdminBalanceReportsPage() {
               ongoingJob.status === "PROCESSING")
           }
           showOrganizationSelector={true}
+          showGenerateButton={false}
         />
 
         {/* Export Job Status - Only show when processing, not when completed */}

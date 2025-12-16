@@ -98,7 +98,6 @@ export default function MerchantBalanceReportsPage() {
     setIsLoading(true);
 
     try {
-
       if (!accessToken) {
         throw new ApplicationError({ message: "請重新登入" });
       }
@@ -388,7 +387,6 @@ export default function MerchantBalanceReportsPage() {
           setPaymentMethod={setPaymentMethod}
           date={date}
           setDate={setDate}
-          onGenerateReport={handleGenerateReport}
           onExportExcel={handleExportExcel}
           isLoading={isLoading}
           isExportInProgress={
@@ -397,6 +395,7 @@ export default function MerchantBalanceReportsPage() {
               ongoingJob.status === "PROCESSING")
           }
           showOrganizationSelector={false}
+          showGenerateButton={false}
         />
 
         {/* Export Job Status - Only show when processing, not when completed */}

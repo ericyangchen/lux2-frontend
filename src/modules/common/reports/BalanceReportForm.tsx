@@ -29,11 +29,12 @@ interface BalanceReportFormProps {
   setPaymentMethod: (method: PaymentMethod) => void;
   date: string;
   setDate: (date: string) => void;
-  onGenerateReport: () => void;
+  onGenerateReport?: () => void;
   onExportExcel: () => void;
   isLoading: boolean;
   isExportInProgress?: boolean;
   showOrganizationSelector?: boolean;
+  showGenerateButton?: boolean;
 }
 
 export function BalanceReportForm({
@@ -48,6 +49,7 @@ export function BalanceReportForm({
   isLoading,
   isExportInProgress = false,
   showOrganizationSelector = false,
+  showGenerateButton = true,
 }: BalanceReportFormProps) {
   const isFormValid = () => {
     if (showOrganizationSelector && !organizationId) return false;
@@ -167,13 +169,15 @@ export function BalanceReportForm({
 
       {/* Action Buttons */}
       <div className="flex gap-4 pt-4">
-        <Button
-          onClick={onGenerateReport}
-          disabled={!isFormValid() || isLoading}
-          className={`min-w-[120px] ${isMerchant ? 'bg-gray-900 text-white hover:bg-gray-800 shadow-none rounded-none' : ''}`}
-        >
-          {isLoading ? "生成中..." : "生成報表"}
-        </Button>
+        {showGenerateButton && onGenerateReport && (
+          <Button
+            onClick={onGenerateReport}
+            disabled={!isFormValid() || isLoading}
+            className={`min-w-[120px] ${isMerchant ? 'bg-gray-900 text-white hover:bg-gray-800 shadow-none rounded-none' : ''}`}
+          >
+            {isLoading ? "生成中..." : "生成報表"}
+          </Button>
+        )}
 
         <Button
           onClick={onExportExcel}
