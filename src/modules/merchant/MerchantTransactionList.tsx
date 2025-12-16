@@ -22,6 +22,15 @@ import {
 import { ApiGetTransactionById } from "@/lib/apis/transactions/get";
 import { ApiGetTransactionCountAndSumOfAmountAndFee } from "@/lib/apis/transactions/get";
 import { ApiGetTransactionsByMerchantId } from "@/lib/apis/transactions/get";
+import {
+  ApiExportTransactionsByMerchantId,
+  ApiGetMerchantExportJobStatus,
+  ExportTransactionsDto,
+  JobStatus as TransactionJobStatus,
+} from "@/lib/apis/transactions/export";
+import { ExportCompletionDialog } from "@/components/export/ExportCompletionDialog";
+import { ExportJobStatus } from "@/components/export/ExportJobStatus";
+import { useExportJob } from "@/lib/hooks/use-export-job";
 import { Badge } from "@/components/shadcn/ui/badge";
 import { Button } from "@/components/shadcn/ui/button";
 import { MerchantDateTimePicker } from "@/components/MerchantDateTimePicker";
@@ -579,6 +588,47 @@ export function MerchantTransactionList() {
     startDate: moment.tz(PHILIPPINES_TIMEZONE).startOf("day").toDate(),
     endDate: moment.tz(PHILIPPINES_TIMEZONE).endOf("day").toDate(),
   });
+  const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+  const [ongoingJob, setOngoingJob] = useState<TransactionJobStatus | null>(
+    null
+  );
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [completedExportUrl, setCompletedExportUrl] = useState<string | null>(
+    null
+  );
+  const [completedExportFilename, setCompletedExportFilename] =
+    useState<string>("");
+
+  const { jobStatus, startPolling, downloadFile } = useExportJob({
+    jobId: currentJobId || ongoingJob?.jobId || null,
+    fetchJobStatus: async (id: string) => {
+      if (!organizationId) throw new Error("Organization ID is required");
+      return ApiGetMerchantExportJobStatus({
+        merchantId: organizationId,
+        jobId: id,
+        accessToken: accessToken || "",
+      });
+    },
+    onComplete: (gcsUrl: string) => {
+      const filename = `transactions-export-${moment().format(
+        "YYYY-MM-DD-HHmm"
+      )}.xlsx`;
+      setCompletedExportUrl(gcsUrl);
+      setCompletedExportFilename(filename);
+      setShowCompletionDialog(true);
+      setOngoingJob(null);
+      setCurrentJobId(null);
+    },
+    onError: (error: string) => {
+      setOngoingJob(null);
+      setCurrentJobId(null);
+      toast({
+        title: "匯出失敗",
+        description: error,
+        variant: "destructive",
+      });
+    },
+  });
 
   // Fetch transaction summary for multiple conditions search
   const fetchTransactionSummary = async () => {
@@ -757,77 +807,104 @@ export function MerchantTransactionList() {
     setNextCursor(null);
   };
 
-  const handleExportCSV = () => {
-    if (!transactions.length) {
+  const handleExportExcel = async () => {
+    if (!organizationId || !accessToken) {
       toast({
-        title: "無法匯出",
-        description: "沒有數據可以匯出",
+        title: "錯誤",
+        description: "請重新登入",
         variant: "destructive",
       });
       return;
     }
 
-    // Prepare CSV data
-    const headers = [
-      "訂單號碼",
-      "系統ID",
-      "類型",
-      "通道",
-      "金額",
-      "手續費",
-      "狀態",
-      "創建時間",
-      "完成時間",
-    ];
+    try {
+      // Build export filters from current search state
+      const exportFilters: ExportTransactionsDto = {
+        merchantId: organizationId,
+      };
 
-    const csvData = transactions.map((transaction) => [
-      transaction.merchantOrderId,
-      transaction.id,
-      TransactionTypeDisplayNames[transaction.type] || transaction.type,
-      PaymentMethodDisplayNames[transaction.paymentMethod],
-      transaction.amount,
-      transaction.totalFee || "0",
-      TransactionStatusDisplayNames[transaction.status] || transaction.status,
-      convertDatabaseTimeToReadablePhilippinesTime(transaction.createdAt),
-      transaction.successAt
-        ? convertDatabaseTimeToReadablePhilippinesTime(transaction.successAt)
-        : "-",
-    ]);
+      // Add filters from current form state or merchantOrderId
+      if (merchantOrderId) {
+        exportFilters.merchantOrderId = merchantOrderId;
+      } else {
+        if (filters.transactionType && filters.transactionType !== "all") {
+          exportFilters.type = filters.transactionType;
+        }
+        if (filters.paymentMethod && filters.paymentMethod !== "all") {
+          exportFilters.paymentMethod = filters.paymentMethod;
+        }
+        if (filters.status && filters.status !== "all") {
+          exportFilters.status = filters.status;
+        }
+        if (filters.amountMin) {
+          exportFilters.amountMin = filters.amountMin;
+        }
+        if (filters.amountMax) {
+          exportFilters.amountMax = filters.amountMax;
+        }
+        if (filters.startDate) {
+          exportFilters.createdAtStart = moment
+            .tz(filters.startDate, PHILIPPINES_TIMEZONE)
+            .startOf("day")
+            .toISOString();
+        }
+        if (filters.endDate) {
+          exportFilters.createdAtEnd = moment
+            .tz(filters.endDate, PHILIPPINES_TIMEZONE)
+            .endOf("day")
+            .toISOString();
+        }
+      }
 
-    // Convert to CSV string
-    const csvContent = [
-      headers.join(","),
-      ...csvData.map((row) =>
-        row
-          .map((field) =>
-            typeof field === "string" && field.includes(",")
-              ? `"${field}"`
-              : field
-          )
-          .join(",")
-      ),
-    ].join("\n");
+      const response = await ApiExportTransactionsByMerchantId({
+        merchantId: organizationId,
+        filters: exportFilters,
+        accessToken,
+      });
 
-    // Create and download file
-    const blob = new Blob(["\uFEFF" + csvContent], {
-      type: "text/csv;charset=utf-8;",
-    });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `transactions-${moment().format("YYYY-MM-DD-HHmm")}.csv`
-    );
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "匯出Excel失敗");
+      }
 
-    toast({
-      title: "匯出成功",
-      description: `已匯出 ${transactions.length} 筆交易記錄`,
-    });
+      // Backend now returns job ID for async processing
+      const data = await response.json();
+      const { jobId } = data;
+
+      if (!jobId) {
+        throw new Error("無法取得匯出工作 ID");
+      }
+
+      setCurrentJobId(jobId);
+      setOngoingJob({
+        jobId,
+        userId: "",
+        organizationId,
+        jobType: "TRANSACTION_EXPORT",
+        status: "PENDING",
+        progress: 0,
+        progressMessage: null,
+        gcsUrl: null,
+        error: null,
+        metadata: exportFilters,
+        createdAt: new Date().toISOString(),
+        updatedAt: undefined,
+        completedAt: null,
+      });
+      startPolling(jobId);
+
+      toast({
+        title: "匯出已開始",
+        description: "匯出工作已建立，正在處理中...",
+      });
+    } catch (error) {
+      console.error("Export Excel error:", error);
+      toast({
+        title: "錯誤",
+        description: error instanceof Error ? error.message : "匯出Excel失敗",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -851,12 +928,20 @@ export function MerchantTransactionList() {
               </Button>
               <Button
                 variant="outline"
-                disabled={!transactions.length}
-                onClick={handleExportCSV}
+                disabled={
+                  ongoingJob !== null &&
+                  (ongoingJob.status === "PENDING" ||
+                    ongoingJob.status === "PROCESSING")
+                }
+                onClick={handleExportExcel}
                 className="border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none"
               >
                 <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
-                匯出 CSV
+                {ongoingJob !== null &&
+                (ongoingJob.status === "PENDING" ||
+                  ongoingJob.status === "PROCESSING")
+                  ? "匯出中..."
+                  : "匯出 Excel"}
               </Button>
             </div>
           </div>
@@ -957,6 +1042,31 @@ export function MerchantTransactionList() {
 
       {/* Transaction Table */}
       <TransactionTable transactions={transactions} isLoading={isLoading} />
+
+      {/* Export Job Status - Only show when processing, not when completed */}
+      {(jobStatus || currentJobId) && jobStatus?.status !== "COMPLETED" && (
+        <div className="mt-4">
+          <ExportJobStatus
+            jobStatus={jobStatus}
+            onDownload={(url: string) => {
+              const filename = `transactions-export-${moment().format(
+                "YYYY-MM-DD-HHmm"
+              )}.xlsx`;
+              downloadFile(url, filename);
+            }}
+          />
+        </div>
+      )}
+
+      {/* Export Completion Dialog */}
+      <ExportCompletionDialog
+        open={showCompletionDialog}
+        onOpenChange={setShowCompletionDialog}
+        downloadUrl={completedExportUrl || ""}
+        filename={completedExportFilename}
+        onDownload={downloadFile}
+        exportPagePath="/merchant/exports?tab=TransactionExports"
+      />
 
       {/* Load More Button */}
       {transactions.length > 0 &&

@@ -1,10 +1,20 @@
-import * as moment from "moment-timezone";
+import moment from "moment-timezone";
 
 import {
   ApiGetTransactionById,
   ApiGetTransactionCountAndSumOfAmountAndFee,
   ApiGetTransactions,
 } from "@/lib/apis/transactions/get";
+import {
+  ApiExportTransactions,
+  ApiGetExportJobStatus,
+  ExportTransactionsDto,
+  JobStatus as TransactionJobStatus,
+} from "@/lib/apis/transactions/export";
+import { ExportCompletionDialog } from "@/components/export/ExportCompletionDialog";
+import { ExportJobStatus } from "@/components/export/ExportJobStatus";
+import { useExportJob } from "@/lib/hooks/use-export-job";
+import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import {
   DepositPaymentChannelCategories,
   PaymentChannelDisplayNames,
@@ -221,6 +231,162 @@ export function ApiTransactionList() {
     id: string;
   } | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+
+  // Export job states
+  const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+  const [ongoingJob, setOngoingJob] = useState<TransactionJobStatus | null>(
+    null
+  );
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [completedExportUrl, setCompletedExportUrl] = useState<string | null>(
+    null
+  );
+  const [completedExportFilename, setCompletedExportFilename] =
+    useState<string>("");
+
+  const { jobStatus, startPolling, downloadFile } = useExportJob({
+    jobId: currentJobId || ongoingJob?.jobId || null,
+    fetchJobStatus: async (id: string) => {
+      const { accessToken } = getApplicationCookies();
+      return ApiGetExportJobStatus({
+        jobId: id,
+        accessToken: accessToken || "",
+      });
+    },
+    onComplete: (gcsUrl: string) => {
+      const filename = `transactions-export-${moment().format(
+        "YYYY-MM-DD-HHmm"
+      )}.xlsx`;
+      setCompletedExportUrl(gcsUrl);
+      setCompletedExportFilename(filename);
+      setShowCompletionDialog(true);
+      setOngoingJob(null);
+      setCurrentJobId(null);
+    },
+    onError: (error: string) => {
+      setOngoingJob(null);
+      setCurrentJobId(null);
+      toast({
+        title: "匯出失敗",
+        description: error,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleExportExcel = async () => {
+    const { accessToken, organizationId } = getApplicationCookies();
+    
+    if (!accessToken) {
+      toast({
+        title: "錯誤",
+        description: "請重新登入",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Build export filters from current search state
+      const exportFilters: ExportTransactionsDto = {};
+
+      if (transactionType && transactionType !== "all") {
+        exportFilters.type = transactionType;
+      }
+      if (paymentMethod && paymentMethod !== "all") {
+        exportFilters.paymentMethod = paymentMethod;
+      }
+      if (paymentChannel && paymentChannel !== "all") {
+        exportFilters.paymentChannel = paymentChannel;
+      }
+      if (merchantId) {
+        exportFilters.merchantId = merchantId;
+      }
+      if (merchantOrderId) {
+        exportFilters.merchantOrderId = merchantOrderId;
+      }
+      if (transactionStatus && transactionStatus !== "all") {
+        exportFilters.status = transactionStatus;
+      }
+      if (startDate) {
+        exportFilters.createdAtStart = convertToPhilippinesTimezone(
+          startDate.toISOString()
+        );
+      }
+      if (endDate) {
+        exportFilters.createdAtEnd = convertToPhilippinesTimezone(
+          endDate.toISOString()
+        );
+      }
+      if (successStartDate) {
+        exportFilters.successAtStart = convertToPhilippinesTimezone(
+          successStartDate.toISOString()
+        );
+      }
+      if (successEndDate) {
+        exportFilters.successAtEnd = convertToPhilippinesTimezone(
+          successEndDate.toISOString()
+        );
+      }
+      if (amount) {
+        exportFilters.amount = amount;
+      }
+      if (amountMin) {
+        exportFilters.amountMin = amountMin;
+      }
+      if (amountMax) {
+        exportFilters.amountMax = amountMax;
+      }
+
+      const response = await ApiExportTransactions({
+        filters: exportFilters,
+        accessToken,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "匯出Excel失敗");
+      }
+
+      // Backend now returns job ID for async processing
+      const data = await response.json();
+      const { jobId } = data;
+
+      if (!jobId) {
+        throw new Error("無法取得匯出工作 ID");
+      }
+
+      setCurrentJobId(jobId);
+      setOngoingJob({
+        jobId,
+        userId: "",
+        organizationId: organizationId || "",
+        jobType: "TRANSACTION_EXPORT",
+        status: "PENDING",
+        progress: 0,
+        progressMessage: null,
+        gcsUrl: null,
+        error: null,
+        metadata: exportFilters,
+        createdAt: new Date().toISOString(),
+        updatedAt: undefined,
+        completedAt: null,
+      });
+      startPolling(jobId);
+
+      toast({
+        title: "匯出已開始",
+        description: "匯出工作已建立，正在處理中...",
+      });
+    } catch (error) {
+      console.error("Export Excel error:", error);
+      toast({
+        title: "錯誤",
+        description: error instanceof Error ? error.message : "匯出Excel失敗",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleSearch = async (isLoadMore: boolean = false) => {
     const { accessToken, organizationId } = getApplicationCookies();
@@ -842,7 +1008,49 @@ export function ApiTransactionList() {
         >
           {isLoading ? "查詢中..." : "查詢"}
         </Button>
+        <Button
+          variant="outline"
+          disabled={
+            ongoingJob !== null &&
+            (ongoingJob.status === "PENDING" ||
+              ongoingJob.status === "PROCESSING")
+          }
+          onClick={handleExportExcel}
+          className="border-gray-200 bg-white text-gray-900 hover:bg-gray-50"
+        >
+          <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+          {ongoingJob !== null &&
+          (ongoingJob.status === "PENDING" ||
+            ongoingJob.status === "PROCESSING")
+            ? "匯出中..."
+            : "匯出 Excel"}
+        </Button>
       </div>
+
+      {/* Export Job Status - Only show when processing, not when completed */}
+      {(jobStatus || currentJobId) && jobStatus?.status !== "COMPLETED" && (
+        <div className="mb-4">
+          <ExportJobStatus
+            jobStatus={jobStatus}
+            onDownload={(url: string) => {
+              const filename = `transactions-export-${moment().format(
+                "YYYY-MM-DD-HHmm"
+              )}.xlsx`;
+              downloadFile(url, filename);
+            }}
+          />
+        </div>
+      )}
+
+      {/* Export Completion Dialog */}
+      <ExportCompletionDialog
+        open={showCompletionDialog}
+        onOpenChange={setShowCompletionDialog}
+        downloadUrl={completedExportUrl || ""}
+        filename={completedExportFilename}
+        onDownload={downloadFile}
+        exportPagePath="/admin/exports?tab=TransactionExports"
+      />
       {/* table */}
       {currentQueryType && (
         <div className="pt-4 flex flex-col">

@@ -32,6 +32,7 @@ interface BalanceReportFormProps {
   onGenerateReport: () => void;
   onExportExcel: () => void;
   isLoading: boolean;
+  isExportInProgress?: boolean;
   showOrganizationSelector?: boolean;
 }
 
@@ -45,6 +46,7 @@ export function BalanceReportForm({
   onGenerateReport,
   onExportExcel,
   isLoading,
+  isExportInProgress = false,
   showOrganizationSelector = false,
 }: BalanceReportFormProps) {
   const isFormValid = () => {
@@ -175,11 +177,11 @@ export function BalanceReportForm({
 
         <Button
           onClick={onExportExcel}
-          disabled={!isFormValid() || isLoading}
+          disabled={!isFormValid() || isLoading || isExportInProgress}
           variant="outline"
           className={`min-w-[120px] ${isMerchant ? 'border-gray-200 bg-white text-gray-900 hover:bg-gray-50 shadow-none rounded-none' : ''}`}
         >
-          {isLoading ? "匯出中..." : "匯出Excel"}
+          {isExportInProgress ? "匯出中..." : "匯出Excel"}
         </Button>
       </div>
     </div>

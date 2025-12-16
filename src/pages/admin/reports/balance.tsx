@@ -1,8 +1,12 @@
 import {
-  ApiExportAdminBalanceReport,
   ApiGetAdminBalanceSummary,
   ApiGetAdminBalanceTransactions,
 } from "@/lib/apis/reports/get";
+import {
+  ApiExportAdminBalanceReport,
+  ApiGetBalanceReportJobStatus,
+  JobStatus as BalanceReportJobStatus,
+} from "@/lib/apis/reports/export";
 import {
   BalanceSummary,
   BalanceTransactions,
@@ -12,10 +16,14 @@ import { ApplicationError } from "@/lib/error/applicationError";
 import { ApplicationHeader } from "@/modules/common/ApplicationHeader";
 import { BalanceReportDisplay } from "@/modules/common/reports/BalanceReportDisplay";
 import { BalanceReportForm } from "@/modules/common/reports/BalanceReportForm";
+import { ExportCompletionDialog } from "@/components/export/ExportCompletionDialog";
+import { ExportJobStatus } from "@/components/export/ExportJobStatus";
 import { PaymentMethod } from "@/lib/enums/transactions/payment-method.enum";
 import { getApplicationCookies } from "@/lib/utils/cookie";
+import { useExportJob } from "@/lib/hooks/use-export-job";
 import { useState } from "react";
 import { useToast } from "@/components/shadcn/ui/use-toast";
+import moment from "moment-timezone";
 
 export default function AdminBalanceReportsPage() {
   const [organizationId, setOrganizationId] = useState<string>("");
@@ -32,7 +40,50 @@ export default function AdminBalanceReportsPage() {
   >([{}]); // Page 1 has no cursor
   const transactionLimit = 20;
 
+  // Export job states
+  const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+  const [ongoingJob, setOngoingJob] = useState<BalanceReportJobStatus | null>(
+    null
+  );
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [completedExportUrl, setCompletedExportUrl] = useState<string | null>(
+    null
+  );
+  const [completedExportFilename, setCompletedExportFilename] =
+    useState<string>("");
+
   const { toast } = useToast();
+  const { accessToken } = getApplicationCookies();
+
+  const { jobStatus, startPolling, downloadFile } = useExportJob({
+    jobId: currentJobId || ongoingJob?.jobId || null,
+    fetchJobStatus: async (id: string) => {
+      return ApiGetBalanceReportJobStatus({
+        jobId: id,
+        accessToken: accessToken || "",
+        isAdmin: true,
+      });
+    },
+    onComplete: (gcsUrl: string) => {
+      const filename = `balance-report-${organizationId}-${paymentMethod}-${date}-${moment().format(
+        "HHmm"
+      )}.xlsx`;
+      setCompletedExportUrl(gcsUrl);
+      setCompletedExportFilename(filename);
+      setShowCompletionDialog(true);
+      setOngoingJob(null);
+      setCurrentJobId(null);
+    },
+    onError: (error: string) => {
+      setOngoingJob(null);
+      setCurrentJobId(null);
+      toast({
+        title: "匯出失敗",
+        description: error,
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleGenerateReport = async () => {
     if (!organizationId || !paymentMethod || !date) {
@@ -47,8 +98,6 @@ export default function AdminBalanceReportsPage() {
     setIsLoading(true);
 
     try {
-      const { accessToken } = getApplicationCookies();
-
       if (!accessToken) {
         throw new ApplicationError({ message: "請重新登入" });
       }
@@ -121,15 +170,16 @@ export default function AdminBalanceReportsPage() {
       return;
     }
 
-    setIsLoading(true);
+    if (!accessToken) {
+      toast({
+        title: "錯誤",
+        description: "請重新登入",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
-      const { accessToken } = getApplicationCookies();
-
-      if (!accessToken) {
-        throw new ApplicationError({ message: "請重新登入" });
-      }
-
       const response = await ApiExportAdminBalanceReport({
         organizationId,
         paymentMethod: paymentMethod as PaymentMethod,
@@ -144,32 +194,35 @@ export default function AdminBalanceReportsPage() {
         });
       }
 
-      // Get filename from response headers
-      const contentDisposition = response.headers.get("Content-Disposition");
-      let filename = `balance-report-${organizationId}-${paymentMethod}-${date}.xlsx`;
+      // Backend now returns job ID for async processing
+      const data = await response.json();
+      const { jobId } = data;
 
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
-        if (filenameMatch) {
-          filename = filenameMatch[1];
-        }
+      if (!jobId) {
+        throw new Error("無法取得匯出工作 ID");
       }
 
-      // Download the file
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.style.display = "none";
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      setCurrentJobId(jobId);
+      setOngoingJob({
+        jobId,
+        userId: "",
+        organizationId,
+        jobType: "BALANCE_REPORT",
+        status: "PENDING",
+        progress: 0,
+        progressMessage: null,
+        gcsUrl: null,
+        error: null,
+        metadata: { organizationId, paymentMethod, date },
+        createdAt: new Date().toISOString(),
+        updatedAt: undefined,
+        completedAt: null,
+      });
+      startPolling(jobId);
 
       toast({
-        title: "成功",
-        description: "Excel 檔案已下載",
+        title: "匯出已開始",
+        description: "匯出工作已建立，正在處理中...",
       });
     } catch (error) {
       console.error("Export Excel error:", error);
@@ -179,8 +232,6 @@ export default function AdminBalanceReportsPage() {
           error instanceof ApplicationError ? error.message : "匯出Excel失敗",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -200,8 +251,6 @@ export default function AdminBalanceReportsPage() {
     setCurrentPage(page);
 
     try {
-      const { accessToken } = getApplicationCookies();
-
       if (!accessToken) {
         throw new ApplicationError({ message: "請重新登入" });
       }
@@ -263,8 +312,6 @@ export default function AdminBalanceReportsPage() {
     setIsLoadingPagination(true);
 
     try {
-      const { accessToken } = getApplicationCookies();
-
       if (!accessToken) {
         throw new ApplicationError({ message: "請重新登入" });
       }
@@ -328,7 +375,37 @@ export default function AdminBalanceReportsPage() {
           onGenerateReport={handleGenerateReport}
           onExportExcel={handleExportExcel}
           isLoading={isLoading}
+          isExportInProgress={
+            ongoingJob !== null &&
+            (ongoingJob.status === "PENDING" ||
+              ongoingJob.status === "PROCESSING")
+          }
           showOrganizationSelector={true}
+        />
+
+        {/* Export Job Status - Only show when processing, not when completed */}
+        {(jobStatus || currentJobId) && jobStatus?.status !== "COMPLETED" && (
+          <div className="mt-4">
+            <ExportJobStatus
+              jobStatus={jobStatus}
+              onDownload={(url: string) => {
+                const filename = `balance-report-${organizationId}-${paymentMethod}-${date}-${moment().format(
+                  "HHmm"
+                )}.xlsx`;
+                downloadFile(url, filename);
+              }}
+            />
+          </div>
+        )}
+
+        {/* Export Completion Dialog */}
+        <ExportCompletionDialog
+          open={showCompletionDialog}
+          onOpenChange={setShowCompletionDialog}
+          downloadUrl={completedExportUrl || ""}
+          filename={completedExportFilename}
+          onDownload={downloadFile}
+          exportPagePath="/admin/exports?tab=BalanceReports"
         />
 
         {summaryData && transactionsData && (
