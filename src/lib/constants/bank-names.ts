@@ -376,10 +376,10 @@ export const getWithdrawalToAccountTypeFromBankName = (bankName: string) => {
       return WithdrawalToAccountType.GCASH_ACCOUNT;
     case "1050":
       return WithdrawalToAccountType.MAYA_ACCOUNT;
-    case "2022":
-      return WithdrawalToAccountType.EASYPAISA_ACCOUNT;
-    case "2075":
-      return WithdrawalToAccountType.JAZZCASH_ACCOUNT;
+    // case "2022":
+    //   return WithdrawalToAccountType.EASYPAISA_ACCOUNT;
+    // case "2075":
+    //   return WithdrawalToAccountType.JAZZCASH_ACCOUNT;
     default:
       return WithdrawalToAccountType.BANK_ACCOUNT;
   }
