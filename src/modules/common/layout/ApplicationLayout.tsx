@@ -155,7 +155,7 @@ export default function ApplicationLayout({
                 <div className="w-full h-full br-green-500">
                   <Image
                     src="/aapay-logo-horizontal.jpg"
-                    alt="AApay"
+                    alt="Logo"
                     width={1024}
                     height={552}
                     className="w-full h-full object-cover rounded-lg"
@@ -303,7 +303,7 @@ export default function ApplicationLayout({
                     <div className="w-full h-full br-green-500">
                       <Image
                         src="/aapay-logo-horizontal.jpg"
-                        alt="AApay"
+                        alt="Logo"
                         width={1024}
                         height={552}
                         className="w-full h-full object-cover rounded-lg"
