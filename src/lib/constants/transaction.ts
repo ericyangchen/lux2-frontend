@@ -90,15 +90,15 @@ export const DepositPaymentChannelCategories = {
     // SnapPay
     PaymentChannel.NATIVE_GCASH_SNAPPAY_DEPOSIT,
 
-    // UnitPay
-    PaymentChannel.NATIVE_GCASH_UNITPAY_DEPOSIT,
+    // // UnitPay
+    // PaymentChannel.NATIVE_GCASH_UNITPAY_DEPOSIT,
 
-    // T207PAY
-    PaymentChannel.NATIVE_GCASH_T207PAY_DEPOSIT,
-    PaymentChannel.NATIVE_GCASH_T207PAY_B_DEPOSIT,
+    // // T207PAY
+    // PaymentChannel.NATIVE_GCASH_T207PAY_DEPOSIT,
+    // PaymentChannel.NATIVE_GCASH_T207PAY_B_DEPOSIT,
 
-    // XWINPAY
-    PaymentChannel.NATIVE_GCASH_XWINPAY_DEPOSIT,
+    // // XWINPAY
+    // PaymentChannel.NATIVE_GCASH_XWINPAY_DEPOSIT,
 
     // // BIFU
     // PaymentChannel.NATIVE_GCASH_DIRECT_BIFU,
@@ -139,14 +139,6 @@ export const DepositPaymentChannelCategories = {
     // // 724PAY
     // PaymentChannel.NATIVE_GCASH_724PAY_DEPOSIT,
   ] as PaymentChannel[],
-  [PaymentMethod.EASY_PAISA]: [
-    // SahulatPay
-    PaymentChannel.EASY_PAISA_SAHULAT_PAY_DEPOSIT,
-  ] as PaymentChannel[],
-  [PaymentMethod.JAZZ_CASH]: [
-    // SahulatPay
-    PaymentChannel.JAZZ_CASH_SAHULAT_PAY_DEPOSIT,
-  ] as PaymentChannel[],
 };
 
 export const WithdrawalPaymentChannelCategories = {
@@ -154,15 +146,15 @@ export const WithdrawalPaymentChannelCategories = {
     // SnapPay
     PaymentChannel.NATIVE_GCASH_SNAPPAY_WITHDRAWAL,
 
-    // UnitPay
-    PaymentChannel.NATIVE_GCASH_UNITPAY_WITHDRAWAL,
+    // // UnitPay
+    // PaymentChannel.NATIVE_GCASH_UNITPAY_WITHDRAWAL,
 
-    // T207PAY
-    PaymentChannel.NATIVE_GCASH_T207PAY_WITHDRAWAL,
-    PaymentChannel.NATIVE_GCASH_T207PAY_B_WITHDRAWAL,
+    // // T207PAY
+    // PaymentChannel.NATIVE_GCASH_T207PAY_WITHDRAWAL,
+    // PaymentChannel.NATIVE_GCASH_T207PAY_B_WITHDRAWAL,
 
-    // XWINPAY
-    PaymentChannel.NATIVE_GCASH_XWINPAY_WITHDRAWAL,
+    // // XWINPAY
+    // PaymentChannel.NATIVE_GCASH_XWINPAY_WITHDRAWAL,
 
     // // BIFU
     // PaymentChannel.NATIVE_GCASH_BIFU_BANK,
@@ -195,14 +187,6 @@ export const WithdrawalPaymentChannelCategories = {
     // // 724PAY
     // PaymentChannel.NATIVE_GCASH_724PAY_WITHDRAWAL,
   ] as PaymentChannel[],
-  [PaymentMethod.EASY_PAISA]: [
-    // EasyPaisa SahulatPay
-    PaymentChannel.EASY_PAISA_SAHULAT_PAY_WITHDRAWAL,
-  ] as PaymentChannel[],
-  [PaymentMethod.JAZZ_CASH]: [
-    // SahulatPay
-    PaymentChannel.JAZZ_CASH_SAHULAT_PAY_WITHDRAWAL,
-  ] as PaymentChannel[],
 };
 
 export const AllPaymentChannelCategories = {
@@ -210,20 +194,10 @@ export const AllPaymentChannelCategories = {
     ...DepositPaymentChannelCategories[PaymentMethod.NATIVE_GCASH],
     ...WithdrawalPaymentChannelCategories[PaymentMethod.NATIVE_GCASH],
   ],
-  [PaymentMethod.EASY_PAISA]: [
-    ...DepositPaymentChannelCategories[PaymentMethod.EASY_PAISA],
-    ...WithdrawalPaymentChannelCategories[PaymentMethod.EASY_PAISA],
-  ],
-  [PaymentMethod.JAZZ_CASH]: [
-    ...DepositPaymentChannelCategories[PaymentMethod.JAZZ_CASH],
-    ...WithdrawalPaymentChannelCategories[PaymentMethod.JAZZ_CASH],
-  ],
 };
 
 export const PaymentMethodDisplayNames = {
   [PaymentMethod.NATIVE_GCASH]: "GCash",
-  [PaymentMethod.EASY_PAISA]: "EasyPaisa",
-  [PaymentMethod.JAZZ_CASH]: "JazzCash",
 };
 
 export const PaymentMethodCurrencyMapping: Record<
@@ -231,7 +205,6 @@ export const PaymentMethodCurrencyMapping: Record<
   (PaymentMethod | string)[]
 > = {
   PHP: [PaymentMethod.NATIVE_GCASH],
-  PKR: [PaymentMethod.EASY_PAISA, PaymentMethod.JAZZ_CASH],
 };
 
 export const PaymentChannelDisplayNames = {
@@ -239,27 +212,27 @@ export const PaymentChannelDisplayNames = {
   [PaymentChannel.NATIVE_GCASH_SNAPPAY_DEPOSIT]: "Snap: Gcash Deposit",
   [PaymentChannel.NATIVE_GCASH_SNAPPAY_WITHDRAWAL]: "Snap: Gcash Withdrawal",
 
-  // /* UnitPay */
-  [PaymentChannel.NATIVE_GCASH_UNITPAY_DEPOSIT]: "Unit: Gcash Deposit",
-  [PaymentChannel.NATIVE_GCASH_UNITPAY_WITHDRAWAL]: "Unit: Gcash Withdrawal",
+  // // /* UnitPay */
+  // [PaymentChannel.NATIVE_GCASH_UNITPAY_DEPOSIT]: "Unit: Gcash Deposit",
+  // [PaymentChannel.NATIVE_GCASH_UNITPAY_WITHDRAWAL]: "Unit: Gcash Withdrawal",
 
-  /* T207PAY */
-  [PaymentChannel.NATIVE_GCASH_T207PAY_DEPOSIT]: "207: Gcash Deposit",
-  [PaymentChannel.NATIVE_GCASH_T207PAY_WITHDRAWAL]: "207: Gcash Withdrawal",
-  [PaymentChannel.NATIVE_GCASH_T207PAY_B_DEPOSIT]: "207黑: Gcash Deposit",
-  [PaymentChannel.NATIVE_GCASH_T207PAY_B_WITHDRAWAL]: "207黑: Gcash Withdrawal",
+  // /* T207PAY */
+  // [PaymentChannel.NATIVE_GCASH_T207PAY_DEPOSIT]: "207: Gcash Deposit",
+  // [PaymentChannel.NATIVE_GCASH_T207PAY_WITHDRAWAL]: "207: Gcash Withdrawal",
+  // [PaymentChannel.NATIVE_GCASH_T207PAY_B_DEPOSIT]: "207黑: Gcash Deposit",
+  // [PaymentChannel.NATIVE_GCASH_T207PAY_B_WITHDRAWAL]: "207黑: Gcash Withdrawal",
 
-  /* XWINPAY */
-  [PaymentChannel.NATIVE_GCASH_XWINPAY_DEPOSIT]: "Xwin: Gcash Deposit",
-  [PaymentChannel.NATIVE_GCASH_XWINPAY_WITHDRAWAL]: "Xwin: Gcash Withdrawal",
+  // /* XWINPAY */
+  // [PaymentChannel.NATIVE_GCASH_XWINPAY_DEPOSIT]: "Xwin: Gcash Deposit",
+  // [PaymentChannel.NATIVE_GCASH_XWINPAY_WITHDRAWAL]: "Xwin: Gcash Withdrawal",
 
-  /* SahulatPay */
-  [PaymentChannel.EASY_PAISA_SAHULAT_PAY_DEPOSIT]: "Sahulat: EasyPaisa Deposit",
-  [PaymentChannel.EASY_PAISA_SAHULAT_PAY_WITHDRAWAL]:
-    "Sahulat: EasyPaisa Withdrawal",
-  [PaymentChannel.JAZZ_CASH_SAHULAT_PAY_DEPOSIT]: "Sahulat: JazzCash Deposit",
-  [PaymentChannel.JAZZ_CASH_SAHULAT_PAY_WITHDRAWAL]:
-    "Sahulat: JazzCash Withdrawal",
+  // /* SahulatPay */
+  // [PaymentChannel.EASY_PAISA_SAHULAT_PAY_DEPOSIT]: "Sahulat: EasyPaisa Deposit",
+  // [PaymentChannel.EASY_PAISA_SAHULAT_PAY_WITHDRAWAL]:
+  //   "Sahulat: EasyPaisa Withdrawal",
+  // [PaymentChannel.JAZZ_CASH_SAHULAT_PAY_DEPOSIT]: "Sahulat: JazzCash Deposit",
+  // [PaymentChannel.JAZZ_CASH_SAHULAT_PAY_WITHDRAWAL]:
+  //   "Sahulat: JazzCash Withdrawal",
 
   // /**
   //  * BIFU
@@ -355,8 +328,6 @@ export const WithdrawalAccountTypeDisplayNames = {
   [WithdrawalToAccountType.BANK_ACCOUNT]: "銀行帳戶",
   [WithdrawalToAccountType.GCASH_ACCOUNT]: "GCash帳戶",
   [WithdrawalToAccountType.MAYA_ACCOUNT]: "Maya帳戶",
-  [WithdrawalToAccountType.EASYPAISA_ACCOUNT]: "EasyPaisa帳戶",
-  [WithdrawalToAccountType.JAZZCASH_ACCOUNT]: "JazzCash帳戶",
 };
 
 export const WithdrawalAccountTypesByPaymentMethod = {
@@ -364,15 +335,5 @@ export const WithdrawalAccountTypesByPaymentMethod = {
     WithdrawalToAccountType.BANK_ACCOUNT,
     WithdrawalToAccountType.GCASH_ACCOUNT,
     WithdrawalToAccountType.MAYA_ACCOUNT,
-  ] as WithdrawalToAccountType[],
-  [PaymentMethod.EASY_PAISA]: [
-    WithdrawalToAccountType.BANK_ACCOUNT,
-    WithdrawalToAccountType.EASYPAISA_ACCOUNT,
-    WithdrawalToAccountType.JAZZCASH_ACCOUNT,
-  ] as WithdrawalToAccountType[],
-  [PaymentMethod.JAZZ_CASH]: [
-    WithdrawalToAccountType.BANK_ACCOUNT,
-    WithdrawalToAccountType.EASYPAISA_ACCOUNT,
-    WithdrawalToAccountType.JAZZCASH_ACCOUNT,
   ] as WithdrawalToAccountType[],
 };
