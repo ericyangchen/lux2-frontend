@@ -186,7 +186,7 @@ export default function LoginPage() {
       <div
         className="min-h-screen flex justify-center items-center p-4 relative bg-cover bg-center bg-black"
         style={{
-          backgroundImage: "url(/aapay-logo.jpg)",
+          backgroundImage: "url(/luxpay-logo.jpg)",
         }}
       >
         {/* Overlay for better readability */}
@@ -197,7 +197,7 @@ export default function LoginPage() {
               <div className="flex flex-col items-center space-y-6">
                 <div className="h-28 flex items-center justify-center w-full">
                   <Image
-                    src="/aapay-logo-horizontal.jpg"
+                    src="/luxpay-logo-horizontal.jpg"
                     alt="Logo"
                     width={1024}
                     height={552}

@@ -161,7 +161,7 @@ export default function MerchantNavigationHeader() {
                 </span> */}
                 <div className="h-12 flex items-center justify-center w-[100px]">
                   <Image
-                    src="/aapay-logo-horizontal.jpg"
+                    src="/luxpay-logo-horizontal.jpg"
                     alt="Logo"
                     width={1024}
                     height={552}
@@ -267,7 +267,7 @@ export default function MerchantNavigationHeader() {
                   {/* <span className="font-bold text-xl">{getCompanyName()}</span> */}
                   <div className="w-full h-full br-green-500">
                     <Image
-                      src="/aapay-logo-horizontal.jpg"
+                      src="/luxpay-logo-horizontal.jpg"
                       alt="Logo"
                       width={1024}
                       height={552}
