@@ -74,9 +74,9 @@ const UserDropdown = ({ user }: { user?: User }) => {
                   {user.name}
                 </span>
                 {roleNames.length > 0 && (
-                <span className="text-xs text-gray-500 px-2 py-0.5 border border-gray-200 rounded">
+                  <span className="text-xs text-gray-500 px-2 py-0.5 border border-gray-200 rounded">
                     {roleNames.join(", ")}
-                </span>
+                  </span>
                 )}
               </div>
               <div className="flex items-center gap-2 text-xs text-gray-600">
@@ -162,7 +162,7 @@ export default function MerchantNavigationHeader() {
                 <div className="h-12 flex items-center justify-center w-[100px]">
                   <Image
                     src="/aapay-logo-horizontal.jpg"
-                    alt="AApay"
+                    alt="Logo"
                     width={1024}
                     height={552}
                     className="w-full h-full object-cover rounded-md"
@@ -268,7 +268,7 @@ export default function MerchantNavigationHeader() {
                   <div className="w-full h-full br-green-500">
                     <Image
                       src="/aapay-logo-horizontal.jpg"
-                      alt="AApay"
+                      alt="Logo"
                       width={1024}
                       height={552}
                       className="w-full h-full object-cover rounded-lg"
@@ -322,9 +322,9 @@ export default function MerchantNavigationHeader() {
                         {user.name}
                       </span>
                       {roleNames.length > 0 && (
-                      <span className="text-xs text-gray-500 px-2 py-0.5 border border-gray-200 rounded">
+                        <span className="text-xs text-gray-500 px-2 py-0.5 border border-gray-200 rounded">
                           {roleNames.join(", ")}
-                      </span>
+                        </span>
                       )}
                     </div>
                     <div className="flex items-center gap-2 text-xs text-gray-600">

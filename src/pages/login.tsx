@@ -198,7 +198,7 @@ export default function LoginPage() {
                 <div className="h-28 flex items-center justify-center w-full">
                   <Image
                     src="/aapay-logo-horizontal.jpg"
-                    alt="AApay"
+                    alt="Logo"
                     width={1024}
                     height={552}
                     className="w-full h-full object-cover rounded-md"
