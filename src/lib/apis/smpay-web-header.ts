@@ -1,7 +1,7 @@
 export const SMPayWebHeader = () => {
   return {
     "Content-Type": "application/json",
-    "X-SMPay-Client": "web",
+    "X-Infra-Client": "web",
   };
 };
 
