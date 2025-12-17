@@ -101,7 +101,7 @@ export function TransactionCleanupSection() {
           <Label htmlFor="transaction-ids">Transaction IDs</Label>
           <Textarea
             id="transaction-ids"
-            placeholder="Enter transaction IDs, one per line&#10;atx1234567890&#10;atx0987654321"
+            placeholder="Enter transaction IDs, one per line&#10;ltx1234567890&#10;ltx0987654321"
             value={transactionIds}
             onChange={(e) => setTransactionIds(e.target.value)}
             rows={10}
